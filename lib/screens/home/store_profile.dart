@@ -127,17 +127,15 @@ class _StoreProfileState extends State<StoreProfile> {
             ),
           ),
         ),
-        Container(
-          height: 200,
-          child: Expanded(
-            child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                itemBuilder: (context, index) {
-                  return UpdateTile(
-                      name: "Sahachari", image: "assets/updates_image.png");
-                }),
-          ),
+        SizedBox(
+          height: 175.0,
+          child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return UpdateTile(
+                    name: "Sahachari", image: "assets/updates_image.png");
+              }),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -152,7 +150,8 @@ class _StoreProfileState extends State<StoreProfile> {
             ),
           ),
         ),
-        Expanded(
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.5,
           child: GridView.count(
             padding: EdgeInsets.all(16.0),
             crossAxisCount: 2,
@@ -161,19 +160,19 @@ class _StoreProfileState extends State<StoreProfile> {
             children: [
               CategoryTile(
                 name: 'Clothings',
-                image: 'assets/sohachat_icon.png',
+                image: 'assets/updates_image.png',
               ),
               CategoryTile(
                 name: 'Electronics',
-                image: 'assets/join_brothers_icon.png',
+                image: 'assets/updates_image.png',
               ),
               CategoryTile(
                 name: 'groceries',
-                image: 'assets/variety_stores_icon.png',
+                image: 'assets/updates_image.png',
               ),
               CategoryTile(
                 name: 'Accessories',
-                image: 'assets/medi_plus_icon.png',
+                image: 'assets/updates_image.png',
               ),
             ],
           ),
