@@ -27,7 +27,7 @@ class UpdateTile extends StatelessWidget {
           SizedBox(height: 8.0),
           Text(name,
               style:
-                  TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0)),
+                  TextStyle(fontWeight: FontWeight.bold, fontSize: 12.0)),
         ],
       ),
     );

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:tnennt/screens/home/catalog.dart';
-import 'package:tnennt/screens/home/community.dart';
-import 'package:tnennt/screens/home/gallery.dart';
-import 'package:tnennt/screens/home/rental.dart';
-import 'package:tnennt/screens/home/store_profile.dart';
+import 'package:tnennt/screens/home_pages/catalog.dart';
+import 'package:tnennt/screens/home_pages/community.dart';
+import 'package:tnennt/screens/home_pages/gallery.dart';
+import 'package:tnennt/screens/home_pages/rental.dart';
+import 'package:tnennt/screens/home_pages/store_profile.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
