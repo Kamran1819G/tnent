@@ -1,19 +1,20 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:tnennt/screens/setting_screen.dart';
-import 'package:tnennt/screens/update_screen.dart';
-import 'package:tnennt/widgets/FeaturedTile.dart';
-import 'package:tnennt/widgets/UpdateTile.dart';
+import 'package:tnennt/screens/notification_screen.dart';
+import 'package:tnennt/widgets/home/FeaturedTile.dart';
+import 'package:tnennt/widgets/home/StoresUpdateTile.dart';
 
-import '../../widgets/CategoryTile.dart';
+import '../../widgets/home/CategoryTile.dart';
+import '../users/myprofile_screen.dart';
 
-class StoreProfile extends StatefulWidget {
-  const StoreProfile({super.key});
+class Home extends StatefulWidget {
+  const Home({super.key});
 
   @override
-  State<StoreProfile> createState() => _StoreProfileState();
+  State<Home> createState() => _HomeState();
 }
 
-class _StoreProfileState extends State<StoreProfile>
+class _HomeState extends State<Home>
     with TickerProviderStateMixin {
   late TabController _tabController;
 
@@ -68,7 +69,7 @@ class _StoreProfileState extends State<StoreProfile>
                             text: ' •',
                             style: TextStyle(
                               fontWeight: FontWeight.w900,
-                              fontSize: 28.0,
+                              fontSize: 30.0,
                               color: Colors.green,
                             ),
                           ),
@@ -84,14 +85,14 @@ class _StoreProfileState extends State<StoreProfile>
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => UpdateScreen()));
+                            builder: (context) => NotificationScreen()));
                   },
                   child: Icon(Icons.notifications_rounded)),
               SizedBox(width: 16.0),
               GestureDetector(
                 onTap: () {
                   Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => SettingScreen()));
+                      MaterialPageRoute(builder: (context) => MyProfileScreen()));
                 },
                 child: CircleAvatar(
                   backgroundImage: AssetImage('assets/profile_image.png'),
@@ -161,44 +162,79 @@ class _StoreProfileState extends State<StoreProfile>
               scrollDirection: Axis.horizontal,
               itemCount: 5,
               itemBuilder: (context, index) {
-                return UpdateTile(
+                return StoreUpdateTile(
                     name: "Sahachari", image: "assets/updates_image.png");
               }),
         ),
 
         // Featured Section
         TabBar(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
           controller: _tabController,
           isScrollable: true,
           tabAlignment: TabAlignment.start,
           unselectedLabelColor: Colors.black,
-          labelColor: Colors.black,
+          labelColor: Colors.white,
           indicator: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.black,
-              width: 1.0,
-            ),
+            color: Theme.of(context).primaryColor,
+            borderRadius: BorderRadius.circular(12),
           ),
-          splashBorderRadius: BorderRadius.circular(20),
-          indicatorSize: TabBarIndicatorSize.values[0],
+          labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
+          labelStyle: TextStyle(
+            fontSize: 14.0,
+          ),
+          indicatorSize: TabBarIndicatorSize.label,
+          overlayColor: MaterialStateProperty.all(Colors.transparent),
           dividerColor: Colors.transparent,
           tabs: <Widget>[
-            Tab(
-              text: "Electronics",
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 1.0),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Text(
+                "Electronics",
+              ),
             ),
-            Tab(
-              text: "Clothings",
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 1.0),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Text(
+                "Clothings",
+              ),
             ),
-            Tab(
-              text: "Groceries",
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 1.0),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Text(
+                "Groceries",
+              ),
             ),
-            Tab(
-              text: "Accessories",
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 1.0),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Text(
+                "Accessories",
+              ),
             ),
-            Tab(
-              text: "Books",
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 1.0),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Text(
+                "Books",
+              ),
             )
           ],
         ),

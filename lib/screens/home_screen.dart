@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
@@ -5,7 +6,7 @@ import 'package:tnennt/screens/home_pages/catalog.dart';
 import 'package:tnennt/screens/home_pages/community.dart';
 import 'package:tnennt/screens/home_pages/gallery.dart';
 import 'package:tnennt/screens/home_pages/rental.dart';
-import 'package:tnennt/screens/home_pages/store_profile.dart';
+import 'package:tnennt/screens/home_pages/home.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,10 +20,10 @@ class _HomeScreenState extends State<HomeScreen> {
   PageController _pageController = PageController();
 
   static final List<Widget> _widgetOptions = <Widget>[
-    SingleChildScrollView(child: StoreProfile()),
+    SingleChildScrollView(child: Home()),
     Catalog(),
     Rental(),
-    Gallery(),
+    SingleChildScrollView(child: Gallery()),
     Community(),
   ];
 

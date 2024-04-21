@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 
-class UpdateScreen extends StatefulWidget {
-  const UpdateScreen({super.key});
+class NotificationScreen extends StatefulWidget {
+  const NotificationScreen({super.key});
 
   @override
-  State<UpdateScreen> createState() => _UpdateScreenState();
+  State<NotificationScreen> createState() => _NotificationScreenState();
 }
 
-class _UpdateScreenState extends State<UpdateScreen>
+class _NotificationScreenState extends State<NotificationScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool isStoreOwner = true;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: isStoreOwner ? 2 : 1, vsync: this);
   }
 
   @override
@@ -70,32 +71,46 @@ class _UpdateScreenState extends State<UpdateScreen>
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          TabBar(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            controller: _tabController,
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            unselectedLabelColor: Colors.black,
-            labelColor: Colors.black,
-            indicator: BoxDecoration(
-              shape: BoxShape.rectangle,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.black,
-                width: 1.0,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              tabAlignment: TabAlignment.start,
+              unselectedLabelColor: Colors.black,
+              labelColor: Colors.white,
+              indicator: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.circular(12),
               ),
+              labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
+              labelStyle: TextStyle(
+                fontSize: 14.0,
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              overlayColor: MaterialStateProperty.all(Colors.transparent),
+              dividerColor: Colors.transparent,
+              tabs: <Widget>[
+                Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Theme.of(context).primaryColor, width: 1.0),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Text("General")),
+                if (isStoreOwner)
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Theme.of(context).primaryColor, width: 1.0),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Text(
+                      "Store",
+                    ),
+                  ),
+              ],
             ),
-            splashBorderRadius: BorderRadius.circular(12),
-            indicatorSize: TabBarIndicatorSize.values[0],
-            dividerColor: Colors.transparent,
-            tabs: <Widget>[
-              Tab(
-                text: "General",
-              ),
-              Tab(
-                text: "Connections",
-              ),
-            ],
           ),
           SizedBox(height: 20.0),
           Expanded(
@@ -104,11 +119,11 @@ class _UpdateScreenState extends State<UpdateScreen>
               child: TabBarView(controller: _tabController, children: [
                 ListView.separated(
                     itemBuilder: (context, index) => ListTile(
-                      minVerticalPadding: 8.0,
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.grey, width: 1.0),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
+                          minVerticalPadding: 8.0,
+                          shape: RoundedRectangleBorder(
+                            side: BorderSide(color: Colors.grey, width: 1.0),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
                           title: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -131,9 +146,13 @@ class _UpdateScreenState extends State<UpdateScreen>
                               SizedBox(height: 4.0),
                               Row(
                                 children: [
-                                  Text('Order ID:', style: TextStyle(fontSize: 12.0, fontWeight: FontWeight.w900)),
+                                  Text('Order ID:',
+                                      style: TextStyle(
+                                          fontSize: 12.0,
+                                          fontWeight: FontWeight.w900)),
                                   SizedBox(width: 4.0),
-                                  Text('#1234567890', style: TextStyle(fontSize: 12.0)),
+                                  Text('#1234567890',
+                                      style: TextStyle(fontSize: 12.0)),
                                 ],
                               ),
                             ],
@@ -150,15 +169,18 @@ class _UpdateScreenState extends State<UpdateScreen>
                                 color: Colors.white, size: 12.0),
                           ),
                         ),
-                    separatorBuilder: (context, index) => SizedBox(height: 16.0),
+                    separatorBuilder: (context, index) =>
+                        SizedBox(height: 16.0),
                     itemCount: 2),
-                ListView.separated(
-                    itemBuilder: (context, index) => ListTile(
-                          title: Text('General'),
-                          subtitle: Text('General updates'),
-                        ),
-                    separatorBuilder: (context, index) => SizedBox(height: 16.0),
-                    itemCount: 5)
+                if (isStoreOwner)
+                  ListView.separated(
+                      itemBuilder: (context, index) => ListTile(
+                            title: Text('General'),
+                            subtitle: Text('General updates'),
+                          ),
+                      separatorBuilder: (context, index) =>
+                          SizedBox(height: 16.0),
+                      itemCount: 5)
               ]),
             ),
           )

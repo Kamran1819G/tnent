@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class UpdateTile extends StatelessWidget {
+class StoreUpdateTile extends StatelessWidget {
   final String name;
   final String image;
 
-  UpdateTile({
+  StoreUpdateTile({
     required this.name,
     required this.image,
   });
@@ -12,7 +12,7 @@ class UpdateTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(8.0),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
