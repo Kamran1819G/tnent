@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tnennt/helpers/color_utils.dart';
 
 class UpdateTile extends StatelessWidget {
   final String name;
@@ -19,7 +20,7 @@ class UpdateTile extends StatelessWidget {
               height: 100,
               width: 100,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey[200]!),
+                border: Border.all(color: hexToColor('#B5B5B5'), width: 1.0),
                 borderRadius: BorderRadius.circular(8.0),
               ),
               child: Image.asset(image, height: 48.0)),

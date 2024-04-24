@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:tnennt/widgets/notification/order_update_notification.dart';
+import 'package:tnennt/widgets/notification/store_connection_notification.dart';
+
+import '../helpers/color_utils.dart';
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
@@ -27,50 +31,52 @@ class _NotificationScreenState extends State<NotificationScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        toolbarHeight: 100.0,
-        title: RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: 'Updates'.toUpperCase(),
-                style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 28.0,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              TextSpan(
-                text: ' •',
-                style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 28.0,
-                  color: Colors.green,
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey[100],
-              child: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
+          SizedBox(height: 20.0),
+          Container(
+            height: 100,
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Updates'.toUpperCase(),
+                      style: TextStyle(
+                        color: hexToColor('#1E1E1E'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 28.0,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    Text(
+                      ' •',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 28.0,
+                        color: hexToColor('#1770B5'),
+                      ),
+                    ),
+                  ],
+                ),
+                Spacer(),
+                Container(
+                  margin: EdgeInsets.all(8.0),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.grey[100],
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12.0),
             child: TabBar(
@@ -92,17 +98,21 @@ class _NotificationScreenState extends State<NotificationScreen>
               dividerColor: Colors.transparent,
               tabs: <Widget>[
                 Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Theme.of(context).primaryColor, width: 1.0),
+                      border: Border.all(
+                          color: Theme.of(context).primaryColor, width: 1.0),
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: Text("General")),
                 if (isStoreOwner)
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Theme.of(context).primaryColor, width: 1.0),
+                      border: Border.all(
+                          color: Theme.of(context).primaryColor, width: 1.0),
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: Text(
@@ -114,75 +124,49 @@ class _NotificationScreenState extends State<NotificationScreen>
           ),
           SizedBox(height: 20.0),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: TabBarView(controller: _tabController, children: [
+            child: TabBarView(controller: _tabController, children: [
+              ListView(
+                children: [
+                  OrderUpdateNotification(
+                    type: NotificationType.orderplaced,
+                    productImage: 'assets/updates_image.png',
+                    productName: 'Nikon Camera',
+                    price: 12000,
+                    orderID: '123456',
+                    time: '2024-04-24 10:00 AM',
+                  ),
+                  SizedBox(height: 16.0),
+                  OrderUpdateNotification(
+                    type: NotificationType.cancelled,
+                    orderID: '123456',
+                    time: '2024-04-24 10:00 AM',
+                  ),
+                  SizedBox(height: 16.0),
+                  OrderUpdateNotification(
+                    type: NotificationType.delivered,
+                    name: 'Kamran Khan',
+                    orderID: '789012',
+                    time: '2024-04-23 3:00 PM',
+                  ),
+                  SizedBox(height: 16.0),
+                  OrderUpdateNotification(
+                    type: NotificationType.refunded, // or delivered
+                    orderID: '345678',
+                    time: '2024-04-22 12:00 PM',
+                  ),
+                ],
+              ),
+              if (isStoreOwner)
                 ListView.separated(
-                    itemBuilder: (context, index) => ListTile(
-                          minVerticalPadding: 8.0,
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.grey, width: 1.0),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          title: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Text("Delivered",
-                                      style: TextStyle(
-                                          fontSize: 16.0,
-                                          color: Colors.green.shade700,
-                                          fontWeight: FontWeight.w900)),
-                                  SizedBox(width: 8.0),
-                                  Text("(April 20, 2024, 12:45pm )",
-                                      style: TextStyle(
-                                          fontSize: 12.0,
-                                          color: Colors.grey,
-                                          fontWeight: FontWeight.w900)),
-                                ],
-                              ),
-                              SizedBox(height: 4.0),
-                              Row(
-                                children: [
-                                  Text('Order ID:',
-                                      style: TextStyle(
-                                          fontSize: 12.0,
-                                          fontWeight: FontWeight.w900)),
-                                  SizedBox(width: 4.0),
-                                  Text('#1234567890',
-                                      style: TextStyle(fontSize: 12.0)),
-                                ],
-                              ),
-                            ],
-                          ),
-                          subtitle: Text('Item is delivered to Kamran Khan'),
-                          trailing: Container(
-                            height: 30,
-                            width: 30,
-                            decoration: BoxDecoration(
-                              color: Colors.green.shade900,
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: Icon(Icons.check,
-                                color: Colors.white, size: 12.0),
-                          ),
-                        ),
+                    itemBuilder: (context, index) =>
+                        StoreConnectionNotification(
+                            name: 'Kamran Khan',
+                            image: 'assets/profile_image.png',
+                            time: 'April 20, 2024, 12:45pm'),
                     separatorBuilder: (context, index) =>
                         SizedBox(height: 16.0),
-                    itemCount: 2),
-                if (isStoreOwner)
-                  ListView.separated(
-                      itemBuilder: (context, index) => ListTile(
-                            title: Text('General'),
-                            subtitle: Text('General updates'),
-                          ),
-                      separatorBuilder: (context, index) =>
-                          SizedBox(height: 16.0),
-                      itemCount: 5)
-              ]),
-            ),
+                    itemCount: 5)
+            ]),
           )
         ],
       ),

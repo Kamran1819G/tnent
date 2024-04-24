@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/screens/store_owner/analytics_screen.dart';
 import 'package:tnennt/widgets/store_profile/AddUpdateTile.dart';
+
 import '../../widgets/store_profile/UpdateTile.dart';
 
 class MyStoreProfileScreen extends StatefulWidget {
@@ -39,7 +41,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                         width: 75,
                         margin: EdgeInsets.symmetric(horizontal: 15.0),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20.0),
+                            borderRadius: BorderRadius.circular(20.0),
                             image: DecorationImage(
                                 image: AssetImage('assets/jain_brothers.png'),
                                 fit: BoxFit.cover)),
@@ -80,7 +82,9 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                               Text(
                                 'jainbrothers.tnennet.store',
                                 style: TextStyle(
-                                    color: Colors.white, fontSize: 14.0),
+                                    color: Colors.white,
+                                    fontFamily: 'Poppins',
+                                    fontSize: 12.0),
                               ),
                             ],
                           )
@@ -106,7 +110,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(Icons.ios_share, color: Colors.white),
+                          Icon(Icons.ios_share, color: Colors.white, size: 18),
                           SizedBox(width: 10.0),
                           Container(
                             padding: EdgeInsets.symmetric(
@@ -115,17 +119,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                               color: Colors.grey[600],
                               borderRadius: BorderRadius.circular(20.0),
                             ),
-                            child: Row(
-                              children: [
-                                Icon(Icons.location_pin,
-                                    color: Colors.white, size: 16),
-                                SizedBox(width: 5.0),
-                                Text(
-                                  'Navi Mumbai',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 14.0),
-                                ),
-                              ],
+                            child: Text(
+                              'Navi Mumbai',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                  fontSize: 12.0),
                             ),
                           ),
                           Spacer(),
@@ -133,7 +132,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                             "Accepting Orders: ",
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 14.0,
+                              fontSize: 10.0,
                             ),
                           ),
                           Switch(
@@ -253,62 +252,73 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                       ],
                     ),
                   ),
-                  Container(
-                    height: 125,
-                    width: 125,
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: hexToColor('#EAE6F6'),
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        RichText(
-                          text: TextSpan(
-                            children: [
-                              TextSpan(
-                                text: 'Analytics'.toUpperCase(),
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 15.0,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AnalyticsScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      height: 125,
+                      width: 125,
+                      padding: EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: hexToColor('#EAE6F6'),
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: 'Analytics'.toUpperCase(),
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 15.0,
+                                  ),
                                 ),
-                              ),
-                              TextSpan(
-                                text: ' •',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 20.0,
-                                  color: Colors.green,
+                                TextSpan(
+                                  text: ' •',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 20.0,
+                                    color: Colors.green,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 8.0),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Icon(Icons.stacked_bar_chart_rounded,
+                                  color: Colors.black, size: 50),
+                              Container(
+                                margin: EdgeInsets.only(left: 10.0),
+                                padding: EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey[800],
+                                  borderRadius: BorderRadius.circular(50.0),
+                                ),
+                                child: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Colors.white,
+                                  size: 16.0,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        SizedBox(height: 8.0),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Icon(Icons.stacked_bar_chart_rounded, color: Colors.black, size:50),
-                            Container(
-                              margin: EdgeInsets.only(left: 10.0),
-                              padding: EdgeInsets.all(8.0),
-                              decoration: BoxDecoration(
-                                color: Colors.grey[800],
-                                borderRadius: BorderRadius.circular(50.0),
-                              ),
-                              child: Icon(
-                                Icons.arrow_forward_ios,
-                                color: Colors.white,
-                                size: 16.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                   Container(
@@ -410,10 +420,11 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
             SizedBox(height: 20.0),
 
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
                     borderRadius: BorderRadius.circular(50.0),
@@ -447,8 +458,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                               '2500',
                               style: TextStyle(
                                 color: Theme.of(context).primaryColor,
-                                fontSize: 24.0,
-                                fontWeight: FontWeight.bold,
+                                fontSize: 22.0,
+                                fontWeight: FontWeight.w900,
                               ),
                             ),
                           ],
@@ -459,25 +470,23 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Icon(Icons.flag_rounded,
-                              color: hexToColor('#47E012'),
-                              size: 30.0
-                          ),
+                              color: hexToColor('#47E012'), size: 30.0),
                           SizedBox(width: 10.0),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text('Total Reviews',
                                   style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16.0,
+                                    color: hexToColor('#272822'),
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 14.0,
                                   )),
                               Text(
                                 '700/900',
                                 style: TextStyle(
-                                  color: Colors.grey[600],
+                                  color: hexToColor('#838383'),
                                   fontSize: 12.0,
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w900,
                                 ),
                               ),
                             ],
@@ -487,84 +496,81 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                     ],
                   ),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children:[
-                    Container(
-                      width: 200.0,
-                      padding: EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(50.0),
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundColor: Colors.white,
-                            child: Icon(Icons.person_outline, color: Colors.black)
-                          ),
-                          SizedBox(width: 10.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Orders & Pays',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16.0,
-                                )
-                              ),
-                              Text('Orders & Payments',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 10.0,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Container(
+                    width: 200.0,
+                    padding: EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: hexToColor('#F3F3F3'),
+                      borderRadius: BorderRadius.circular(50.0),
                     ),
-                    SizedBox(height: 8.0),
-                    Container(
-                      width: 200.0,
-                      padding: EdgeInsets.all(16.0),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[100],
-                        borderRadius: BorderRadius.circular(50.0),
-                      ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                              backgroundColor: Colors.white,
-                              child: Icon(Icons.person_outline, color: Colors.black)
-                          ),
-                          SizedBox(width: 10.0),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('My Settings',
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16.0,
-                                  )
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Icon(Icons.person_outline,
+                                color: Colors.black)),
+                        SizedBox(width: 10.0),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Orders & Pays',
+                                style: TextStyle(
+                                  color: hexToColor('#272822'),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14.0,
+                                )),
+                            Text(
+                              'Orders & Payments',
+                              style: TextStyle(
+                                color: hexToColor('#838383'),
+                                fontFamily: 'Poppins',
+                                fontSize: 10.0,
+                                fontWeight: FontWeight.w500,
                               ),
-                              Text('Store Settings',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 10.0,
-                                    fontWeight: FontWeight.bold,
-                                  )
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    )
-                  ]
-                )
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 10.0),
+                  Container(
+                    width: 200.0,
+                    padding: EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: hexToColor('#F3F3F3'),
+                      borderRadius: BorderRadius.circular(50.0),
+                    ),
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                            backgroundColor: Colors.white,
+                            child: Icon(Icons.settings_outlined,
+                                color: Colors.black)),
+                        SizedBox(width: 10.0),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('My Settings',
+                                style: TextStyle(
+                                  color: hexToColor('#272822'),
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14.0,
+                                )),
+                            Text('Store Settings',
+                                style: TextStyle(
+                                  color: hexToColor('#838383'),
+                                  fontFamily: 'Poppins',
+                                  fontSize: 10.0,
+                                  fontWeight: FontWeight.w500,
+                                )),
+                          ],
+                        )
+                      ],
+                    ),
+                  )
+                ])
               ],
             ),
             SizedBox(height: 20.0),
@@ -578,26 +584,21 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                   style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w900,
-                    fontSize: 18.0,
+                    fontSize: 16.0,
                   ),
                 ),
               ),
             ),
             SizedBox(height: 10.0),
             Container(
-              margin: EdgeInsets.symmetric(horizontal: 4.0),
-              height: 175.0,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: [
+                margin: EdgeInsets.symmetric(horizontal: 4.0),
+                height: 175.0,
+                child: ListView(scrollDirection: Axis.horizontal, children: [
                   AddUpdateTile(),
                   for (int i = 0; i < 5; i++)
                     UpdateTile(
-                        name: "Sahachari", image: "assets/updates_image.png"
-                    ),
-                ]
-              )
-            ),
+                        name: "Sahachari", image: "assets/updates_image.png"),
+                ])),
           ],
         ),
       ),

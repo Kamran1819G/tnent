@@ -1,8 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/screens/gallery_pages/the_middlemen.dart';
 import 'package:tnennt/screens/store_owner/mystoreprofile_screen.dart';
 
 class Gallery extends StatefulWidget {
@@ -29,34 +28,30 @@ class _GalleryState extends State<Gallery> {
             padding: EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               children: [
-                Container(
-                  child: RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Gallery'.toUpperCase(),
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 28.0,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                        TextSpan(
-                          text: ' •',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w900,
-                            fontSize: 28.0,
-                            color: Colors.green,
-                          ),
-                        ),
-                      ],
+                Row(
+                  children: [
+                    Text(
+                      'Gallery'.toUpperCase(),
+                      style: TextStyle(
+                        color: hexToColor('#1E1E1E'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 28.0,
+                        letterSpacing: 1.5,
+                      ),
                     ),
-                  ),
+                    Text(
+                      ' •',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 28.0,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
                 ),
                 Spacer(),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                  padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                   decoration: BoxDecoration(
                     color: Colors.grey[900],
                     borderRadius: BorderRadius.circular(20.0),
@@ -65,7 +60,8 @@ class _GalleryState extends State<Gallery> {
                     'Contact Us',
                     style: TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
                       fontSize: 12.0,
                     ),
                   ),
@@ -73,13 +69,14 @@ class _GalleryState extends State<Gallery> {
               ],
             ),
           ),
-          if(myStore)
+          if (myStore)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text('Store',
+                  child: Text(
+                    'Store',
                     style: TextStyle(
                       color: Colors.black,
                       fontWeight: FontWeight.w900,
@@ -89,29 +86,34 @@ class _GalleryState extends State<Gallery> {
                 ),
                 SizedBox(height: 10.0),
                 GestureDetector(
-                  onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => MyStoreProfileScreen()));
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => MyStoreProfileScreen()));
                   },
                   child: Container(
-                      height: 150,
-                      decoration: BoxDecoration(
-                        color: hexToColor('#2D332F'),
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(children: [
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: hexToColor('#2D332F'),
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
                             Container(
-                              height: 75,
-                              width: 75,
+                              height: 70,
+                              width: 70,
                               margin: EdgeInsets.symmetric(horizontal: 15.0),
                               decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(20.0),
-                                  image: DecorationImage(
-                                      image: AssetImage('assets/jain_brothers.png'),
-                                      fit: BoxFit.cover)),
+                                borderRadius: BorderRadius.circular(15.0),
+                                image: DecorationImage(
+                                  image: AssetImage('assets/jain_brothers.png'),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,7 +137,7 @@ class _GalleryState extends State<Gallery> {
                                     Container(
                                       width: 10,
                                       height: 10,
-                                      margin: EdgeInsets.symmetric(vertical: 25),
+                                      margin: EdgeInsets.symmetric(vertical: 15),
                                       decoration: BoxDecoration(
                                         color: Colors.green,
                                         borderRadius: BorderRadius.circular(5),
@@ -144,51 +146,48 @@ class _GalleryState extends State<Gallery> {
                                   ],
                                 ),
                                 Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(Icons.web,
-                                        color: hexToColor('#00F0FF'), size: 16),
+                                    Icon(Icons.web, color: hexToColor('#00F0FF'), size: 14),
                                     SizedBox(width: 5.0),
                                     Text(
-                                      'jainbrothers.tnennet.store',
+                                      'jainbrothers.tnennt.store',
                                       style: TextStyle(
-                                          color: Colors.white, fontSize: 14.0),
+                                        color: Colors.white,
+                                        fontSize: 10.0,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ],
                                 )
                               ],
                             ),
-
-                          ]),
-                          Row(
-                            children: [
-                              Spacer(),
-                              Text(
-                                "Accepting Orders: ",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14.0,
-                                ),
-                              ),
-                              Switch(
-                                  value: isAccepting,
-                                  activeColor: hexToColor('#41FA00'),
-                                  trackOutlineColor: MaterialStateColor.resolveWith(
-                                          (states) => Colors.grey),
-                                  trackOutlineWidth:
-                                  MaterialStateProperty.resolveWith(
-                                          (states) => 1.0),
-                                  activeTrackColor: Colors.transparent,
-                                  inactiveTrackColor: Colors.transparent,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      isAccepting = !isAccepting;
-                                    });
-                                  })
-                            ],
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 15.0),
+                          child: Switch(
+                            value: isAccepting,
+                            activeColor: hexToColor('#41FA00'),
+                            trackOutlineColor: MaterialStateColor.resolveWith(
+                                  (states) => Colors.grey,
+                            ),
+                            trackOutlineWidth: MaterialStateProperty.resolveWith(
+                                  (states) => 1.0,
+                            ),
+                            activeTrackColor: Colors.transparent,
+                            inactiveTrackColor: Colors.transparent,
+                            onChanged: (value) {
+                              setState(() {
+                                isAccepting = !isAccepting;
+                              });
+                            },
                           ),
-                        ],
-                      )),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -200,46 +199,46 @@ class _GalleryState extends State<Gallery> {
             dashColor: Colors.grey,
           ),
           SizedBox(height: 20.0),
-
           Image.asset("assets/digital_store_banner.png"),
           SizedBox(height: 20.0),
           Image.asset("assets/deliver_anything_banner.png"),
           SizedBox(height: 20.0),
-          Image.asset("assets/the_middleman_banner.png"),
+          GestureDetector(
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => TheMiddlemen()));
+              },
+              child: Image.asset("assets/the_middleman_banner.png")),
           SizedBox(height: 20.0),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children:[
-              Dash(
-                direction: Axis.horizontal,
-                length: (MediaQuery.of(context).size.width/3) ,
-                dashLength: 8,
-                dashColor: Colors.grey,
+          Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+            Dash(
+              direction: Axis.horizontal,
+              length: (MediaQuery.of(context).size.width / 3),
+              dashLength: 8,
+              dashColor: Colors.grey,
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              decoration: BoxDecoration(
+                color: Colors.grey[900],
+                borderRadius: BorderRadius.circular(20.0),
               ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey[900],
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                child: Text(
-                  'Coming Soon',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12.0,
-                  ),
+              child: Text(
+                'Coming Soon',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12.0,
                 ),
               ),
-              Dash(
-                direction: Axis.horizontal,
-                length: (MediaQuery.of(context).size.width/3),
-                dashLength: 8,
-                dashColor: Colors.grey,
-              ),
-            ]
-          ),
-
+            ),
+            Dash(
+              direction: Axis.horizontal,
+              length: (MediaQuery.of(context).size.width / 3),
+              dashLength: 8,
+              dashColor: Colors.grey,
+            ),
+          ]),
           SizedBox(height: 150.0),
         ],
       ),

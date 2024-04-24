@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/screens/explore_screen.dart';
 import 'package:tnennt/screens/notification_screen.dart';
 import 'package:tnennt/widgets/home/FeaturedTile.dart';
 import 'package:tnennt/widgets/home/StoresUpdateTile.dart';
@@ -48,11 +51,11 @@ class _HomeState extends State<Home>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Wednesday, 17 November',
+                    Text('Wednesday, 17 November'.toUpperCase(),
                         style: TextStyle(
                             color: Colors.grey[500],
                             fontWeight: FontWeight.w900,
-                            fontSize: 16.0)),
+                            fontSize: 12.0)),
                     SizedBox(height: 4.0),
                     RichText(
                       text: TextSpan(
@@ -70,7 +73,7 @@ class _HomeState extends State<Home>
                             style: TextStyle(
                               fontWeight: FontWeight.w900,
                               fontSize: 30.0,
-                              color: Colors.green,
+                              color: hexToColor('#42FF00'),
                             ),
                           ),
                         ],
@@ -79,7 +82,7 @@ class _HomeState extends State<Home>
                   ],
                 ),
               ),
-              SizedBox(width: 16.0),
+              SizedBox(width: 10.0),
               GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -87,7 +90,7 @@ class _HomeState extends State<Home>
                         MaterialPageRoute(
                             builder: (context) => NotificationScreen()));
                   },
-                  child: Icon(Icons.notifications_rounded)),
+                  child: Image.asset('assets/icons/notification_box.png', height: 24, width: 24, fit: BoxFit.cover, colorBlendMode: BlendMode.overlay,)),
               SizedBox(width: 16.0),
               GestureDetector(
                 onTap: () {
@@ -101,42 +104,65 @@ class _HomeState extends State<Home>
             ],
           ),
         ),
-        Container(
-          margin: EdgeInsets.all(20),
-          padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(25),
-            border: Border.all(
-              width: 2,
-              color: Colors.grey.shade200,
-            ),
-          ),
-          child: Row(
-            children: [
-              CircleAvatar(
-                backgroundColor: Colors.grey[100],
-                child: Icon(
-                  Icons.search,
-                  color: Colors.grey,
-                ),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(
+                context, MaterialPageRoute(builder: (context) => ExploreScreen()));
+          },
+          child: Container(
+            margin: EdgeInsets.all(20),
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(50),
+              border: Border.all(
+                width: 1,
+                color: hexToColor('#DDDDDD'),
               ),
-              SizedBox(width: 8.0),
-              Expanded(
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search Products & Store',
-                    border: InputBorder.none,
-                    hintStyle: TextStyle(
-                      color: Colors.grey,
-                      fontSize: 16.0,
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 25.0,
+                  backgroundColor: hexToColor('#EEEEEE'),
+                  child: CircleAvatar(
+                    radius: 15.0,
+                    backgroundColor: hexToColor('#DDDDDD'),
+                    child: Icon(
+                      Icons.search,
+                      color: Theme.of(context).primaryColor,
                     ),
                   ),
                 ),
-              ),
-            ],
+                SizedBox(width: 20.0),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Search Products & Store',
+                      style: TextStyle(
+                        color: hexToColor('#6D6D6D'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    Text(
+                      'clothings, electronics, groceries & more...',
+                      style: TextStyle(
+                        color: hexToColor('#989898'),
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 10.0,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
+        SizedBox(height: 10.0),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.0),
           child: Image.asset('assets/store_profile_banner.png'),
@@ -172,15 +198,16 @@ class _HomeState extends State<Home>
           controller: _tabController,
           isScrollable: true,
           tabAlignment: TabAlignment.start,
-          unselectedLabelColor: Colors.black,
+          unselectedLabelColor: hexToColor('#737373'),
           labelColor: Colors.white,
           indicator: BoxDecoration(
-            color: Theme.of(context).primaryColor,
-            borderRadius: BorderRadius.circular(12),
+            color: hexToColor('#343434'),
+            borderRadius: BorderRadius.circular(50),
           ),
           labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
           labelStyle: TextStyle(
             fontSize: 14.0,
+            fontWeight: FontWeight.w900,
           ),
           indicatorSize: TabBarIndicatorSize.label,
           overlayColor: MaterialStateProperty.all(Colors.transparent),
@@ -189,8 +216,8 @@ class _HomeState extends State<Home>
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 1.0),
-                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(color: hexToColor('#343434'), width: 1.0),
+                borderRadius: BorderRadius.circular(50.0),
               ),
               child: Text(
                 "Electronics",
@@ -199,8 +226,8 @@ class _HomeState extends State<Home>
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 1.0),
-                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(color: hexToColor('#343434'), width: 1.0),
+                borderRadius: BorderRadius.circular(50.0),
               ),
               child: Text(
                 "Clothings",
@@ -209,8 +236,8 @@ class _HomeState extends State<Home>
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 1.0),
-                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(color: hexToColor('#343434'), width: 1.0),
+                borderRadius: BorderRadius.circular(50.0),
               ),
               child: Text(
                 "Groceries",
@@ -219,17 +246,17 @@ class _HomeState extends State<Home>
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 1.0),
-                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(color: hexToColor('#343434'), width: 1.0),
+                borderRadius: BorderRadius.circular(50.0),
               ),
               child: Text(
                 "Accessories",
               ),
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 8.0),
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 1.0),
+                border: Border.all(color: hexToColor('#343434'), width: 1.0),
                 borderRadius: BorderRadius.circular(12.0),
               ),
               child: Text(

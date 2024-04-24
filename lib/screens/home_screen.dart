@@ -1,11 +1,8 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
 import 'package:tnennt/screens/home_pages/catalog.dart';
 import 'package:tnennt/screens/home_pages/community.dart';
 import 'package:tnennt/screens/home_pages/gallery.dart';
-import 'package:tnennt/screens/home_pages/rental.dart';
 import 'package:tnennt/screens/home_pages/home.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,7 +19,6 @@ class _HomeScreenState extends State<HomeScreen> {
   static final List<Widget> _widgetOptions = <Widget>[
     SingleChildScrollView(child: Home()),
     Catalog(),
-    Rental(),
     SingleChildScrollView(child: Gallery()),
     Community(),
   ];
@@ -77,9 +73,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   GButton(
                     icon: Icons.collections_bookmark,
-                  ),
-                  GButton(
-                    icon: Icons.add_shopping_cart_rounded,
                   ),
                   GButton(
                     icon: Icons.layers_outlined,
