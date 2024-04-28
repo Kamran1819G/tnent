@@ -1,11 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:tnennt/screens/home_pages/catalog.dart';
-import 'package:tnennt/screens/home_pages/community.dart';
-import 'package:tnennt/screens/home_pages/gallery.dart';
-import 'package:tnennt/screens/home_pages/home.dart';
+import 'package:tnennt/pages/home_pages/catalog.dart';
+import 'package:tnennt/pages/home_pages/community.dart';
+import 'package:tnennt/pages/home_pages/gallery.dart';
+import 'package:tnennt/pages/home_pages/home.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

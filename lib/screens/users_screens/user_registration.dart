@@ -1,9 +1,11 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/screens/home_screen.dart';
+
+import '../../widgets/customCheckboxListTile.dart';
 
 class UserRegistration extends StatefulWidget {
   const UserRegistration({super.key});
@@ -20,6 +22,41 @@ class _UserRegistrationState extends State<UserRegistration> {
 
   final _otpControllers = List.generate(4, (_) => TextEditingController());
   final _focusNodes = List.generate(4, (_) => FocusNode());
+
+  List<String> categories = [
+    'Clothing',
+    'Grocery',
+    'Electronics',
+    'Restaurant',
+    'Book Store',
+    'Bakery',
+    'Beauty Apparel',
+    'Cafe',
+    'Florist',
+    'Footwear',
+    'Accessories',
+    'Stationary',
+    'Eyewear',
+    'Watch',
+    'Musical Instrument',
+    'Sports'
+  ];
+
+  List<String> filteredCategories = [];
+
+  void _filterCategories(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredCategories =
+            categories; // Show all categories if the search query is empty
+      } else {
+        filteredCategories = categories
+            .where((category) =>
+                category.toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+  }
 
   Future<void> pickImage() async {
     final ImagePicker _picker = ImagePicker();
@@ -42,7 +79,6 @@ class _UserRegistrationState extends State<UserRegistration> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,7 +99,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -218,7 +255,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -434,7 +472,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -516,7 +555,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                       child: ElevatedButton(
                         onPressed: () async {
                           await pickImage();
-                          if(profileImage != null) {
+                          if (profileImage != null) {
                             _pageController.nextPage(
                                 duration: Duration(milliseconds: 500),
                                 curve: Curves.easeInOut);
@@ -544,7 +583,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Text('Add a picture', style: TextStyle(fontSize: 16)),
+                            Text('Add a picture',
+                                style: TextStyle(fontSize: 16)),
                           ],
                         ),
                       ),
@@ -553,8 +593,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                     GestureDetector(
                       onTap: () {
                         _pageController.animateToPage(currentPage + 2,
-                        duration: Duration(milliseconds: 100),
-                        curve: Curves.easeInOut);
+                            duration: Duration(milliseconds: 100),
+                            curve: Curves.easeInOut);
                       },
                       child: Center(
                         child: Text(
@@ -579,7 +619,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -724,7 +765,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -901,7 +943,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -1045,6 +1088,203 @@ class _UserRegistrationState extends State<UserRegistration> {
                         ),
                       ),
                     ),
+                  ],
+                ),
+                // Page 7: Your Interests
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 100,
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
+                            decoration: BoxDecoration(
+                              color: hexToColor('#272822'),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset('assets/tnennt_logo.png',
+                                      width: 20, height: 20),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    'Tnennt inc.',
+                                    style: TextStyle(
+                                      color: hexToColor('#E6E6E6'),
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                ]),
+                          ),
+                          Spacer(),
+                          Container(
+                            margin: EdgeInsets.all(8.0),
+                            child: CircleAvatar(
+                              backgroundColor: Colors.grey[100],
+                              child: IconButton(
+                                icon: Icon(Icons.arrow_back_ios_new,
+                                    color: Colors.black),
+                                onPressed: () {
+                                  if (currentPage == 0) {
+                                    Navigator.pop(context);
+                                  } else {
+                                    _pageController.previousPage(
+                                      duration: Duration(milliseconds: 500),
+                                      curve: Curves.easeInOut,
+                                    );
+                                    currentPage--;
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.025),
+                    Container(
+                      color: hexToColor('#E6E6E6'),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Your Interests',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              fontSize: 20,
+                            ),
+                          ),
+                          Text(
+                            'Pick upto 5 things you love. It’ll help you get great deals related to these products',
+                            style: TextStyle(
+                              color: hexToColor('#636363'),
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                        horizontal: 16,
+                      ),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20,
+                      ),
+                      decoration: BoxDecoration(
+                        color: hexToColor('#E6E6E6'),
+                        border: Border.all(
+                          color: hexToColor('#838383'),
+                          strokeAlign: BorderSide.strokeAlignInside,
+                          style: BorderStyle.solid,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: TextField(
+                        style: TextStyle(
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16,
+                        ),
+                        decoration: InputDecoration(
+                            label: Text('Enter Interest'),
+                            labelStyle: TextStyle(
+                              color: hexToColor('#615656'),
+                              fontSize: 12,
+                            ),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              size: 30,
+                            ),
+                            prefixIconColor: hexToColor('#615656'),
+                            border: InputBorder.none),
+                        keyboardType: TextInputType.name,
+                        onChanged: _filterCategories,
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Expanded(
+                      child: GridView.count(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 0,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: 3.5,
+                        physics: BouncingScrollPhysics(),
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        children: [
+                          if (filteredCategories.isNotEmpty)
+                            ...filteredCategories.map((category) {
+                              return Container(
+                                margin: EdgeInsets.symmetric(horizontal: 8),
+                                child: CustomCheckboxListTile(
+                                  title: category,
+                                ),
+                              );
+                            }).toList(),
+                          if (filteredCategories.isEmpty)
+                            ...categories.map((category) {
+                              return Container(
+                                margin: EdgeInsets.symmetric(horizontal: 8),
+                                child: CustomCheckboxListTile(
+                                  title: category,
+                                ),
+                              );
+                            }).toList(),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.0),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) {
+                                return HomeScreen();
+                              },
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          // Set the button color to black
+                          foregroundColor: Colors.white,
+                          // Set the text color to white
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 100, vertical: 18),
+                          // Set the padding
+                          textStyle: TextStyle(
+                            fontSize: 16, // Set the text size
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w500, // Set the text weight
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                12), // Set the button corner radius
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Continue', style: TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
                   ],
                 ),
               ],

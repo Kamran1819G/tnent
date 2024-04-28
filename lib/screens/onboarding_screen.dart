@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/home_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -84,33 +85,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             mainAxisSize: MainAxisSize.max,
             children: [
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 decoration: BoxDecoration(
-                  color: onLastPage ? Colors.white : Colors.black,
-                  borderRadius: BorderRadius.circular(20),
+                  color: hexToColor('#272822'),
+                  borderRadius: BorderRadius.circular(20.0),
                 ),
                 child: Row(
-                  children: [
-                    Icon(
-                      Icons.pie_chart,
-                      size: 24,
-                      color: onLastPage ? Colors.black : Colors.white,
-                    ),
-                    SizedBox(width: 8),
-                    Text(
-                      'Tnennt inc.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: onLastPage ? Colors.black : Colors.white,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset('assets/tnennt_logo.png',
+                          width: 20, height: 20),
+                      SizedBox(width: 10),
+                      Text(
+                        'Tnennt inc.',
+                        style: TextStyle(
+                          color: hexToColor('#E6E6E6'),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 14.0,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
+                    ]),
               ),
               Spacer(),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -121,17 +120,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       '${currentPage.toInt() + 1}/',
                       // Current page number
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                        color: hexToColor('#272822'),
                       ),
                     ),
                     Text(
                       '4', // Total number of pages
                       style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.black,
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                        color: hexToColor('#272822'),
                       ),
                     ),
                   ],

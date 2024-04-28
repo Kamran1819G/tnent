@@ -4,11 +4,10 @@ import 'package:flutter/widgets.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/explore_screen.dart';
 import 'package:tnennt/screens/notification_screen.dart';
-import 'package:tnennt/widgets/home/FeaturedTile.dart';
+import 'package:tnennt/widgets/home/ProductTile.dart';
 import 'package:tnennt/widgets/home/StoresUpdateTile.dart';
-
-import '../../widgets/home/CategoryTile.dart';
-import '../users/myprofile_screen.dart';
+import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
+import 'package:tnennt/widgets/home/CategoryTile.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -254,10 +253,10 @@ class _HomeState extends State<Home>
               ),
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 50.0, vertical: 8.0),
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
               decoration: BoxDecoration(
                 border: Border.all(color: hexToColor('#343434'), width: 1.0),
-                borderRadius: BorderRadius.circular(12.0),
+                borderRadius: BorderRadius.circular(50.0),
               ),
               child: Text(
                 "Books",
@@ -295,7 +294,19 @@ class _HomeState extends State<Home>
                   return SizedBox(width: 15.0);
                 },
                 itemBuilder: (context, index) {
-                  return FeaturedTile(
+                  return ProductTile(
+                      name: "Cannon XYZ",
+                      image: "assets/product_image.png",
+                      price: 200);
+                }),
+            ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: 5,
+                separatorBuilder: (context, index) {
+                  return SizedBox(width: 15.0);
+                },
+                itemBuilder: (context, index) {
+                  return ProductTile(
                       name: "Sahachari",
                       image: "assets/sahachari_image.png",
                       price: 200);
@@ -307,7 +318,7 @@ class _HomeState extends State<Home>
                   return SizedBox(width: 15.0);
                 },
                 itemBuilder: (context, index) {
-                  return FeaturedTile(
+                  return ProductTile(
                       name: "Sahachari",
                       image: "assets/sahachari_image.png",
                       price: 200);
@@ -319,7 +330,7 @@ class _HomeState extends State<Home>
                   return SizedBox(width: 15.0);
                 },
                 itemBuilder: (context, index) {
-                  return FeaturedTile(
+                  return ProductTile(
                       name: "Sahachari",
                       image: "assets/sahachari_image.png",
                       price: 200);
@@ -331,19 +342,7 @@ class _HomeState extends State<Home>
                   return SizedBox(width: 15.0);
                 },
                 itemBuilder: (context, index) {
-                  return FeaturedTile(
-                      name: "Sahachari",
-                      image: "assets/sahachari_image.png",
-                      price: 200);
-                }),
-            ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                separatorBuilder: (context, index) {
-                  return SizedBox(width: 15.0);
-                },
-                itemBuilder: (context, index) {
-                  return FeaturedTile(
+                  return ProductTile(
                       name: "Sahachari",
                       image: "assets/sahachari_image.png",
                       price: 200);
@@ -367,30 +366,35 @@ class _HomeState extends State<Home>
             ),
           ),
         ),
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.5,
+        Container(
+          height: MediaQuery.of(context).size.height * 1.05,
           child: GridView.count(
             padding: EdgeInsets.all(16.0),
+            physics: NeverScrollableScrollPhysics(),
             crossAxisCount: 2,
             mainAxisSpacing: 16.0,
             crossAxisSpacing: 16.0,
+            childAspectRatio: 0.75,
             children: [
               CategoryTile(
                 name: 'Clothings',
-                image: 'assets/sahachari_image.png',
+                image: 'assets/product_image.png',
               ),
               CategoryTile(
                 name: 'Electronics',
-                image: 'assets/sahachari_image.png',
+                image: 'assets/product_image.png',
               ),
               CategoryTile(
                 name: 'groceries',
-                image: 'assets/sahachari_image.png',
+                image: 'assets/product_image.png',
               ),
               CategoryTile(
                 name: 'Accessories',
-                image: 'assets/sahachari_image.png',
+                image: 'assets/product_image.png',
               ),
+              CategoryTile(name: 'Sports', image: 'assets/product_image.png'),
+              CategoryTile(name: 'Books', image: 'assets/product_image.png'),
+
             ],
           ),
         ),

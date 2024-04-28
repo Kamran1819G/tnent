@@ -36,14 +36,14 @@ class CommunityPost extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     backgroundImage: AssetImage(profileImage),
-                    radius: 25.0,
+                    radius: 20.0,
                   ),
                   const SizedBox(width: 16.0),
                   Text(
                     name,
                     style: const TextStyle(
                       fontWeight: FontWeight.w900,
-                      fontSize: 22.0,
+                      fontSize: 18.0,
                     ),
                   ),
                 ],
@@ -53,7 +53,7 @@ class CommunityPost extends StatelessWidget {
                 postTime,
                 style: TextStyle(
                   color: hexToColor('#9C9C9C'),
-                  fontSize: 12.0,
+                  fontSize: 10.0,
                 ),
               ),
             ],
@@ -65,7 +65,7 @@ class CommunityPost extends StatelessWidget {
               caption!,
               style: TextStyle(
                 color: hexToColor('#737373'),
-                fontSize: 14.0,
+                fontSize: 12.0,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -99,7 +99,7 @@ class CommunityPost extends StatelessWidget {
                     const SizedBox(width: 8.0),
                     Text(
                       '$likes',
-                      style: TextStyle(color: hexToColor('#989797')),
+                      style: TextStyle(color: hexToColor('#989797'), fontSize: 12.0),
                     ),
                   ],
                 ),

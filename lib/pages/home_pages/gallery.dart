@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/screens/gallery_pages/store_registration.dart';
-import 'package:tnennt/screens/gallery_pages/the_middlemen.dart';
-import 'package:tnennt/screens/store_owner/mystoreprofile_screen.dart';
+import 'package:tnennt/pages/gallery_pages/store_registration.dart';
+import 'package:tnennt/pages/gallery_pages/the_middlemen.dart';
+import 'package:tnennt/screens/store_owner_screens/mystoreprofile_screen.dart';
 
 class Gallery extends StatefulWidget {
   const Gallery({super.key});

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:tnennt/widgets/community/community_post.dart';
 
 import '../../helpers/color_utils.dart';
-import '../create_community_post_screen.dart';
+import 'package:tnennt/screens/create_community_post_screen.dart';
 
 class Community extends StatefulWidget {
   const Community({super.key});

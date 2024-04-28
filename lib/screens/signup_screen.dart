@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tnennt/screens/signin_screen.dart';
-import 'package:tnennt/screens/users/user_registration.dart';
+import 'package:tnennt/screens/users_screens/user_registration.dart';
 
 import '../helpers/color_utils.dart';
 

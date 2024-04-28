@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/screens/store_owner/analytics_screen.dart';
-import 'package:tnennt/screens/store_owner/order_pays_screen.dart';
+import 'package:tnennt/screens/store_owner_screens/analytics_screen.dart';
+import 'package:tnennt/screens/store_owner_screens/order_pays_screen.dart';
 import 'package:tnennt/widgets/store_profile/AddUpdateTile.dart';
 
 import '../../widgets/store_profile/UpdateTile.dart';

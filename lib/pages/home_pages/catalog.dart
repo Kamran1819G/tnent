@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:tnennt/screens/notification_screen.dart';
+import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
 
 import '../../helpers/color_utils.dart';
-import '../notification_screen.dart';
-import '../users/myprofile_screen.dart';
 
 class Catalog extends StatefulWidget {
   const Catalog({super.key});

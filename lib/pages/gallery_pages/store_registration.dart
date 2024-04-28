@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/widgets/customCheckboxListTile.dart';
 
 class StoreRegistration extends StatefulWidget {
   const StoreRegistration({super.key});
@@ -16,6 +17,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   bool value = false;
 
   List<String> categories = [
+    'Clothing',
     'Grocery',
     'Electronics',
     'Restaurant',
@@ -1175,71 +1177,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         physics: BouncingScrollPhysics(),
                         padding: EdgeInsets.symmetric(horizontal: 12),
                         children: [
-                          Container(
-                            margin: EdgeInsets.symmetric(horizontal: 8),
-                            child: CheckboxListTile(
-                              controlAffinity: ListTileControlAffinity.leading,
-                              selectedTileColor: Theme.of(context).primaryColor,
-                              activeColor: Colors.white,
-                              title: Text(
-                                'Clothing',
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w500),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              checkboxShape: CircleBorder(
-                                side: BorderSide(
-                                  color: Colors.white,
-                                ),
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                side: BorderSide(
-                                  color: hexToColor('#848484'),
-                                  width: 1,
-                                ),
-                              ),
-                              checkColor: Theme.of(context).primaryColor,
-                              value: true,
-                              selected: true,
-                              onChanged: (value) {},
-                            ),
-                          ),
                           ...categories.map((category) {
                             return Container(
                               margin: EdgeInsets.symmetric(horizontal: 8),
-                              child: CheckboxListTile(
-                                controlAffinity: ListTileControlAffinity.leading,
-                                selectedTileColor: Theme.of(context).primaryColor,
-                                activeColor: Colors.white,
-                                title: Text(
-                                  category,
-                                  style: TextStyle(
-                                      fontSize: 12,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w500),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                checkboxShape: CircleBorder(
-                                  side: BorderSide(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  side: BorderSide(
-                                    color: hexToColor('#848484'),
-                                    width: 1,
-                                  ),
-                                ),
-                                checkColor: Theme.of(context).primaryColor,
-                                value: false,
-                                selected: false,
-                                onChanged: (value) {},
+                              child: CustomCheckboxListTile(
+                                title: category,
+                                selectedStyle: true,
                               ),
                             );
                           }).toList(),

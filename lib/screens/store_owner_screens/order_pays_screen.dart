@@ -1,7 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/screens/store_owner/payments_screen.dart';
+import 'package:tnennt/screens/store_owner_screens/payments_screen.dart';
 
 class OrderAndPaysScreen extends StatefulWidget {
   const OrderAndPaysScreen({super.key});
