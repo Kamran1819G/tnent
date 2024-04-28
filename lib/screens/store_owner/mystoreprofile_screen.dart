@@ -1,6 +1,8 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/store_owner/analytics_screen.dart';
+import 'package:tnennt/screens/store_owner/order_pays_screen.dart';
 import 'package:tnennt/widgets/store_profile/AddUpdateTile.dart';
 
 import '../../widgets/store_profile/UpdateTile.dart';
@@ -497,41 +499,51 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                   ),
                 ),
                 Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Container(
-                    width: 200.0,
-                    padding: EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: hexToColor('#F3F3F3'),
-                      borderRadius: BorderRadius.circular(50.0),
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                            backgroundColor: Colors.white,
-                            child: Icon(Icons.person_outline,
-                                color: Colors.black)),
-                        SizedBox(width: 10.0),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Orders & Pays',
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => OrderAndPaysScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 200.0,
+                      padding: EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: hexToColor('#F3F3F3'),
+                        borderRadius: BorderRadius.circular(50.0),
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                              backgroundColor: Colors.white,
+                              child: Icon(Icons.person_outline,
+                                  color: Colors.black)),
+                          SizedBox(width: 10.0),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Orders & Pays',
+                                  style: TextStyle(
+                                    color: hexToColor('#272822'),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14.0,
+                                  )),
+                              Text(
+                                'Orders & Payments',
                                 style: TextStyle(
-                                  color: hexToColor('#272822'),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14.0,
-                                )),
-                            Text(
-                              'Orders & Payments',
-                              style: TextStyle(
-                                color: hexToColor('#838383'),
-                                fontFamily: 'Poppins',
-                                fontSize: 10.0,
-                                fontWeight: FontWeight.w500,
+                                  color: hexToColor('#838383'),
+                                  fontFamily: 'Poppins',
+                                  fontSize: 10.0,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                          ],
-                        )
-                      ],
+                            ],
+                          )
+                        ],
+                      ),
                     ),
                   ),
                   SizedBox(height: 10.0),
@@ -597,7 +609,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                   AddUpdateTile(),
                   for (int i = 0; i < 5; i++)
                     UpdateTile(
-                        name: "Sahachari", image: "assets/updates_image.png"),
+                        name: "Sahachari", image: "assets/sahachari_image.png"),
                 ])),
           ],
         ),

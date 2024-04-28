@@ -129,7 +129,7 @@ class _NotificationScreenState extends State<NotificationScreen>
                 children: [
                   OrderUpdateNotification(
                     type: NotificationType.orderplaced,
-                    productImage: 'assets/updates_image.png',
+                    productImage: 'assets/sahachari_image.png',
                     productName: 'Nikon Camera',
                     price: 12000,
                     orderID: '123456',

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../helpers/color_utils.dart';
@@ -89,7 +90,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           width: 1.0,
                         ),
                         borderRadius: BorderRadius.circular(
-                            50.0), // Adjust the radius as needed
+                            50.0),
                       ),
                       child: DropdownButton<String>(
                         padding: EdgeInsets.symmetric(horizontal: 25.0),
@@ -141,6 +142,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 ),
               ),
               SizedBox(height: 40),
+
+              // Total Customers
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 12),
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -187,6 +190,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 ),
               ),
               SizedBox(height: 20),
+
+              // Total Ordered Item
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 12),
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -267,7 +272,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                           ),
-                          child: Image.asset('assets/updates_image.png'),
+                          child: Image.asset('assets/sahachari_image.png'),
                         ),
                         SizedBox(height: 20),
                         Text(
@@ -278,7 +283,330 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     )
                   ],
                 ),
-              )
+              ),
+
+              SizedBox(height: 20),
+
+              // Total Store Visitors & Conversion Rate From New Visitors
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 12),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: hexToColor('#AFAFAF')),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 100,
+                          child: Text(
+                            'Total Store Visitors',
+                            style: TextStyle(
+                                color: hexToColor('#747474'),
+                                fontSize: 14,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          '800k',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        SizedBox(
+                          width: 100,
+                          child: Text(
+                            'Conversion Rate',
+                            style: TextStyle(
+                                color: hexToColor('#747474'),
+                                fontSize: 14,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          '0.00%',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 100,
+                          child: Text(
+                            'New Store Visitors',
+                            style: TextStyle(
+                                color: hexToColor('#747474'),
+                                fontSize: 14,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          '10k',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        SizedBox(
+                          width: 150,
+                          child: Text(
+                            'Conversion Rate From New Visitors',
+                            style: TextStyle(
+                                color: hexToColor('#747474'),
+                                fontSize: 14,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        Text(
+                          '0.00%',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 20),
+
+              // Average Order Value
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 12),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: hexToColor('#AFAFAF')),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Average Order Value',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        color: hexToColor('#272822'),
+                        fontSize: 18,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          '₹',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 30,
+                          ),
+                        ),
+                        Text(
+                          '760',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 30,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        SizedBox(
+                          width: 250,
+                          child: Text(
+                            'is the average item price that your customer purchases.',
+                            style: TextStyle(
+                                color: hexToColor('#B0B0B0'),
+                                fontSize: 10,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 20),
+
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 12),
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: hexToColor('#AFAFAF')),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 100,
+                          child: Text(
+                            'Revenue From Store',
+                            style: TextStyle(
+                                color: hexToColor('#747474'),
+                                fontSize: 14,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          '800k',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 100,
+                              child: Text(
+                                'Tax Amount',
+                                style: TextStyle(
+                                    color: hexToColor('#747474'),
+                                    fontSize: 14,
+                                    fontFamily: 'Gotham',
+                                    fontWeight: FontWeight.w500),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Text(
+                              'platform tax, GST, Middlemen',
+                              style: TextStyle(
+                                color: hexToColor('#B0B0B0'),
+                                fontSize: 8,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          '40k',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          width: 100,
+                          child: Text(
+                            'Net Profit From Store',
+                            style: TextStyle(
+                                color: hexToColor('#747474'),
+                                fontSize: 14,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          '760k',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        SizedBox(
+                          width: 150,
+                          child: Text(
+                            'Store Performance',
+                            style: TextStyle(
+                                color: hexToColor('#747474'),
+                                fontSize: 14,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '+0.00%',
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 28,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            Text(
+                              'difference compared to last month',
+                              style: TextStyle(
+                                color: hexToColor('#B0B0B0'),
+                                fontSize: 8,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 20),
             ],
           ),
         ),

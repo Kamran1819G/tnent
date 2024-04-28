@@ -397,7 +397,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                   itemCount: 5,
                   itemBuilder: (context, index) {
                     return UpdateTile(
-                        name: "Sahachari", image: "assets/updates_image.png");
+                        name: "Sahachari", image: "assets/sahachari_image.png");
                   }),
             ),
           ],

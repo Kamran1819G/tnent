@@ -189,7 +189,7 @@ class _HomeState extends State<Home>
               itemCount: 5,
               itemBuilder: (context, index) {
                 return StoreUpdateTile(
-                    name: "Sahachari", image: "assets/updates_image.png");
+                    name: "Sahachari", image: "assets/sahachari_image.png");
               }),
         ),
 
@@ -297,7 +297,7 @@ class _HomeState extends State<Home>
                 itemBuilder: (context, index) {
                   return FeaturedTile(
                       name: "Sahachari",
-                      image: "assets/updates_image.png",
+                      image: "assets/sahachari_image.png",
                       price: 200);
                 }),
             ListView.separated(
@@ -309,7 +309,7 @@ class _HomeState extends State<Home>
                 itemBuilder: (context, index) {
                   return FeaturedTile(
                       name: "Sahachari",
-                      image: "assets/updates_image.png",
+                      image: "assets/sahachari_image.png",
                       price: 200);
                 }),
             ListView.separated(
@@ -321,7 +321,7 @@ class _HomeState extends State<Home>
                 itemBuilder: (context, index) {
                   return FeaturedTile(
                       name: "Sahachari",
-                      image: "assets/updates_image.png",
+                      image: "assets/sahachari_image.png",
                       price: 200);
                 }),
             ListView.separated(
@@ -333,7 +333,7 @@ class _HomeState extends State<Home>
                 itemBuilder: (context, index) {
                   return FeaturedTile(
                       name: "Sahachari",
-                      image: "assets/updates_image.png",
+                      image: "assets/sahachari_image.png",
                       price: 200);
                 }),
             ListView.separated(
@@ -345,7 +345,7 @@ class _HomeState extends State<Home>
                 itemBuilder: (context, index) {
                   return FeaturedTile(
                       name: "Sahachari",
-                      image: "assets/updates_image.png",
+                      image: "assets/sahachari_image.png",
                       price: 200);
                 }),
           ]),
@@ -377,19 +377,19 @@ class _HomeState extends State<Home>
             children: [
               CategoryTile(
                 name: 'Clothings',
-                image: 'assets/updates_image.png',
+                image: 'assets/sahachari_image.png',
               ),
               CategoryTile(
                 name: 'Electronics',
-                image: 'assets/updates_image.png',
+                image: 'assets/sahachari_image.png',
               ),
               CategoryTile(
                 name: 'groceries',
-                image: 'assets/updates_image.png',
+                image: 'assets/sahachari_image.png',
               ),
               CategoryTile(
                 name: 'Accessories',
-                image: 'assets/updates_image.png',
+                image: 'assets/sahachari_image.png',
               ),
             ],
           ),

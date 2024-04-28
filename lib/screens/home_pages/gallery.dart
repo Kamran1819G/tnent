@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/screens/gallery_pages/store_registration.dart';
 import 'package:tnennt/screens/gallery_pages/the_middlemen.dart';
 import 'package:tnennt/screens/store_owner/mystoreprofile_screen.dart';
 
@@ -51,7 +52,8 @@ class _GalleryState extends State<Gallery> {
                 ),
                 Spacer(),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                   decoration: BoxDecoration(
                     color: Colors.grey[900],
                     borderRadius: BorderRadius.circular(20.0),
@@ -137,7 +139,8 @@ class _GalleryState extends State<Gallery> {
                                     Container(
                                       width: 10,
                                       height: 10,
-                                      margin: EdgeInsets.symmetric(vertical: 15),
+                                      margin:
+                                          EdgeInsets.symmetric(vertical: 15),
                                       decoration: BoxDecoration(
                                         color: Colors.green,
                                         borderRadius: BorderRadius.circular(5),
@@ -148,7 +151,8 @@ class _GalleryState extends State<Gallery> {
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Icon(Icons.web, color: hexToColor('#00F0FF'), size: 14),
+                                    Icon(Icons.web,
+                                        color: hexToColor('#00F0FF'), size: 14),
                                     SizedBox(width: 5.0),
                                     Text(
                                       'jainbrothers.tnennt.store',
@@ -171,10 +175,11 @@ class _GalleryState extends State<Gallery> {
                             value: isAccepting,
                             activeColor: hexToColor('#41FA00'),
                             trackOutlineColor: MaterialStateColor.resolveWith(
-                                  (states) => Colors.grey,
+                              (states) => Colors.grey,
                             ),
-                            trackOutlineWidth: MaterialStateProperty.resolveWith(
-                                  (states) => 1.0,
+                            trackOutlineWidth:
+                                MaterialStateProperty.resolveWith(
+                              (states) => 1.0,
                             ),
                             activeTrackColor: Colors.transparent,
                             inactiveTrackColor: Colors.transparent,
@@ -199,7 +204,14 @@ class _GalleryState extends State<Gallery> {
             dashColor: Colors.grey,
           ),
           SizedBox(height: 20.0),
-          Image.asset("assets/digital_store_banner.png"),
+          GestureDetector(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => StoreRegistration()));
+              },
+              child: Image.asset("assets/digital_store_banner.png")),
           SizedBox(height: 20.0),
           Image.asset("assets/deliver_anything_banner.png"),
           SizedBox(height: 20.0),

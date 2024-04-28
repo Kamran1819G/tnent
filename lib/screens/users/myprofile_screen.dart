@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../helpers/color_utils.dart';
+import '../signin_screen.dart';
 
 class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({super.key});
@@ -18,7 +19,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              SizedBox(height: 40.0),
+              SizedBox(height: 20.0),
               // Profile Card
               Container(
                   height: 150,
@@ -171,7 +172,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 alignment: Alignment.center,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => SignInScreen()));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
