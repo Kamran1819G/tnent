@@ -59,9 +59,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
               controller: _pageController,
               physics: NeverScrollableScrollPhysics(),
               children: <Widget>[
-                // Page 1: Intro
+                // Page 1: Create Your Own e-Store
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
                       height: 100,
@@ -116,35 +116,47 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.6),
-                    Container(
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    Padding(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          ClipRect(
+                            child: Image.asset(
+                              'assets/create_your_own_e-store.png',
+                              width: MediaQuery.of(context).size.width * 0.7,
+                              height: MediaQuery.of(context).size.height * 0.35,
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          SizedBox(height: 100),
                           Text(
-                            'Create Your Store',
+                            'Create Your Own e-Store',
                             style: TextStyle(
-                                color: hexToColor('#2D332F'),
+                                color: hexToColor('#1E1E1E'),
                                 fontWeight: FontWeight.w900,
                                 fontSize: 26.0),
                           ),
                           Text(
-                            'Enter your details to proceed further',
+                            'Make your own digital store and start selling online',
                             style: TextStyle(
-                                color: hexToColor('#636363'),
+                                color: hexToColor('#858585'),
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w500,
                                 fontSize: 16.0),
+                            maxLines: 2,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 50),
                     Center(
                       child: SmoothPageIndicator(
                         controller: _pageController,
-                        count: 4,
+                        count: 5,
                         effect: ExpandingDotsEffect(
                           dotColor: hexToColor('#787878'),
                           activeDotColor: Theme.of(context).primaryColor,
@@ -155,7 +167,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 50),
+                    SizedBox(height: 20),
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
@@ -170,7 +182,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           foregroundColor: Colors.white,
                           // Set the text color to white
                           padding: EdgeInsets.symmetric(
-                              horizontal: 50, vertical: 16),
+                              horizontal: 75, vertical: 20),
                           // Set the padding
                           textStyle: TextStyle(
                             fontSize: 16, // Set the text size
@@ -186,6 +198,590 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text('Get Started', style: TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                // Page 2: Delivery support
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 100,
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            decoration: BoxDecoration(
+                              color: hexToColor('#272822'),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset('assets/tnennt_logo.png',
+                                      width: 20, height: 20),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    'Tnennt inc.',
+                                    style: TextStyle(
+                                      color: hexToColor('#E6E6E6'),
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                ]),
+                          ),
+                          Spacer(),
+                          Container(
+                            margin: EdgeInsets.all(8.0),
+                            child: CircleAvatar(
+                              backgroundColor: Colors.grey[100],
+                              child: IconButton(
+                                icon: Icon(Icons.arrow_back_ios_new,
+                                    color: Colors.black),
+                                onPressed: () {
+                                  if (currentPage == 0) {
+                                    Navigator.pop(context);
+                                  } else {
+                                    _pageController.previousPage(
+                                      duration: Duration(milliseconds: 500),
+                                      curve: Curves.easeInOut,
+                                    );
+                                    currentPage--;
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.125),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ClipRect(
+                            child: Image.asset(
+                              'assets/delivery_support.png',
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.height * 0.35,
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          SizedBox(height: 100),
+                          Text(
+                            'Delivery Support',
+                            style: TextStyle(
+                                color: hexToColor('#1E1E1E'),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 26.0),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Provided middlemen for product delivery',
+                            style: TextStyle(
+                                color: hexToColor('#858585'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16.0),
+                            maxLines: 2,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 50),
+                    Center(
+                      child: SmoothPageIndicator(
+                        controller: _pageController,
+                        count: 5,
+                        effect: ExpandingDotsEffect(
+                          dotColor: hexToColor('#787878'),
+                          activeDotColor: Theme.of(context).primaryColor,
+                          dotHeight: 4,
+                          dotWidth: 4,
+                          spacing: 10,
+                          expansionFactor: 5,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _pageController.nextPage(
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.easeInOut);
+                          currentPage++;
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          // Set the button color to black
+                          foregroundColor: Colors.white,
+                          // Set the text color to white
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 75, vertical: 20),
+                          // Set the padding
+                          textStyle: TextStyle(
+                            fontSize: 16, // Set the text size
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w500, // Set the text weight
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                30), // Set the button corner radius
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Next', style: TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                // Page 3: Packaging
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 100,
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            decoration: BoxDecoration(
+                              color: hexToColor('#272822'),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset('assets/tnennt_logo.png',
+                                      width: 20, height: 20),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    'Tnennt inc.',
+                                    style: TextStyle(
+                                      color: hexToColor('#E6E6E6'),
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                ]),
+                          ),
+                          Spacer(),
+                          Container(
+                            margin: EdgeInsets.all(8.0),
+                            child: CircleAvatar(
+                              backgroundColor: Colors.grey[100],
+                              child: IconButton(
+                                icon: Icon(Icons.arrow_back_ios_new,
+                                    color: Colors.black),
+                                onPressed: () {
+                                  if (currentPage == 0) {
+                                    Navigator.pop(context);
+                                  } else {
+                                    _pageController.previousPage(
+                                      duration: Duration(milliseconds: 500),
+                                      curve: Curves.easeInOut,
+                                    );
+                                    currentPage--;
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ClipRect(
+                            child: Image.asset(
+                              'assets/packaging.png',
+                              width: MediaQuery.of(context).size.width * 0.5,
+                              height: MediaQuery.of(context).size.height * 0.35,
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          SizedBox(height: 100),
+                          Text(
+                            'Packaging',
+                            style: TextStyle(
+                                color: hexToColor('#1E1E1E'),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 26.0),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Provide product delivery in our custom packaging ',
+                            style: TextStyle(
+                                color: hexToColor('#858585'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16.0),
+                            maxLines: 2,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 50),
+                    Center(
+                      child: SmoothPageIndicator(
+                        controller: _pageController,
+                        count: 5,
+                        effect: ExpandingDotsEffect(
+                          dotColor: hexToColor('#787878'),
+                          activeDotColor: Theme.of(context).primaryColor,
+                          dotHeight: 4,
+                          dotWidth: 4,
+                          spacing: 10,
+                          expansionFactor: 5,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _pageController.nextPage(
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.easeInOut);
+                          currentPage++;
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          // Set the button color to black
+                          foregroundColor: Colors.white,
+                          // Set the text color to white
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 75, vertical: 20),
+                          // Set the padding
+                          textStyle: TextStyle(
+                            fontSize: 16, // Set the text size
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w500, // Set the text weight
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                30), // Set the button corner radius
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Next', style: TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                // Page 4: Analytics
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 100,
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            decoration: BoxDecoration(
+                              color: hexToColor('#272822'),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset('assets/tnennt_logo.png',
+                                      width: 20, height: 20),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    'Tnennt inc.',
+                                    style: TextStyle(
+                                      color: hexToColor('#E6E6E6'),
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                ]),
+                          ),
+                          Spacer(),
+                          Container(
+                            margin: EdgeInsets.all(8.0),
+                            child: CircleAvatar(
+                              backgroundColor: Colors.grey[100],
+                              child: IconButton(
+                                icon: Icon(Icons.arrow_back_ios_new,
+                                    color: Colors.black),
+                                onPressed: () {
+                                  if (currentPage == 0) {
+                                    Navigator.pop(context);
+                                  } else {
+                                    _pageController.previousPage(
+                                      duration: Duration(milliseconds: 500),
+                                      curve: Curves.easeInOut,
+                                    );
+                                    currentPage--;
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ClipRect(
+                            child: Image.asset(
+                              'assets/analytics.png',
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.height * 0.4,
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          SizedBox(height: 75),
+                          Text(
+                            'Analytics',
+                            style: TextStyle(
+                                color: hexToColor('#1E1E1E'),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 26.0),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'See Your Business Insights & Store Matrics',
+                            style: TextStyle(
+                                color: hexToColor('#858585'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16.0),
+                            maxLines: 2,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 50),
+                    Center(
+                      child: SmoothPageIndicator(
+                        controller: _pageController,
+                        count: 5,
+                        effect: ExpandingDotsEffect(
+                          dotColor: hexToColor('#787878'),
+                          activeDotColor: Theme.of(context).primaryColor,
+                          dotHeight: 4,
+                          dotWidth: 4,
+                          spacing: 10,
+                          expansionFactor: 5,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _pageController.nextPage(
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.easeInOut);
+                          currentPage++;
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          // Set the button color to black
+                          foregroundColor: Colors.white,
+                          // Set the text color to white
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 75, vertical: 20),
+                          // Set the padding
+                          textStyle: TextStyle(
+                            fontSize: 16, // Set the text size
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w500, // Set the text weight
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                30), // Set the button corner radius
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Next', style: TextStyle(fontSize: 16)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                // Page 5: Discount Coupons
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 100,
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            decoration: BoxDecoration(
+                              color: hexToColor('#272822'),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset('assets/tnennt_logo.png',
+                                      width: 20, height: 20),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    'Tnennt inc.',
+                                    style: TextStyle(
+                                      color: hexToColor('#E6E6E6'),
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                ]),
+                          ),
+                          Spacer(),
+                          Container(
+                            margin: EdgeInsets.all(8.0),
+                            child: CircleAvatar(
+                              backgroundColor: Colors.grey[100],
+                              child: IconButton(
+                                icon: Icon(Icons.arrow_back_ios_new,
+                                    color: Colors.black),
+                                onPressed: () {
+                                  if (currentPage == 0) {
+                                    Navigator.pop(context);
+                                  } else {
+                                    _pageController.previousPage(
+                                      duration: Duration(milliseconds: 500),
+                                      curve: Curves.easeInOut,
+                                    );
+                                    currentPage--;
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          ClipRect(
+                            child: Image.asset(
+                              'assets/discount_coupons.png',
+                              width: MediaQuery.of(context).size.width * 0.7,
+                              height: MediaQuery.of(context).size.height * 0.35,
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          SizedBox(height: 100),
+                          Text(
+                            'Discount Coupons',
+                            style: TextStyle(
+                                color: hexToColor('#1E1E1E'),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 26.0),
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Create Discount Coupons For Your Store And Products Easily And Instantly',
+                            style: TextStyle(
+                                color: hexToColor('#858585'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16.0),
+                            maxLines: 2,
+                            textAlign: TextAlign.center,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 50),
+                    Center(
+                      child: SmoothPageIndicator(
+                        controller: _pageController,
+                        count: 5,
+                        effect: ExpandingDotsEffect(
+                          dotColor: hexToColor('#787878'),
+                          activeDotColor: Theme.of(context).primaryColor,
+                          dotHeight: 4,
+                          dotWidth: 4,
+                          spacing: 10,
+                          expansionFactor: 5,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          _pageController.nextPage(
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.easeInOut);
+                          currentPage++;
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          // Set the button color to black
+                          foregroundColor: Colors.white,
+                          // Set the text color to white
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 75, vertical: 20),
+                          // Set the padding
+                          textStyle: TextStyle(
+                            fontSize: 16, // Set the text size
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w500, // Set the text weight
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                                30), // Set the button corner radius
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text('Finish', style: TextStyle(fontSize: 16)),
                           ],
                         ),
                       ),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 
@@ -46,9 +47,9 @@ class _ProductTileState extends State<ProductTile> {
         children: [
           Stack(
             children: [
-              Container(
-                height: 145,
-                child: Image.asset(widget.image, height: 48.0),
+              ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                child:Image.asset(widget.image, fit: BoxFit.fill),
               ),
               Positioned(
                 right: 8.0,
@@ -64,7 +65,7 @@ class _ProductTileState extends State<ProductTile> {
                     child: Icon(
                       _isInWishlist ? Icons.favorite : Icons.favorite_border,
                       color: _isInWishlist ? Colors.red : Colors.grey,
-                      size: 14.0,
+                      size: 20,
                     ),
                   ),
                 ),
@@ -72,25 +73,29 @@ class _ProductTileState extends State<ProductTile> {
             ],
           ),
           SizedBox(height: 8.0),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.name,
-                style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12.0),
-              ),
-              SizedBox(height: 4.0),
-              Text(
-                '\$${widget.price.toString()}',
-                style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12.0),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.name,
+                  style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 14.0),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 10.0),
+                Text(
+                  '₹${widget.price.toString()}',
+                  style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12.0),
+                ),
+              ],
+            ),
           ),
         ],
       ),

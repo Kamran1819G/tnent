@@ -1,6 +1,6 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/widgets/explore/ProductTile.dart';
 
 import 'notification_screen.dart';
 
@@ -12,6 +12,86 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
+  String searchQuery = '';
+  List<dynamic> products = [
+    {
+      'name': 'Product 1 Product 1 Product 1',
+      'image': 'assets/product_image.png',
+      'price': 100.0,
+    },
+    {
+      'name': 'Product 2',
+      'image': 'assets/product_image.png',
+      'price': 200.0,
+    },
+    {
+      'name': 'Product 3',
+      'image': 'assets/product_image.png',
+      'price': 300.0,
+    },
+    {
+      'name': 'Product 4',
+      'image': 'assets/product_image.png',
+      'price': 400.0,
+    },
+    {
+      'name': 'Product 1 Product 1 Product 1',
+      'image': 'assets/product_image.png',
+      'price': 100.0,
+    },
+    {
+      'name': 'Product 2',
+      'image': 'assets/product_image.png',
+      'price': 200.0,
+    },
+    {
+      'name': 'Product 3',
+      'image': 'assets/product_image.png',
+      'price': 300.0,
+    },
+    {
+      'name': 'Product 4',
+      'image': 'assets/product_image.png',
+      'price': 400.0,
+    },
+    {
+      'name': 'Product 1 Product 1 Product 1',
+      'image': 'assets/product_image.png',
+      'price': 100.0,
+    },
+    {
+      'name': 'Product 2',
+      'image': 'assets/product_image.png',
+      'price': 200.0,
+    },
+    {
+      'name': 'Product 3',
+      'image': 'assets/product_image.png',
+      'price': 300.0,
+    },
+    {
+      'name': 'Product 4',
+      'image': 'assets/product_image.png',
+      'price': 400.0,
+    }
+  ];
+
+  List<dynamic> filteredProducts = [];
+
+  void _filterProducts(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredProducts =
+            products; // Show all products if the search query is empty
+      } else {
+        filteredProducts = products
+            .where((product) =>
+                product['name'].toLowerCase().contains(query.toLowerCase()))
+            .toList();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,7 +124,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       ),
                     ],
                   ),
-
                   Spacer(),
                   Row(
                     children: [
@@ -53,9 +132,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => NotificationScreen()));
+                                    builder: (context) =>
+                                        NotificationScreen()));
                           },
-                          child: Image.asset('assets/icons/notification_box.png', height: 24, width: 24, fit: BoxFit.cover, colorBlendMode: BlendMode.overlay,)),
+                          child: Image.asset(
+                            'assets/icons/notification_box.png',
+                            height: 24,
+                            width: 24,
+                            fit: BoxFit.cover,
+                            colorBlendMode: BlendMode.overlay,
+                          )),
                       SizedBox(width: 10),
                       Container(
                         margin: EdgeInsets.all(8.0),
@@ -104,22 +190,70 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   SizedBox(width: 20.0),
                   Expanded(
                     child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search Products & Store',
-                        hintStyle: TextStyle(
-                          color: hexToColor('#6D6D6D'),
-                          fontWeight: FontWeight.w900,
-                          fontSize: 16.0,
+                        decoration: InputDecoration(
+                          hintText: 'Search Products & Store',
+                          hintStyle: TextStyle(
+                            color: hexToColor('#6D6D6D'),
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16.0,
+                          ),
+                          border: InputBorder.none,
                         ),
-                        border: InputBorder.none,
-                      ),
-                    ),
+                        onChanged: (value) {
+                          searchQuery = value;
+                          _filterProducts(value);
+                        }),
                   ),
                 ],
               ),
             ),
+            filteredProducts.isNotEmpty && searchQuery.isNotEmpty
+                ? Expanded(
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      padding: EdgeInsets.all(20),
+                      crossAxisSpacing: 20,
+                      mainAxisSpacing: 20,
+                      childAspectRatio: 0.7,
+                      children: [
+                        ...filteredProducts.map((product) {
+                          return ProductTile(
+                            name: product['name'],
+                            image: product['image'],
+                            price: product['price'],
+                          );
+                        }).toList(),
+                      ],
+                    ),
+                  )
+                : filteredProducts.isEmpty && searchQuery.isNotEmpty
+                    ? ClipRRect(
+                        child: Image.asset(
+                          'assets/no_results.png',
+                          height: MediaQuery.of(context).size.height * 0.5,
+                          width: MediaQuery.of(context).size.width * 0.7,
+                        ),
+                      )
+                    : Expanded(
+                        child: GridView.count(
+                          crossAxisCount: 2,
+                          padding: EdgeInsets.all(20),
+                          crossAxisSpacing: 20,
+                          mainAxisSpacing: 20,
+                          childAspectRatio: 0.7,
+                          children: [
+                            ...products.map((product) {
+                              return ProductTile(
+                                name: product['name'],
+                                image: product['image'],
+                                price: product['price'],
+                              );
+                            }).toList(),
+                          ],
+                        ),
+                      ),
           ],
-        )
+        ),
       ),
     );
   }
