@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/screens/store_owner_screens/create_coupon_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/payments_screen.dart';
 
 class OrderAndPaysScreen extends StatefulWidget {
@@ -96,7 +98,8 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                     children: [
                       CircleAvatar(
                           backgroundColor: Colors.white,
-                          child: Icon(Icons.currency_rupee, color: Colors.black)),
+                          child:
+                              Icon(Icons.currency_rupee, color: Colors.black)),
                       SizedBox(width: 10.0),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,38 +126,46 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                 ),
               ),
               SizedBox(height: 10.0),
-              Container(
-                width: 200.0,
-                padding: EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: hexToColor('#F3F3F3'),
-                  borderRadius: BorderRadius.circular(50.0),
-                ),
-                child: Row(
-                  children: [
-                    CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.percent, color: Colors.black)),
-                    SizedBox(width: 10.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Coupons',
-                            style: TextStyle(
-                              color: hexToColor('#272822'),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14.0,
-                            )),
-                        Text('My Coupons',
-                            style: TextStyle(
-                              color: hexToColor('#838383'),
-                              fontFamily: 'Poppins',
-                              fontSize: 10.0,
-                              fontWeight: FontWeight.w500,
-                            )),
-                      ],
-                    )
-                  ],
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => CreateCouponScreen()));
+                },
+                child: Container(
+                  width: 200.0,
+                  padding: EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    color: hexToColor('#F3F3F3'),
+                    borderRadius: BorderRadius.circular(50.0),
+                  ),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                          backgroundColor: Colors.white,
+                          child: Icon(Icons.percent, color: Colors.black)),
+                      SizedBox(width: 10.0),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Coupons',
+                              style: TextStyle(
+                                color: hexToColor('#272822'),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14.0,
+                              )),
+                          Text('My Coupons',
+                              style: TextStyle(
+                                color: hexToColor('#838383'),
+                                fontFamily: 'Poppins',
+                                fontSize: 10.0,
+                                fontWeight: FontWeight.w500,
+                              )),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
               )
             ]),
@@ -526,7 +537,7 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                 ],
               ),
             ),
-            ],
+          ],
         ),
       )),
     );
