@@ -1249,14 +1249,10 @@ class _UserRegistrationState extends State<UserRegistration> {
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) {
-                                return HomeScreen();
-                              },
-                            ),
-                          );
+                          _pageController.nextPage(
+                              duration: Duration(milliseconds: 500),
+                              curve: Curves.easeInOut);
+                          currentPage++;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -1283,6 +1279,129 @@ class _UserRegistrationState extends State<UserRegistration> {
                           ],
                         ),
                       ),
+                    ),
+                    SizedBox(height: 20),
+                  ],
+                ),
+                // Page 11:  Congratulation Page
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      height: 100,
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
+                            decoration: BoxDecoration(
+                              color: hexToColor('#272822'),
+                              borderRadius: BorderRadius.circular(20.0),
+                            ),
+                            child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Image.asset('assets/tnennt_logo.png',
+                                      width: 20, height: 20),
+                                  SizedBox(width: 10),
+                                  Text(
+                                    'Tnennt inc.',
+                                    style: TextStyle(
+                                      color: hexToColor('#E6E6E6'),
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                ]),
+                          ),
+                          Spacer(),
+                          Container(
+                            margin: EdgeInsets.all(8.0),
+                            child: CircleAvatar(
+                              backgroundColor: Colors.grey[100],
+                              child: IconButton(
+                                icon: Icon(Icons.arrow_back_ios_new,
+                                    color: Colors.black),
+                                onPressed: () {
+                                  if (currentPage == 0) {
+                                    Navigator.pop(context);
+                                  } else {
+                                    _pageController.previousPage(
+                                      duration: Duration(milliseconds: 500),
+                                      curve: Curves.easeInOut,
+                                    );
+                                    currentPage--;
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(100),
+                      child: Image.asset(
+                        'assets/congratulation.png',
+                        width: 200,
+                        height: 200,
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Congratulations!',
+                            style: TextStyle(
+                              color: hexToColor('#2A2A2A'),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 34,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            'Your account has been created',
+                            style: TextStyle(
+                              color: hexToColor('#636363'),
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 18,
+                            ),
+                            maxLines: 2,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Hurray! you are now ready to shop from your local stores',
+                          style: TextStyle(
+                            color: hexToColor('#636363'),
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12,
+                          ),
+                        ),
+                        Text(
+                          'Join Our Tnennt Community',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 20),
                   ],

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../helpers/color_utils.dart';
 
@@ -89,8 +90,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           color: hexToColor('#AFAFAF'),
                           width: 1.0,
                         ),
-                        borderRadius: BorderRadius.circular(
-                            50.0),
+                        borderRadius: BorderRadius.circular(50.0),
                       ),
                       child: DropdownButton<String>(
                         padding: EdgeInsets.symmetric(horizontal: 25.0),
@@ -121,20 +121,27 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       ),
                     ),
                     Spacer(),
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: hexToColor('#131312'),
-                        borderRadius: BorderRadius.circular(50.0),
-                      ),
-                      child: Text(
-                        'Print Data',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14.0,
+                    GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (context) => _buildBottomSheet());
+                      },
+                      child: Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: hexToColor('#131312'),
+                          borderRadius: BorderRadius.circular(50.0),
+                        ),
+                        child: Text(
+                          'Print Data',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14.0,
+                          ),
                         ),
                       ),
                     ),
@@ -610,6 +617,112 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBottomSheet() {
+    return Container(
+      height: 250,
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 100,
+              height: 4,
+              margin: const EdgeInsets.symmetric(vertical: 15),
+              decoration: BoxDecoration(
+                color: hexToColor('#CACACA'),
+                borderRadius: BorderRadius.circular(5),
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+          Text('Print Data As',
+          style: TextStyle(
+                  color: hexToColor('#343434'),
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16.0),
+          ),
+          SizedBox(height: 25),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  Image.asset(
+                    'assets/icons/xls.png',
+                    scale: 1.5,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Excel',
+                    style: TextStyle(
+                        color: hexToColor('#2B2B2B'),
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12.0),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  Image.asset(
+                    'assets/icons/jpg.png',
+                    scale: 1.5,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Image',
+                    style: TextStyle(
+                        color: hexToColor('#2B2B2B'),
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12.0),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  Image.asset(
+                    'assets/icons/doc.png',
+                    scale: 1.5,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Doc',
+                    style: TextStyle(
+                        color: hexToColor('#2B2B2B'),
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12.0),
+                  ),
+                ],
+              ),
+              Column(
+                children: [
+                  Image.asset(
+                    'assets/icons/pdf.png',
+                    scale: 1.5,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'PDF',
+                    style: TextStyle(
+                        color: hexToColor('#2B2B2B'),
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12.0),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

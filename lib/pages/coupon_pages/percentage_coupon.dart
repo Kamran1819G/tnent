@@ -1,7 +1,12 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:intl/intl.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/pages/coupon_pages/share_coupon.dart';
 
 class PercentageCoupon extends StatefulWidget {
   const PercentageCoupon({super.key});
@@ -19,6 +24,8 @@ class _PercentageCouponState extends State<PercentageCoupon> {
 
   DateTime? _selectedDate;
 
+  GlobalKey _globalKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
@@ -26,7 +33,9 @@ class _PercentageCouponState extends State<PercentageCoupon> {
     _orderAmountController = TextEditingController(text: '1000');
     _couponCodeController = TextEditingController(text: 'CouponCode');
     _couponLimitController = TextEditingController(text: '200');
-    _expiryDateController = TextEditingController(text: DateFormat('dd/MM/yyyy').format(DateTime.now().add(Duration(days: 30))));
+    _expiryDateController = TextEditingController(
+        text: DateFormat('dd/MM/yyyy')
+            .format(DateTime.now().add(Duration(days: 30))));
   }
 
   @override
@@ -49,8 +58,23 @@ class _PercentageCouponState extends State<PercentageCoupon> {
     if (picked != null && picked != _selectedDate) {
       setState(() {
         _selectedDate = picked;
-        _expiryDateController.text = DateFormat('dd/MM/yyyy').format(_selectedDate!);
+        _expiryDateController.text =
+            DateFormat('dd/MM/yyyy').format(_selectedDate!);
       });
+    }
+  }
+
+  Future<Uint8List?> _capturePng() async {
+    try {
+      RenderRepaintBoundary boundary = _globalKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      print(e);
+      return null;
     }
   }
 
@@ -61,7 +85,7 @@ class _PercentageCouponState extends State<PercentageCoupon> {
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-            children:[
+            children: [
               Container(
                 height: 100,
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -106,123 +130,128 @@ class _PercentageCouponState extends State<PercentageCoupon> {
                 ),
               ),
               SizedBox(height: 20),
-              Stack(
-                children: [
-                  ClipRRect(
-                    child: Image.asset(
-                      'assets/coupon_bg.png',
-                      width: MediaQuery.of(context).size.width * 0.9,
-                    ),
-                  ),
-                  Positioned(
-                    left: 20,
-                    top: 20,
-                    child: Container(
-                      padding:
-                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20.0),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.5),
-                            spreadRadius: 1,
-                            blurRadius: 5,
-                            offset: Offset(0, 3), // changes position of shadow
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Coupon: ',
-                            style: TextStyle(
-                              color: hexToColor('#9A9A9A'),
-                              fontFamily: 'Gotham',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 10.0,
-                            ),
-                          ),
-                          Text(
-                            _couponCodeController.text.toUpperCase(),
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w700,
-                              fontSize: 10.0,
-                            ),
-                          ),
-                        ],
+              RepaintBoundary(
+                key: _globalKey,
+                child: Stack(
+                  children: [
+                    ClipRRect(
+                      child: Image.asset(
+                        'assets/coupon_bg.png',
+                        width: MediaQuery.of(context).size.width * 0.9,
                       ),
                     ),
-                  ),
-                  Positioned(
-                    bottom: 20,
-                    left: 30,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
+                    Positioned(
+                      left: 20,
+                      top: 20,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 1,
+                              blurRadius: 5,
+                              offset:
+                                  Offset(0, 3), // changes position of shadow
+                            ),
+                          ],
+                        ),
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Text(
-                              _discountController.text,
-                              style: TextStyle(
-                                color: hexToColor('#343434'),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 38.0,
-                              ),
-                            ),
-                            Text(
-                              ' %',
-                              style: TextStyle(
-                                color: hexToColor('#343434'),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 18.0,
-                              ),
-                            ),
-                            Text(
-                              ' OFF',
-                              style: TextStyle(
-                                color: hexToColor('#343434'),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 18.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'On all orders ',
+                              'Coupon: ',
                               style: TextStyle(
                                 color: hexToColor('#9A9A9A'),
                                 fontFamily: 'Gotham',
                                 fontWeight: FontWeight.w500,
-                                fontSize: 14.0,
+                                fontSize: 10.0,
                               ),
                             ),
-                            _orderAmountController.text.isNotEmpty &&
-                                int.parse(_orderAmountController.text) != 0
-                                ? Text(
-                              'over ₹ ${_orderAmountController.text}',
+                            Text(
+                              _couponCodeController.text.toUpperCase(),
                               style: TextStyle(
-                                color: hexToColor('#9A9A9A'),
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 14.0,
+                                color: Theme.of(context).primaryColor,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 10.0,
                               ),
-                            )
-                                : Container()
+                            ),
                           ],
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                    Positioned(
+                      bottom: 20,
+                      left: 30,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                _discountController.text,
+                                style: TextStyle(
+                                  color: hexToColor('#343434'),
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 38.0,
+                                ),
+                              ),
+                              Text(
+                                ' %',
+                                style: TextStyle(
+                                  color: hexToColor('#343434'),
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 18.0,
+                                ),
+                              ),
+                              Text(
+                                ' OFF',
+                                style: TextStyle(
+                                  color: hexToColor('#343434'),
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 18.0,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'On all orders ',
+                                style: TextStyle(
+                                  color: hexToColor('#9A9A9A'),
+                                  fontFamily: 'Gotham',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14.0,
+                                ),
+                              ),
+                              _orderAmountController.text.isNotEmpty &&
+                                      int.parse(_orderAmountController.text) !=
+                                          0
+                                  ? Text(
+                                      'over ₹ ${_orderAmountController.text}',
+                                      style: TextStyle(
+                                        color: hexToColor('#9A9A9A'),
+                                        fontFamily: 'Gotham',
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 14.0,
+                                      ),
+                                    )
+                                  : Container()
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
               SizedBox(height: 20),
               Dash(
@@ -246,21 +275,22 @@ class _PercentageCouponState extends State<PercentageCoupon> {
                         fontSize: 16,
                       ),
                       decoration: InputDecoration(
-                          labelText: 'Discount Value',
-                          prefixIcon: Icon(Icons.percent),
-                          prefixIconConstraints: BoxConstraints(
-                            minWidth: 40,
-                          ),
-                          labelStyle: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: 16,
-                          ),
+                        labelText: 'Discount Value',
+                        prefixIcon: Icon(Icons.percent),
+                        prefixIconConstraints: BoxConstraints(
+                          minWidth: 40,
+                        ),
+                        labelStyle: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 16,
+                        ),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
                             color: hexToColor('#848484'),
                           ),
                           borderRadius: BorderRadius.circular(12),
-                        ),),
+                        ),
+                      ),
                     ),
                     SizedBox(height: 16.0),
                     TextField(
@@ -272,28 +302,29 @@ class _PercentageCouponState extends State<PercentageCoupon> {
                         fontSize: 16,
                       ),
                       decoration: InputDecoration(
-                          labelText: 'On Orders Over',
-                          labelStyle: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: 16,
-                          ),
-                          suffixText: '(optional)',
-                          suffixStyle: TextStyle(
-                            color: hexToColor('#B1B1B1'),
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14,
-                          ),
-                          prefixIcon: Icon(Icons.currency_rupee),
-                          prefixIconConstraints: BoxConstraints(
-                            minWidth: 40,
-                          ),
+                        labelText: 'On Orders Over',
+                        labelStyle: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 16,
+                        ),
+                        suffixText: '(optional)',
+                        suffixStyle: TextStyle(
+                          color: hexToColor('#B1B1B1'),
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
+                        prefixIcon: Icon(Icons.currency_rupee),
+                        prefixIconConstraints: BoxConstraints(
+                          minWidth: 40,
+                        ),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
                             color: hexToColor('#848484'),
                           ),
                           borderRadius: BorderRadius.circular(12),
-                        ),),
+                        ),
+                      ),
                     ),
                     SizedBox(height: 16.0),
                     TextField(
@@ -304,11 +335,11 @@ class _PercentageCouponState extends State<PercentageCoupon> {
                         fontSize: 16,
                       ),
                       decoration: InputDecoration(
-                          labelText: 'Coupon Code',
-                          labelStyle: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: 16,
-                          ),
+                        labelText: 'Coupon Code',
+                        labelStyle: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 16,
+                        ),
                         border: OutlineInputBorder(
                           borderSide: BorderSide(
                             color: hexToColor('#848484'),
@@ -328,11 +359,11 @@ class _PercentageCouponState extends State<PercentageCoupon> {
                         fontSize: 16,
                       ),
                       decoration: InputDecoration(
-                          labelText: 'Coupon Limit',
-                          labelStyle: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontSize: 16,
-                          ),
+                        labelText: 'Coupon Limit',
+                        labelStyle: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 16,
+                        ),
                         suffixText: '(Coupons)',
                         suffixStyle: TextStyle(
                           color: hexToColor('#B1B1B1'),
@@ -345,7 +376,8 @@ class _PercentageCouponState extends State<PercentageCoupon> {
                             color: hexToColor('#848484'),
                           ),
                           borderRadius: BorderRadius.circular(12),
-                        ),),
+                        ),
+                      ),
                     ),
                     SizedBox(height: 16.0),
                     TextField(
@@ -379,16 +411,25 @@ class _PercentageCouponState extends State<PercentageCoupon> {
               SizedBox(height: 30.0),
               Center(
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Add the function to be executed when the button is pressed
+                  onPressed: () async {
+                    Uint8List? imageBytes = await _capturePng();
+                    if (imageBytes != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              ShareCoupon(imageBytes: imageBytes),
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: hexToColor('#2D332F'),
                     // Set the button color to black
                     foregroundColor: Colors.white,
                     // Set the text color to white
-                    padding: EdgeInsets.symmetric(
-                        horizontal: 100, vertical: 18),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 100, vertical: 18),
                     // Set the padding
                     textStyle: TextStyle(
                       fontSize: 16, // Set the text size
@@ -409,7 +450,7 @@ class _PercentageCouponState extends State<PercentageCoupon> {
                 ),
               ),
               SizedBox(height: 50.0),
-            ]
+            ],
           ),
         ),
       ),

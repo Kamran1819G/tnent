@@ -531,13 +531,17 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                     fontWeight: FontWeight.w600,
                                     fontSize: 14.0,
                                   )),
-                              Text(
-                                'Orders & Payments',
-                                style: TextStyle(
-                                  color: hexToColor('#838383'),
-                                  fontFamily: 'Poppins',
-                                  fontSize: 10.0,
-                                  fontWeight: FontWeight.w500,
+                              SizedBox(
+                                width: 100,
+                                child: Text(
+                                  'Orders, Payments & Coupons',
+                                  style: TextStyle(
+                                    color: hexToColor('#838383'),
+                                    fontFamily: 'Poppins',
+                                    fontSize: 10.0,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  maxLines: 2,
                                 ),
                               ),
                             ],
