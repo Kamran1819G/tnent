@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/widgets/explore/ProductTile.dart';
 
@@ -12,6 +14,7 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
+  int? _selectedFilterOption;
   String searchQuery = '';
   List<dynamic> products = [
     {
@@ -207,6 +210,45 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 ],
               ),
             ),
+            if(filteredProducts.isNotEmpty && searchQuery.isNotEmpty)
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: Text(
+                        'Showing ${filteredProducts.length} results for "$searchQuery"',
+                        style: TextStyle(
+                          color: hexToColor('#6D6D6D'),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16.0,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Spacer(),
+                    GestureDetector(
+                      onTap: () {
+                        showModalBottomSheet(
+                            context: context,
+                            builder: (context) => _buildBottomSheet());
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(10),
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Image.asset('assets/icons/filter.png', fit: BoxFit.fill,),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            SizedBox(height: 20),
             filteredProducts.isNotEmpty && searchQuery.isNotEmpty
                 ? Expanded(
                     child: GridView.count(
@@ -234,26 +276,113 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           width: MediaQuery.of(context).size.width * 0.7,
                         ),
                       )
-                    : Expanded(
-                        child: GridView.count(
-                          crossAxisCount: 2,
-                          padding: EdgeInsets.all(20),
-                          crossAxisSpacing: 20,
-                          mainAxisSpacing: 20,
-                          childAspectRatio: 0.7,
-                          children: [
-                            ...products.map((product) {
-                              return ProductTile(
-                                name: product['name'],
-                                image: product['image'],
-                                price: product['price'],
-                              );
-                            }).toList(),
-                          ],
-                        ),
-                      ),
+                    : Container()
+
           ],
         ),
+      ),
+    );
+  }
+  Widget _buildBottomSheet() {
+    return Container(
+      height: 300,
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 100,
+              height: 4,
+              margin: const EdgeInsets.symmetric(vertical: 15),
+              decoration: BoxDecoration(
+                color: hexToColor('#CACACA'),
+                borderRadius: BorderRadius.circular(5),
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+          Text('Add Filter',
+            style: TextStyle(
+                color: hexToColor('#343434'),
+                fontWeight: FontWeight.w900,
+                fontSize: 16.0),
+          ),
+          SizedBox(height: 25),
+          RadioListTile(
+            title: Text('Featured',
+            style: TextStyle(
+                color: Theme.of(context).primaryColor,
+                fontFamily: 'Gotham',
+                fontWeight: FontWeight.w500,
+                fontSize: 16.0)
+            ),
+            controlAffinity: ListTileControlAffinity.trailing,
+            dense: true,
+            value: 0,
+            groupValue: _selectedFilterOption,
+            activeColor: Theme.of(context).primaryColor,
+            onChanged: (value) {
+              setState(() {
+                _selectedFilterOption = value as int?;
+              });
+            },
+          ),
+          RadioListTile(
+            title: Text('High To Low',
+                style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontFamily: 'Gotham',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16.0)),
+            controlAffinity: ListTileControlAffinity.trailing,
+            value: 1,
+            groupValue: _selectedFilterOption,
+            activeColor: Theme.of(context).primaryColor,
+            dense: true,
+            onChanged: (value) {
+              setState(() {
+                _selectedFilterOption = value as int?;
+              });
+            },
+          ),
+          RadioListTile(
+            title: Text('Low To High',
+                style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontFamily: 'Gotham',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16.0)),
+            controlAffinity: ListTileControlAffinity.trailing,
+            value: 2,
+            groupValue: _selectedFilterOption,
+            activeColor: Theme.of(context).primaryColor,
+            dense: true,
+            onChanged: (value) {
+              setState(() {
+                _selectedFilterOption = value as int?;
+              });
+            },
+          ),
+          RadioListTile(
+            title: Text('Discount',
+                style: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontFamily: 'Gotham',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16.0)),
+            controlAffinity: ListTileControlAffinity.trailing,
+            value: 3,
+            groupValue: _selectedFilterOption,
+            activeColor: Theme.of(context).primaryColor,
+            dense: true,
+            onChanged: (value) {
+              setState(() {
+                _selectedFilterOption = value as int?;
+              });
+            },
+          ),
+        ],
       ),
     );
   }

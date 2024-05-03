@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/screens/home_screen.dart';
 import 'package:tnennt/screens/onboarding_screen.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final onboarding = prefs.getBool('onboarding')??false;
+  runApp(MyApp(onboarding: onboarding,));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final bool onboarding;
+  const MyApp({super.key, this.onboarding = false });
   
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -33,7 +41,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Gotham Black',
 
       ),
-      home: OnboardingScreen(),
+      home: onboarding ? HomeScreen() : OnboardingScreen(),
     );
   }
 }
