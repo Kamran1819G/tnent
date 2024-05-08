@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 tabs: const [
                   GButton(
-                    icon: Icons.home_filled,
+                    icon: Icons.home,
                   ),
                   GButton(
                     icon: Icons.collections_bookmark,
@@ -86,6 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-    ));
+    ),
+    );
   }
 }

@@ -94,7 +94,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset('assets/tnennt_logo.png',
+                        Image.asset('assets/white_tnennt_logo.png',
                             width: 20, height: 20),
                         SizedBox(width: 10),
                         Text(

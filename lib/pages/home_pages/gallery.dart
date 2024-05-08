@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/pages/gallery_pages/deliver_anything_anywhere.dart';
+import 'package:tnennt/pages/delivery_service_pages/deliverproduct.dart';
 import 'package:tnennt/pages/gallery_pages/store_registration.dart';
 import 'package:tnennt/pages/gallery_pages/the_middlemen.dart';
 import 'package:tnennt/screens/store_owner_screens/mystoreprofile_screen.dart';
@@ -205,15 +208,20 @@ class _GalleryState extends State<Gallery> {
           ),
           SizedBox(height: 20.0),
           GestureDetector(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => StoreRegistration()));
-              },
-              child: Image.asset("assets/digital_store_banner.png")),
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => StoreRegistration()));
+            },
+            child: Image.asset("assets/digital_store_banner.png"),
+          ),
           SizedBox(height: 20.0),
-          Image.asset("assets/deliver_anything_banner.png"),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => DeliverAnythingAnywhere()));
+            },
+            child: Image.asset("assets/deliver_anything_banner.png"),
+          ),
           SizedBox(height: 20.0),
           GestureDetector(
               onTap: () {

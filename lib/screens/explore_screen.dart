@@ -202,15 +202,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           ),
                           border: InputBorder.none,
                         ),
-                        onChanged: (value) {
+                        onSubmitted: (value) {
                           searchQuery = value;
                           _filterProducts(value);
-                        }),
+                        },),
                   ),
                 ],
               ),
             ),
-            if(filteredProducts.isNotEmpty && searchQuery.isNotEmpty)
+            if (filteredProducts.isNotEmpty && searchQuery.isNotEmpty)
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -222,7 +222,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         style: TextStyle(
                           color: hexToColor('#6D6D6D'),
                           fontWeight: FontWeight.w900,
-                          fontSize: 16.0,
+                          fontSize: 14.0,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -242,7 +242,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
                           color: Theme.of(context).primaryColor,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Image.asset('assets/icons/filter.png', fit: BoxFit.fill,),
+                        child: Image.asset(
+                          'assets/icons/filter.png',
+                          fit: BoxFit.fill,
+                        ),
                       ),
                     ),
                   ],
@@ -277,12 +280,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         ),
                       )
                     : Container()
-
           ],
         ),
       ),
     );
   }
+
   Widget _buildBottomSheet() {
     return Container(
       height: 300,
@@ -302,85 +305,91 @@ class _ExploreScreenState extends State<ExploreScreen> {
             ),
           ),
           SizedBox(height: 10),
-          Text('Add Filter',
+          Text(
+            'Add Filter',
             style: TextStyle(
                 color: hexToColor('#343434'),
                 fontWeight: FontWeight.w900,
                 fontSize: 16.0),
           ),
           SizedBox(height: 25),
-          RadioListTile(
-            title: Text('Featured',
-            style: TextStyle(
-                color: Theme.of(context).primaryColor,
-                fontFamily: 'Gotham',
-                fontWeight: FontWeight.w500,
-                fontSize: 16.0)
+          StatefulBuilder(
+            builder: (context, setState) => Column(
+              children: [
+                RadioListTile(
+                  title: Text('Featured',
+                      style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16.0)),
+                  controlAffinity: ListTileControlAffinity.trailing,
+                  dense: true,
+                  value: 0,
+                  groupValue: _selectedFilterOption,
+                  activeColor: Theme.of(context).primaryColor,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedFilterOption = value as int?;
+                    });
+                  },
+                ),
+                RadioListTile(
+                  title: Text('High To Low',
+                      style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16.0)),
+                  controlAffinity: ListTileControlAffinity.trailing,
+                  value: 1,
+                  groupValue: _selectedFilterOption,
+                  activeColor: Theme.of(context).primaryColor,
+                  dense: true,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedFilterOption = value as int?;
+                    });
+                  },
+                ),
+                RadioListTile(
+                  title: Text('Low To High',
+                      style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16.0)),
+                  controlAffinity: ListTileControlAffinity.trailing,
+                  value: 2,
+                  groupValue: _selectedFilterOption,
+                  activeColor: Theme.of(context).primaryColor,
+                  dense: true,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedFilterOption = value as int?;
+                    });
+                  },
+                ),
+                RadioListTile(
+                  title: Text('Discount',
+                      style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 16.0)),
+                  controlAffinity: ListTileControlAffinity.trailing,
+                  value: 3,
+                  groupValue: _selectedFilterOption,
+                  activeColor: Theme.of(context).primaryColor,
+                  dense: true,
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedFilterOption = value as int?;
+                    });
+                  },
+                ),
+              ],
             ),
-            controlAffinity: ListTileControlAffinity.trailing,
-            dense: true,
-            value: 0,
-            groupValue: _selectedFilterOption,
-            activeColor: Theme.of(context).primaryColor,
-            onChanged: (value) {
-              setState(() {
-                _selectedFilterOption = value as int?;
-              });
-            },
-          ),
-          RadioListTile(
-            title: Text('High To Low',
-                style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontFamily: 'Gotham',
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16.0)),
-            controlAffinity: ListTileControlAffinity.trailing,
-            value: 1,
-            groupValue: _selectedFilterOption,
-            activeColor: Theme.of(context).primaryColor,
-            dense: true,
-            onChanged: (value) {
-              setState(() {
-                _selectedFilterOption = value as int?;
-              });
-            },
-          ),
-          RadioListTile(
-            title: Text('Low To High',
-                style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontFamily: 'Gotham',
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16.0)),
-            controlAffinity: ListTileControlAffinity.trailing,
-            value: 2,
-            groupValue: _selectedFilterOption,
-            activeColor: Theme.of(context).primaryColor,
-            dense: true,
-            onChanged: (value) {
-              setState(() {
-                _selectedFilterOption = value as int?;
-              });
-            },
-          ),
-          RadioListTile(
-            title: Text('Discount',
-                style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontFamily: 'Gotham',
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16.0)),
-            controlAffinity: ListTileControlAffinity.trailing,
-            value: 3,
-            groupValue: _selectedFilterOption,
-            activeColor: Theme.of(context).primaryColor,
-            dense: true,
-            onChanged: (value) {
-              setState(() {
-                _selectedFilterOption = value as int?;
-              });
-            },
           ),
         ],
       ),
