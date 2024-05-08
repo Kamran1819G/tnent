@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/widgets/explore/ProductTile.dart';
+import 'package:tnennt/widgets/explore/ExploreResultTile.dart';
 
 import 'notification_screen.dart';
 
@@ -262,7 +262,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       childAspectRatio: 0.7,
                       children: [
                         ...filteredProducts.map((product) {
-                          return ProductTile(
+                          return ExploreResultTile(
                             name: product['name'],
                             image: product['image'],
                             price: product['price'],

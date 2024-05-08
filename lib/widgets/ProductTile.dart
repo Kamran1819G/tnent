@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 
@@ -39,7 +38,7 @@ class _ProductTileState extends State<ProductTile> {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8.0),
+        borderRadius: BorderRadius.circular(6.0),
         color: hexToColor('#F5F5F5'),
       ),
       child: Column(
@@ -47,9 +46,16 @@ class _ProductTileState extends State<ProductTile> {
         children: [
           Stack(
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                child:Image.asset(widget.image, fit: BoxFit.fill),
+              Container(
+                height: 150,
+                width: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  image: DecorationImage(
+                    image: AssetImage(widget.image),
+                    fit: BoxFit.fill,
+                  ),
+                ),
               ),
               Positioned(
                 right: 8.0,
@@ -65,7 +71,7 @@ class _ProductTileState extends State<ProductTile> {
                     child: Icon(
                       _isInWishlist ? Icons.favorite : Icons.favorite_border,
                       color: _isInWishlist ? Colors.red : Colors.grey,
-                      size: 20,
+                      size: 14.0,
                     ),
                   ),
                 ),
@@ -77,22 +83,22 @@ class _ProductTileState extends State<ProductTile> {
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Text(
                   widget.name,
                   style: TextStyle(
                       color: hexToColor('#343434'),
                       fontWeight: FontWeight.w900,
-                      fontSize: 14.0),
-                  overflow: TextOverflow.ellipsis,
+                      fontSize: 10.0),
                 ),
-                SizedBox(height: 10.0),
+                SizedBox(height: 8.0),
                 Text(
-                  '₹${widget.price.toString()}',
+                  '\$${widget.price.toString()}',
                   style: TextStyle(
                       color: hexToColor('#343434'),
                       fontWeight: FontWeight.w900,
-                      fontSize: 12.0),
+                      fontSize: 10.0),
                 ),
               ],
             ),

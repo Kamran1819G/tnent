@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 
-class ProductTile extends StatefulWidget {
+class ExploreResultTile extends StatefulWidget {
   final String name;
   final String image;
   final double price;
 
-  ProductTile({
+  ExploreResultTile({
     required this.name,
     required this.image,
     required this.price,
   });
 
   @override
-  _ProductTileState createState() => _ProductTileState();
+  _ExploreResultTileState createState() => _ExploreResultTileState();
 }
 
-class _ProductTileState extends State<ProductTile> {
+class _ExploreResultTileState extends State<ExploreResultTile> {
   bool _isInWishlist = false;
 
   void _toggleWishlist() {
@@ -24,12 +24,12 @@ class _ProductTileState extends State<ProductTile> {
       _isInWishlist = !_isInWishlist;
     });
 
-    // Send wishlist request to the server
+// Send wishlist request to the server
     if (_isInWishlist) {
-      // Code to send wishlist request to the server
+// Code to send wishlist request to the server
       print('Adding to wishlist...');
     } else {
-      // Code to remove from wishlist request to the server
+// Code to remove from wishlist request to the server
       print('Removing from wishlist...');
     }
   }
@@ -47,8 +47,7 @@ class _ProductTileState extends State<ProductTile> {
           Stack(
             children: [
               Container(
-                height: 145,
-                child: Image.asset(widget.image, height: 48.0),
+                child: Image.asset(widget.image, fit: BoxFit.fill),
               ),
               Positioned(
                 right: 8.0,
@@ -72,25 +71,30 @@ class _ProductTileState extends State<ProductTile> {
             ],
           ),
           SizedBox(height: 8.0),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.name,
-                style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12.0),
-              ),
-              SizedBox(height: 4.0),
-              Text(
-                '\$${widget.price.toString()}',
-                style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontWeight: FontWeight.w900,
-                    fontSize: 12.0),
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.name,
+                  style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12.0),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: 4.0),
+                Text(
+                  '\$${widget.price.toString()}',
+                  style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12.0),
+                ),
+              ],
+            ),
           ),
         ],
       ),

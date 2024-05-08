@@ -1,13 +1,13 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/explore_screen.dart';
 import 'package:tnennt/screens/notification_screen.dart';
-import 'package:tnennt/widgets/home/ProductTile.dart';
-import 'package:tnennt/widgets/home/StoresUpdateTile.dart';
+import 'package:tnennt/screens/stores_screen.dart';
+import 'package:tnennt/widgets/ProductTile.dart';
+import 'package:tnennt/widgets/StoresUpdateTile.dart';
 import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
-import 'package:tnennt/widgets/home/CategoryTile.dart';
+import 'package:tnennt/widgets/CategoryTile.dart';
+import 'package:tnennt/widgets/StoreTile.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -16,8 +16,7 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home>
-    with TickerProviderStateMixin {
+class _HomeState extends State<Home> with TickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -89,12 +88,20 @@ class _HomeState extends State<Home>
                         MaterialPageRoute(
                             builder: (context) => NotificationScreen()));
                   },
-                  child: Image.asset('assets/icons/notification_box.png', height: 24, width: 24, fit: BoxFit.cover, colorBlendMode: BlendMode.overlay,)),
+                  child: Image.asset(
+                    'assets/icons/notification_box.png',
+                    height: 24,
+                    width: 24,
+                    fit: BoxFit.cover,
+                    colorBlendMode: BlendMode.overlay,
+                  )),
               SizedBox(width: 16.0),
               GestureDetector(
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => MyProfileScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => MyProfileScreen()));
                 },
                 child: CircleAvatar(
                   backgroundImage: AssetImage('assets/profile_image.png'),
@@ -105,8 +112,8 @@ class _HomeState extends State<Home>
         ),
         GestureDetector(
           onTap: () {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => ExploreScreen()));
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => ExploreScreen()));
           },
           child: Container(
             margin: EdgeInsets.all(20),
@@ -170,28 +177,27 @@ class _HomeState extends State<Home>
         // Updates Section
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: RichText(
-            text: TextSpan(
-              text: 'Updates',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w900,
-                fontSize: 18.0,
-              ),
+          child: Text(
+            'Updates',
+            style: TextStyle(
+              color: hexToColor('#343434'),
+              fontWeight: FontWeight.w900,
+              fontSize: 18.0,
             ),
           ),
         ),
         SizedBox(
-          height: 175.0,
+          height: 150.0,
           child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return StoreUpdateTile(
-                    name: "Sahachari", image: "assets/sahachari_image.png");
-              }),
+            scrollDirection: Axis.horizontal,
+            itemCount: 5,
+            itemBuilder: (context, index) {
+              return StoreUpdateTile(
+                  name: "Sahachari", image: "assets/sahachari_image.png");
+            },
+          ),
         ),
-
+        SizedBox(height: 40.0),
         // Featured Section
         TabBar(
           controller: _tabController,
@@ -265,18 +271,16 @@ class _HomeState extends State<Home>
           ],
         ),
 
-        SizedBox(height: 20.0),
+        SizedBox(height: 40.0),
 
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: RichText(
-            text: TextSpan(
-              text: 'Featured',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w900,
-                fontSize: 24.0,
-              ),
+          child: Text(
+            'Featured',
+            style: TextStyle(
+              color: hexToColor('#343434'),
+              fontWeight: FontWeight.w900,
+              fontSize: 24.0,
             ),
           ),
         ),
@@ -285,7 +289,7 @@ class _HomeState extends State<Home>
 
         Container(
           height: 200.0,
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          padding: EdgeInsets.only(left: 16.0),
           child: TabBarView(controller: _tabController, children: [
             ListView.separated(
                 scrollDirection: Axis.horizontal,
@@ -352,17 +356,98 @@ class _HomeState extends State<Home>
 
         SizedBox(height: 40.0),
 
+        // Feature Store Section
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(
+            children: [
+              Text(
+                'Featured Stores',
+                style: TextStyle(
+                  color: hexToColor('#343434'),
+                  fontWeight: FontWeight.w900,
+                  fontSize: 22.0,
+                ),
+              ),
+              Spacer(),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => StoresScreen()));
+                },
+                child: Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                  decoration: BoxDecoration(
+                    color: hexToColor('#F5F5F5'),
+                    borderRadius: BorderRadius.circular(50.0),
+                  ),
+                  child: Text(
+                    'View All',
+                    style: TextStyle(
+                      color: hexToColor('#272822'),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12.0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(height: 30.0),
+
+        Container(
+          height: 125.0,
+          padding: EdgeInsets.only(left: 16.0),
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            children: [
+              StoreTile(
+                storeName: 'Sanachari',
+                storeLogo: 'assets/sahachari_image.png',
+              ),
+              SizedBox(width: 15.0),
+              StoreTile(
+                storeName: 'Jain Brothers',
+                storeLogo: 'assets/jain_brothers.png',
+              ),
+              SizedBox(width: 15.0),
+              StoreTile(
+                storeName: 'Sanachari',
+                storeLogo: 'assets/sahachari_image.png',
+              ),
+              SizedBox(width: 15.0),
+              StoreTile(
+                storeName: 'Jain Brothers',
+                storeLogo: 'assets/jain_brothers.png',
+              ),
+              SizedBox(width: 15.0),
+              StoreTile(
+                storeName: 'Sanachari',
+                storeLogo: 'assets/sahachari_image.png',
+              ),
+              SizedBox(width: 15.0),
+              StoreTile(
+                storeName: 'Jain Brothers',
+                storeLogo: 'assets/jain_brothers.png',
+              ),
+            ],
+          ),
+        ),
+
+        SizedBox(height: 20.0),
+
         // Category Section
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: RichText(
-            text: TextSpan(
-              text: 'Category',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.w900,
-                fontSize: 18.0,
-              ),
+          child: Text(
+            'Category',
+            style: TextStyle(
+              color: hexToColor('#343434'),
+              fontWeight: FontWeight.w900,
+              fontSize: 22.0,
             ),
           ),
         ),
@@ -394,7 +479,6 @@ class _HomeState extends State<Home>
               ),
               CategoryTile(name: 'Sports', image: 'assets/product_image.png'),
               CategoryTile(name: 'Books', image: 'assets/product_image.png'),
-
             ],
           ),
         ),
