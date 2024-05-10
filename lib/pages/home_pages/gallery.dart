@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/pages/gallery_pages/deliver_anything_anywhere.dart';
-import 'package:tnennt/pages/delivery_service_pages/deliverproduct.dart';
+import 'package:tnennt/pages/delivery_service_pages/deliver_product.dart';
 import 'package:tnennt/pages/gallery_pages/store_registration.dart';
 import 'package:tnennt/pages/gallery_pages/the_middlemen.dart';
 import 'package:tnennt/screens/store_owner_screens/mystoreprofile_screen.dart';

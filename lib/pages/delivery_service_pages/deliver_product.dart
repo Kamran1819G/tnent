@@ -1,12 +1,7 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:tnennt/models/location_details_model.dart';
 import 'package:tnennt/pages/delivery_service_pages/upload_and_verify_document.dart';
-
 import '../../helpers/color_utils.dart';
-import 'enter_location_details.dart';
 
 class DeliverProduct extends StatefulWidget {
   const DeliverProduct({super.key});
@@ -30,8 +25,6 @@ class _DeliverProductState extends State<DeliverProduct> {
     _dropLocationController.dispose();
     super.dispose();
   }
-
-
 
   void _setPickupLocation(LocationDetails pickupDetails) {
     setState(() {
@@ -177,10 +170,12 @@ class _DeliverProductState extends State<DeliverProduct> {
                                             fontSize: 16,
                                           ),
                                           onTap: () async {
-                                            final pickupDetails = await Navigator.push(
+                                            final pickupDetails =
+                                                await Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => EnterLocationDetails(
+                                                builder: (context) =>
+                                                    EnterLocationDetails(
                                                   onSubmit: _setPickupLocation,
                                                   type: "Pickup",
                                                 ),
@@ -239,7 +234,8 @@ class _DeliverProductState extends State<DeliverProduct> {
                                         ),
                                       ),
                                       if (_pickupLocationController
-                                          .text.isNotEmpty)
+                                              .text.isNotEmpty &&
+                                          _pickupDetails != null)
                                         IconButton(
                                           icon: Image.asset(
                                             'assets/icons/delete.png',
@@ -247,6 +243,17 @@ class _DeliverProductState extends State<DeliverProduct> {
                                           ),
                                           onPressed: () {
                                             _pickupLocationController.clear();
+                                            _pickupDetails = null;
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    EnterLocationDetails(
+                                                  onSubmit: _setPickupLocation,
+                                                  type: "Pickup",
+                                                ),
+                                              ),
+                                            );
                                           },
                                         ),
                                     ],
@@ -281,10 +288,12 @@ class _DeliverProductState extends State<DeliverProduct> {
                                             fontSize: 16,
                                           ),
                                           onTap: () async {
-                                            final dropDetails = await Navigator.push(
+                                            final dropDetails =
+                                                await Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) => EnterLocationDetails(
+                                                builder: (context) =>
+                                                    EnterLocationDetails(
                                                   onSubmit: _setDropLocation,
                                                   type: "Shipment",
                                                 ),
@@ -343,7 +352,8 @@ class _DeliverProductState extends State<DeliverProduct> {
                                         ),
                                       ),
                                       if (_dropLocationController
-                                          .text.isNotEmpty)
+                                              .text.isNotEmpty &&
+                                          _dropDetails != null)
                                         IconButton(
                                           icon: Image.asset(
                                             'assets/icons/delete.png',
@@ -351,6 +361,17 @@ class _DeliverProductState extends State<DeliverProduct> {
                                           ),
                                           onPressed: () {
                                             _dropLocationController.clear();
+                                            _dropDetails = null;
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    EnterLocationDetails(
+                                                  onSubmit: _setDropLocation,
+                                                  type: "Shipment",
+                                                ),
+                                              ),
+                                            );
                                           },
                                         ),
                                     ],
@@ -387,7 +408,7 @@ class _DeliverProductState extends State<DeliverProduct> {
                           child: GridView.count(
                             physics: NeverScrollableScrollPhysics(),
                             crossAxisCount: 2,
-                            crossAxisSpacing: 30,
+                            crossAxisSpacing: 20,
                             mainAxisSpacing: 20,
                             childAspectRatio: 2.5,
                             children: [
@@ -563,5 +584,242 @@ class _DeliverProductState extends State<DeliverProduct> {
         ),
       ),
     );
+  }
+}
+
+class EnterLocationDetails extends StatefulWidget {
+  final Function(LocationDetails) onSubmit;
+  final String type;
+
+  EnterLocationDetails({super.key, required this.onSubmit, required this.type});
+
+  @override
+  State<EnterLocationDetails> createState() => _EnterLocationDetailsState();
+}
+
+class _EnterLocationDetailsState extends State<EnterLocationDetails> {
+  late TextEditingController _nameController;
+  late TextEditingController _phoneController;
+  late TextEditingController _addressLine1Controller;
+  late TextEditingController _addressLine2Controller;
+  late TextEditingController _zipController;
+  late TextEditingController _cityController;
+  late TextEditingController _stateController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _phoneController = TextEditingController();
+    _addressLine1Controller = TextEditingController();
+    _addressLine2Controller = TextEditingController();
+    _zipController = TextEditingController();
+    _cityController = TextEditingController();
+    _stateController = TextEditingController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 75,
+                padding: EdgeInsets.only(left: 16, right: 8),
+                child: Row(
+                  children: [
+                    Image.asset('assets/black_tnennt_logo.png',
+                        width: 30, height: 30),
+                    Spacer(),
+                    Container(
+                      margin: EdgeInsets.all(8.0),
+                      child: CircleAvatar(
+                        backgroundColor: Colors.grey[100],
+                        child: IconButton(
+                          icon: Icon(Icons.arrow_back_ios_new,
+                              color: Colors.black),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: Text(
+                  'Enter ${widget.type} Details',
+                  style: TextStyle(
+                    color: hexToColor('#2A2A2A'),
+                    fontSize: 34,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              SizedBox(height: 50),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: _buildTextField(
+                        controller: _nameController,
+                        labelText: 'Name',
+                        hintText: 'Enter Name',
+                        prefixIcon: Icons.person_outline,
+                        keyboardType: TextInputType.name,
+                      ),
+                    ),
+                    SizedBox(height: 35),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: _buildTextField(
+                        controller: _phoneController,
+                        labelText: 'Mobile Number',
+                        hintText: 'XXXXX-XXXXX',
+                        prefixIcon: Icons.phone_outlined,
+                        keyboardType: TextInputType.phone,
+                      ),
+                    ),
+                    SizedBox(height: 35),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: _buildTextField(
+                        controller: _addressLine1Controller,
+                        labelText: 'Flat/ Housing No./ Building/ Apartment',
+                        hintText: 'Address Line 1',
+                        prefixIcon: Icons.location_on_outlined,
+                        keyboardType: TextInputType.streetAddress,
+                      ),
+                    ),
+                    SizedBox(height: 35),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: _buildTextField(
+                        controller: _addressLine2Controller,
+                        labelText: 'Area/ Street/ Sector',
+                        hintText: 'Address Line 2',
+                        prefixIcon: Icons.location_on_outlined,
+                        keyboardType: TextInputType.streetAddress,
+                      ),
+                    ),
+                    SizedBox(height: 35),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.5,
+                      child: _buildTextField(
+                        controller: _zipController,
+                        labelText: 'Pincode',
+                        keyboardType: TextInputType.number,
+                      ),
+                    ),
+                    SizedBox(height: 35),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.45,
+                          child: _buildTextField(
+                            controller: _cityController,
+                            labelText: 'City',
+                            keyboardType: TextInputType.name,
+                          ),
+                        ),
+                        SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.45,
+                          child: _buildTextField(
+                            controller: _stateController,
+                            labelText: 'State',
+                            keyboardType: TextInputType.name,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 40),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: _submit,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: hexToColor('#2D332F'),
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 100, vertical: 20),
+                          textStyle: TextStyle(
+                            fontSize: 16,
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w500,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                        ),
+                        child: Text('Proceed', style: TextStyle(fontSize: 16)),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    String? labelText,
+    String? hintText,
+    IconData? prefixIcon,
+    TextInputType? keyboardType,
+  }) {
+    return TextField(
+      controller: controller,
+      style: TextStyle(
+        color: hexToColor('#2A2A2A'),
+        fontFamily: 'Gotham',
+        fontSize: 14,
+        fontWeight: FontWeight.w900,
+      ),
+      decoration: InputDecoration(
+        floatingLabelBehavior: FloatingLabelBehavior.always,
+        labelText: labelText,
+        hintText: hintText,
+        prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
+        prefixIconColor: Theme.of(context).primaryColor,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: hexToColor('#2A2A2A')),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: hexToColor('#2A2A2A')),
+        ),
+      ),
+      keyboardType: keyboardType,
+    );
+  }
+
+  void _submit() {
+    final locationDetails = LocationDetails(
+      name: _nameController.text,
+      phone: _phoneController.text,
+      addressLine1: _addressLine1Controller.text,
+      addressLine2: _addressLine2Controller.text,
+      zip: _zipController.text,
+      city: _cityController.text,
+      state: _stateController.text,
+    );
+
+    widget.onSubmit(locationDetails);
+    Navigator.pop(context);
   }
 }

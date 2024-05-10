@@ -1,8 +1,4 @@
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import '../../helpers/color_utils.dart';
@@ -44,6 +40,7 @@ class _SetPickupDateTimeState extends State<SetPickupDateTime> {
 
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
+      initialEntryMode: TimePickerEntryMode.input,
       context: context,
       initialTime: _selectedTime ?? TimeOfDay.now(),
     );

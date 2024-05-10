@@ -3,11 +3,10 @@ import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/explore_screen.dart';
 import 'package:tnennt/screens/notification_screen.dart';
 import 'package:tnennt/screens/stores_screen.dart';
-import 'package:tnennt/widgets/ProductTile.dart';
-import 'package:tnennt/widgets/StoresUpdateTile.dart';
 import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
-import 'package:tnennt/widgets/CategoryTile.dart';
-import 'package:tnennt/widgets/StoreTile.dart';
+
+import '../../screens/story_screen.dart';
+import '../../screens/users_screens/storeprofile_screen.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -192,7 +191,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             scrollDirection: Axis.horizontal,
             itemCount: 5,
             itemBuilder: (context, index) {
-              return StoreUpdateTile(
+              return UpdateTile(
                   name: "Sahachari", image: "assets/sahachari_image.png");
             },
           ),
@@ -483,6 +482,264 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
         ),
       ],
+    );
+  }
+}
+
+class StoreTile extends StatelessWidget {
+  final String storeName;
+  final String storeLogo;
+
+  StoreTile({
+    required this.storeName,
+    required this.storeLogo,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StoreProfileScreen(
+              storeName: storeName,
+              storeLogo: storeLogo,
+            ),
+          ),
+        );
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            height: 75,
+            width: 75,
+            decoration: BoxDecoration(
+              border: Border.all(color: hexToColor('#B5B5B5')),
+              borderRadius: BorderRadius.circular(18.0),
+              image: DecorationImage(
+                image: AssetImage(storeLogo),
+                fit: BoxFit.fill,
+              ),
+            ),
+          ),
+          SizedBox(height: 8.0),
+          Expanded(
+            child: Text(
+              storeName,
+              style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 12.0),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class CategoryTile extends StatelessWidget {
+  final String name;
+  final String image;
+
+  CategoryTile({
+    required this.name,
+    required this.image,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 300,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8.0),
+        color: hexToColor('#F5F5F5'),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+
+          Container(
+            height: 200,
+            child: Image.asset(image,
+              fit: BoxFit.fill,
+            ),
+          ),
+          SizedBox(height: 8.0),
+          Text(
+            name,
+            style: TextStyle(
+              color: hexToColor('#343434'),
+              fontWeight: FontWeight.w900,
+              fontSize: 14.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class UpdateTile extends StatelessWidget {
+  final String name;
+  final String image;
+
+  UpdateTile({
+    required this.name,
+    required this.image,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StoryScreen(
+              storeName: name,
+              storeImage: Image.asset(image),
+            ),
+          ),
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 100,
+              width: 100,
+              decoration: BoxDecoration(
+                border: Border.all(color: hexToColor('#B5B5B5')),
+                borderRadius: BorderRadius.circular(18.0),
+                image: DecorationImage(
+                  image: AssetImage(image),
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ),
+            SizedBox(height: 8.0),
+            Text(
+              name,
+              style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 10.0),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ProductTile extends StatefulWidget {
+  final String name;
+  final String image;
+  final double price;
+
+  ProductTile({
+    required this.name,
+    required this.image,
+    required this.price,
+  });
+
+  @override
+  _ProductTileState createState() => _ProductTileState();
+}
+
+class _ProductTileState extends State<ProductTile> {
+  bool _isInWishlist = false;
+
+  void _toggleWishlist() {
+    setState(() {
+      _isInWishlist = !_isInWishlist;
+    });
+
+    // Send wishlist request to the server
+    if (_isInWishlist) {
+      // Code to send wishlist request to the server
+      print('Adding to wishlist...');
+    } else {
+      // Code to remove from wishlist request to the server
+      print('Removing from wishlist...');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6.0),
+        color: hexToColor('#F5F5F5'),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              Container(
+                height: 150,
+                width: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  image: DecorationImage(
+                    image: AssetImage(widget.image),
+                    fit: BoxFit.fill,
+                  ),
+                ),
+              ),
+              Positioned(
+                right: 8.0,
+                top: 8.0,
+                child: GestureDetector(
+                  onTap: _toggleWishlist,
+                  child: Container(
+                    padding: EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(100.0),
+                    ),
+                    child: Icon(
+                      _isInWishlist ? Icons.favorite : Icons.favorite_border,
+                      color: _isInWishlist ? Colors.red : Colors.grey,
+                      size: 14.0,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8.0),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Text(
+                  widget.name,
+                  style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 10.0),
+                ),
+                SizedBox(height: 8.0),
+                Text(
+                  '\$${widget.price.toString()}',
+                  style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontWeight: FontWeight.w900,
+                      fontSize: 10.0),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

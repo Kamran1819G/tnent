@@ -1,11 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/store_owner_screens/analytics_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/order_pays_screen.dart';
-import 'package:tnennt/widgets/store_profile/AddUpdateTile.dart';
-
-import '../../widgets/store_profile/UpdateTile.dart';
+import 'package:tnennt/screens/store_owner_screens/store_settings_screen.dart';
 
 class MyStoreProfileScreen extends StatefulWidget {
   const MyStoreProfileScreen({super.key});
@@ -551,39 +549,49 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                     ),
                   ),
                   SizedBox(height: 10.0),
-                  Container(
-                    width: 200.0,
-                    padding: EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: hexToColor('#F3F3F3'),
-                      borderRadius: BorderRadius.circular(50.0),
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                            backgroundColor: Colors.white,
-                            child: Icon(Icons.settings_outlined,
-                                color: Colors.black)),
-                        SizedBox(width: 10.0),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('My Settings',
-                                style: TextStyle(
-                                  color: hexToColor('#272822'),
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14.0,
-                                )),
-                            Text('Store Settings',
-                                style: TextStyle(
-                                  color: hexToColor('#838383'),
-                                  fontFamily: 'Poppins',
-                                  fontSize: 10.0,
-                                  fontWeight: FontWeight.w500,
-                                )),
-                          ],
-                        )
-                      ],
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StoreSettingsScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 200.0,
+                      padding: EdgeInsets.all(16.0),
+                      decoration: BoxDecoration(
+                        color: hexToColor('#F3F3F3'),
+                        borderRadius: BorderRadius.circular(50.0),
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                              backgroundColor: Colors.white,
+                              child: Icon(Icons.settings_outlined,
+                                  color: Colors.black)),
+                          SizedBox(width: 10.0),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('My Settings',
+                                  style: TextStyle(
+                                    color: hexToColor('#272822'),
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14.0,
+                                  )),
+                              Text('Store Settings',
+                                  style: TextStyle(
+                                    color: hexToColor('#838383'),
+                                    fontFamily: 'Poppins',
+                                    fontSize: 10.0,
+                                    fontWeight: FontWeight.w500,
+                                  )),
+                            ],
+                          )
+                        ],
+                      ),
                     ),
                   )
                 ])
@@ -610,13 +618,64 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                 margin: EdgeInsets.symmetric(horizontal: 4.0),
                 height: 175.0,
                 child: ListView(scrollDirection: Axis.horizontal, children: [
-                  AddUpdateTile(),
+                  Container(
+                    padding: EdgeInsets.all(8.0),
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 100,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            color: hexToColor('#F3F3F3'),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child: Container(
+                              margin: EdgeInsets.all(16.0),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                              ),
+                              child: Icon(Icons.add,
+                                  size: 34.0, color: hexToColor('#B5B5B5'))),
+                        ),
+                      ],
+                    ),
+                  ),
                   for (int i = 0; i < 5; i++)
                     UpdateTile(
                         name: "Sahachari", image: "assets/sahachari_image.png"),
                 ])),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class UpdateTile extends StatelessWidget {
+  final String name;
+  final String image;
+
+  UpdateTile({
+    required this.name,
+    required this.image,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Container(
+              height: 100,
+              width: 100,
+              decoration: BoxDecoration(
+                border: Border.all(color: hexToColor('#B5B5B5'), width: 1.0),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Image.asset(image, height: 48.0)),
+        ],
       ),
     );
   }
