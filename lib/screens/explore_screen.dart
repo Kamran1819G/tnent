@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/screens/product_detail_screen.dart';
 import 'notification_screen.dart';
 
 class ExploreScreen extends StatefulWidget {
@@ -189,19 +190,20 @@ class _ExploreScreenState extends State<ExploreScreen> {
                   SizedBox(width: 20.0),
                   Expanded(
                     child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Search Products & Store',
-                          hintStyle: TextStyle(
-                            color: hexToColor('#6D6D6D'),
-                            fontWeight: FontWeight.w900,
-                            fontSize: 16.0,
-                          ),
-                          border: InputBorder.none,
+                      decoration: InputDecoration(
+                        hintText: 'Search Products & Store',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#6D6D6D'),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16.0,
                         ),
-                        onSubmitted: (value) {
-                          searchQuery = value;
-                          _filterProducts(value);
-                        },),
+                        border: InputBorder.none,
+                      ),
+                      onSubmitted: (value) {
+                        searchQuery = value;
+                        _filterProducts(value);
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -428,69 +430,91 @@ class _ResultTileState extends State<ResultTile> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8.0),
-        color: hexToColor('#F5F5F5'),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Container(
-                child: Image.asset(widget.image, fit: BoxFit.fill),
-              ),
-              Positioned(
-                right: 8.0,
-                top: 8.0,
-                child: GestureDetector(
-                  onTap: _toggleWishlist,
-                  child: Container(
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(100.0),
-                    ),
-                    child: Icon(
-                      _isInWishlist ? Icons.favorite : Icons.favorite_border,
-                      color: _isInWishlist ? Colors.red : Colors.grey,
-                      size: 14.0,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetailScreen(
+              images: [
+                Image.asset(widget.image),
+                Image.asset(widget.image),
+                Image.asset(widget.image),
+              ],
+              productName: widget.name,
+              productDescription:
+                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. eiusmod tempor incididunt ut labore et do.',
+              productPrice: widget.price,
+              storeName: 'Jain Brothers',
+              storeLogo: 'assets/jain_brothers.png',
+              Discount: 10,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.0),
+          color: hexToColor('#F5F5F5'),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
+              children: [
+                Container(
+                  child: Image.asset(widget.image, fit: BoxFit.fill),
+                ),
+                Positioned(
+                  right: 8.0,
+                  top: 8.0,
+                  child: GestureDetector(
+                    onTap: _toggleWishlist,
+                    child: Container(
+                      padding: EdgeInsets.all(8.0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(100.0),
+                      ),
+                      child: Icon(
+                        _isInWishlist ? Icons.favorite : Icons.favorite_border,
+                        color: _isInWishlist ? Colors.red : Colors.grey,
+                        size: 14.0,
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8.0),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.name,
-                  style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontWeight: FontWeight.w900,
-                      fontSize: 12.0),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 4.0),
-                Text(
-                  '\$${widget.price.toString()}',
-                  style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontWeight: FontWeight.w900,
-                      fontSize: 12.0),
-                ),
               ],
             ),
-          ),
-        ],
+            SizedBox(height: 8.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.name,
+                    style: TextStyle(
+                        color: hexToColor('#343434'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 12.0),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 4.0),
+                  Text(
+                    '\$${widget.price.toString()}',
+                    style: TextStyle(
+                        color: hexToColor('#343434'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 12.0),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-

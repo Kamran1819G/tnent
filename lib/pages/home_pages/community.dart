@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import '../../helpers/color_utils.dart';
-import 'package:tnennt/screens/create_community_post_screen.dart';
 
 class Community extends StatefulWidget {
   const Community({super.key});
@@ -51,8 +53,7 @@ class _CommunityState extends State<Community> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) =>
-                                  CreateCommunityPostScreen()));
+                              builder: (context) => CreateCommunityPost()));
                     },
                   ),
                 ),
@@ -64,7 +65,8 @@ class _CommunityState extends State<Community> {
           name: 'Kamran Khan',
           profileImage: 'assets/profile_image.png',
           postTime: '8 h ago',
-          caption: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          caption:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
           image: 'assets/post_image.png',
           likes: 991,
           productLink: 'https://example.com/product',
@@ -73,14 +75,16 @@ class _CommunityState extends State<Community> {
           name: 'Kamran Khan',
           profileImage: 'assets/profile_image.png',
           postTime: '8 h ago',
-          caption: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          caption:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
           likes: 991,
         ),
         CommunityPost(
           name: 'Kamran Khan',
           profileImage: 'assets/profile_image.png',
           postTime: '8 h ago',
-          caption: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+          caption:
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
           likes: 991,
         ),
         SizedBox(height: 100.0),
@@ -126,21 +130,49 @@ class CommunityPost extends StatelessWidget {
                     radius: 20.0,
                   ),
                   const SizedBox(width: 16.0),
-                  Text(
-                    name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 18.0,
-                    ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 18.0,
+                        ),
+                      ),
+                      Text(
+                        postTime,
+                        style: TextStyle(
+                          color: hexToColor('#9C9C9C'),
+                          fontSize: 10.0,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
               const Spacer(),
-              Text(
-                postTime,
-                style: TextStyle(
-                  color: hexToColor('#9C9C9C'),
-                  fontSize: 10.0,
+              GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                    ),
+                    context: context,
+                    builder: (context) => _buildMoreBottomSheet(),
+                  );
+                },
+                child: CircleAvatar(
+                  backgroundColor: hexToColor('#F5F5F5'),
+                  child: Icon(
+                    Icons.more_horiz,
+                    color: hexToColor('#BEBEBE'),
+                    size: 20,
+                  ),
                 ),
               ),
             ],
@@ -172,7 +204,7 @@ class CommunityPost extends StatelessWidget {
             children: [
               Container(
                 padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: hexToColor('#BEBEBE')),
                   borderRadius: BorderRadius.circular(50.0),
@@ -186,7 +218,8 @@ class CommunityPost extends StatelessWidget {
                     const SizedBox(width: 8.0),
                     Text(
                       '$likes',
-                      style: TextStyle(color: hexToColor('#989797'), fontSize: 12.0),
+                      style: TextStyle(
+                          color: hexToColor('#989797'), fontSize: 12.0),
                     ),
                   ],
                 ),
@@ -207,7 +240,10 @@ class CommunityPost extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  avatar: Icon(Icons.link_outlined, color: hexToColor('#B4B4B4'),),
+                  avatar: Icon(
+                    Icons.link_outlined,
+                    color: hexToColor('#B4B4B4'),
+                  ),
                 ),
               Spacer(),
               Icon(Icons.ios_share_outlined)
@@ -217,5 +253,342 @@ class CommunityPost extends StatelessWidget {
       ),
     );
   }
+  _buildMoreBottomSheet(){
+    return Container(
+      height: 250,
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 100,
+              height: 4,
+              margin: const EdgeInsets.symmetric(vertical: 15),
+              decoration: BoxDecoration(
+                color: hexToColor('#CACACA'),
+                borderRadius: BorderRadius.circular(5),
+              ),
+            ),
+          ),
+          SizedBox(height: 50),
+          CircleAvatar(
+            backgroundColor: hexToColor('#2B2B2B'),
+            child: Icon(
+              Icons.report_gmailerrorred,
+              color: hexToColor('#BEBEBE'),
+              size: 20,
+            ),
+          ),
+          SizedBox(height: 20),
+          Text(
+            'Report',
+            style: TextStyle(
+              color: hexToColor('#9B9B9B'),
+              fontWeight: FontWeight.w900,
+              fontSize: 16.0,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
+class CreateCommunityPost extends StatefulWidget {
+  const CreateCommunityPost({super.key});
+
+  @override
+  State<CreateCommunityPost> createState() => _CreateCommunityPostState();
+}
+
+class _CreateCommunityPostState extends State<CreateCommunityPost> {
+  File? _image;
+  List<File> _images = [];
+
+  Future pickImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      setState(() {
+        _image = File(image.path);
+        _images.add(_image!);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              height: 100,
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Community Post'.toUpperCase(),
+                        style: TextStyle(
+                          color: hexToColor('#1E1E1E'),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 24.0,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      Text(
+                        ' •',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 28.0,
+                          color: hexToColor('#FF0000'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Spacer(),
+                  Container(
+                    margin: EdgeInsets.all(8.0),
+                    child: CircleAvatar(
+                      backgroundColor: hexToColor('#F5F5F5'),
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back_ios_rounded,
+                            color: Colors.black),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
+            // Add Image
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Add Image',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                  ),
+                  SizedBox(height: 10),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          // Add the function to be executed when the button is pressed
+                          if (_images.length < 3) {
+                            pickImage();
+                          }
+                        },
+                        child: Container(
+                          height: 75,
+                          width: 75,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: hexToColor('#848484')),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Center(
+                            child: Icon(
+                              Icons.image_outlined,
+                              size: 40,
+                              color: hexToColor('#545454'),
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 10),
+                      if (_images.isNotEmpty)
+                        Expanded(
+                          child: SizedBox(
+                            height: 75,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount:
+                                  _images.length > 3 ? 3 : _images.length,
+                              itemBuilder: (context, index) {
+                                return Stack(
+                                  children: [
+                                    Container(
+                                      width: 75,
+                                      margin: const EdgeInsets.only(right: 10),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: hexToColor('#848484')),
+                                        borderRadius: BorderRadius.circular(12),
+                                        image: DecorationImage(
+                                          image: FileImage(_images[index]),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 0,
+                                      right: 0,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _images.removeAt(index);
+                                          });
+                                        },
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.red,
+                                          ),
+                                          child: Icon(
+                                            Icons.close,
+                                            color: Colors.white,
+                                            size: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      if (_images.isEmpty)
+                        Text(
+                          '(you can add up to 3 images)',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                            color: hexToColor('#636363'),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 50),
+            // Caption
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Caption',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                  ),
+                  SizedBox(height: 20),
+                  TextField(
+                    textAlign: TextAlign.start,
+                    maxLines: 5,
+                    maxLength: 700,
+                    decoration: InputDecoration(
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                      labelText: 'Description',
+                      labelStyle: TextStyle(
+                        color: hexToColor('#545454'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16.0,
+                      ),
+                      hintText: 'Write a caption...',
+                      hintStyle: TextStyle(
+                        color: hexToColor('#989898'),
+                        fontFamily: 'Gotham',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.0,
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: hexToColor('#848484'),
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
+            // Product Link
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Product Link',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                  ),
+                  SizedBox(height: 10),
+                  TextField(
+                    textAlign: TextAlign.start,
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(
+                        Icons.add_link,
+                        color: hexToColor('#848484'),
+                      ),
+                      hintText: 'Paste the product link...',
+                      hintStyle: TextStyle(
+                        color: hexToColor('#989898'),
+                        fontFamily: 'Gotham',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 16.0,
+                      ),
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: hexToColor('#848484'),
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 100),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  // Add the function to be executed when the button is pressed
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: hexToColor('#2D332F'),
+                  // Set the button color to black
+                  foregroundColor: Colors.white,
+                  // Set the text color to white
+                  padding: EdgeInsets.symmetric(horizontal: 100, vertical: 18),
+                  // Set the padding
+                  textStyle: TextStyle(
+                    fontSize: 16, // Set the text size
+                    fontFamily: 'Gotham',
+                    fontWeight: FontWeight.w500, // Set the text weight
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(
+                        30), // Set the button corner radius
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('Post', style: TextStyle(fontSize: 16)),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

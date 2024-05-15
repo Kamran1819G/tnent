@@ -62,82 +62,79 @@ class _StoresScreenState extends State<StoresScreen> {
                 ],
               ),
             ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height - 160,
-              child: Expanded(
-                child: GridView.count(
-                  crossAxisCount: 4,
-                  mainAxisSpacing: 20.0,
-                  children: [
-                    StoreTile(
-                      storeName: 'Sanachari',
-                      storeLogo: 'assets/sahachari_image.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Jain Brothers',
-                      storeLogo: 'assets/jain_brothers.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Sanachari',
-                      storeLogo: 'assets/sahachari_image.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Jain Brothers',
-                      storeLogo: 'assets/jain_brothers.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Sanachari',
-                      storeLogo: 'assets/sahachari_image.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Jain Brothers',
-                      storeLogo: 'assets/jain_brothers.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Sanachari',
-                      storeLogo: 'assets/sahachari_image.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Jain Brothers',
-                      storeLogo: 'assets/jain_brothers.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Sanachari',
-                      storeLogo: 'assets/sahachari_image.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Jain Brothers',
-                      storeLogo: 'assets/jain_brothers.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Sanachari',
-                      storeLogo: 'assets/sahachari_image.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Jain Brothers',
-                      storeLogo: 'assets/jain_brothers.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Sanachari',
-                      storeLogo: 'assets/sahachari_image.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Jain Brothers',
-                      storeLogo: 'assets/jain_brothers.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Sanachari',
-                      storeLogo: 'assets/sahachari_image.png',
-                    ),
-                    StoreTile(
-                      storeName: 'Jain Brothers',
-                      storeLogo: 'assets/jain_brothers.png',
-                    ),StoreTile(
-                      storeName: 'Sanachari',
-                      storeLogo: 'assets/sahachari_image.png',
-                    ),
-                  ],
-                ),
+            Expanded(
+              child: GridView.count(
+                crossAxisCount: 4,
+                mainAxisSpacing: 20.0,
+                children: [
+                  StoreTile(
+                    storeName: 'Sanachari',
+                    storeLogo: 'assets/sahachari_image.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Jain Brothers',
+                    storeLogo: 'assets/jain_brothers.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Sanachari',
+                    storeLogo: 'assets/sahachari_image.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Jain Brothers',
+                    storeLogo: 'assets/jain_brothers.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Sanachari',
+                    storeLogo: 'assets/sahachari_image.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Jain Brothers',
+                    storeLogo: 'assets/jain_brothers.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Sanachari',
+                    storeLogo: 'assets/sahachari_image.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Jain Brothers',
+                    storeLogo: 'assets/jain_brothers.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Sanachari',
+                    storeLogo: 'assets/sahachari_image.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Jain Brothers',
+                    storeLogo: 'assets/jain_brothers.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Sanachari',
+                    storeLogo: 'assets/sahachari_image.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Jain Brothers',
+                    storeLogo: 'assets/jain_brothers.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Sanachari',
+                    storeLogo: 'assets/sahachari_image.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Jain Brothers',
+                    storeLogo: 'assets/jain_brothers.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Sanachari',
+                    storeLogo: 'assets/sahachari_image.png',
+                  ),
+                  StoreTile(
+                    storeName: 'Jain Brothers',
+                    storeLogo: 'assets/jain_brothers.png',
+                  ),StoreTile(
+                    storeName: 'Sanachari',
+                    storeLogo: 'assets/sahachari_image.png',
+                  ),
+                ],
               ),
             ),
           ],

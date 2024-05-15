@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/explore_screen.dart';
 import 'package:tnennt/screens/notification_screen.dart';
+import 'package:tnennt/screens/product_detail_screen.dart';
 import 'package:tnennt/screens/stores_screen.dart';
 import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
+import 'package:tnennt/widgets/product_tile.dart';
 
 import '../../screens/story_screen.dart';
 import '../../screens/users_screens/storeprofile_screen.dart';
@@ -136,7 +138,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     backgroundColor: hexToColor('#DDDDDD'),
                     child: Icon(
                       Icons.search,
-                      color: Theme.of(context).primaryColor,
+                      color: Theme
+                          .of(context)
+                          .primaryColor,
                     ),
                   ),
                 ),
@@ -288,69 +292,54 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
         Container(
           height: 200.0,
-          padding: EdgeInsets.only(left: 16.0),
+          padding: EdgeInsets.only(left: 8.0),
           child: TabBarView(controller: _tabController, children: [
-            ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                separatorBuilder: (context, index) {
-                  return SizedBox(width: 15.0);
-                },
-                itemBuilder: (context, index) {
-                  return ProductTile(
-                      name: "Cannon XYZ",
-                      image: "assets/product_image.png",
-                      price: 200);
-                }),
-            ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                separatorBuilder: (context, index) {
-                  return SizedBox(width: 15.0);
-                },
-                itemBuilder: (context, index) {
-                  return ProductTile(
-                      name: "Sahachari",
-                      image: "assets/sahachari_image.png",
-                      price: 200);
-                }),
-            ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                separatorBuilder: (context, index) {
-                  return SizedBox(width: 15.0);
-                },
-                itemBuilder: (context, index) {
-                  return ProductTile(
-                      name: "Sahachari",
-                      image: "assets/sahachari_image.png",
-                      price: 200);
-                }),
-            ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                separatorBuilder: (context, index) {
-                  return SizedBox(width: 15.0);
-                },
-                itemBuilder: (context, index) {
-                  return ProductTile(
-                      name: "Sahachari",
-                      image: "assets/sahachari_image.png",
-                      price: 200);
-                }),
-            ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: 5,
-                separatorBuilder: (context, index) {
-                  return SizedBox(width: 15.0);
-                },
-                itemBuilder: (context, index) {
-                  return ProductTile(
-                      name: "Sahachari",
-                      image: "assets/sahachari_image.png",
-                      price: 200);
-                }),
-          ]),
+            ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return ProductTile(
+                    name: "Cannon XYZ",
+                    image: "assets/product_image.png",
+                    price: 200);
+              },),
+            ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return ProductTile(
+                    name: "Cannon XYZ",
+                    image: "assets/product_image.png",
+                    price: 200);
+              },),
+            ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return ProductTile(
+                    name: "Cannon XYZ",
+                    image: "assets/product_image.png",
+                    price: 200);
+              },),
+            ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return ProductTile(
+                    name: "Cannon XYZ",
+                    image: "assets/product_image.png",
+                    price: 200);
+              },),
+            ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 5,
+              itemBuilder: (context, index) {
+                return ProductTile(
+                    name: "Cannon XYZ",
+                    image: "assets/product_image.png",
+                    price: 200);
+              },),
+          ],),
         ),
 
         SizedBox(height: 40.0),
@@ -376,7 +365,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
                 child: Container(
                   padding:
-                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                  EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                   decoration: BoxDecoration(
                     color: hexToColor('#F5F5F5'),
                     borderRadius: BorderRadius.circular(50.0),
@@ -451,7 +440,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
         ),
         Container(
-          height: MediaQuery.of(context).size.height * 1.05,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height * 1.05,
           child: GridView.count(
             padding: EdgeInsets.all(16.0),
             physics: NeverScrollableScrollPhysics(),
@@ -502,10 +494,11 @@ class StoreTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => StoreProfileScreen(
-              storeName: storeName,
-              storeLogo: storeLogo,
-            ),
+            builder: (context) =>
+                StoreProfileScreen(
+                  storeName: storeName,
+                  storeLogo: storeLogo,
+                ),
           ),
         );
       },
@@ -597,10 +590,11 @@ class UpdateTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => StoryScreen(
-              storeName: name,
-              storeImage: Image.asset(image),
-            ),
+            builder: (context) =>
+                StoryScreen(
+                  storeName: name,
+                  storeImage: Image.asset(image),
+                ),
           ),
         );
       },
@@ -631,114 +625,6 @@ class UpdateTile extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class ProductTile extends StatefulWidget {
-  final String name;
-  final String image;
-  final double price;
-
-  ProductTile({
-    required this.name,
-    required this.image,
-    required this.price,
-  });
-
-  @override
-  _ProductTileState createState() => _ProductTileState();
-}
-
-class _ProductTileState extends State<ProductTile> {
-  bool _isInWishlist = false;
-
-  void _toggleWishlist() {
-    setState(() {
-      _isInWishlist = !_isInWishlist;
-    });
-
-    // Send wishlist request to the server
-    if (_isInWishlist) {
-      // Code to send wishlist request to the server
-      print('Adding to wishlist...');
-    } else {
-      // Code to remove from wishlist request to the server
-      print('Removing from wishlist...');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6.0),
-        color: hexToColor('#F5F5F5'),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(
-            children: [
-              Container(
-                height: 150,
-                width: 150,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  image: DecorationImage(
-                    image: AssetImage(widget.image),
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 8.0,
-                top: 8.0,
-                child: GestureDetector(
-                  onTap: _toggleWishlist,
-                  child: Container(
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(100.0),
-                    ),
-                    child: Icon(
-                      _isInWishlist ? Icons.favorite : Icons.favorite_border,
-                      color: _isInWishlist ? Colors.red : Colors.grey,
-                      size: 14.0,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8.0),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text(
-                  widget.name,
-                  style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontWeight: FontWeight.w900,
-                      fontSize: 10.0),
-                ),
-                SizedBox(height: 8.0),
-                Text(
-                  '\$${widget.price.toString()}',
-                  style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontWeight: FontWeight.w900,
-                      fontSize: 10.0),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

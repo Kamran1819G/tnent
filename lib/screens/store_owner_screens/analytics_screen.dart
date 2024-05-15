@@ -124,6 +124,13 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     GestureDetector(
                       onTap: () {
                         showModalBottomSheet(
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(12),
+                                topRight: Radius.circular(12),
+                              ),
+                            ),
                             context: context,
                             builder: (context) => _buildBottomSheet());
                       },
@@ -640,11 +647,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             ),
           ),
           SizedBox(height: 10),
-          Text('Print Data As',
-          style: TextStyle(
-                  color: hexToColor('#343434'),
-                  fontWeight: FontWeight.w900,
-                  fontSize: 16.0),
+          Text(
+            'Print Data As',
+            style: TextStyle(
+                color: hexToColor('#343434'),
+                fontWeight: FontWeight.w900,
+                fontSize: 16.0),
           ),
           SizedBox(height: 25),
           Row(

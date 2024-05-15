@@ -6,7 +6,7 @@ import 'package:tnennt/pages/gallery_pages/deliver_anything_anywhere.dart';
 import 'package:tnennt/pages/delivery_service_pages/deliver_product.dart';
 import 'package:tnennt/pages/gallery_pages/store_registration.dart';
 import 'package:tnennt/pages/gallery_pages/the_middlemen.dart';
-import 'package:tnennt/screens/store_owner_screens/mystoreprofile_screen.dart';
+import 'package:tnennt/screens/store_owner_screens/my_store_profile_screen.dart';
 
 class Gallery extends StatefulWidget {
   const Gallery({super.key});
