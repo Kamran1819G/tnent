@@ -233,26 +233,41 @@ class OrderStatusWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: status.map((e) => OrderStatusItem(status: e)).toList(),
+      children: status.asMap().entries.map((entry) {
+        final index = entry.key;
+        final isLast = index == status.length - 1;
+        return OrderStatusItem(status: entry.value, isLast: isLast);
+      }).toList(),
     );
   }
 }
 
 class OrderStatusItem extends StatelessWidget {
   final OrderStatus status;
+  final bool isLast;
 
-  const OrderStatusItem({Key? key, required this.status}) : super(key: key);
+  const OrderStatusItem({Key? key, required this.status, this.isLast = false}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 12.0,),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            status.isError ? Icons.cancel : Icons.check_circle,
-            color: status.isError ? Colors.red : Theme.of(context).primaryColor,
+          Column(
+            children: [
+              Icon(
+                status.isError ? Icons.cancel : Icons.check_circle,
+                color: status.isError ? Colors.red : Theme.of(context).primaryColor,
+              ),
+              if (!isLast)
+                Container(
+                  height: 60,
+                  width: 3,
+                  color: Theme.of(context).primaryColor,
+                ),
+            ],
           ),
           SizedBox(width: 8),
           Expanded(
