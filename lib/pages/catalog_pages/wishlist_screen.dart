@@ -179,7 +179,8 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 14.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Stack(
             children: [
@@ -217,7 +218,7 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
               ),
             ],
           ),
-          SizedBox(width: 15.0),
+          SizedBox(width: 12.0),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -241,6 +242,7 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
               ),
               SizedBox(height: 25.0),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Container(
                     padding:
@@ -258,7 +260,7 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                       ),
                     ),
                   ),
-                  SizedBox(width: 4.0),
+                  SizedBox(width: 8.0),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -285,21 +287,28 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                       ),
                     ),
                   ),
+                  SizedBox(width: 8.0),
+                  if (widget.selectedItem)
+                    Checkbox(
+                      checkColor: Colors.black,
+                      activeColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black),
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                      overlayColor: MaterialStateProperty.all(Colors.black),
+                      value: _isSelected,
+                      onChanged: (value) {
+                        setState(() {
+                          _isSelected = value!;
+                        },
+                        );
+                      },
+                    ),
                 ],
               )
             ],
           ),
-          SizedBox(width: 15.0),
-          if (widget.selectedItem)
-            Checkbox(
-                activeColor: Colors.white,
-                checkColor: Theme.of(context).primaryColor,
-                value: _isSelected,
-                onChanged: (value) {
-                  setState(() {
-                    _isSelected = value!;
-                  });
-                }),
         ],
       ),
     );
