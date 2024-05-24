@@ -1419,12 +1419,12 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 30.0),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SizedBox(height: 30.0),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
                       width: MediaQuery.of(context).size.width * 0.8,
