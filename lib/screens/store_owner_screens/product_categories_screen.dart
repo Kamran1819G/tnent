@@ -1,8 +1,5 @@
 import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:tnennt/screens/store_owner_screens/optionals_screen.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/helpers/color_utils.dart';
@@ -17,6 +14,11 @@ class ProductCategoriesScreen extends StatefulWidget {
 }
 
 class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
+  TextEditingController _newCategoryController = TextEditingController();
+  List categories = [
+    'Accessories',
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,8 +147,12 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                         ),
                         Expanded(
                           child: TextField(
+                            controller: _newCategoryController,
                             style: TextStyle(
-                              color: Colors.white,
+                                color: Colors.black,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16.0
                             ),
                             decoration: InputDecoration(
                               hintText: 'Create Your New Category',
@@ -165,16 +171,24 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                             ),
                           ),
                         ),
-                        Container(
-                          margin: EdgeInsets.only(right: 8),
-                          padding: EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.arrow_forward,
-                            color: Colors.white,
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              categories.add(_newCategoryController.text);
+                              _newCategoryController.clear();
+                            });
+                          },
+                          child: Container(
+                            margin: EdgeInsets.only(right: 8),
+                            padding: EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.arrow_forward,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       ],
@@ -200,18 +214,17 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                   SizedBox(height: 20),
                   GridView.builder(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 3,
                       childAspectRatio: 1.2,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
                     ),
-                    itemCount: 5,
+                    itemCount: categories.length,
                     itemBuilder: (context, index) {
                       return CategoryTile(
-                        categoryName: 'Food',
-                        itemCount: 137,
+                        categoryName: categories[index],
+                        itemCount: 0,
                       );
                     },
                   )
@@ -264,8 +277,9 @@ class CategoryTile extends StatelessWidget {
               style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.w900,
-                fontSize: 15.0,
+                fontSize: 12.0,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
             SizedBox(height: 8.0),
             Row(
@@ -654,8 +668,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           ),
                           SizedBox(height: 20),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Expanded(
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.3,
                                 child: TextField(
                                   controller: _discountController,
                                   keyboardType: TextInputType.number,
@@ -678,8 +694,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                       style: TextStyle(
                                         color: Theme.of(context).primaryColor,
                                         fontFamily: 'Gotham',
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 18.0,
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
@@ -697,8 +713,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   onSubmitted: (_) => _calculateValues(),
                                 ),
                               ),
-                              SizedBox(width: 16.0),
-                              Expanded(
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.3,
                                 child: TextField(
                                   controller: _mrpController,
                                   keyboardType: TextInputType.number,
@@ -721,8 +737,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                       style: TextStyle(
                                         color: Theme.of(context).primaryColor,
                                         fontFamily: 'Gotham',
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 18.0,
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
@@ -740,8 +756,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   onSubmitted: (_) => _calculateValues(),
                                 ),
                               ),
-                              SizedBox(width: 16.0),
-                              Expanded(
+                              Container(
+                                width: MediaQuery.of(context).size.width * 0.3,
                                 child: TextField(
                                   controller: _itemPriceController,
                                   keyboardType: TextInputType.number,
@@ -764,8 +780,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                       style: TextStyle(
                                         color: Theme.of(context).primaryColor,
                                         fontFamily: 'Gotham',
-                                        fontWeight: FontWeight.w900,
-                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 18.0,
                                       ),
                                       textAlign: TextAlign.center,
                                     ),
