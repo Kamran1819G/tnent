@@ -41,7 +41,8 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Gotham Black',
 
       ),
-      home: onboarding ? HomeScreen() : OnboardingScreen(),
+      home: MediaQuery.withNoTextScaling(
+          child: onboarding ? HomeScreen() : OnboardingScreen()),
     );
   }
 }

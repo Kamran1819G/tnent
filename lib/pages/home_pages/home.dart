@@ -138,9 +138,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     backgroundColor: hexToColor('#DDDDDD'),
                     child: Icon(
                       Icons.search,
-                      color: Theme
-                          .of(context)
-                          .primaryColor,
+                      color: Theme.of(context).primaryColor,
                     ),
                   ),
                 ),
@@ -293,53 +291,61 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         Container(
           height: 200.0,
           padding: EdgeInsets.only(left: 8.0),
-          child: TabBarView(controller: _tabController, children: [
-            ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return ProductTile(
-                    name: "Cannon XYZ",
-                    image: "assets/product_image.png",
-                    price: 200);
-              },),
-            ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return ProductTile(
-                    name: "Cannon XYZ",
-                    image: "assets/product_image.png",
-                    price: 200);
-              },),
-            ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return ProductTile(
-                    name: "Cannon XYZ",
-                    image: "assets/product_image.png",
-                    price: 200);
-              },),
-            ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return ProductTile(
-                    name: "Cannon XYZ",
-                    image: "assets/product_image.png",
-                    price: 200);
-              },),
-            ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return ProductTile(
-                    name: "Cannon XYZ",
-                    image: "assets/product_image.png",
-                    price: 200);
-              },),
-          ],),
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  return ProductTile(
+                      name: "Cannon XYZ",
+                      image: "assets/product_image.png",
+                      price: 200);
+                },
+              ),
+              ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  return ProductTile(
+                      name: "Cannon XYZ",
+                      image: "assets/product_image.png",
+                      price: 200);
+                },
+              ),
+              ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  return ProductTile(
+                      name: "Cannon XYZ",
+                      image: "assets/product_image.png",
+                      price: 200);
+                },
+              ),
+              ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  return ProductTile(
+                      name: "Cannon XYZ",
+                      image: "assets/product_image.png",
+                      price: 200);
+                },
+              ),
+              ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  return ProductTile(
+                      name: "Cannon XYZ",
+                      image: "assets/product_image.png",
+                      price: 200);
+                },
+              ),
+            ],
+          ),
         ),
 
         SizedBox(height: 40.0),
@@ -365,7 +371,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
                 child: Container(
                   padding:
-                  EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                   decoration: BoxDecoration(
                     color: hexToColor('#F5F5F5'),
                     borderRadius: BorderRadius.circular(50.0),
@@ -440,17 +446,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
         ),
         Container(
-          height: MediaQuery
-              .of(context)
-              .size
-              .height * 1.05,
+          height: MediaQuery.of(context).size.height * 1.05,
           child: GridView.count(
             padding: EdgeInsets.all(16.0),
             physics: NeverScrollableScrollPhysics(),
             crossAxisCount: 2,
-            mainAxisSpacing: 16.0,
             crossAxisSpacing: 16.0,
-            childAspectRatio: 0.75,
+            mainAxisSpacing: 16.0,
+            childAspectRatio: 0.8,
             children: [
               CategoryTile(
                 name: 'Clothings',
@@ -494,11 +497,10 @@ class StoreTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                StoreProfileScreen(
-                  storeName: storeName,
-                  storeLogo: storeLogo,
-                ),
+            builder: (context) => StoreProfileScreen(
+              storeName: storeName,
+              storeLogo: storeLogo,
+            ),
           ),
         );
       },
@@ -521,9 +523,7 @@ class StoreTile extends StatelessWidget {
           Expanded(
             child: Text(
               storeName,
-              style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 12.0),
+              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12.0),
             ),
           ),
         ],
@@ -544,22 +544,23 @@ class CategoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 300,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(8.0),
         color: hexToColor('#F5F5F5'),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-
           Container(
-            height: 200,
-            child: Image.asset(image,
-              fit: BoxFit.fill,
+            height: 190,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8.0),
+              image: DecorationImage(
+                image: AssetImage(image),
+                fit: BoxFit.fill,
+              ),
             ),
           ),
-          SizedBox(height: 8.0),
+          SizedBox(height: 6.0),
           Text(
             name,
             style: TextStyle(
@@ -567,6 +568,7 @@ class CategoryTile extends StatelessWidget {
               fontWeight: FontWeight.w900,
               fontSize: 14.0,
             ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -590,11 +592,10 @@ class UpdateTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                StoryScreen(
-                  storeName: name,
-                  storeImage: Image.asset(image),
-                ),
+            builder: (context) => StoryScreen(
+              storeName: name,
+              storeImage: Image.asset(image),
+            ),
           ),
         );
       },
@@ -603,25 +604,21 @@ class UpdateTile extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              height: 100,
-              width: 100,
-              decoration: BoxDecoration(
-                border: Border.all(color: hexToColor('#B5B5B5')),
-                borderRadius: BorderRadius.circular(18.0),
-                image: DecorationImage(
-                  image: AssetImage(image),
-                  fit: BoxFit.fill,
-                ),
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Image.asset(image),
               ),
             ),
-            SizedBox(height: 8.0),
-            Text(
-              name,
-              style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 10.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4.0),
+              child: Text(
+                name,
+                style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10.0),
+              ),
             ),
           ],
         ),

@@ -65,7 +65,7 @@ class _StoresScreenState extends State<StoresScreen> {
             Expanded(
               child: GridView.count(
                 crossAxisCount: 4,
-                mainAxisSpacing: 20.0,
+                childAspectRatio: 0.8,
                 children: [
                   StoreTile(
                     storeName: 'Sanachari',
@@ -167,31 +167,37 @@ class StoreTile extends StatelessWidget {
           ),
         );
       },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            height: 75,
-            width: 75,
-            decoration: BoxDecoration(
-              border: Border.all(color: hexToColor('#B5B5B5')),
-              borderRadius: BorderRadius.circular(18.0),
-              image: DecorationImage(
-                image: AssetImage(storeLogo),
-                fit: BoxFit.fill,
+      child: Container(
+        padding: EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: hexToColor('#B5B5B5')),
+                  borderRadius: BorderRadius.circular(18.0),
+                  image: DecorationImage(
+                    image: AssetImage(storeLogo),
+                    fit: BoxFit.fill,
+                  ),
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 8.0),
-          Expanded(
-            child: Text(
-              storeName,
-              style: TextStyle(
-                  fontWeight: FontWeight.w900,
-                  fontSize: 12.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Expanded(
+                child: Text(
+                  storeName,
+                  style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 12.0),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
