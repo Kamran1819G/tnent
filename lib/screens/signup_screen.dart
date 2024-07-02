@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/screens/signin_screen.dart';
+import 'package:tnennt/services/firebase/firebase_auth_service.dart';
 import 'package:tnennt/screens/users_screens/user_registration.dart';
 
 import '../helpers/color_utils.dart';
@@ -12,6 +14,77 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  String? errorMessage = '';
+  bool passwordVisible = false;
+
+  TextEditingController usernameController = TextEditingController();
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  signUpWithEmailAndPassword() async {
+    try {
+      await Auth().signUpWithEmailAndPassword(
+        username: usernameController.text,
+        email: emailController.text,
+        password: passwordController.text,
+      );
+
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => UserRegistration(),
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            errorMessage!,
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> signUpWithGoogle() async {
+    try {
+      await Auth().signInWithGoogle();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => UserRegistration(),
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        errorMessage = e.toString();
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            errorMessage!,
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -91,6 +164,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextField(
+                controller: usernameController,
                 style: TextStyle(
                   fontFamily: 'Gotham',
                   fontWeight: FontWeight.w500,
@@ -122,6 +196,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextField(
+                controller: emailController,
                 style: TextStyle(
                   fontFamily: 'Gotham',
                   fontWeight: FontWeight.w500,
@@ -153,6 +228,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextField(
+                controller: passwordController,
+                obscureText: !passwordVisible,
                 style: TextStyle(
                   fontFamily: 'Gotham',
                   fontWeight: FontWeight.w500,
@@ -164,7 +241,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       color: hexToColor('#545454'),
                       fontSize: 16,
                     ),
-                    suffixIcon: Icon(Icons.lock_open_outlined),
+                    suffixIcon: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          passwordVisible = !passwordVisible;
+                        });
+                      },
+                      child: Icon(
+                        passwordVisible
+                            ? Icons.lock_open
+                            : Icons.lock_outline,
+                      ),
+                    ),
                     suffixIconColor: Theme.of(context).primaryColor,
                     border: InputBorder.none),
                 keyboardType: TextInputType.visiblePassword,
@@ -182,12 +270,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: IconButton(
                         icon: Icon(Icons.arrow_forward),
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => UserRegistration(),
-                            ),
-                          );
+                          signUpWithEmailAndPassword();
                         },
                         color: Colors.white,
                       ),
@@ -216,7 +299,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       height: 50,
                       margin: EdgeInsets.only(right: 10),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          signUpWithGoogle();
+                        },
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.black,
                           backgroundColor: Colors.white,
@@ -252,10 +337,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       height: 50,
                       margin: EdgeInsets.only(left: 10),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                        },
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
-                          backgroundColor: Colors.black,
+                          backgroundColor: Colors.blue,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -264,13 +350,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              'assets/apple.png',
+                              'assets/facebook.png',
                               width: 20,
                               height: 20,
                             ),
                             SizedBox(width: 10),
                             Text(
-                              'Apple',
+                              'Facebook',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontFamily: 'Poppins',

@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/screens/explore_screen.dart';
 import 'package:tnennt/screens/notification_screen.dart';
-import 'package:tnennt/screens/product_detail_screen.dart';
 import 'package:tnennt/screens/stores_screen.dart';
 import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
+import 'package:tnennt/services/user_service.dart';
 import 'package:tnennt/widgets/product_tile.dart';
 
 import '../../screens/story_screen.dart';
 import '../../screens/users_screens/storeprofile_screen.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  final UserModel? currentUser;
+
+  Home({required this.currentUser});
 
   @override
   State<Home> createState() => _HomeState();
@@ -20,14 +24,16 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with TickerProviderStateMixin {
   late TabController _tabController;
 
+
   @override
   void initState() {
     super.initState();
     _tabController = TabController(
         length: 5,
         initialIndex: 0,
-        vsync: this); // Change the length to match your number of tabs.
+        vsync: this);
   }
+
 
   @override
   void dispose() {
@@ -50,7 +56,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text('Wednesday, 17 November'.toUpperCase(),
+                    Text(DateFormat('EEEE, d MMMM').format(DateTime.now()).toUpperCase(),
                         style: TextStyle(
                             color: Colors.grey[500],
                             fontWeight: FontWeight.w900,
@@ -60,7 +66,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       text: TextSpan(
                         children: [
                           TextSpan(
-                            text: 'Kamran Khan',
+                            text: (widget.currentUser!.firstName.isNotEmpty)
+                                ? 'Hello, ${widget.currentUser!.firstName} ${widget.currentUser!.lastName}'
+                                : 'Hello, User',
                             style: TextStyle(
                               color: Colors.black,
                               fontWeight: FontWeight.w900,
@@ -104,8 +112,13 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       MaterialPageRoute(
                           builder: (context) => MyProfileScreen()));
                 },
-                child: CircleAvatar(
-                  backgroundImage: AssetImage('assets/profile_image.png'),
+                child: widget.currentUser != null && widget.currentUser!.photoURL.isNotEmpty
+                    ? CircleAvatar(
+                  backgroundImage: NetworkImage(widget.currentUser!.photoURL),
+                )
+                    : CircleAvatar(
+                  backgroundColor: Theme.of(context).primaryColor,
+                  child: Icon(Icons.person, color: Colors.white),
                 ),
               ),
             ],
@@ -177,7 +190,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         SizedBox(height: 20.0),
         // Updates Section
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
           child: Text(
             'Updates',
             style: TextStyle(
@@ -453,7 +466,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             crossAxisCount: 2,
             crossAxisSpacing: 16.0,
             mainAxisSpacing: 16.0,
-            childAspectRatio: 0.8,
+            childAspectRatio: 0.75,
             children: [
               CategoryTile(
                 name: 'Clothings',
@@ -618,6 +631,9 @@ class UpdateTile extends StatelessWidget {
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600,
                     fontSize: 10.0),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                textAlign: TextAlign.center,
               ),
             ),
           ],

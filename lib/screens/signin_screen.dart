@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:tnennt/screens/signup_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:tnennt/services/firebase/firebase_auth_service.dart';
+import 'package:tnennt/screens/users_screens/reset_password_screen.dart';
+import 'package:tnennt/widget_tree.dart';
 
 import '../helpers/color_utils.dart';
 import 'home_screen.dart';
@@ -12,6 +16,72 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
+  String? errorMessage = '';
+  bool passwordVisible = false;
+
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+
+  Future<void> signInWithEmailAndPassword() async {
+    try {
+      await Auth().signInWithEmailAndPassword(
+          email: emailController.text, password: passwordController.text);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WidgetTree(),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        errorMessage = e.message;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            errorMessage!,
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      await Auth().signInWithGoogle();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => WidgetTree(),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        errorMessage = e.message;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            errorMessage!,
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +96,8 @@ class _SignInScreenState extends State<SignInScreen> {
               child: Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                     decoration: BoxDecoration(
                       color: hexToColor('#272822'),
                       borderRadius: BorderRadius.circular(20.0),
@@ -49,40 +120,6 @@ class _SignInScreenState extends State<SignInScreen> {
                         ]),
                   ),
                   Spacer(),
-                  Container(
-                    margin: EdgeInsets.all(8.0),
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        // Set the button color to black
-                        foregroundColor: Colors.white,
-                        // Set the text color to white
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 30, vertical: 12),
-                        // Set the padding
-                        textStyle: TextStyle(
-                          fontSize: 16, // Set the text size
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500, // Set the text weight
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                              30), // Set the button corner radius
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('Guest',
-                              style: TextStyle(
-                                  fontSize: 16,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500)),
-                        ],
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -125,6 +162,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextField(
+                controller: emailController,
                 style: TextStyle(
                   fontFamily: 'Gotham',
                   fontWeight: FontWeight.w500,
@@ -156,35 +194,59 @@ class _SignInScreenState extends State<SignInScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextField(
+                controller: passwordController,
+                cursorColor: Theme.of(context).primaryColor,
                 style: TextStyle(
                   fontFamily: 'Gotham',
                   fontWeight: FontWeight.w500,
                   fontSize: 16,
                 ),
+                obscureText: !passwordVisible,
                 decoration: InputDecoration(
                     label: Text('Password'),
                     labelStyle: TextStyle(
                       color: hexToColor('#545454'),
                       fontSize: 16,
                     ),
-                    suffixIcon: Icon(Icons.lock_open_outlined),
+                    suffixIcon: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          passwordVisible = !passwordVisible;
+                        });
+                      },
+                      child: Icon(
+                        passwordVisible
+                            ? Icons.lock_open
+                            : Icons.lock_outline,
+                      ),
+                    ),
                     suffixIconColor: Theme.of(context).primaryColor,
                     border: InputBorder.none),
                 keyboardType: TextInputType.visiblePassword,
               ),
             ),
             SizedBox(height: 10),
-            Container(
-                padding: EdgeInsets.symmetric(horizontal: 25),
-                child: Text(
-                  'Forgot Password?',
-                  style: TextStyle(
-                    color: hexToColor('#636363'),
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14,
+            GestureDetector(
+              onTap: () async {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ResetPasswordScreen(),
                   ),
-                )),
+                );
+                },
+              child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 25),
+                  child: Text(
+                    'Forgot Password?',
+                    style: TextStyle(
+                      color: hexToColor('#636363'),
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 14,
+                    ),
+                  ),),
+            ),
             SizedBox(height: 10),
             Container(
                 padding: EdgeInsets.symmetric(horizontal: 20),
@@ -197,12 +259,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       child: IconButton(
                         icon: Icon(Icons.arrow_forward_ios),
                         onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HomeScreen(),
-                            ),
-                          );
+                          signInWithEmailAndPassword();
                         },
                         color: Colors.white,
                       ),
@@ -232,9 +289,13 @@ class _SignInScreenState extends State<SignInScreen> {
                       height: 50,
                       margin: EdgeInsets.only(right: 10),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          signInWithGoogle();
+
+                        },
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.black, backgroundColor: Colors.white,
+                          foregroundColor: Colors.black,
+                          backgroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -267,10 +328,11 @@ class _SignInScreenState extends State<SignInScreen> {
                       height: 50,
                       margin: EdgeInsets.only(left: 10),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () async {
+                        },
                         style: ElevatedButton.styleFrom(
                           foregroundColor: Colors.white,
-                          backgroundColor: Colors.black,
+                          backgroundColor: Colors.blue,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -279,13 +341,13 @@ class _SignInScreenState extends State<SignInScreen> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Image.asset(
-                              'assets/apple.png',
+                              'assets/facebook.png',
                               width: 20,
                               height: 20,
                             ),
                             SizedBox(width: 10),
                             Text(
-                              'Apple',
+                              'Facebook',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontFamily: 'Poppins',

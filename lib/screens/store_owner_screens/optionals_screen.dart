@@ -100,7 +100,7 @@ class _OptionalsScreenState extends State<OptionalsScreen>
             SizedBox(height: 20),
             Expanded(
               child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.only(left: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

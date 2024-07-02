@@ -16,7 +16,7 @@ class ProductCategoriesScreen extends StatefulWidget {
 class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
   TextEditingController _newCategoryController = TextEditingController();
   List categories = [
-    'Accessories',
+    'Sarees',
   ];
 
   @override
@@ -127,7 +127,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                       border: Border.all(
                         color: hexToColor('#848484'),
                       ),
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -152,21 +152,21 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                                 color: Colors.black,
                                 fontFamily: 'Gotham',
                                 fontWeight: FontWeight.w500,
-                                fontSize: 16.0
+                                fontSize: 14.0
                             ),
                             decoration: InputDecoration(
                               hintText: 'Create Your New Category',
                               hintTextDirection: TextDirection.ltr,
                               hintStyle: TextStyle(
                                 color: hexToColor('#A1A1A1'),
-                                fontSize: 16,
+                                fontSize: 14,
                                 fontFamily: 'Gotham',
                                 fontWeight: FontWeight.w500,
                               ),
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(
                                 horizontal: 20,
-                                vertical: 16,
+                                vertical: 20,
                               ),
                             ),
                           ),
@@ -317,15 +317,15 @@ class CategoryTile extends StatelessWidget {
                   },
                   child: Container(
                     margin: EdgeInsets.only(left: 10.0),
-                    padding: EdgeInsets.all(8.0),
+                    padding: EdgeInsets.all(6.0),
                     decoration: BoxDecoration(
                       color: Theme.of(context).primaryColor,
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(6.0),
                     ),
                     child: Icon(
                       Icons.add,
                       color: Colors.white,
-                      size: 16.0,
+                      size: 14.0,
                     ),
                   ),
                 ),

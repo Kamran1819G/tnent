@@ -89,7 +89,7 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                     );
                   },
                   child: Container(
-                    width: 200.0,
+                    width: 180.0,
                     padding: EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
                       color: hexToColor('#F3F3F3'),
@@ -135,7 +135,7 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                             builder: (context) => CreateCouponScreen()));
                   },
                   child: Container(
-                    width: 200.0,
+                    width: 180.0,
                     padding: EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
                       color: hexToColor('#F3F3F3'),
@@ -210,36 +210,38 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                           Text(
                             '100',
                             style: TextStyle(
-                              fontSize: 22,
+                              fontSize: 20,
                               fontWeight: FontWeight.w900,
                               color: Theme.of(context).primaryColor,
                             ),
                           ),
+                          SizedBox(height: 8),
                           Text(
                             'Ongoing Orders',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 12,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                          SizedBox(height: 5),
                           Text(
                             'Products that are out for delivery',
                             style: TextStyle(
                               color: hexToColor('#9B9B9B'),
-                              fontSize: 12,
+                              fontSize: 10,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(width: 16),
                       CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(
                           Icons.arrow_forward_ios,
                           color: hexToColor('#9B9B9B'),
+                          size: 14,
                         ),
                       ),
                     ],
@@ -275,36 +277,38 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                           Text(
                             '100',
                             style: TextStyle(
-                              fontSize: 22,
+                              fontSize: 20,
                               fontWeight: FontWeight.w900,
                               color: Theme.of(context).primaryColor,
                             ),
                           ),
+                          SizedBox(height: 8),
                           Text(
                             'Delivered Orders',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 12,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                          SizedBox(height: 5),
                           Text(
                             'Products that are delivered to the customer',
                             style: TextStyle(
                               color: hexToColor('#9B9B9B'),
-                              fontSize: 12,
+                              fontSize: 10,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(width: 16),
                       CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(
                           Icons.arrow_forward_ios,
                           color: hexToColor('#9B9B9B'),
+                          size: 14,
                         ),
                       ),
                     ],
@@ -340,36 +344,38 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                           Text(
                             '100',
                             style: TextStyle(
-                              fontSize: 22,
+                              fontSize: 20,
                               fontWeight: FontWeight.w900,
                               color: Theme.of(context).primaryColor,
                             ),
                           ),
+                          SizedBox(height: 8),
                           Text(
                             'Cancelled Orders',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 12,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w600,
                             ),
                           ),
+                          SizedBox(height: 5),
                           Text(
                             'Products that are not delivered ',
                             style: TextStyle(
                               color: hexToColor('#9B9B9B'),
-                              fontSize: 12,
+                              fontSize: 10,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
                       ),
-                      SizedBox(width: 16),
                       CircleAvatar(
                         backgroundColor: Colors.white,
                         child: Icon(
                           Icons.arrow_forward_ios,
                           color: hexToColor('#9B9B9B'),
+                          size: 14,
                         ),
                       ),
                     ],
@@ -735,16 +741,16 @@ class _OrdersScreenState extends State<OrdersScreen> {
 enum OrderStatus { Ongoing, Delivered, Cancelled }
 
 class OrderCard extends StatelessWidget {
-  String productName;
-  String productImage;
-  String orderId;
-  double productPrice;
-  String? uniqueCode;
-  OrderStatus orderStatus;
-  String middlemanName;
-  String middlemanPhone;
-  String? deliveryAddress;
-  String? cancelReason;
+  final String productName;
+  final String productImage;
+  final String orderId;
+  final double productPrice;
+  final String? uniqueCode;
+  final OrderStatus orderStatus;
+  final String middlemanName;
+  final String middlemanPhone;
+  final String? deliveryAddress;
+  final String? cancelReason;
 
   OrderCard({
     required this.productName,
@@ -761,169 +767,187 @@ class OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        border: Border.all(color: hexToColor('#8F8F8F')),
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Column(
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          decoration: BoxDecoration(
+            border: Border.all(color: hexToColor('#8F8F8F')),
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: Column(
             children: [
-              Container(
-                height: 75,
-                width: 75,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8.0),
-                  image: DecorationImage(
-                    image: AssetImage(productImage),
-                    fit: BoxFit.fill,
-                  ),
-                ),
-              ),
-              SizedBox(width: 16),
-              Column(
+              Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    productName,
-                    style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontWeight: FontWeight.w900,
-                      fontSize: 12.0,
+                  Container(
+                    height: 75,
+                    width: 75,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      image: DecorationImage(
+                        image: AssetImage(productImage),
+                        fit: BoxFit.fill,
+                      ),
                     ),
                   ),
-                  SizedBox(height: 6),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Order ID:',
+                  SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          productName,
+                          style: TextStyle(
+                            color: hexToColor('#343434'),
+                            fontWeight: FontWeight.w900,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                        SizedBox(height: 6),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Order ID:',
+                              style: TextStyle(
+                                color: hexToColor('#878787'),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 10.0,
+                              ),
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              orderId,
+                              style: TextStyle(
+                                color: hexToColor('#A9A9A9'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 10.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          '₹$productPrice',
+                          style: TextStyle(
+                            color: Theme
+                                .of(context)
+                                .primaryColor,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            'Provided Middleman',
+                            style: TextStyle(
+                              color: hexToColor('#2D332F'),
+                              fontWeight: FontWeight.w900,
+                              fontSize: 12.0,
+                            ),
+                            textDirection: TextDirection.rtl,
+                          ),
+                          SizedBox(height: 6),
+                          Text(
+                            middlemanName,
+                            style: TextStyle(
+                              color: hexToColor('#878787'),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 10.0,
+                            ),
+                          ),
+                          Text(
+                            middlemanPhone,
+                            style: TextStyle(
+                              color: hexToColor('#878787'),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 10.0,
+                            ),
+                          ),
+                          SizedBox(height: 15),
+                          if (orderStatus == OrderStatus.Ongoing)
+                            Text(
+                              '$uniqueCode',
+                              style: TextStyle(
+                                color: Theme
+                                    .of(context)
+                                    .primaryColor,
+                                fontWeight: FontWeight.w900,
+                                fontSize: 22.0,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+              ),
+              SizedBox(height: 16),
+              if (orderStatus == OrderStatus.Ongoing ||
+                  orderStatus == OrderStatus.Delivered)
+                Row(
+                  children: [
+                    Text(
+                      "Delivery Address:",
+                      style: TextStyle(
+                        color: Theme
+                            .of(context)
+                            .primaryColor,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 10.0,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        deliveryAddress ?? 'Not Available',
                         style: TextStyle(
                           color: hexToColor('#878787'),
+                          fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
                           fontSize: 10.0,
                         ),
                       ),
-                      SizedBox(width: 4),
-                      Text(
-                        orderId,
+                    ),
+                  ],
+                ),
+              if (orderStatus == OrderStatus.Cancelled)
+                Row(
+                  children: [
+                    Text(
+                      "Cancel Reason:",
+                      style: TextStyle(
+                        color: hexToColor('#FF0000'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 10.0,
+                      ),
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        cancelReason ?? 'Not Available',
                         style: TextStyle(
-                          color: hexToColor('#A9A9A9'),
+                          color: hexToColor('#878787'),
                           fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w500,
                           fontSize: 10.0,
                         ),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  Text(
-                    '₹$productPrice',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 12.0,
                     ),
-                  ),
-                ],
-              ),
-              Spacer(),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'Provided Middleman',
-                    style: TextStyle(
-                      color: hexToColor('#2D332F'),
-                      fontWeight: FontWeight.w900,
-                      fontSize: 12.0,
-                    ),
-                  ),
-                  SizedBox(height: 6),
-                  Text(
-                    middlemanName,
-                    style: TextStyle(
-                      color: hexToColor('#878787'),
-                      fontWeight: FontWeight.w500,
-                      fontSize: 10.0,
-                    ),
-                  ),
-                  Text(
-                    middlemanPhone,
-                    style: TextStyle(
-                      color: hexToColor('#878787'),
-                      fontWeight: FontWeight.w500,
-                      fontSize: 10.0,
-                    ),
-                  ),
-                  SizedBox(height: 15),
-                  if (orderStatus == OrderStatus.Ongoing)
-                    Text(
-                      '$uniqueCode',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 22.0,
-                      ),
-                    ),
-                ],
-              ),
+                  ],
+                ),
             ],
           ),
-          SizedBox(height: 16),
-          if (orderStatus == OrderStatus.Ongoing ||
-              orderStatus == OrderStatus.Delivered)
-            Row(
-              children: [
-                Text(
-                  "Delivery Address:",
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 10.0,
-                  ),
-                ),
-                SizedBox(width: 8),
-                Text(
-                  deliveryAddress ?? 'Not Available',
-                  style: TextStyle(
-                    color: hexToColor('#878787'),
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w500,
-                    fontSize: 10.0,
-                  ),
-                ),
-              ],
-            ),
-          if (orderStatus == OrderStatus.Cancelled)
-            Row(
-              children: [
-                Text(
-                  "Cancel Reason:",
-                  style: TextStyle(
-                    color: hexToColor('#FF0000'),
-                    fontWeight: FontWeight.w900,
-                    fontSize: 10.0,
-                  ),
-                ),
-                SizedBox(width: 8),
-                Text(
-                  cancelReason ?? 'Not Available',
-                  style: TextStyle(
-                    color: hexToColor('#878787'),
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w500,
-                    fontSize: 10.0,
-                  ),
-                ),
-              ],
-            ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

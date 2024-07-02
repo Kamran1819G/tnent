@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
-
-import '../helpers/color_utils.dart';
+import 'package:tnennt/helpers/color_utils.dart';
 
 class CustomCheckboxListTile extends StatefulWidget {
   final String title;
-  final bool initialValue;
+  final bool value;
   final bool selectedStyle;
+  final ValueChanged<bool> onChanged;
 
   const CustomCheckboxListTile({
     super.key,
     required this.title,
-    this.initialValue = false,
+    this.value = false,
     this.selectedStyle = false,
+    required this.onChanged,
   });
 
   @override
@@ -24,12 +25,13 @@ class _CustomCheckboxListTileState extends State<CustomCheckboxListTile> {
   @override
   void initState() {
     super.initState();
-    _isChecked = widget.initialValue;
+    _isChecked = widget.value;
   }
 
   void _toggleCheckbox() {
     setState(() {
       _isChecked = !_isChecked;
+      widget.onChanged(_isChecked); // Notify parent about the change
     });
   }
 
@@ -65,9 +67,7 @@ class _CustomCheckboxListTileState extends State<CustomCheckboxListTile> {
       selected: widget.selectedStyle ? _isChecked : false,
       value: _isChecked,
       onChanged: (value) {
-        setState(() {
-          _isChecked = value ?? false;
-        });
+        _toggleCheckbox();
       },
     );
   }

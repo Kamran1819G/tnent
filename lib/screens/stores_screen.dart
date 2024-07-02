@@ -168,29 +168,24 @@ class StoreTile extends StatelessWidget {
         );
       },
       child: Container(
-        padding: EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(12.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: hexToColor('#B5B5B5')),
-                  borderRadius: BorderRadius.circular(18.0),
-                  image: DecorationImage(
-                    image: AssetImage(storeLogo),
-                    fit: BoxFit.fill,
-                  ),
-                ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(18.0),
+              child: Image.asset(
+                storeLogo,
+                fit: BoxFit.fill,
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Expanded(
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
                 child: Text(
                   storeName,
                   style: TextStyle(
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w700,
                       fontSize: 12.0),
                   overflow: TextOverflow.ellipsis,
                 ),

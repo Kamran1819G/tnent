@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tnennt/services/firebase/firebase_auth_service.dart';
 import 'package:tnennt/screens/signin_screen.dart';
 
 import '../../helpers/color_utils.dart';
@@ -12,7 +16,9 @@ class ResetPasswordScreen extends StatefulWidget {
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   PageController _pageController = PageController();
+  TextEditingController _emailController = TextEditingController();
   int _currentPage = 0;
+
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +113,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: TextField(
+                    controller: _emailController,
                     style: TextStyle(
                       fontFamily: 'Gotham',
                       fontWeight: FontWeight.w500,
@@ -129,15 +136,19 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     children: [
                       Spacer(),
                       CircleAvatar(
-                        backgroundColor: Theme.of(context).primaryColor,
+                        backgroundColor: _emailController.text.isNotEmpty
+                            ? Theme.of(context).primaryColor
+                            : Colors.grey[500],
                         radius: 30,
                         child: IconButton(
                           icon: Icon(Icons.arrow_forward),
-                          onPressed: () {
-                            _pageController.nextPage(
-                                duration: Duration(milliseconds: 300),
-                                curve: Curves.easeIn);
-                            _currentPage++;
+                          onPressed: () async {
+                            if(_emailController.text.isNotEmpty){
+                              _pageController.nextPage(
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeIn);
+                              _currentPage++;
+                            }
                           },
                           color: Colors.white,
                         ),
@@ -236,7 +247,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 SizedBox(height: 20),
                 Center(
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
+
                       _pageController.nextPage(
                           duration: Duration(milliseconds: 500),
                           curve: Curves.easeInOut);

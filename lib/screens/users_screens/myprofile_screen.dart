@@ -1,7 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/screens/users_screens/reset_password_screen.dart';
+import 'package:tnennt/services/user_service.dart';
 
+import '../../services/firebase/firebase_auth_service.dart';
 import '../../helpers/color_utils.dart';
 import '../signin_screen.dart';
 
@@ -13,6 +17,7 @@ class MyProfileScreen extends StatefulWidget {
 }
 
 class _MyProfileScreenState extends State<MyProfileScreen> {
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,89 +28,105 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               SizedBox(height: 20.0),
               // Profile Card
               Container(
-                height: 150,
-                margin: EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  color: hexToColor('#2D332F'),
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(children: [
-                      Container(
-                        height: 75,
-                        width: 75,
-                        margin: EdgeInsets.symmetric(horizontal: 15.0),
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            image: DecorationImage(
-                                image: AssetImage('assets/profile_image.png'),
-                                fit: BoxFit.cover)),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              RichText(
-                                text: TextSpan(
-                                  text: 'Kamran Khan',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 28.0,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 10.0),
-                              Container(
-                                width: 10,
-                                height: 10,
-                                margin: EdgeInsets.symmetric(vertical: 25),
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            children: [
-                              Icon(Icons.person_outline,
-                                  color: hexToColor('#00F0FF'),
-                                  size: 16,
-                                  weight: 5),
-                              SizedBox(width: 5.0),
-                              Text(
-                                'kamran1819g',
-                                style: TextStyle(
-                                    color: hexToColor('#C5C5C5'),
-                                    fontSize: 12.0,
-                                    fontFamily: 'Poppins'),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(left: 30.0, bottom: 50),
+                  height: 125,
+                  width: double.infinity,
+                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: hexToColor('#2D332F'),
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        right: 16.0,
+                        top: 25.0,
                         child: CircleAvatar(
-                          backgroundColor: Colors.grey[100],
+                          backgroundColor: hexToColor('#F5F5F5'),
+                          radius: 16,
                           child: IconButton(
-                            icon: Icon(Icons.arrow_back_ios_new,
-                                color: Colors.black),
+                            icon: Icon(
+                              Icons.arrow_back_ios_new,
+                              color: Colors.black,
+                              size: 16,
+                            ),
                             onPressed: () {
                               Navigator.pop(context);
                             },
                           ),
                         ),
                       ),
-                    ]),
-                  ],
-                ),
-              ),
+                      Align(
+                        alignment: Alignment(-0.9, -0.2),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              child: GestureDetector(
+                                onTap: () {},
+                                child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(100.0),
+                                    child: Image.asset(
+                                      'assets/profile_image.png',
+                                      width: 55,
+                                      fit: BoxFit.cover,
+                                    )),
+                              ),
+                            ),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      'Kamran Khan',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w900,
+                                        fontSize: 26.0,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    SizedBox(width: 10.0),
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      margin:
+                                          EdgeInsets.symmetric(vertical: 25),
+                                      decoration: BoxDecoration(
+                                        color: Colors.green,
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.person_outline,
+                                        color: hexToColor('#00F0FF'),
+                                        size: 16,
+                                        weight: 5),
+                                    SizedBox(width: 5.0),
+                                    Text(
+                                      'kamran1819g',
+                                      style: TextStyle(
+                                          color: hexToColor('#C5C5C5'),
+                                          fontSize: 12.0,
+                                          fontFamily: 'Poppins'),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )),
 
               SizedBox(height: 20),
               ListTile(
@@ -188,10 +209,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 alignment: Alignment.center,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => SignInScreen()));
+                    Auth().signOut();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => SignInScreen()),
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,

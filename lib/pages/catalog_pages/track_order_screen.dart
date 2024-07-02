@@ -258,7 +258,7 @@ class OrderStatusItem extends StatelessWidget {
           Column(
             children: [
               Icon(
-                status.isError ? Icons.cancel : Icons.check_circle,
+                status.isError ? Icons.cancel : CupertinoIcons.checkmark_alt_circle_fill,
                 color: status.isError ? Colors.red : Theme.of(context).primaryColor,
               ),
               if (!isLast)

@@ -1,14 +1,19 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tnennt/services/firebase/firebase_auth_service.dart';
 import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/screens/home_screen.dart';
+import 'package:tnennt/services/user_service.dart';
+import 'package:tnennt/widget_tree.dart';
 
 import '../../widgets/customCheckboxListTile.dart';
 
 class UserRegistration extends StatefulWidget {
-  const UserRegistration({super.key});
+  UserRegistration({key}) : super(key: key);
 
   @override
   State<UserRegistration> createState() => _UserRegistrationState();
@@ -17,8 +22,15 @@ class UserRegistration extends StatefulWidget {
 class _UserRegistrationState extends State<UserRegistration> {
   PageController _pageController = PageController();
   File? profileImage;
+  String? photoURL;
   int currentPage = 0;
   bool value = false;
+  User? user = Auth().currentUser;
+
+  TextEditingController _phoneController = TextEditingController();
+  TextEditingController _firstNameController = TextEditingController();
+  TextEditingController _lastNameController = TextEditingController();
+  TextEditingController _locationController = TextEditingController();
 
   final _otpControllers = List.generate(4, (_) => TextEditingController());
   final _focusNodes = List.generate(4, (_) => FocusNode());
@@ -41,21 +53,45 @@ class _UserRegistrationState extends State<UserRegistration> {
     'Musical Instrument',
     'Sports'
   ];
-
   List<String> filteredCategories = [];
+  Map<String, bool> selectedCategories = {};
+
+  @override
+  void initState() {
+    super.initState();
+    filteredCategories = categories;
+    for (var category in categories) {
+      selectedCategories[category] = false;
+    }
+  }
 
   void _filterCategories(String query) {
     setState(() {
-      if (query.isEmpty) {
-        filteredCategories =
-            categories; // Show all categories if the search query is empty
-      } else {
-        filteredCategories = categories
-            .where((category) =>
-                category.toLowerCase().contains(query.toLowerCase()))
-            .toList();
-      }
+      filteredCategories = categories
+          .where((category) =>
+              category.toLowerCase().contains(query.toLowerCase()))
+          .toList();
     });
+  }
+
+  void _onCategoryChanged(String category, bool isSelected) {
+    setState(() {
+      selectedCategories[category] = isSelected;
+    });
+  }
+
+  void _onContinuePressed() async {
+    List<String> selected = selectedCategories.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
+
+    print('Selected categories: $selected');
+
+    await addUserDetails();
+    _pageController.nextPage(
+        duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+    currentPage++;
   }
 
   Future<void> pickImage() async {
@@ -65,6 +101,66 @@ class _UserRegistrationState extends State<UserRegistration> {
       setState(() {
         profileImage = File(image.path);
       });
+    }
+  }
+
+  Future<void> uploadImage() async {
+    try {
+      final user = this.user;
+      if (user != null) {
+        photoURL = await UserService()
+            .uploadProfilePicture(uid: user.uid, file: profileImage!);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Image uploaded successfully!',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+            ),
+          ),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          'Error: $e',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
+        ),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+
+  Future<void> addUserDetails() async {
+    try {
+      final user = this.user;
+      if (user != null) {
+        await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
+          'phoneNumber': _phoneController.text,
+          'firstName': _firstNameController.text,
+          'lastName': _lastNameController.text,
+          'location': _locationController.text,
+          'interest': selectedCategories,
+          'photoURL': photoURL,
+        });
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          'Error: $e',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+          ),
+        ),
+        backgroundColor: Colors.red,
+      ));
     }
   }
 
@@ -205,6 +301,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                           SizedBox(width: 8),
                           Expanded(
                             child: TextField(
+                              controller: _phoneController,
                               style: TextStyle(
                                 color: hexToColor('#636363'),
                                 fontFamily: 'Poppins',
@@ -736,7 +833,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Center(
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          await uploadImage();
                           _pageController.nextPage(
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeInOut);
@@ -852,6 +950,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: TextField(
+                        controller: _firstNameController,
                         style: TextStyle(
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
@@ -881,6 +980,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: TextField(
+                        controller: _lastNameController,
                         style: TextStyle(
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
@@ -1030,6 +1130,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: TextField(
+                        controller: _locationController,
                         style: TextStyle(
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
@@ -1103,7 +1204,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
+                              color: Colors.black,
                               borderRadius: BorderRadius.circular(20.0),
                             ),
                             child: Row(
@@ -1116,7 +1217,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                                   Text(
                                     'Tnennt inc.',
                                     style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
+                                      color: Colors.white,
                                       fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
@@ -1151,7 +1252,6 @@ class _UserRegistrationState extends State<UserRegistration> {
                     SizedBox(
                         height: MediaQuery.of(context).size.height * 0.025),
                     Container(
-                      color: hexToColor('#E6E6E6'),
                       padding:
                           EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       child: Column(
@@ -1165,9 +1265,9 @@ class _UserRegistrationState extends State<UserRegistration> {
                             ),
                           ),
                           Text(
-                            'Pick upto 5 things you love. It’ll help you get great deals related to these products',
+                            'Pick up to 5 things you love. It’ll help you get great deals related to these products',
                             style: TextStyle(
-                              color: hexToColor('#636363'),
+                              color: Colors.grey,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
                               fontSize: 14,
@@ -1177,16 +1277,11 @@ class _UserRegistrationState extends State<UserRegistration> {
                       ),
                     ),
                     Container(
-                      margin: EdgeInsets.symmetric(
-                        horizontal: 16,
-                      ),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 20,
-                      ),
+                      margin: EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: 20),
                       decoration: BoxDecoration(
-                        color: hexToColor('#E6E6E6'),
                         border: Border.all(
-                          color: hexToColor('#838383'),
+                          color: Colors.grey,
                           strokeAlign: BorderSide.strokeAlignInside,
                           style: BorderStyle.solid,
                         ),
@@ -1201,14 +1296,14 @@ class _UserRegistrationState extends State<UserRegistration> {
                         decoration: InputDecoration(
                             label: Text('Enter Interest'),
                             labelStyle: TextStyle(
-                              color: hexToColor('#615656'),
+                              color: Colors.grey,
                               fontSize: 12,
                             ),
                             prefixIcon: Icon(
                               Icons.search,
                               size: 30,
                             ),
-                            prefixIconColor: hexToColor('#615656'),
+                            prefixIconColor: Colors.grey,
                             border: InputBorder.none),
                         keyboardType: TextInputType.name,
                         onChanged: _filterCategories,
@@ -1230,6 +1325,9 @@ class _UserRegistrationState extends State<UserRegistration> {
                                 margin: EdgeInsets.symmetric(horizontal: 8),
                                 child: CustomCheckboxListTile(
                                   title: category,
+                                  value: selectedCategories[category] ?? false,
+                                  onChanged: (isSelected) =>
+                                      _onCategoryChanged(category, isSelected),
                                 ),
                               );
                             }).toList(),
@@ -1239,6 +1337,9 @@ class _UserRegistrationState extends State<UserRegistration> {
                                 margin: EdgeInsets.symmetric(horizontal: 8),
                                 child: CustomCheckboxListTile(
                                   title: category,
+                                  value: selectedCategories[category] ?? false,
+                                  onChanged: (isSelected) =>
+                                      _onCategoryChanged(category, isSelected),
                                 ),
                               );
                             }).toList(),
@@ -1248,12 +1349,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                     SizedBox(height: MediaQuery.of(context).size.height * 0.0),
                     Center(
                       child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
-                          currentPage++;
-                        },
+                        onPressed: _onContinuePressed,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
                           // Set the button color to black
@@ -1322,18 +1418,15 @@ class _UserRegistrationState extends State<UserRegistration> {
                             child: CircleAvatar(
                               backgroundColor: Colors.grey[100],
                               child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
+                                icon: Icon(Icons.exit_to_app,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => WidgetTree(),
+                                    ),
+                                  );
                                 },
                               ),
                             ),

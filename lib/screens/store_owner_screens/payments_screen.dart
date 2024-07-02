@@ -195,442 +195,110 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
               ),
             ),
             SizedBox(height: 20.0),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Order ID:',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          SizedBox(width: 8.0),
-                          Text(
-                            '123456',
-                            style: TextStyle(
-                              color: hexToColor('#747474'),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        'May 7, 2023, 15:43 pm',
-                        style: TextStyle(
-                          color: hexToColor('#747474'),
-                          fontFamily: 'Poppins',
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Payment Mode:',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ), //TextStyle
-                          ),
-                          SizedBox(width: 8.0),
-                          Text(
-                            'UPI',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        '₹ 2500',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).primaryColor,
-                          fontSize: 24.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 10.0),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Order ID:',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          SizedBox(width: 8.0),
-                          Text(
-                            '123456',
-                            style: TextStyle(
-                              color: hexToColor('#747474'),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        'May 7, 2023, 15:43 pm',
-                        style: TextStyle(
-                          color: hexToColor('#747474'),
-                          fontFamily: 'Poppins',
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Payment Mode:',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ), //TextStyle
-                          ),
-                          SizedBox(width: 8.0),
-                          Text(
-                            'UPI',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        '₹ 2500',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).primaryColor,
-                          fontSize: 24.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 10.0),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Order ID:',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          SizedBox(width: 8.0),
-                          Text(
-                            '123456',
-                            style: TextStyle(
-                              color: hexToColor('#747474'),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        'May 7, 2023, 15:43 pm',
-                        style: TextStyle(
-                          color: hexToColor('#747474'),
-                          fontFamily: 'Poppins',
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Payment Mode:',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ), //TextStyle
-                          ),
-                          SizedBox(width: 8.0),
-                          Text(
-                            'UPI',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        '₹ 2500',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).primaryColor,
-                          fontSize: 24.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 10.0),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Order ID:',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          SizedBox(width: 8.0),
-                          Text(
-                            '123456',
-                            style: TextStyle(
-                              color: hexToColor('#747474'),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        'May 7, 2023, 15:43 pm',
-                        style: TextStyle(
-                          color: hexToColor('#747474'),
-                          fontFamily: 'Poppins',
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Payment Mode:',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ), //TextStyle
-                          ),
-                          SizedBox(width: 8.0),
-                          Text(
-                            'UPI',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        '₹ 2500',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).primaryColor,
-                          fontSize: 24.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 10.0),
-            Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Order ID:',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          SizedBox(width: 8.0),
-                          Text(
-                            '123456',
-                            style: TextStyle(
-                              color: hexToColor('#747474'),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        'May 7, 2023, 15:43 pm',
-                        style: TextStyle(
-                          color: hexToColor('#747474'),
-                          fontFamily: 'Poppins',
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 10.0),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Payment Mode:',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ), //TextStyle
-                          ),
-                          SizedBox(width: 8.0),
-                          Text(
-                            'UPI',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              fontFamily: 'Poppins',
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        '₹ 2500',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).primaryColor,
-                          fontSize: 24.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+            ListView.separated(
+              shrinkWrap: true,
+              itemCount: 5,
+              separatorBuilder: (context, index) => SizedBox(height: 10.0),
+              itemBuilder: (context, index) {
+                return PaymentInfoTile();
+              },
+            )
           ],
         ),
+      ),
+    );
+  }
+}
+
+class PaymentInfoTile extends StatelessWidget {
+  const PaymentInfoTile({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(8.0),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Order ID:',
+                    style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  SizedBox(width: 8.0),
+                  Text(
+                    '123456',
+                    style: TextStyle(
+                      color: hexToColor('#747474'),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                'May 7, 2023, 15:43 pm',
+                style: TextStyle(
+                  color: hexToColor('#747474'),
+                  fontFamily: 'Poppins',
+                  fontSize: 10,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 20.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Payment Mode:',
+                    style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontSize: 12,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w600,
+                    ), //TextStyle
+                  ),
+                  SizedBox(width: 8.0),
+                  Text(
+                    'UPI',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                '₹ 2500',
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).primaryColor,
+                  fontSize: 24.0,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

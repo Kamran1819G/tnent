@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/widgets/customCheckboxListTile.dart';
@@ -13,7 +14,7 @@ class StoreRegistration extends StatefulWidget {
 
 class _StoreRegistrationState extends State<StoreRegistration> {
   PageController _pageController = PageController();
-  int currentPage = 0;
+  TextEditingController phoneController() => TextEditingController();
   bool value = false;
 
   List<String> categories = [
@@ -34,9 +35,20 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     'Musical Instrument',
     'Sports'
   ];
+  Map<String, bool> selectedCategories = {};
+
 
   final _otpControllers = List.generate(4, (_) => TextEditingController());
   final _focusNodes = List.generate(4, (_) => FocusNode());
+  bool isButtonEnabled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    for (var category in categories) {
+      selectedCategories[category] = false;
+    }
+  }
 
   @override
   void dispose() {
@@ -49,6 +61,26 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     super.dispose();
   }
 
+  void _onCategoryChanged(String category, bool isSelected) {
+    setState(() {
+      selectedCategories[category] = isSelected;
+    });
+  }
+
+  void _onContinuePressed() {
+    // Get the selected categories
+    List<String> selected = selectedCategories.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
+
+    print('Selected categories: $selected');
+
+    // Move to the next page or perform the desired action
+    _pageController.nextPage(
+        duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,19 +89,19 @@ class _StoreRegistrationState extends State<StoreRegistration> {
           children: <Widget>[
             PageView(
               controller: _pageController,
-              physics: NeverScrollableScrollPhysics(),
               children: <Widget>[
                 // Page 1: Create Your Own e-Store
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                Stack(
                   children: [
                     Container(
                       height: 100,
+                      alignment: Alignment(0, -0.9),
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -100,15 +132,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  Navigator.pop(context);
                                 },
                               ),
                             ),
@@ -116,44 +140,48 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ClipRect(
-                            child: Image.asset(
-                              'assets/create_your_own_e-store.png',
-                              width: MediaQuery.of(context).size.width * 0.7,
-                              height: MediaQuery.of(context).size.height * 0.35,
-                              fit: BoxFit.fill,
+                    Align(
+                      alignment: Alignment(0, 0),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            ClipRect(
+                              child: Image.asset(
+                                'assets/create_your_own_e-store.png',
+                                width: MediaQuery.of(context).size.width * 0.7,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.35,
+                                fit: BoxFit.fill,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 100),
-                          Text(
-                            'Create Your Own e-Store',
-                            style: TextStyle(
-                                color: hexToColor('#1E1E1E'),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 26.0),
-                          ),
-                          Text(
-                            'Make your own digital store and start selling online',
-                            style: TextStyle(
-                                color: hexToColor('#858585'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16.0),
-                            maxLines: 2,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                            SizedBox(height: 100),
+                            Text(
+                              'Create Your Own e-Store',
+                              style: TextStyle(
+                                  color: hexToColor('#1E1E1E'),
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 26.0),
+                            ),
+                            Text(
+                              'Make your own digital store and start selling online',
+                              style: TextStyle(
+                                  color: hexToColor('#858585'),
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16.0),
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    SizedBox(height: 50),
-                    Center(
+                    Align(
+                      alignment: Alignment(0.0, 0.7),
                       child: SmoothPageIndicator(
                         controller: _pageController,
                         count: 5,
@@ -167,14 +195,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Center(
+                    Align(
+                      alignment: Alignment(0, 0.9),
                       child: ElevatedButton(
                         onPressed: () {
                           _pageController.nextPage(
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeInOut);
-                          currentPage++;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -205,16 +232,17 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   ],
                 ),
                 // Page 2: Delivery support
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                Stack(
                   children: [
                     Container(
                       height: 100,
+                      alignment: Alignment(0, -0.9),
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -245,15 +273,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  _pageController.previousPage(
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
                                 },
                               ),
                             ),
@@ -261,45 +283,47 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.125),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ClipRect(
-                            child: Image.asset(
-                              'assets/delivery_support.png',
-                              width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height * 0.35,
-                              fit: BoxFit.fill,
+                    Align(
+                      alignment: Alignment(0, 0),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ClipRect(
+                              child: Image.asset(
+                                'assets/delivery_support.png',
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height * 0.35,
+                                fit: BoxFit.fill,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 100),
-                          Text(
-                            'Delivery Support',
-                            style: TextStyle(
-                                color: hexToColor('#1E1E1E'),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 26.0),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Provided middlemen for product delivery',
-                            style: TextStyle(
-                                color: hexToColor('#858585'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16.0),
-                            maxLines: 2,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                            SizedBox(height: 100),
+                            Text(
+                              'Delivery Support',
+                              style: TextStyle(
+                                  color: hexToColor('#1E1E1E'),
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 26.0),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Provided middlemen for product delivery',
+                              style: TextStyle(
+                                  color: hexToColor('#858585'),
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16.0),
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    SizedBox(height: 50),
-                    Center(
+                    Align(
+                      alignment: Alignment(0.0, 0.7),
                       child: SmoothPageIndicator(
                         controller: _pageController,
                         count: 5,
@@ -313,14 +337,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Center(
+                    Align(
+                      alignment: Alignment(0, 0.9),
                       child: ElevatedButton(
                         onPressed: () {
                           _pageController.nextPage(
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeInOut);
-                          currentPage++;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -351,16 +374,17 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   ],
                 ),
                 // Page 3: Packaging
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                Stack(
                   children: [
                     Container(
                       height: 100,
+                      alignment: Alignment(0, -0.9),
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -391,15 +415,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  _pageController.previousPage(
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
                                 },
                               ),
                             ),
@@ -407,45 +425,47 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ClipRect(
-                            child: Image.asset(
-                              'assets/packaging.png',
-                              width: MediaQuery.of(context).size.width * 0.5,
-                              height: MediaQuery.of(context).size.height * 0.35,
-                              fit: BoxFit.fill,
+                    Align(
+                      alignment: Alignment(0, 0),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 10),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ClipRect(
+                              child: Image.asset(
+                                'assets/packaging.png',
+                                width: MediaQuery.of(context).size.width * 0.5,
+                                height: MediaQuery.of(context).size.height * 0.35,
+                                fit: BoxFit.fill,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 100),
-                          Text(
-                            'Packaging',
-                            style: TextStyle(
-                                color: hexToColor('#1E1E1E'),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 26.0),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Provide product delivery in our custom packaging ',
-                            style: TextStyle(
-                                color: hexToColor('#858585'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16.0),
-                            maxLines: 2,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                            SizedBox(height: 100),
+                            Text(
+                              'Packaging',
+                              style: TextStyle(
+                                  color: hexToColor('#1E1E1E'),
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 26.0),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Provide product delivery in our custom packaging ',
+                              style: TextStyle(
+                                  color: hexToColor('#858585'),
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16.0),
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    SizedBox(height: 50),
-                    Center(
+                    Align(
+                      alignment: Alignment(0.0, 0.7),
                       child: SmoothPageIndicator(
                         controller: _pageController,
                         count: 5,
@@ -459,14 +479,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Center(
+                    Align(
+                      alignment: Alignment(0, 0.9),
                       child: ElevatedButton(
                         onPressed: () {
                           _pageController.nextPage(
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeInOut);
-                          currentPage++;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -497,16 +516,17 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   ],
                 ),
                 // Page 4: Analytics
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                Stack(
                   children: [
                     Container(
                       height: 100,
+                      alignment: Alignment(0, -0.9),
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -537,15 +557,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  _pageController.previousPage(
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
                                 },
                               ),
                             ),
@@ -553,45 +567,47 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ClipRect(
-                            child: Image.asset(
-                              'assets/analytics.png',
-                              width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height * 0.4,
-                              fit: BoxFit.fill,
+                    Align(
+                      alignment: Alignment(0, 0),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ClipRect(
+                              child: Image.asset(
+                                'assets/analytics.png',
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height * 0.4,
+                                fit: BoxFit.fill,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 75),
-                          Text(
-                            'Analytics',
-                            style: TextStyle(
-                                color: hexToColor('#1E1E1E'),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 26.0),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'See Your Business Insights & Store Matrics',
-                            style: TextStyle(
-                                color: hexToColor('#858585'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16.0),
-                            maxLines: 2,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                            SizedBox(height: 75),
+                            Text(
+                              'Analytics',
+                              style: TextStyle(
+                                  color: hexToColor('#1E1E1E'),
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 26.0),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'See Your Business Insights & Store Matrics',
+                              style: TextStyle(
+                                  color: hexToColor('#858585'),
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16.0),
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    SizedBox(height: 50),
-                    Center(
+                    Align(
+                      alignment: Alignment(0.0, 0.7),
                       child: SmoothPageIndicator(
                         controller: _pageController,
                         count: 5,
@@ -605,14 +621,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Center(
+                    Align(
+                      alignment: Alignment(0, 0.9),
                       child: ElevatedButton(
                         onPressed: () {
                           _pageController.nextPage(
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeInOut);
-                          currentPage++;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -643,16 +658,17 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   ],
                 ),
                 // Page 5: Discount Coupons
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                Stack(
                   children: [
                     Container(
                       height: 100,
+                      alignment: Alignment(0, -0.9),
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -683,15 +699,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  _pageController.previousPage(
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
                                 },
                               ),
                             ),
@@ -699,45 +709,47 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ClipRect(
-                            child: Image.asset(
-                              'assets/discount_coupons.png',
-                              width: MediaQuery.of(context).size.width * 0.7,
-                              height: MediaQuery.of(context).size.height * 0.35,
-                              fit: BoxFit.fill,
+                    Align(
+                      alignment: Alignment(0, 0),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ClipRect(
+                              child: Image.asset(
+                                'assets/discount_coupons.png',
+                                width: MediaQuery.of(context).size.width * 0.7,
+                                height: MediaQuery.of(context).size.height * 0.35,
+                                fit: BoxFit.fill,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 100),
-                          Text(
-                            'Discount Coupons',
-                            style: TextStyle(
-                                color: hexToColor('#1E1E1E'),
-                                fontWeight: FontWeight.w900,
-                                fontSize: 26.0),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Create Discount Coupons For Your Store And Products Easily And Instantly',
-                            style: TextStyle(
-                                color: hexToColor('#858585'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16.0),
-                            maxLines: 2,
-                            textAlign: TextAlign.center,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                            SizedBox(height: 100),
+                            Text(
+                              'Discount Coupons',
+                              style: TextStyle(
+                                  color: hexToColor('#1E1E1E'),
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 26.0),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Create Discount Coupons For Your Store And Products Easily And Instantly',
+                              style: TextStyle(
+                                  color: hexToColor('#858585'),
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16.0),
+                              maxLines: 2,
+                              textAlign: TextAlign.center,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                    SizedBox(height: 50),
-                    Center(
+                    Align(
+                      alignment: Alignment(0.0, 0.7),
                       child: SmoothPageIndicator(
                         controller: _pageController,
                         count: 5,
@@ -751,14 +763,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Center(
+                    Align(
+                      alignment: Alignment(0, 0.9),
                       child: ElevatedButton(
                         onPressed: () {
                           _pageController.nextPage(
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeInOut);
-                          currentPage++;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -797,7 +808,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -828,15 +840,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  _pageController.previousPage(
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
                                 },
                               ),
                             ),
@@ -902,6 +908,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           SizedBox(width: 8),
                           Expanded(
                             child: TextField(
+                              controller: phoneController(),
                               style: TextStyle(
                                 color: hexToColor('#636363'),
                                 fontFamily: 'Poppins',
@@ -915,6 +922,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                   ),
                                 ),
                               ),
+                              maxLength: 10,
                               keyboardType: TextInputType.phone,
                             ),
                           ),
@@ -928,7 +936,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           _pageController.nextPage(
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeInOut);
-                          currentPage++;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -952,7 +959,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -983,15 +991,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  _pageController.previousPage(
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
                                 },
                               ),
                             ),
@@ -1038,116 +1040,70 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          4,
-                          (index) {
-                            return index < 3
-                                ? Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 40.0,
-                                        height: 40.0,
-                                        child: TextField(
-                                          controller: _otpControllers[index],
-                                          focusNode: _focusNodes[index],
-                                          autofocus: index == 0,
-                                          textAlign: TextAlign.center,
-                                          maxLength: 1,
-                                          style: TextStyle(
-                                            fontSize: 22.0,
-                                            color: hexToColor('#636363'),
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                          keyboardType: TextInputType.number,
-                                          decoration: InputDecoration(
-                                            counterText: '',
-                                            border: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Colors.black,
-                                                width: 2.0,
-                                              ),
-                                            ),
-                                          ),
-                                          onChanged: (value) {
-                                            if (value.isNotEmpty) {
-                                              if (index < 5) {
-                                                _focusNodes[index + 1]
-                                                    .requestFocus();
-                                              } else {
-                                                // OTP complete
-                                              }
-                                            } else {
-                                              if (index > 0) {
-                                                _focusNodes[index - 1]
-                                                    .requestFocus();
-                                              }
-                                            }
-                                          },
-                                        ),
+                      child: Center(
+                        child: Wrap(
+                          spacing: 10,
+                          children: List.generate(
+                            _otpControllers.length,
+                            (index) {
+                              return Container(
+                                height: 50.0,
+                                width: 50.0,
+                                child: TextField(
+                                  controller: _otpControllers[index],
+                                  focusNode: _focusNodes[index],
+                                  textAlign: TextAlign.center,
+                                  keyboardType: TextInputType.number,
+                                  maxLength: 1,
+                                  cursorColor: Theme.of(context).primaryColor,
+                                  decoration: InputDecoration(
+                                    counterText: '',
+                                    border: UnderlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: hexToColor('#838383'),
                                       ),
-                                      SizedBox(width: 10.0), // Add space here
-                                    ],
-                                  )
-                                : SizedBox(
-                                    width: 40.0,
-                                    height: 40.0,
-                                    child: TextField(
-                                      controller: _otpControllers[index],
-                                      focusNode: _focusNodes[index],
-                                      autofocus: index == 0,
-                                      textAlign: TextAlign.center,
-                                      maxLength: 1,
-                                      style: TextStyle(
-                                        fontSize: 22.0,
-                                        color: hexToColor('#636363'),
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      keyboardType: TextInputType.number,
-                                      decoration: InputDecoration(
-                                        counterText: '',
-                                        border: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: Colors.black,
-                                            width: 2.0,
-                                          ),
-                                        ),
-                                      ),
-                                      onChanged: (value) {
-                                        if (value.isNotEmpty) {
-                                          if (index < 5) {
-                                            _focusNodes[index + 1]
-                                                .requestFocus();
-                                          } else {
-                                            // OTP complete
-                                          }
-                                        } else {
-                                          if (index > 0) {
-                                            _focusNodes[index - 1]
-                                                .requestFocus();
-                                          }
-                                        }
-                                      },
                                     ),
-                                  );
-                          },
+                                  ),
+                                  onChanged: (value) {
+                                    if (value.isNotEmpty) {
+                                      if (index + 1 < _otpControllers.length) {
+                                        FocusScope.of(context).nextFocus();
+                                      } else {
+                                        setState(() {
+                                          isButtonEnabled = true;
+                                        });
+                                        FocusScope.of(context).unfocus();
+                                      }
+                                    } else {
+                                      if (index > 0) {
+                                        FocusScope.of(context).previousFocus();
+                                        setState(() {
+                                          isButtonEnabled = false;
+                                        });
+                                      }
+                                    }
+                                  },
+                                ),
+                              );
+                            },
+                          ),
                         ),
                       ),
                     ),
                     SizedBox(height: 16),
                     Center(
                       child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
-                          currentPage++;
-                        },
+                        onPressed: isButtonEnabled
+                            ? () {
+                                _pageController.nextPage(
+                                    duration: Duration(milliseconds: 500),
+                                    curve: Curves.easeInOut);
+                              }
+                            : null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
+                          backgroundColor: isButtonEnabled
+                              ? Theme.of(context).primaryColor
+                              : Colors.grey,
                           shape: CircleBorder(),
                           padding: EdgeInsets.all(16),
                         ),
@@ -1169,7 +1125,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -1200,15 +1157,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  _pageController.previousPage(
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
                                 },
                               ),
                             ),
@@ -1321,7 +1272,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           _pageController.nextPage(
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeInOut);
-                          currentPage++;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
@@ -1361,7 +1311,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -1392,15 +1343,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  _pageController.previousPage(
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
                                 },
                               ),
                             ),
@@ -1469,7 +1414,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           _pageController.nextPage(
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeInOut);
-                          currentPage++;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
@@ -1509,7 +1453,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -1540,15 +1485,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  _pageController.previousPage(
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
                                 },
                               ),
                             ),
@@ -1650,7 +1589,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           _pageController.nextPage(
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeInOut);
-                          currentPage++;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
@@ -1718,18 +1656,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             child: CircleAvatar(
                               backgroundColor: Colors.grey[100],
                               child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
+                                icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
                                     _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut,
                                     );
-                                    currentPage--;
-                                  }
                                 },
                               ),
                             ),
@@ -1737,8 +1669,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.025),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.025),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -1778,6 +1709,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               margin: EdgeInsets.symmetric(horizontal: 8),
                               child: CustomCheckboxListTile(
                                 title: category,
+                                value: selectedCategories[category] ?? false,
+                                onChanged: (isSelected) =>
+                                    _onCategoryChanged(category, isSelected),
                                 selectedStyle: true,
                               ),
                             );
@@ -1788,28 +1722,18 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     SizedBox(height: MediaQuery.of(context).size.height * 0.0),
                     Center(
                       child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
-                          currentPage++;
-                        },
+                        onPressed: _onContinuePressed,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
-                          // Set the button color to black
                           foregroundColor: Colors.white,
-                          // Set the text color to white
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 100, vertical: 18),
-                          // Set the padding
+                          padding: EdgeInsets.symmetric(horizontal: 100, vertical: 18),
                           textStyle: TextStyle(
-                            fontSize: 16, // Set the text size
+                            fontSize: 16,
                             fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500, // Set the text weight
+                            fontWeight: FontWeight.w500,
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                30), // Set the button corner radius
+                            borderRadius: BorderRadius.circular(30),
                           ),
                         ),
                         child: Row(
@@ -1833,7 +1757,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -1864,15 +1789,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  _pageController.previousPage(
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
                                 },
                               ),
                             ),
@@ -1996,7 +1915,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           _pageController.nextPage(
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeInOut);
-                          currentPage++;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
@@ -2036,7 +1954,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -2067,15 +1986,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  _pageController.previousPage(
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
                                 },
                               ),
                             ),
@@ -2152,7 +2065,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           _pageController.nextPage(
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeInOut);
-                          currentPage++;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
@@ -2192,7 +2104,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -2223,15 +2136,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  _pageController.previousPage(
+                                      duration: Duration(milliseconds: 300),
+                                      curve: Curves.easeOut);
                                 },
                               ),
                             ),
@@ -2457,7 +2364,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           _pageController.nextPage(
                               duration: Duration(milliseconds: 500),
                               curve: Curves.easeInOut);
-                          currentPage++;
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -2498,7 +2404,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -2529,15 +2436,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 icon: Icon(Icons.arrow_back_ios_new,
                                     color: Colors.black),
                                 onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
+                                  Navigator.pop(context);
                                 },
                               ),
                             ),
@@ -2545,8 +2444,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.1),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     ClipRRect(
                       borderRadius: BorderRadius.circular(100),
                       child: Image.asset(
@@ -2555,8 +2453,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         height: 200,
                       ),
                     ),
-                    SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.05),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -2584,7 +2481,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-
                     SizedBox(height: MediaQuery.of(context).size.height * 0.25),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
