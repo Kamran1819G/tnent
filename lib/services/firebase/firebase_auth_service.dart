@@ -64,7 +64,6 @@ class Auth {
   Future<void> signUpWithEmailAndPassword({
     required String email,
     required String password,
-    required String username,
   }) async {
     try {
       await _auth.createUserWithEmailAndPassword(
@@ -79,7 +78,6 @@ class Auth {
       if (currentUser != null) {
         await _firestore.collection('Users').doc(currentUser!.uid).set({
           'email': currentUser!.email,
-          'username': username,
         });
       }
     } catch (e) {

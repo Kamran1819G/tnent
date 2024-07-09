@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/screens/signin_screen.dart';
 import 'package:tnennt/services/firebase/firebase_auth_service.dart';
@@ -17,25 +16,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String? errorMessage = '';
   bool passwordVisible = false;
 
-  TextEditingController usernameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
   signUpWithEmailAndPassword() async {
     try {
       await Auth().signUpWithEmailAndPassword(
-        username: usernameController.text,
         email: emailController.text,
         password: passwordController.text,
       );
-
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => UserRegistration(),
-        ),
-      );
+      if(Auth().currentUser != null) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => UserRegistration(),
+          ),
+        );
+      }
     } catch (e) {
       setState(() {
         errorMessage = e.toString();
@@ -164,38 +161,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TextField(
-                controller: usernameController,
-                style: TextStyle(
-                  fontFamily: 'Gotham',
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
-                decoration: InputDecoration(
-                    label: Text('Username'),
-                    labelStyle: TextStyle(
-                      color: hexToColor('#545454'),
-                      fontSize: 16,
-                    ),
-                    suffixIcon: Icon(Icons.person_outline),
-                    suffixIconColor: Theme.of(context).primaryColor,
-                    border: InputBorder.none),
-                keyboardType: TextInputType.name,
-              ),
-            ),
-            SizedBox(height: 10),
-            Container(
-              margin: EdgeInsets.only(left: 20, right: 50),
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: hexToColor('#D9D9D9'),
-                border: Border.all(
-                  color: hexToColor('#838383'),
-                  strokeAlign: BorderSide.strokeAlignInside,
-                  style: BorderStyle.solid,
-                ),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: TextField(
                 controller: emailController,
                 style: TextStyle(
                   fontFamily: 'Gotham',
@@ -277,7 +242,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ],
                 )),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.15),
             Center(
               child: Text(
                 'Or Sign Up With',
@@ -388,7 +353,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 SizedBox(width: 5),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => SignInScreen(),

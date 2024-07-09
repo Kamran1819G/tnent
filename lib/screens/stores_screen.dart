@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import '../helpers/color_utils.dart';
-import 'users_screens/storeprofile_screen.dart';
+import 'store_owner_screens/storeprofile_screen.dart';
 
 class StoresScreen extends StatefulWidget {
   const StoresScreen({super.key});

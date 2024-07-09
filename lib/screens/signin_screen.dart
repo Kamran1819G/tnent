@@ -266,7 +266,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                   ],
                 )),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.075),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.15),
             // Create google and apple sign in buttons
             Center(
               child: Text(
@@ -379,7 +379,7 @@ class _SignInScreenState extends State<SignInScreen> {
                 SizedBox(width: 5),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => SignUpScreen(),

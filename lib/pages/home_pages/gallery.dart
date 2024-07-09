@@ -16,7 +16,7 @@ class Gallery extends StatefulWidget {
 }
 
 class _GalleryState extends State<Gallery> {
-  bool myStore = true;
+  bool isStoreRegistered = true;
   bool isAccepting = true;
 
   @override
@@ -74,7 +74,7 @@ class _GalleryState extends State<Gallery> {
               ],
             ),
           ),
-          if (myStore)
+          if (isStoreRegistered)
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -207,22 +207,30 @@ class _GalleryState extends State<Gallery> {
             dashColor: Colors.grey,
           ),
           SizedBox(height: 20.0),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => StoreRegistration()));
-            },
-            child: Image.asset("assets/digital_store_banner.png"),
+          if(!isStoreRegistered)
+            GestureDetector(
+              onTap: () {
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => StoreRegistration()));
+              },
+              child: Image.asset("assets/digital_store_banner.png"),
+            ),
+          if(!isStoreRegistered) SizedBox(height: 20.0),
+          MaterialButton(onPressed: (){
+            setState(() {
+              isStoreRegistered = !isStoreRegistered;
+            });
+          },
+          child: Text('Change isStoreRegistered'),
           ),
-          SizedBox(height: 20.0),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => DeliverAnythingAnywhere()));
-            },
-            child: Image.asset("assets/deliver_anything_banner.png"),
-          ),
-          SizedBox(height: 20.0),
+          // GestureDetector(
+          //  onTap: () {
+          //    Navigator.push(context,
+          //        MaterialPageRoute(builder: (context) => DeliverAnythingAnywhere()));
+          //  },
+          //  child: Image.asset("assets/deliver_anything_banner.png"),
+          // ),
+          // SizedBox(height: 20.0),
           GestureDetector(
               onTap: () {
                 Navigator.push(context,

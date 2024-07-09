@@ -6,11 +6,10 @@ import 'package:tnennt/screens/explore_screen.dart';
 import 'package:tnennt/screens/notification_screen.dart';
 import 'package:tnennt/screens/stores_screen.dart';
 import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
-import 'package:tnennt/services/user_service.dart';
 import 'package:tnennt/widgets/product_tile.dart';
 
 import '../../screens/story_screen.dart';
-import '../../screens/users_screens/storeprofile_screen.dart';
+import '../../screens/store_owner_screens/storeprofile_screen.dart';
 
 class Home extends StatefulWidget {
   final UserModel? currentUser;
@@ -23,15 +22,20 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
   late TabController _tabController;
-
+  int _selectedIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(
-        length: 5,
-        initialIndex: 0,
-        vsync: this);
+      length: 6,
+      vsync: this,
+    );
+    _tabController.addListener(() {
+      setState(() {
+        _selectedIndex = _tabController.index;
+      });
+    });
   }
 
 
@@ -39,6 +43,36 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  String _getTabLabel(int index) {
+    switch (index) {
+      case 0:
+        return 'Electronics';
+      case 1:
+        return 'Clothings';
+      case 2:
+        return 'Accessories';
+      case 3:
+        return 'Groceries';
+      case 4:
+        return 'Books';
+      case 5:
+        return 'More+';
+      default:
+        return '';
+    }
+  }
+
+  String getGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Good Morning ⛅';
+    } else if (hour < 18) {
+      return 'Good Afternoon ';
+    } else {
+      return 'Good Evening 🌕';
+    }
   }
 
   @override
@@ -56,7 +90,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(DateFormat('EEEE, d MMMM').format(DateTime.now()).toUpperCase(),
+                    Text(getGreeting().toUpperCase(),
                         style: TextStyle(
                             color: Colors.grey[500],
                             fontWeight: FontWeight.w900,
@@ -112,14 +146,16 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       MaterialPageRoute(
                           builder: (context) => MyProfileScreen()));
                 },
-                child: widget.currentUser != null && widget.currentUser!.photoURL.isNotEmpty
+                child: widget.currentUser != null &&
+                        widget.currentUser!.photoURL.isNotEmpty
                     ? CircleAvatar(
-                  backgroundImage: NetworkImage(widget.currentUser!.photoURL),
-                )
+                        backgroundImage:
+                            NetworkImage(widget.currentUser!.photoURL),
+                      )
                     : CircleAvatar(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  child: Icon(Icons.person, color: Colors.white),
-                ),
+                        backgroundColor: Theme.of(context).primaryColor,
+                        child: Icon(Icons.person, color: Colors.white),
+                      ),
               ),
             ],
           ),
@@ -213,76 +249,29 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         ),
         SizedBox(height: 40.0),
         // Featured Section
-        TabBar(
-          controller: _tabController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          unselectedLabelColor: hexToColor('#737373'),
-          labelColor: Colors.white,
-          indicator: BoxDecoration(
-            color: hexToColor('#343434'),
-            borderRadius: BorderRadius.circular(50),
-          ),
-          labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
-          labelStyle: TextStyle(
-            fontSize: 14.0,
-            fontWeight: FontWeight.w900,
-          ),
-          indicatorSize: TabBarIndicatorSize.label,
-          overlayColor: MaterialStateProperty.all(Colors.transparent),
-          dividerColor: Colors.transparent,
-          tabs: <Widget>[
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: hexToColor('#343434'), width: 1.0),
-                borderRadius: BorderRadius.circular(50.0),
+        Wrap(
+          children: List.generate(6, (index) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2.0),
+              child: ChoiceChip(
+                label: Text(_getTabLabel(index)),
+                labelStyle: TextStyle(
+                  fontSize: 14.0,
+                  fontWeight: FontWeight.w900,
+                  color: _selectedIndex == index ? Colors.white : Colors.black,
+                ),
+                showCheckmark: false,
+                selected: _selectedIndex == index,
+                selectedColor:  hexToColor('#343434'),
+                onSelected: (selected) {
+                  setState(() {
+                    _selectedIndex = index;
+                    _tabController.index = index;
+                  });
+                },
               ),
-              child: Text(
-                "Electronics",
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: hexToColor('#343434'), width: 1.0),
-                borderRadius: BorderRadius.circular(50.0),
-              ),
-              child: Text(
-                "Clothings",
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: hexToColor('#343434'), width: 1.0),
-                borderRadius: BorderRadius.circular(50.0),
-              ),
-              child: Text(
-                "Groceries",
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: hexToColor('#343434'), width: 1.0),
-                borderRadius: BorderRadius.circular(50.0),
-              ),
-              child: Text(
-                "Accessories",
-              ),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-              decoration: BoxDecoration(
-                border: Border.all(color: hexToColor('#343434'), width: 1.0),
-                borderRadius: BorderRadius.circular(50.0),
-              ),
-              child: Text(
-                "Books",
-              ),
-            )
-          ],
+            );
+          }),
         ),
 
         SizedBox(height: 40.0),
