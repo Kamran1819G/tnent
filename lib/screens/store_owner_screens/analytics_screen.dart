@@ -194,7 +194,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           'customers engaged to your store.',
                           style: TextStyle(
                               color: hexToColor('#B0B0B0'),
-                              fontSize: 12,
+                              fontSize: 10,
                               fontFamily: 'Gotham',
                               fontWeight: FontWeight.w500),
                         ),
@@ -281,17 +281,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          height: 100,
-                          width: 100,
+                          height: 120,
+                          width: 120,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Image.asset('assets/sahachari_image.png'),
                         ),
-                        SizedBox(height: 20),
+                        SizedBox(height: 10),
                         Text(
                           'Item Name',
-                          style: TextStyle(color: hexToColor('#343434')),
+                          style: TextStyle(color: hexToColor('#343434'),
+                            fontWeight: FontWeight.w900,
+                            fontSize: 12.0,
+                          ),
                         ),
                       ],
                     )

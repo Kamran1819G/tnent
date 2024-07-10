@@ -112,7 +112,8 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
                             '123456',
                             style: TextStyle(
                                 color: hexToColor('#A9A9A9'),
-                                fontWeight: FontWeight.w900,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w600,
                                 fontSize: 14.0),
                           ),
                         ],
@@ -123,7 +124,7 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
                         style: TextStyle(
                             color: hexToColor('#343434'),
                             fontWeight: FontWeight.w900,
-                            fontSize: 16.0),
+                            fontSize: 18.0),
                       ),
                     ],
                   ),
@@ -279,7 +280,7 @@ class OrderStatusItem extends StatelessWidget {
                   style: TextStyle(
                     color: hexToColor('#727272'),
                     fontWeight: FontWeight.w900,
-                    fontSize: 16,
+                    fontSize: 14,
                   ),
                 ),
                 SizedBox(height: 4),
@@ -314,7 +315,6 @@ class OrderStatusItem extends StatelessWidget {
                     fontSize: 12,
                   ),
                 ),
-                SizedBox(height: 4),
               ],
             ),
           ),

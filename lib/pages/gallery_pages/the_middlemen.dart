@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_stack/flutter_image_stack.dart';
 import 'package:tnennt/helpers/color_utils.dart';
@@ -130,8 +131,11 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        child:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 18,),
+                        child: Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white,
+                          size: 18,
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
                           padding: EdgeInsets.all(16.0),
@@ -139,7 +143,14 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                               side: BorderSide(color: hexToColor('#2D332F'))),
                         )),
                     TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => MiddlemenRegistrationForm(),
+                            ),
+                          );
+                        },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -171,6 +182,408 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                 SizedBox(height: 20),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class MiddlemenRegistrationForm extends StatefulWidget {
+  const MiddlemenRegistrationForm({super.key});
+
+  @override
+  State<MiddlemenRegistrationForm> createState() =>
+      _MiddlemenRegistrationFormState();
+}
+
+class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _dobController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _phoneController = TextEditingController();
+  TextEditingController _addressController = TextEditingController();
+  TextEditingController _idProofController = TextEditingController();
+  TextEditingController _vehicleRegController = TextEditingController();
+
+  int _vehicleRadioValue = 0;
+
+  Future<void> pickDoB() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      setState(() {
+        _dobController.text = "${picked.toLocal()}".split(' ')[0];
+      });
+    }
+  }
+
+
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Container(
+                height: 100,
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Register as Middlemen'.toUpperCase(),
+                          style: TextStyle(
+                            color: hexToColor('#1E1E1E'),
+                            fontWeight: FontWeight.w900,
+                            fontSize: 18.0,
+                            letterSpacing: 1.5,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 2,
+                        ),
+                        Text(
+                          ' •',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16.0,
+                            color: hexToColor('#FF0000'),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Spacer(),
+                    Container(
+                      margin: EdgeInsets.all(8.0),
+                      child: CircleAvatar(
+                        backgroundColor: Colors.grey[100],
+                        child: IconButton(
+                          icon:
+                              Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 16.0),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Full Name',
+                      style: TextStyle(
+                        color: hexToColor('#2D332F'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: _nameController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your full name',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#727272'),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    //DOB
+                    Text(
+                      'Date of Birth',
+                      style: TextStyle(
+                        color: hexToColor('#2D332F'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: _dobController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your date of birth',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#727272'),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                      onTap: () {
+                        FocusScope.of(context).requestFocus(new FocusNode());
+                        pickDoB();
+                      },
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Email Address',
+                      style: TextStyle(
+                        color: hexToColor('#2D332F'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: _emailController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your email address',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#727272'),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Phone Number',
+                      style: TextStyle(
+                        color: hexToColor('#2D332F'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: _phoneController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your phone number',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#727272'),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Address',
+                      style: TextStyle(
+                        color: hexToColor('#2D332F'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: _addressController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your address',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#727272'),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                      maxLines: 3,
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'ID Proof',
+                      style: TextStyle(
+                        color: hexToColor('#2D332F'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      controller: _idProofController,
+                      decoration: InputDecoration(
+                        hintText: 'Aadhar Card, Voter ID, etc.',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#727272'),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    // radio button for do you have vehicle yes or no
+                    Text(
+                      'Do you have a vehicle?',
+                      style: TextStyle(
+                        color: hexToColor('#2D332F'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      children: [
+                        Radio(
+                          value: 1,
+                          groupValue: _vehicleRadioValue,
+                          onChanged: (value) {
+                            setState(() {
+                              _vehicleRadioValue = value!;
+                            });
+                          },
+                        ),
+                        Text(
+                          'Yes',
+                          style: TextStyle(
+                            color: hexToColor('#727272'),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                        SizedBox(width: 20),
+                        Radio(
+                          value: 2,
+                          groupValue: _vehicleRadioValue,
+                          onChanged: (value) {
+                            setState(() {
+                              _vehicleRadioValue = value!;
+                            });
+                          },
+                        ),
+                        Text(
+                          'No',
+                          style: TextStyle(
+                            color: hexToColor('#727272'),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_vehicleRadioValue == 1) ...[
+                      SizedBox(height: 20),
+                      Text(
+                        'Vehicle Registration Number',
+                        style: TextStyle(
+                          color: hexToColor('#2D332F'),
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16.0,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      TextField(
+                        controller: _vehicleRegController,
+                        decoration: InputDecoration(
+                          hintText: 'Enter your vehicle registration number',
+                          hintStyle: TextStyle(
+                            color: hexToColor('#727272'),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12.0,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                        ),
+                      ),
+                    ],
+                    SizedBox(height: 20),
+                    // UPI ID
+                    Text(
+                      'UPI ID',
+                      style: TextStyle(
+                        color: hexToColor('#2D332F'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Enter your UPI ID',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#727272'),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Emergency Contact Number',
+                      style: TextStyle(
+                        color: hexToColor('#2D332F'),
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16.0,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Enter your emergency contact number',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#727272'),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                    Center(
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        child: Text(
+                          'Register',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 16.0,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: hexToColor('#2D332F'),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 60.0,
+                            vertical: 16.0,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50.0),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),

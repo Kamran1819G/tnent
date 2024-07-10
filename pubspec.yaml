@@ -104,7 +104,6 @@ flutter:
     - family: Gotham Black
       fonts:
         - asset: fonts/GothamPro-Black-Regular.ttf
-          weight: 900
     - family: Gotham
       fonts:
         - asset: fonts/Gotham-Regular.ttf

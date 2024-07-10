@@ -118,7 +118,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         ' •',
                         style: TextStyle(
                           fontWeight: FontWeight.w900,
-                          fontSize: 28.0,
+                          fontSize: 18.0,
                           color: hexToColor('#FAD524'),
                         ),
                       ),
@@ -495,7 +495,7 @@ class _ResultTileState extends State<ResultTile> {
                   Text(
                     widget.name,
                     style: TextStyle(
-                        color: hexToColor('#343434'),
+                        color: hexToColor('#222230'),
                         fontWeight: FontWeight.w900,
                         fontSize: 12.0),
                     maxLines: 1,

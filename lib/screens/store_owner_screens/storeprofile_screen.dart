@@ -60,6 +60,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                   text: '${widget.storeName}',
                                   style: TextStyle(
                                     color: Colors.white,
+                                    fontFamily: 'Gotham Black',
                                     fontWeight: FontWeight.w900,
                                     fontSize: 28.0,
                                   ),
@@ -250,11 +251,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                         borderRadius:
                                             BorderRadius.circular(50.0),
                                       ),
-                                      child: Icon(
-                                        Icons.flag_rounded,
-                                        color: hexToColor('#47E012'),
-                                        size: 16.0,
-                                      ),
+                                      child: Image.asset('assets/green-flag.png',
+                                          height: 10, width: 10),
                                     ),
                                   ])
                             ],
@@ -350,6 +348,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                   text: 'Store'.toUpperCase(),
                                   style: TextStyle(
                                     color: Colors.black,
+                                    fontFamily: 'Gotham Black',
                                     fontWeight: FontWeight.w900,
                                     fontSize: 15.0,
                                   ),

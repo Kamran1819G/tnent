@@ -105,6 +105,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                                 : 'Hello, User',
                             style: TextStyle(
                               color: Colors.black,
+                              fontFamily: 'Gotham Black',
                               fontWeight: FontWeight.w900,
                               fontSize: 28.0,
                             ),
@@ -260,6 +261,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   fontWeight: FontWeight.w900,
                   color: _selectedIndex == index ? Colors.white : Colors.black,
                 ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50.0),
+                ),
                 showCheckmark: false,
                 selected: _selectedIndex == index,
                 selectedColor:  hexToColor('#343434'),
@@ -373,7 +377,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
                 child: Container(
                   padding:
-                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
                   decoration: BoxDecoration(
                     color: hexToColor('#F5F5F5'),
                     borderRadius: BorderRadius.circular(50.0),
@@ -525,7 +529,7 @@ class StoreTile extends StatelessWidget {
           Expanded(
             child: Text(
               storeName,
-              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 12.0),
+              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10.0),
             ),
           ),
         ],

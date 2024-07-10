@@ -133,7 +133,7 @@ class _CatalogState extends State<Catalog> {
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
                           fontWeight: FontWeight.w900,
-                          fontSize: 22.0,
+                          fontSize: 20.0,
                         ),
                       ),
                       Text(
@@ -184,7 +184,7 @@ class _CatalogState extends State<Catalog> {
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
                           fontWeight: FontWeight.w900,
-                          fontSize: 22.0,
+                          fontSize: 20.0,
                         ),
                       ),
                       Text(
@@ -228,7 +228,7 @@ class _CatalogState extends State<Catalog> {
                       style: TextStyle(
                         color: hexToColor('#1E1E1E'),
                         fontWeight: FontWeight.w900,
-                        fontSize: 22.0,
+                        fontSize: 20.0,
                       ),
                     ),
                     Text(
@@ -267,11 +267,11 @@ class _CatalogState extends State<Catalog> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Comming Soon...',
+                      'Coming Soon...',
                       style: TextStyle(
                         color: hexToColor('#1E1E1E'),
                         fontWeight: FontWeight.w900,
-                        fontSize: 22.0,
+                        fontSize: 20.0,
                       ),
                     ),
                     Text(

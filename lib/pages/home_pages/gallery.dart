@@ -75,131 +75,138 @@ class _GalleryState extends State<Gallery> {
             ),
           ),
           if (isStoreRegistered)
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Text(
-                    'Store',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16.0,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Text(
+                      'Store',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16.0,
+                      ),
                     ),
                   ),
-                ),
-                SizedBox(height: 10.0),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => MyStoreProfileScreen()));
-                  },
-                  child: Container(
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: hexToColor('#2D332F'),
-                      borderRadius: BorderRadius.circular(20.0),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              height: 70,
-                              width: 70,
-                              margin: EdgeInsets.symmetric(horizontal: 15.0),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15.0),
-                                image: DecorationImage(
-                                  image: AssetImage('assets/jain_brothers.png'),
-                                  fit: BoxFit.cover,
+                  SizedBox(height: 10.0),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MyStoreProfileScreen()));
+                    },
+                    child: Container(
+                      height: 100,
+                      decoration: BoxDecoration(
+                        color: hexToColor('#2D332F'),
+                        borderRadius: BorderRadius.circular(20.0),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                height: 70,
+                                width: 70,
+                                margin: EdgeInsets.symmetric(horizontal: 15.0),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(15.0),
+                                  image: DecorationImage(
+                                    image:
+                                        AssetImage('assets/jain_brothers.png'),
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Row(
-                                  children: [
-                                    Container(
-                                      child: RichText(
-                                        text: TextSpan(
-                                          text: 'Jain Brothers',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w900,
-                                            fontSize: 24.0,
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Container(
+                                        child: RichText(
+                                          text: TextSpan(
+                                            text: 'Jain Brothers',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontFamily: 'Gotham Black',
+                                              fontWeight: FontWeight.w900,
+                                              fontSize: 24.0,
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    SizedBox(width: 10.0),
-                                    Container(
-                                      width: 10,
-                                      height: 10,
-                                      margin:
-                                          EdgeInsets.symmetric(vertical: 15),
-                                      decoration: BoxDecoration(
-                                        color: Colors.green,
-                                        borderRadius: BorderRadius.circular(5),
+                                      SizedBox(width: 10.0),
+                                      Container(
+                                        width: 10,
+                                        height: 10,
+                                        margin:
+                                            EdgeInsets.symmetric(vertical: 15),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green,
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(Icons.web,
-                                        color: hexToColor('#00F0FF'), size: 14),
-                                    SizedBox(width: 5.0),
-                                    Text(
-                                      'jainbrothers.tnennt.store',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 10.0,
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w500,
+                                    ],
+                                  ),
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(Icons.web,
+                                          color: hexToColor('#00F0FF'),
+                                          size: 14),
+                                      SizedBox(width: 5.0),
+                                      Text(
+                                        'jainbrothers.tnennt.store',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10.0,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w500,
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 15.0),
-                          child: Switch(
-                            value: isAccepting,
-                            activeColor: hexToColor('#41FA00'),
-                            trackOutlineColor: MaterialStateColor.resolveWith(
-                              (states) => Colors.grey,
-                            ),
-                            trackOutlineWidth:
-                                MaterialStateProperty.resolveWith(
-                              (states) => 1.0,
-                            ),
-                            activeTrackColor: Colors.transparent,
-                            inactiveTrackColor: Colors.transparent,
-                            onChanged: (value) {
-                              setState(() {
-                                isAccepting = !isAccepting;
-                              });
-                            },
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
+                          Padding(
+                            padding: const EdgeInsets.only(right: 15.0),
+                            child: Switch(
+                              value: isAccepting,
+                              activeColor: hexToColor('#41FA00'),
+                              trackOutlineColor: MaterialStateColor.resolveWith(
+                                (states) => Colors.grey,
+                              ),
+                              trackOutlineWidth:
+                                  MaterialStateProperty.resolveWith(
+                                (states) => 1.0,
+                              ),
+                              activeTrackColor: Colors.transparent,
+                              inactiveTrackColor: Colors.transparent,
+                              onChanged: (value) {
+                                setState(() {
+                                  isAccepting = !isAccepting;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          SizedBox(height: 10.0),
           Dash(
             direction: Axis.horizontal,
             length: MediaQuery.of(context).size.width - 32,
@@ -207,21 +214,24 @@ class _GalleryState extends State<Gallery> {
             dashColor: Colors.grey,
           ),
           SizedBox(height: 20.0),
-          if(!isStoreRegistered)
+          if (!isStoreRegistered)
             GestureDetector(
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => StoreRegistration()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => StoreRegistration()));
               },
               child: Image.asset("assets/digital_store_banner.png"),
             ),
-          if(!isStoreRegistered) SizedBox(height: 20.0),
-          MaterialButton(onPressed: (){
-            setState(() {
-              isStoreRegistered = !isStoreRegistered;
-            });
-          },
-          child: Text('Change isStoreRegistered'),
+          if (!isStoreRegistered) SizedBox(height: 20.0),
+          MaterialButton(
+            onPressed: () {
+              setState(() {
+                isStoreRegistered = !isStoreRegistered;
+              });
+            },
+            child: Text('Change isStoreRegistered'),
           ),
           // GestureDetector(
           //  onTap: () {

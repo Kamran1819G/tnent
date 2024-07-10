@@ -124,18 +124,22 @@ class _HomeScreenState extends State<HomeScreen> {
                             );
                           });
                         },
-                        tabs: const [
+                        tabs:  [
                           GButton(
                             icon: Icons.home,
+                            leading: Image.asset('assets/home.png', width: 20.0),
                           ),
                           GButton(
                             icon: Icons.collections_bookmark,
+                            leading: Image.asset('assets/catalog.png', width: 20.0),
                           ),
                           GButton(
                             icon: Icons.layers_outlined,
+                            leading: Image.asset('assets/gallery.png', width: 20.0),
                           ),
                           GButton(
-                            icon: Icons.coffee_rounded,
+                            icon: Icons.coffee,
+                            leading: Image.asset('assets/community.png', width: 20.0),
                           )
                         ],
                       ),

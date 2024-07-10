@@ -214,12 +214,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           },
                           child: CircleAvatar(
                             backgroundColor: hexToColor('#F5F5F5'),
-                            child: Icon(
-                              Icons.flag_rounded,
-                              color: hexToColor('#BEBEBE'),
-                              size: 20,
-                            ),
+                            child: Image.asset(
+                              'assets/grey-flag.png',
+                              width: 18,
+                              height: 18,
                           ),
+                        ),
                         ),
                         SizedBox(width: 8),
                         GestureDetector(
@@ -518,7 +518,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       child: Container(
         decoration: BoxDecoration(
           color: isSelected ? Theme.of(context).primaryColor : Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(2),
           border: Border.all(
             color: isSelected
                 ? Theme.of(context).primaryColor
@@ -531,7 +531,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           child: Text(
             size,
             style: TextStyle(
-              color: isSelected ? Colors.white : hexToColor('#848484'),
+              color: isSelected ? Colors.white : hexToColor('#222230'),
               fontFamily: 'Gotham',
               fontSize: 12,
               fontWeight: FontWeight.w500,
@@ -639,10 +639,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 children: [
                   CircleAvatar(
                     backgroundColor: hexToColor('#F5F5F5'),
-                    child: Icon(
-                      Icons.flag_rounded,
-                      color: hexToColor('#FF0000'),
-                      size: 40,
+                    child: Image.asset('assets/red-flag.png',
+                      width: 25,
+                      height: 25,
                     ),
                   ),
                   SizedBox(height: 10),
@@ -659,10 +658,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 children: [
                   CircleAvatar(
                     backgroundColor: hexToColor('#F5F5F5'),
-                    child: Icon(
-                      Icons.flag_rounded,
-                      color: hexToColor('#00FF44'),
-                      size: 40,
+                    child: Image.asset('assets/green-flag.png',
+                      width: 25,
+                      height: 25,
                     ),
                   ),
                   SizedBox(height: 10),

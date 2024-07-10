@@ -84,6 +84,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                     text: 'Jain Brothers',
                                     style: TextStyle(
                                       color: Colors.white,
+                                      fontFamily: 'Gotham Black',
                                       fontWeight: FontWeight.w900,
                                       fontSize: 28.0,
                                     ),
@@ -150,6 +151,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                           "Accepting Orders: ",
                           style: TextStyle(
                             color: Colors.white,
+                            fontWeight: FontWeight.w900,
                             fontSize: 10.0,
                           ),
                         ),
@@ -159,7 +161,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                             trackOutlineColor: MaterialStateColor.resolveWith(
                                 (states) => Colors.grey),
                             trackOutlineWidth:
-                                MaterialStateProperty.resolveWith(
+                                WidgetStateProperty.resolveWith(
                                     (states) => 1.0),
                             activeTrackColor: Colors.transparent,
                             inactiveTrackColor: Colors.transparent,
@@ -212,6 +214,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                   text: 'List'.toUpperCase(),
                                   style: TextStyle(
                                     color: Colors.black,
+                                    fontFamily: 'Gotham Black',
                                     fontWeight: FontWeight.w900,
                                     fontSize: 14.0,
                                   ),
@@ -219,6 +222,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                 TextSpan(
                                   text: ' •',
                                   style: TextStyle(
+                                    fontFamily: 'Gotham Black',
                                     fontWeight: FontWeight.w900,
                                     fontSize: 14.0,
                                     color: Colors.red,
@@ -304,6 +308,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                   text: 'Analytics'.toUpperCase(),
                                   style: TextStyle(
                                     color: Colors.black,
+                                    fontFamily: 'Gotham Black',
                                     fontWeight: FontWeight.w900,
                                     fontSize: 14.0,
                                   ),
@@ -311,6 +316,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                 TextSpan(
                                   text: ' •',
                                   style: TextStyle(
+                                    fontFamily: 'Gotham Black',
                                     fontWeight: FontWeight.w900,
                                     fontSize: 14.0,
                                     color: Colors.green,
@@ -374,6 +380,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                   text: 'Store'.toUpperCase(),
                                   style: TextStyle(
                                     color: Colors.black,
+                                    fontFamily: 'Gotham Black',
                                     fontWeight: FontWeight.w900,
                                     fontSize: 14.0,
                                   ),
@@ -381,6 +388,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                 TextSpan(
                                   text: ' •',
                                   style: TextStyle(
+                                    fontFamily: 'Gotham Black',
                                     fontWeight: FontWeight.w900,
                                     fontSize: 14.0,
                                     color: Colors.red,
@@ -492,7 +500,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                         Text(
                                           'Store Engagement',
                                           style: TextStyle(
-                                            fontWeight: FontWeight.w900,
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w600,
                                             fontSize: 12.0,
                                           ),
                                         ),
@@ -514,11 +523,10 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                         horizontal: 8.0),
                                     child: Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        Icon(Icons.flag_rounded,
-                                            color: hexToColor('#47E012'),
-                                            size: 30.0),
+                                        Image.asset('assets/green-flag.png',
+                                            height: 20.0, width: 20.0),
                                         Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -526,7 +534,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                             Text('Total Reviews',
                                                 style: TextStyle(
                                                   color: hexToColor('#272822'),
-                                                  fontWeight: FontWeight.w900,
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.w600,
                                                   fontSize: 14.0,
                                                 )),
                                             Text(
@@ -582,6 +591,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                                 'Orders & Pays',
                                                 style: TextStyle(
                                                   color: hexToColor('#272822'),
+                                                  fontFamily: 'Poppins',
                                                   fontWeight: FontWeight.w600,
                                                   fontSize: 14.0,
                                                 ),
@@ -593,7 +603,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                                   style: TextStyle(
                                                     color:
                                                         hexToColor('#838383'),
-                                                    fontFamily: 'Poppins',
+                                                    fontFamily: 'Gotham',
                                                     fontSize: 10.0,
                                                     fontWeight: FontWeight.w500,
                                                   ),
@@ -640,6 +650,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                                   style: TextStyle(
                                                     color:
                                                         hexToColor('#272822'),
+                                                    fontFamily: 'Poppins',
                                                     fontWeight: FontWeight.w600,
                                                     fontSize: 14.0,
                                                   )),
@@ -647,7 +658,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                                   style: TextStyle(
                                                     color:
                                                         hexToColor('#838383'),
-                                                    fontFamily: 'Poppins',
+                                                    fontFamily: 'Gotham',
                                                     fontSize: 10.0,
                                                     fontWeight: FontWeight.w500,
                                                   )),
@@ -671,16 +682,13 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: RichText(
-                            text: TextSpan(
-                              text: 'Updates',
+                          child: Text( 'Updates',
                               style: TextStyle(
                                 color: Colors.black,
                                 fontWeight: FontWeight.w900,
                                 fontSize: 16.0,
                               ),
                             ),
-                          ),
                         ),
                         SizedBox(height: 10.0),
                         Container(
@@ -731,7 +739,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: Text(
-                            'Featured Products',
+                            'Featured',
                             style: TextStyle(
                               color: hexToColor('#343434'),
                               fontWeight: FontWeight.w900,

@@ -123,55 +123,61 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   )),
 
               SizedBox(height: 20),
-              ListTile(
-                contentPadding:
-                    EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
-                tileColor: hexToColor('#EDEDED'),
-                leading: Container(
-                    padding: EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(10.0)),
-                    child: Icon(CupertinoIcons.location_fill,
-                        color: Colors.white)),
-                title: Text(
-                  'Taloja Phase 1, Navi Mumbai',
-                  style: TextStyle(
-                    color: Colors.grey[800],
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w600,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: ListTile(
+                  contentPadding:
+                  EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
+                  tileColor: hexToColor('#EDEDED'),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16.0),
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: RichText(
-                  text: TextSpan(children: [
-                    TextSpan(
-                      text: 'Pincode: ',
-                      style: TextStyle(
-                        color: Theme.of(context).primaryColor,
-                        fontFamily: 'Poppins',
-                        fontSize: 12.0,
-                        fontWeight: FontWeight.w900,
-                      ),
+                  leading: Container(
+                      padding: EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(10.0)),
+                      child: Icon(CupertinoIcons.location_fill,
+                          color: Colors.white)),
+                  title: Text(
+                    'Taloja Phase 1, Navi Mumbai',
+                    style: TextStyle(
+                      color: hexToColor('#4A4F4C'),
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w600,
                     ),
-                    TextSpan(
-                      text: '410208',
-                      style: TextStyle(
-                        color: Colors.grey[700],
-                        fontFamily: 'Poppins',
-                        fontSize: 12.0,
-                        fontWeight: FontWeight.w600,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: RichText(
+                    text: TextSpan(children: [
+                      TextSpan(
+                        text: 'Pincode: ',
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontFamily: 'Poppins',
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                  ]),
-                ),
-                trailing: Container(
-                  padding: EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(100.0)),
-                  child: Icon(Icons.arrow_forward_ios,
-                      size: 18, color: Theme.of(context).primaryColor),
+                      TextSpan(
+                        text: '410208',
+                        style: TextStyle(
+                          color: hexToColor('#787878'),
+                          fontFamily: 'Poppins',
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ]),
+                  ),
+                  trailing: Container(
+                    padding: EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(100.0)),
+                    child: Icon(Icons.arrow_forward_ios,
+                        size: 18, color: Theme.of(context).primaryColor),
+                  ),
                 ),
               ),
               SizedBox(height: 20),
@@ -214,7 +220,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(
-                          10), // Set the button corner radius
+                          50), // Set the button corner radius
                     ),
                   ),
                   child: Text('Sign Out', style: TextStyle(fontSize: 14)),
@@ -247,6 +253,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               color: hexToColor('#9B9B9B'),
               fontWeight: FontWeight.w900,
               fontSize: 14.0,
+              letterSpacing: 1,
             ),
           ),
         ],
