@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +10,6 @@ import 'package:tnennt/services/firebase/firebase_auth_service.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/services/user_service.dart';
 import 'package:tnennt/widget_tree.dart';
-
-import '../../widgets/customCheckboxListTile.dart';
 
 class UserRegistration extends StatefulWidget {
   UserRegistration({key}) : super(key: key);
@@ -21,8 +20,10 @@ class UserRegistration extends StatefulWidget {
 
 class _UserRegistrationState extends State<UserRegistration> {
   PageController _pageController = PageController();
+  late ConfettiController _confettiController;
   int currentPage = 0;
   bool value = false;
+  bool isButtonEnabled = false;
   User? user = Auth().currentUser;
 
   TextEditingController _phoneController = TextEditingController();
@@ -37,6 +38,7 @@ class _UserRegistrationState extends State<UserRegistration> {
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(duration: Duration(seconds: 5));
   }
 
 
@@ -85,63 +87,19 @@ class _UserRegistrationState extends State<UserRegistration> {
             PageView(
               controller: _pageController,
               physics: NeverScrollableScrollPhysics(),
+              onPageChanged: (int page) {
+                setState(() {
+                  currentPage = page;
+                });
+                if(page == 3) {
+                  _confettiController.play();
+                }
+              },
               children: <Widget>[
                 // Page 1: Registration
                 Column(
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildUserRegistrationPageHeader(context, _pageController, currentPage),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -167,137 +125,94 @@ class _UserRegistrationState extends State<UserRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Container(
-                      height: 175,
-                      width: 350,
-                      decoration: BoxDecoration(
-                        color: hexToColor('#E1E1E1'),
-                        border: Border.all(
-                          color: hexToColor('#838383'),
-                          strokeAlign: BorderSide.strokeAlignInside,
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Image.asset(
-                            'assets/india_flag.png',
-                            height: 30,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            '+91',
-                            style: TextStyle(
-                              color: hexToColor('#636363'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
+                    SizedBox(height: 40),
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          height: 175,
+                          width: 375,
+                          decoration: BoxDecoration(
+                            color: hexToColor('#F5F5F5'),
+                            border: Border.all(
+                              color: hexToColor('#838383'),
+                              strokeAlign: BorderSide.strokeAlignInside,
+                              style: BorderStyle.solid,
                             ),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: TextField(
-                              controller: _phoneController,
-                              style: TextStyle(
-                                color: hexToColor('#636363'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                          padding: EdgeInsets.symmetric(horizontal: 50),
+                          margin: EdgeInsets.only(bottom: 25),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/india_flag.png',
+                                height: 40,
                               ),
-                              decoration: InputDecoration(
-                                border: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).primaryColor,
-                                  ),
+                              SizedBox(width: 15),
+                              Text(
+                                '+91',
+                                style: TextStyle(
+                                  color: hexToColor('#636363'),
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 18,
+                                  letterSpacing: 2,
                                 ),
                               ),
-                              keyboardType: TextInputType.phone,
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: TextField(
+                                  controller: _phoneController,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: hexToColor('#636363'),
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 18,
+                                    letterSpacing: 2,
+                                  ),
+                                  decoration: InputDecoration(
+                                      border: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                      ),
+                                      contentPadding:
+                                      EdgeInsets.only(bottom: -15)),
+                                  maxLength: 10,
+                                  keyboardType: TextInputType.phone,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _pageController.jumpToPage(currentPage + 1);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              shape: CircleBorder(),
+                              padding: EdgeInsets.all(15),
+                            ),
+                            child: Icon(
+                              Icons.check,
+                              color: Colors.white,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
-                          currentPage++;
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          shape: CircleBorder(),
-                          padding: EdgeInsets.all(16),
                         ),
-                        child: Icon(
-                          Icons.check,
-                          color: Colors.white,
-                        ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
                 // Page 2: Verification
                 Column(
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildUserRegistrationPageHeader(context, _pageController, currentPage),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -323,198 +238,107 @@ class _UserRegistrationState extends State<UserRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Container(
-                      height: 175,
-                      width: 350,
-                      decoration: BoxDecoration(
-                        color: hexToColor('#E1E1E1'),
-                        border: Border.all(
-                          color: hexToColor('#838383'),
-                          strokeAlign: BorderSide.strokeAlignInside,
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          4,
-                          (index) {
-                            return index < 3
-                                ? Row(
-                                    children: [
-                                      SizedBox(
-                                        width: 40.0,
-                                        height: 40.0,
-                                        child: TextField(
-                                          controller: _otpControllers[index],
-                                          focusNode: _focusNodes[index],
-                                          autofocus: index == 0,
-                                          textAlign: TextAlign.center,
-                                          maxLength: 1,
-                                          style: TextStyle(
-                                            fontSize: 22.0,
-                                            color: hexToColor('#636363'),
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                          keyboardType: TextInputType.number,
-                                          decoration: InputDecoration(
-                                            counterText: '',
-                                            border: UnderlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: Colors.black,
-                                                width: 2.0,
-                                              ),
-                                            ),
-                                          ),
-                                          onChanged: (value) {
-                                            if (value.isNotEmpty) {
-                                              if (index < 5) {
-                                                _focusNodes[index + 1]
-                                                    .requestFocus();
-                                              } else {
-                                                // OTP complete
-                                              }
-                                            } else {
-                                              if (index > 0) {
-                                                _focusNodes[index - 1]
-                                                    .requestFocus();
-                                              }
-                                            }
-                                          },
-                                        ),
-                                      ),
-                                      SizedBox(width: 10.0), // Add space here
-                                    ],
-                                  )
-                                : SizedBox(
-                                    width: 40.0,
-                                    height: 40.0,
+                    SizedBox(height: 40),
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          height: 175,
+                          width: 375,
+                          decoration: BoxDecoration(
+                            color: hexToColor('#F5F5F5'),
+                            border: Border.all(
+                              color: hexToColor('#838383'),
+                              strokeAlign: BorderSide.strokeAlignInside,
+                              style: BorderStyle.solid,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          margin: EdgeInsets.only(bottom: 25),
+                          child: Center(
+                            child: Wrap(
+                              spacing: 10,
+                              children: List.generate(
+                                _otpControllers.length,
+                                    (index) {
+                                  return Container(
+                                    height: 50.0,
+                                    width: 50.0,
                                     child: TextField(
                                       controller: _otpControllers[index],
                                       focusNode: _focusNodes[index],
-                                      autofocus: index == 0,
                                       textAlign: TextAlign.center,
-                                      maxLength: 1,
-                                      style: TextStyle(
-                                        fontSize: 22.0,
-                                        color: hexToColor('#636363'),
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w500,
-                                      ),
                                       keyboardType: TextInputType.number,
+                                      maxLength: 1,
+                                      cursorColor:
+                                      Theme.of(context).primaryColor,
                                       decoration: InputDecoration(
                                         counterText: '',
                                         border: UnderlineInputBorder(
                                           borderSide: BorderSide(
-                                            color: Colors.black,
-                                            width: 2.0,
+                                            color: hexToColor('#838383'),
                                           ),
                                         ),
                                       ),
                                       onChanged: (value) {
                                         if (value.isNotEmpty) {
-                                          if (index < 5) {
-                                            _focusNodes[index + 1]
-                                                .requestFocus();
+                                          if (index + 1 <
+                                              _otpControllers.length) {
+                                            FocusScope.of(context).nextFocus();
                                           } else {
-                                            // OTP complete
+                                            setState(() {
+                                              isButtonEnabled = true;
+                                            });
+                                            FocusScope.of(context).unfocus();
                                           }
                                         } else {
                                           if (index > 0) {
-                                            _focusNodes[index - 1]
-                                                .requestFocus();
+                                            FocusScope.of(context)
+                                                .previousFocus();
+                                            setState(() {
+                                              isButtonEnabled = false;
+                                            });
                                           }
                                         }
                                       },
                                     ),
                                   );
-                          },
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
-                          currentPage++;
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          shape: CircleBorder(),
-                          padding: EdgeInsets.all(16),
-                        ),
-                        child: Icon(
-                          Icons.arrow_forward_ios,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                // Page 5: Name
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
                                 },
                               ),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          child: ElevatedButton(
+                            onPressed: isButtonEnabled
+                                ? () {
+                              _pageController.jumpToPage(currentPage + 1);
+                            }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isButtonEnabled
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.grey,
+                              shape: CircleBorder(),
+                              padding: EdgeInsets.all(15),
+                            ),
+                            child: Icon(
+                              Icons.arrow_forward_ios,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
+                  ],
+                ),
+                // Page 3: Name
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildUserRegistrationPageHeader(context, _pageController, currentPage),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -540,19 +364,9 @@ class _UserRegistrationState extends State<UserRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 40),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: hexToColor('#D9D9D9'),
-                        border: Border.all(
-                          color: hexToColor('#838383'),
-                          strokeAlign: BorderSide.strokeAlignInside,
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                       child: TextField(
                         controller: _firstNameController,
                         style: TextStyle(
@@ -566,23 +380,23 @@ class _UserRegistrationState extends State<UserRegistration> {
                               color: Theme.of(context).primaryColor,
                               fontSize: 16,
                             ),
-                            border: InputBorder.none),
+                          filled: true,
+                          fillColor: hexToColor('#F5F5F5'),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: hexToColor('#838383'),
+                              strokeAlign: BorderSide.strokeAlignInside,
+                              style: BorderStyle.solid,
+                            ),
+                          ),
+                        ),
                         keyboardType: TextInputType.name,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    SizedBox(height: 20),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: hexToColor('#D9D9D9'),
-                        border: Border.all(
-                          color: hexToColor('#838383'),
-                          strokeAlign: BorderSide.strokeAlignInside,
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                       child: TextField(
                         controller: _lastNameController,
                         style: TextStyle(
@@ -596,18 +410,24 @@ class _UserRegistrationState extends State<UserRegistration> {
                               color: Theme.of(context).primaryColor,
                               fontSize: 16,
                             ),
-                            border: InputBorder.none),
+                          filled: true,
+                          fillColor: hexToColor('#F5F5F5'),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: hexToColor('#838383'),
+                              strokeAlign: BorderSide.strokeAlignInside,
+                              style: BorderStyle.solid,
+                            ),
+                          ),),
                         keyboardType: TextInputType.name,
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.4),
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
-                          currentPage++;
+                          _pageController.jumpToPage(currentPage + 1);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -637,63 +457,11 @@ class _UserRegistrationState extends State<UserRegistration> {
                     ),
                   ],
                 ),
-                // Page 6: Location
+                // Page 4: Location
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  if (currentPage == 0) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                    currentPage--;
-                                  }
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildUserRegistrationPageHeader(context, _pageController, currentPage),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -719,19 +487,9 @@ class _UserRegistrationState extends State<UserRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 40),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: hexToColor('#D9D9D9'),
-                        border: Border.all(
-                          color: hexToColor('#838383'),
-                          strokeAlign: BorderSide.strokeAlignInside,
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                       child: TextField(
                         controller: _locationController,
                         style: TextStyle(
@@ -753,18 +511,25 @@ class _UserRegistrationState extends State<UserRegistration> {
                               minWidth: 40,
                             ),
                             prefixIconColor: Theme.of(context).primaryColor,
-                            border: InputBorder.none),
+                          filled: true,
+                          fillColor: hexToColor('#F5F5F5'),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: hexToColor('#838383'),
+                              strokeAlign: BorderSide.strokeAlignInside,
+                              style: BorderStyle.solid,
+                            ),
+                          ),),
                         keyboardType: TextInputType.name,
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.48),
                     Center(
                       child: ElevatedButton(
                         onPressed: () async {
                           await addUserDetails();
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
-                          currentPage++;
+                          _pageController.jumpToPage(currentPage + 1);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -794,68 +559,30 @@ class _UserRegistrationState extends State<UserRegistration> {
                     ),
                   ],
                 ),
-                // Page 11:  Congratulation Page
+                // Page 5:  Congratulation Page
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.exit_to_app,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => WidgetTree(),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildUserRegistrationPageHeader(context, _pageController, currentPage),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(100),
-                      child: Image.asset(
-                        'assets/congratulation.png',
-                        width: 200,
-                        height: 200,
-                      ),
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        ConfettiWidget(
+                          confettiController: _confettiController,
+                          blastDirectionality: BlastDirectionality.explosive,
+                          shouldLoop: false,
+                          colors: [Theme.of(context).primaryColor],
+                        ),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Image.asset(
+                            'assets/congratulation.png',
+                            width: 200,
+                            height: 200,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                     Container(
@@ -920,4 +647,53 @@ class _UserRegistrationState extends State<UserRegistration> {
       ),
     );
   }
+
+  Widget _buildUserRegistrationPageHeader(BuildContext context, PageController controller, int currentPage) {
+    return Container(
+      height: 100,
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            decoration: BoxDecoration(
+              color: hexToColor('#272822'),
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: Row(
+              children: [
+                Image.asset('assets/white_tnennt_logo.png', width: 20, height: 20),
+                SizedBox(width: 10),
+                Text(
+                  'Tnennt inc.',
+                  style: TextStyle(color: hexToColor('#E6E6E6'), fontSize: 14.0),
+                ),
+              ],
+            ),
+          ),
+          Spacer(),
+          Container(
+            margin: EdgeInsets.all(8.0),
+            child: CircleAvatar(
+              backgroundColor: Colors.grey[100],
+              child: IconButton(
+                icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                onPressed: () {
+                  if (currentPage == 0) {
+                    Navigator.pop(context);
+                  } else if (currentPage == 4) {
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => WidgetTree()));
+                  }
+                  else {
+                    controller.jumpToPage(currentPage - 1);
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }

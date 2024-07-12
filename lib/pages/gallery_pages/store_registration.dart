@@ -1,3 +1,4 @@
+import 'package:confetti/confetti.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -15,8 +16,10 @@ class StoreRegistration extends StatefulWidget {
 class _StoreRegistrationState extends State<StoreRegistration> {
   PageController _pageController = PageController();
   late final PageController _storeFeaturesPageController;
+  int _featuresCurrentPageIndex = 0;
   int _currentPageIndex = 0;
   TextEditingController phoneController = TextEditingController();
+  late ConfettiController _confettiController;
 
   bool value = false;
 
@@ -38,7 +41,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     'Musical Instrument',
     'Sports'
   ];
-  Map<String, bool> selectedCategories = {};
+  String? selectedCategory;
 
   final _otpControllers = List.generate(4, (_) => TextEditingController());
   final _focusNodes = List.generate(4, (_) => FocusNode());
@@ -47,15 +50,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   @override
   void initState() {
     super.initState();
+    _confettiController = ConfettiController(duration: const Duration(seconds: 5));
     _storeFeaturesPageController = PageController()
       ..addListener(() {
         setState(() {
-          _currentPageIndex = _storeFeaturesPageController.page?.round() ?? 0;
+          _featuresCurrentPageIndex = _storeFeaturesPageController.page?.round() ?? 0;
         });
       });
-    for (var category in categories) {
-      selectedCategories[category] = false;
-    }
   }
 
   @override
@@ -69,24 +70,25 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     super.dispose();
   }
 
-  void _onCategoryChanged(String category, bool isSelected) {
+  void _onCategoryChanged(String category) {
     setState(() {
-      selectedCategories[category] = isSelected;
+      if (selectedCategory == category) {
+        selectedCategory = null;
+      } else {
+        selectedCategory = category;
+      }
     });
   }
 
   void _onContinuePressed() {
-    // Get the selected categories
-    List<String> selected = selectedCategories.entries
-        .where((entry) => entry.value)
-        .map((entry) => entry.key)
-        .toList();
-
-    print('Selected categories: $selected');
-
-    // Move to the next page or perform the desired action
-    _pageController.nextPage(
-        duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
+    if (selectedCategory != null) {
+      print('Selected category: $selectedCategory');
+      _pageController.jumpToPage(_currentPageIndex + 1);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please select a category'))
+      );
+    }
   }
 
   @override
@@ -97,96 +99,22 @@ class _StoreRegistrationState extends State<StoreRegistration> {
           children: <Widget>[
             PageView(
               controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPageIndex = index;
+                });
+                if(index == 10) {
+                  _confettiController.play();
+                }
+              },
               physics: NeverScrollableScrollPhysics(),
               children: <Widget>[
                 // Page 1: e-Store Features
-                Stack(
-                  children: [
-                    PageView(
-                      controller: _storeFeaturesPageController,
-                      children: [
-                        _buildStoreFeaturePage(
-                          'Create Your Own e-Store',
-                          'Make your own digital store and start selling online',
-                          'assets/create_your_own_e-store.png',
-                        ),
-                        _buildStoreFeaturePage(
-                          'Delivery Support',
-                          'Provided middlemen for product delivery',
-                          'assets/delivery_support.png',
-                        ),
-                        _buildStoreFeaturePage(
-                          'Packaging',
-                          'Provide product delivery in our custom packaging',
-                          'assets/packaging.png',
-                        ),
-                        _buildStoreFeaturePage(
-                          'Analytics',
-                          'See Your Business Insights & Store Matrics',
-                          'assets/analytics.png',
-                        ),
-                        _buildStoreFeaturePage(
-                          'Discount Coupons',
-                          'Create Discount Coupons For Your Store And Products Easily And Instantly',
-                          'assets/discount_coupons.png',
-                        ),
-                      ],
-                    ),
-                    _buildStoreFeatureHeader(),
-                    _buildStoreFeaturePageIndicator(),
-                    _buildStoreFeatureNavigationButton(),
-                  ],
-                ),
+                _buildStoreFeatures(),
                 // Page 2: Registration
                 Column(
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  _pageController.previousPage(
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildStoreRegistrationPageHeader(context ,_pageController, _currentPageIndex),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -279,9 +207,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           bottom: 0,
                           child: ElevatedButton(
                             onPressed: () {
-                              _pageController.nextPage(
-                                  duration: Duration(milliseconds: 500),
-                                  curve: Curves.easeInOut);
+                              _pageController.jumpToPage(_currentPageIndex + 1);
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context).primaryColor,
@@ -301,53 +227,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 // Page 3: Verification
                 Column(
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  _pageController.previousPage(
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -449,9 +329,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           child: ElevatedButton(
                             onPressed: isButtonEnabled
                                 ? () {
-                                    _pageController.nextPage(
-                                        duration: Duration(milliseconds: 500),
-                                        curve: Curves.easeInOut);
+                              _pageController.jumpToPage(_currentPageIndex + 1);
                                   }
                                 : null,
                             style: ElevatedButton.styleFrom(
@@ -475,53 +353,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  _pageController.previousPage(
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -624,9 +456,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
+                          _pageController.jumpToPage(_currentPageIndex + 1);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
@@ -660,53 +490,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  _pageController.previousPage(
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -765,9 +549,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
+                          _pageController.jumpToPage(_currentPageIndex + 1);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
@@ -801,53 +583,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  _pageController.previousPage(
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -939,9 +675,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
+                          _pageController.jumpToPage(_currentPageIndex + 1);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
@@ -975,54 +709,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  _pageController.previousPage(
-                                    duration: Duration(milliseconds: 300),
-                                    curve: Curves.easeOut,
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
                     SizedBox(
                         height: MediaQuery.of(context).size.height * 0.025),
                     Container(
@@ -1064,9 +751,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               margin: EdgeInsets.symmetric(horizontal: 8),
                               child: CustomCheckboxListTile(
                                 title: category,
-                                value: selectedCategories[category] ?? false,
-                                onChanged: (isSelected) =>
-                                    _onCategoryChanged(category, isSelected),
+                                value: selectedCategory == category,
+                                onChanged: (_) => _onCategoryChanged(category),
                                 selectedStyle: true,
                               ),
                             );
@@ -1106,53 +792,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  _pageController.previousPage(
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -1266,9 +906,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
+                          _pageController.jumpToPage(_currentPageIndex + 1);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
@@ -1302,53 +940,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  _pageController.previousPage(
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -1415,9 +1007,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
+                          _pageController.jumpToPage(_currentPageIndex + 1);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
@@ -1451,53 +1041,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  _pageController.previousPage(
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
                     SizedBox(
                         height: MediaQuery.of(context).size.height * 0.025),
                     Container(
@@ -1713,9 +1257,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
+                          _pageController.jumpToPage(_currentPageIndex + 1);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
@@ -1750,59 +1292,26 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Container(
-                      height: 100,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(100),
-                      child: Image.asset(
-                        'assets/congratulation.png',
-                        width: 200,
-                        height: 200,
-                      ),
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        ConfettiWidget(
+                          confettiController: _confettiController,
+                          blastDirectionality: BlastDirectionality.explosive,
+                          shouldLoop: false,
+                          colors: [Theme.of(context).primaryColor],
+                        ),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: Image.asset(
+                            'assets/congratulation.png',
+                            width: 200,
+                            height: 200,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                     Container(
@@ -1867,8 +1376,72 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     );
   }
 
-  Widget _buildStoreFeaturePage(
-      String title, String subtitle, String imagePath) {
+  Widget _buildStoreRegistrationPageHeader(BuildContext context, PageController controller, int currentPage) {
+    return Container(
+      height: 100,
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            decoration: BoxDecoration(
+              color: hexToColor('#272822'),
+              borderRadius: BorderRadius.circular(20.0),
+            ),
+            child: Row(
+              children: [
+                Image.asset('assets/white_tnennt_logo.png', width: 20, height: 20),
+                SizedBox(width: 10),
+                Text(
+                  'Tnennt inc.',
+                  style: TextStyle(color: hexToColor('#E6E6E6'), fontSize: 14.0),
+                ),
+              ],
+            ),
+          ),
+          Spacer(),
+          Container(
+            margin: EdgeInsets.all(8.0),
+            child: CircleAvatar(
+              backgroundColor: Colors.grey[100],
+              child: IconButton(
+                icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                onPressed: () {
+                  if (currentPage == 0 || currentPage > 9) {
+                    Navigator.pop(context);
+                  } else {
+                    controller.jumpToPage(currentPage - 1);
+                  }
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStoreFeatures() {
+    return Stack(
+      children: [
+        PageView(
+          controller: _storeFeaturesPageController,
+          children: [
+            _buildStoreFeaturePage('Create Your Own e-Store', 'Make your own digital store and start selling online', 'assets/create_your_own_e-store.png'),
+            _buildStoreFeaturePage('Delivery Support', 'Provided middlemen for product delivery', 'assets/delivery_support.png'),
+            _buildStoreFeaturePage('Packaging', 'Provide product delivery in our custom packaging', 'assets/packaging.png'),
+            _buildStoreFeaturePage('Analytics', 'See Your Business Insights & Store Matrics', 'assets/analytics.png'),
+            _buildStoreFeaturePage('Discount Coupons', 'Create Discount Coupons For Your Store And Products Easily And Instantly', 'assets/discount_coupons.png'),
+          ],
+        ),
+        _buildStoreFeatureHeader(),
+        _buildStoreFeaturePageIndicator(),
+        _buildStoreFeatureNavigationButton(),
+      ],
+    );
+  }
+
+  Widget _buildStoreFeaturePage(String title, String subtitle, String imagePath) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -1946,10 +1519,10 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
                   onPressed: () {
                     if (_storeFeaturesPageController.hasClients &&
-                        _currentPageIndex > 0) {
+                        _featuresCurrentPageIndex > 0) {
                       _storeFeaturesPageController.previousPage(
                         duration: Duration(milliseconds: 300),
-                        curve: Curves.easeOut,
+                        curve: Curves.easeInOutBack,
                       );
                     } else {
                       Navigator.pop(context);
@@ -1995,17 +1568,14 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         child: ElevatedButton(
           onPressed: () {
             if (_storeFeaturesPageController.hasClients) {
-              if (_currentPageIndex < 4) {
+              if (_featuresCurrentPageIndex < 4) {
                 _storeFeaturesPageController.nextPage(
                   duration: Duration(milliseconds: 100),
-                  curve: Curves.easeInOut,
+                  curve: Curves.easeIn,
                 );
               } else {
-                _pageController.nextPage(
-                  duration: Duration(milliseconds: 500),
-                  curve: Curves.easeInOut,
-                );
-                _currentPageIndex = 0;
+                _pageController.jumpToPage(_currentPageIndex + 1);
+                _featuresCurrentPageIndex = 0;
                 _storeFeaturesPageController.jumpToPage(0);
               }
             }
@@ -2024,7 +1594,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
             ),
           ),
           child: Text(
-            _currentPageIndex >= 4 ? 'Finish' : 'Next',
+            _featuresCurrentPageIndex >= 4 ? 'Finish' : 'Next',
             style: TextStyle(fontSize: 16),
           ),
         ),
