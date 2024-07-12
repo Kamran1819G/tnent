@@ -46,7 +46,6 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                             'Tnennt inc.',
                             style: TextStyle(
                               color: hexToColor('#E6E6E6'),
-                              fontWeight: FontWeight.w900,
                               fontSize: 14.0,
                             ),
                           ),
@@ -90,7 +89,6 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                         'Create Your Store Coupon',
                         style: TextStyle(
                           color: hexToColor('#272822'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                         ),
                         maxLines: 2,
@@ -153,21 +151,19 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                           'Fixed Price Discount',
                           style: TextStyle(
                             color: Colors.white,
-                            fontWeight: FontWeight.w900,
                             fontSize: 22.0,
                           ),
                         ),
                         Text(
                           ' •',
                           style: TextStyle(
-                            fontWeight: FontWeight.w900,
                             fontSize: 18.0,
                             color: hexToColor('#FF0000'),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 40),
+                    SizedBox(height: 20),
                     Text(
                       'Create fixed amount discount coupons for your customers ',
                       style: TextStyle(
@@ -206,21 +202,19 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                           'Percentage Discount',
                           style: TextStyle(
                             color: Colors.white,
-                            fontWeight: FontWeight.w900,
                             fontSize: 22.0,
                           ),
                         ),
                         Text(
                           ' •',
                           style: TextStyle(
-                            fontWeight: FontWeight.w900,
                             fontSize: 18.0,
                             color: hexToColor('#34A853'),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 40),
+                    SizedBox(height: 20),
                     Text(
                       'Create percentage based discount coupons for your customers',
                       style: TextStyle(

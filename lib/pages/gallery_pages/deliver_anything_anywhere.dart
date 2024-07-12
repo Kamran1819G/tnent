@@ -103,7 +103,6 @@ class HeaderTitle extends StatelessWidget {
           style: TextStyle(
             color: hexToColor('#2A2A2A'),
             fontSize: 34,
-            fontWeight: FontWeight.w900,
           ),
         ),
       ),
@@ -191,7 +190,6 @@ class DeliveryOption extends StatelessWidget {
                 Text(
                   'Deliver',
                   style: TextStyle(
-                    fontWeight: FontWeight.w900,
                     fontSize: 24.0,
                     height: 1,
                   ),
@@ -199,7 +197,6 @@ class DeliveryOption extends StatelessWidget {
                 Text(
                   ' •',
                   style: TextStyle(
-                    fontWeight: FontWeight.w900,
                     fontSize: 18.0,
                     color: textColor,
                     height: 1,
@@ -210,7 +207,6 @@ class DeliveryOption extends StatelessWidget {
             Text(
               title,
               style: TextStyle(
-                fontWeight: FontWeight.w900,
                 fontSize: 24.0,
               ),
             ),

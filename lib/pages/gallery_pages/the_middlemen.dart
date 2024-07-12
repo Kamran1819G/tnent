@@ -35,7 +35,6 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                         "The Middlemen Groups!".toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#2D332F'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                         ),
                         maxLines: 2,
@@ -53,7 +52,6 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                         'View List',
                         style: TextStyle(
                           color: Colors.white,
-                          fontWeight: FontWeight.w900,
                           fontSize: 10.0,
                         ),
                       ),
@@ -84,7 +82,6 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                       showTotalCount: true,
                       extraCountTextStyle: TextStyle(
                         color: hexToColor('#727272'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 10.0,
                       ),
                       backgroundColor: hexToColor('#C4C4C4'),
@@ -98,7 +95,6 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                       style: TextStyle(
                         color: hexToColor('#727272'),
                         fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w900,
                         fontSize: 12.0,
                       ),
                     )
@@ -109,7 +105,6 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                   "Description".toUpperCase(),
                   style: TextStyle(
                     color: hexToColor('#2D332F'),
-                    fontWeight: FontWeight.w900,
                     fontSize: 16.0,
                   ),
                 ),
@@ -240,11 +235,10 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                     Row(
                       children: [
                         Text(
-                          'Register as Middlemen'.toUpperCase(),
+                          'Register'.toUpperCase(),
                           style: TextStyle(
                             color: hexToColor('#1E1E1E'),
-                            fontWeight: FontWeight.w900,
-                            fontSize: 18.0,
+                            fontSize: 24.0,
                             letterSpacing: 1.5,
                           ),
                           overflow: TextOverflow.ellipsis,
@@ -253,7 +247,6 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                         Text(
                           ' •',
                           style: TextStyle(
-                            fontWeight: FontWeight.w900,
                             fontSize: 16.0,
                             color: hexToColor('#FF0000'),
                           ),
@@ -278,16 +271,29 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                 ),
               ),
               SizedBox(height: 16.0),
+              Image.asset('assets/black_tnennt_logo.png', width: 75),
+
+              SizedBox(height: 16),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
+                      'Fill the form below to register as a middlemen!',
+                      style: TextStyle(
+                        color: hexToColor('#727272'),
+                        fontFamily: 'Gotham',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18.0,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 25),
+                    Text(
                       'Full Name',
                       style: TextStyle(
                         color: hexToColor('#2D332F'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                     ),
@@ -312,7 +318,6 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                       'Date of Birth',
                       style: TextStyle(
                         color: hexToColor('#2D332F'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                     ),
@@ -340,7 +345,6 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                       'Email Address',
                       style: TextStyle(
                         color: hexToColor('#2D332F'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                     ),
@@ -364,7 +368,6 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                       'Phone Number',
                       style: TextStyle(
                         color: hexToColor('#2D332F'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                     ),
@@ -388,7 +391,6 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                       'Address',
                       style: TextStyle(
                         color: hexToColor('#2D332F'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                     ),
@@ -413,7 +415,6 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                       'ID Proof',
                       style: TextStyle(
                         color: hexToColor('#2D332F'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                     ),
@@ -438,7 +439,6 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                       'Do you have a vehicle?',
                       style: TextStyle(
                         color: hexToColor('#2D332F'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                     ),
@@ -485,10 +485,9 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                     if (_vehicleRadioValue == 1) ...[
                       SizedBox(height: 20),
                       Text(
-                        'Vehicle Registration Number',
+                        'Vehicle Registration No.',
                         style: TextStyle(
                           color: hexToColor('#2D332F'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 16.0,
                         ),
                       ),
@@ -514,7 +513,6 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                       'UPI ID',
                       style: TextStyle(
                         color: hexToColor('#2D332F'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                     ),
@@ -534,10 +532,9 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                     ),
                     SizedBox(height: 20),
                     Text(
-                      'Emergency Contact Number',
+                      'Emergency Contact No.',
                       style: TextStyle(
                         color: hexToColor('#2D332F'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                     ),
@@ -563,7 +560,6 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                           'Register',
                           style: TextStyle(
                             color: Colors.white,
-                            fontWeight: FontWeight.w900,
                             fontSize: 16.0,
                           ),
                         ),

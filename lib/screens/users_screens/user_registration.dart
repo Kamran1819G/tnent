@@ -79,7 +79,6 @@ class _UserRegistrationState extends State<UserRegistration> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: hexToColor('#E6E6E6'),
       body: SafeArea(
         child: Stack(
           children: <Widget>[
@@ -113,7 +112,6 @@ class _UserRegistrationState extends State<UserRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -270,7 +268,6 @@ class _UserRegistrationState extends State<UserRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -488,7 +485,6 @@ class _UserRegistrationState extends State<UserRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -668,7 +664,6 @@ class _UserRegistrationState extends State<UserRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -826,7 +821,6 @@ class _UserRegistrationState extends State<UserRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),

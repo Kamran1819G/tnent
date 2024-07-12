@@ -73,7 +73,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                             'Settings'.toUpperCase(),
                             style: TextStyle(
                               color: hexToColor('#1E1E1E'),
-                              fontWeight: FontWeight.w900,
                               fontSize: 24.0,
                               letterSpacing: 1.5,
                             ),
@@ -81,7 +80,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           Text(
                             ' •',
                             style: TextStyle(
-                              fontWeight: FontWeight.w900,
                               fontSize: 28.0,
                               color: hexToColor('#42FF00'),
                             ),
@@ -116,7 +114,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 20),
             Container(
               height: 100,
               width: 100,
@@ -152,16 +149,18 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.web_rounded,
-                    color: Theme.of(context).primaryColor, size: 16),
+                Image.asset('assets/icons/globe.png',
+                width: 12,
+                  height: 12,
+                ),
                 SizedBox(width: 5),
                 Text(
                   "jainbrother.tnennt.store",
                   style: TextStyle(
                     color: Theme.of(context).primaryColor,
                     fontSize: 12,
-                    fontFamily: 'Gotham',
-                    fontWeight: FontWeight.w600,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -177,7 +176,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                       Text(
                         "Store Name",
                         style: TextStyle(
-                          color: hexToColor("#545454"),
                           fontSize: 14,
                         ),
                       ),
@@ -212,7 +210,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                               Text(
                                 "Category",
                                 style: TextStyle(
-                                  color: hexToColor("#545454"),
                                   fontSize: 14,
                                 ),
                               ),
@@ -269,7 +266,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                               Text(
                                 "Phone Number",
                                 style: TextStyle(
-                                  color: hexToColor("#545454"),
                                   fontSize: 14,
                                 ),
                               ),
@@ -302,7 +298,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                       Text(
                         "E Mail",
                         style: TextStyle(
-                          color: hexToColor("#545454"),
                           fontSize: 14,
                         ),
                       ),
@@ -331,7 +326,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                       Text(
                         "Location",
                         style: TextStyle(
-                          color: hexToColor("#545454"),
                           fontSize: 14,
                         ),
                       ),
@@ -346,8 +340,8 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                             fontWeight: FontWeight.w500,
                           ),
                           decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              CupertinoIcons.globe,
+                            prefixIcon: Image.asset(
+                              'assets/icons/globe.png',
                             ),
                             prefixIconColor: Theme.of(context).primaryColor,
                             suffixIcon: Icon(
@@ -368,7 +362,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                       Text(
                         "UPI",
                         style: TextStyle(
-                          color: hexToColor("#545454"),
                           fontSize: 14,
                         ),
                       ),
@@ -385,6 +378,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           decoration: InputDecoration(
                             prefixIcon: Icon(
                               Icons.credit_card,
+                              size: 28,
                             ),
                             prefixIconColor: Theme.of(context).primaryColor,
                             border: OutlineInputBorder(

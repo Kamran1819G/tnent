@@ -14,7 +14,10 @@ class StoreRegistration extends StatefulWidget {
 
 class _StoreRegistrationState extends State<StoreRegistration> {
   PageController _pageController = PageController();
-  TextEditingController phoneController() => TextEditingController();
+  late final PageController _storeFeaturesPageController;
+  int _currentPageIndex = 0;
+  TextEditingController phoneController = TextEditingController();
+
   bool value = false;
 
   List<String> categories = [
@@ -37,7 +40,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   ];
   Map<String, bool> selectedCategories = {};
 
-
   final _otpControllers = List.generate(4, (_) => TextEditingController());
   final _focusNodes = List.generate(4, (_) => FocusNode());
   bool isButtonEnabled = false;
@@ -45,6 +47,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   @override
   void initState() {
     super.initState();
+    _storeFeaturesPageController = PageController()
+      ..addListener(() {
+        setState(() {
+          _currentPageIndex = _storeFeaturesPageController.page?.round() ?? 0;
+        });
+      });
     for (var category in categories) {
       selectedCategories[category] = false;
     }
@@ -89,714 +97,44 @@ class _StoreRegistrationState extends State<StoreRegistration> {
           children: <Widget>[
             PageView(
               controller: _pageController,
+              physics: NeverScrollableScrollPhysics(),
               children: <Widget>[
-                // Page 1: Create Your Own e-Store
+                // Page 1: e-Store Features
                 Stack(
                   children: [
-                    Container(
-                      height: 100,
-                      alignment: Alignment(0, -0.9),
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0, 0),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ClipRect(
-                              child: Image.asset(
-                                'assets/create_your_own_e-store.png',
-                                width: MediaQuery.of(context).size.width * 0.7,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.35,
-                                fit: BoxFit.fill,
-                              ),
-                            ),
-                            SizedBox(height: 100),
-                            Text(
-                              'Create Your Own e-Store',
-                              style: TextStyle(
-                                  color: hexToColor('#1E1E1E'),
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 26.0),
-                            ),
-                            Text(
-                              'Make your own digital store and start selling online',
-                              style: TextStyle(
-                                  color: hexToColor('#858585'),
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16.0),
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                    PageView(
+                      controller: _storeFeaturesPageController,
+                      children: [
+                        _buildStoreFeaturePage(
+                          'Create Your Own e-Store',
+                          'Make your own digital store and start selling online',
+                          'assets/create_your_own_e-store.png',
                         ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0.0, 0.7),
-                      child: SmoothPageIndicator(
-                        controller: _pageController,
-                        count: 5,
-                        effect: ExpandingDotsEffect(
-                          dotColor: hexToColor('#787878'),
-                          activeDotColor: Theme.of(context).primaryColor,
-                          dotHeight: 4,
-                          dotWidth: 4,
-                          spacing: 10,
-                          expansionFactor: 5,
+                        _buildStoreFeaturePage(
+                          'Delivery Support',
+                          'Provided middlemen for product delivery',
+                          'assets/delivery_support.png',
                         ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0, 0.9),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          // Set the button color to black
-                          foregroundColor: Colors.white,
-                          // Set the text color to white
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 75, vertical: 20),
-                          // Set the padding
-                          textStyle: TextStyle(
-                            fontSize: 16, // Set the text size
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500, // Set the text weight
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                30), // Set the button corner radius
-                          ),
+                        _buildStoreFeaturePage(
+                          'Packaging',
+                          'Provide product delivery in our custom packaging',
+                          'assets/packaging.png',
                         ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Get Started', style: TextStyle(fontSize: 16)),
-                          ],
+                        _buildStoreFeaturePage(
+                          'Analytics',
+                          'See Your Business Insights & Store Matrics',
+                          'assets/analytics.png',
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                // Page 2: Delivery support
-                Stack(
-                  children: [
-                    Container(
-                      height: 100,
-                      alignment: Alignment(0, -0.9),
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  _pageController.previousPage(
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0, 0),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ClipRect(
-                              child: Image.asset(
-                                'assets/delivery_support.png',
-                                width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.height * 0.35,
-                                fit: BoxFit.fill,
-                              ),
-                            ),
-                            SizedBox(height: 100),
-                            Text(
-                              'Delivery Support',
-                              style: TextStyle(
-                                  color: hexToColor('#1E1E1E'),
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 26.0),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Provided middlemen for product delivery',
-                              style: TextStyle(
-                                  color: hexToColor('#858585'),
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16.0),
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                        _buildStoreFeaturePage(
+                          'Discount Coupons',
+                          'Create Discount Coupons For Your Store And Products Easily And Instantly',
+                          'assets/discount_coupons.png',
                         ),
-                      ),
+                      ],
                     ),
-                    Align(
-                      alignment: Alignment(0.0, 0.7),
-                      child: SmoothPageIndicator(
-                        controller: _pageController,
-                        count: 5,
-                        effect: ExpandingDotsEffect(
-                          dotColor: hexToColor('#787878'),
-                          activeDotColor: Theme.of(context).primaryColor,
-                          dotHeight: 4,
-                          dotWidth: 4,
-                          spacing: 10,
-                          expansionFactor: 5,
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0, 0.9),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          // Set the button color to black
-                          foregroundColor: Colors.white,
-                          // Set the text color to white
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 75, vertical: 20),
-                          // Set the padding
-                          textStyle: TextStyle(
-                            fontSize: 16, // Set the text size
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500, // Set the text weight
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                30), // Set the button corner radius
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Next', style: TextStyle(fontSize: 16)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                // Page 3: Packaging
-                Stack(
-                  children: [
-                    Container(
-                      height: 100,
-                      alignment: Alignment(0, -0.9),
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  _pageController.previousPage(
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0, 0),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ClipRect(
-                              child: Image.asset(
-                                'assets/packaging.png',
-                                width: MediaQuery.of(context).size.width * 0.5,
-                                height: MediaQuery.of(context).size.height * 0.35,
-                                fit: BoxFit.fill,
-                              ),
-                            ),
-                            SizedBox(height: 100),
-                            Text(
-                              'Packaging',
-                              style: TextStyle(
-                                  color: hexToColor('#1E1E1E'),
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 26.0),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Provide product delivery in our custom packaging ',
-                              style: TextStyle(
-                                  color: hexToColor('#858585'),
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16.0),
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0.0, 0.7),
-                      child: SmoothPageIndicator(
-                        controller: _pageController,
-                        count: 5,
-                        effect: ExpandingDotsEffect(
-                          dotColor: hexToColor('#787878'),
-                          activeDotColor: Theme.of(context).primaryColor,
-                          dotHeight: 4,
-                          dotWidth: 4,
-                          spacing: 10,
-                          expansionFactor: 5,
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0, 0.9),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          // Set the button color to black
-                          foregroundColor: Colors.white,
-                          // Set the text color to white
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 75, vertical: 20),
-                          // Set the padding
-                          textStyle: TextStyle(
-                            fontSize: 16, // Set the text size
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500, // Set the text weight
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                30), // Set the button corner radius
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Next', style: TextStyle(fontSize: 16)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                // Page 4: Analytics
-                Stack(
-                  children: [
-                    Container(
-                      height: 100,
-                      alignment: Alignment(0, -0.9),
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  _pageController.previousPage(
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0, 0),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ClipRect(
-                              child: Image.asset(
-                                'assets/analytics.png',
-                                width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.height * 0.4,
-                                fit: BoxFit.fill,
-                              ),
-                            ),
-                            SizedBox(height: 75),
-                            Text(
-                              'Analytics',
-                              style: TextStyle(
-                                  color: hexToColor('#1E1E1E'),
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 26.0),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'See Your Business Insights & Store Matrics',
-                              style: TextStyle(
-                                  color: hexToColor('#858585'),
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16.0),
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0.0, 0.7),
-                      child: SmoothPageIndicator(
-                        controller: _pageController,
-                        count: 5,
-                        effect: ExpandingDotsEffect(
-                          dotColor: hexToColor('#787878'),
-                          activeDotColor: Theme.of(context).primaryColor,
-                          dotHeight: 4,
-                          dotWidth: 4,
-                          spacing: 10,
-                          expansionFactor: 5,
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0, 0.9),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          // Set the button color to black
-                          foregroundColor: Colors.white,
-                          // Set the text color to white
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 75, vertical: 20),
-                          // Set the padding
-                          textStyle: TextStyle(
-                            fontSize: 16, // Set the text size
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500, // Set the text weight
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                30), // Set the button corner radius
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Next', style: TextStyle(fontSize: 16)),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                // Page 5: Discount Coupons
-                Stack(
-                  children: [
-                    Container(
-                      height: 100,
-                      alignment: Alignment(0, -0.9),
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#272822'),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Image.asset('assets/white_tnennt_logo.png',
-                                      width: 20, height: 20),
-                                  SizedBox(width: 10),
-                                  Text(
-                                    'Tnennt inc.',
-                                    style: TextStyle(
-                                      color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 14.0,
-                                    ),
-                                  ),
-                                ]),
-                          ),
-                          Spacer(),
-                          Container(
-                            margin: EdgeInsets.all(8.0),
-                            child: CircleAvatar(
-                              backgroundColor: Colors.grey[100],
-                              child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new,
-                                    color: Colors.black),
-                                onPressed: () {
-                                  _pageController.previousPage(
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut);
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0, 0),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            ClipRect(
-                              child: Image.asset(
-                                'assets/discount_coupons.png',
-                                width: MediaQuery.of(context).size.width * 0.7,
-                                height: MediaQuery.of(context).size.height * 0.35,
-                                fit: BoxFit.fill,
-                              ),
-                            ),
-                            SizedBox(height: 100),
-                            Text(
-                              'Discount Coupons',
-                              style: TextStyle(
-                                  color: hexToColor('#1E1E1E'),
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 26.0),
-                            ),
-                            SizedBox(height: 4),
-                            Text(
-                              'Create Discount Coupons For Your Store And Products Easily And Instantly',
-                              style: TextStyle(
-                                  color: hexToColor('#858585'),
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16.0),
-                              maxLines: 2,
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0.0, 0.7),
-                      child: SmoothPageIndicator(
-                        controller: _pageController,
-                        count: 5,
-                        effect: ExpandingDotsEffect(
-                          dotColor: hexToColor('#787878'),
-                          activeDotColor: Theme.of(context).primaryColor,
-                          dotHeight: 4,
-                          dotWidth: 4,
-                          spacing: 10,
-                          expansionFactor: 5,
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment(0, 0.9),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          // Set the button color to black
-                          foregroundColor: Colors.white,
-                          // Set the text color to white
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 75, vertical: 20),
-                          // Set the padding
-                          textStyle: TextStyle(
-                            fontSize: 16, // Set the text size
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500, // Set the text weight
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                30), // Set the button corner radius
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Finish', style: TextStyle(fontSize: 16)),
-                          ],
-                        ),
-                      ),
-                    ),
+                    _buildStoreFeatureHeader(),
+                    _buildStoreFeaturePageIndicator(),
+                    _buildStoreFeatureNavigationButton(),
                   ],
                 ),
                 // Page 2: Registration
@@ -825,7 +163,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -859,7 +196,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           Text(
                             'Registration',
                             style: TextStyle(
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w400,
                               fontSize: 26,
                             ),
                           ),
@@ -875,78 +212,89 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Container(
-                      height: 175,
-                      width: 350,
-                      decoration: BoxDecoration(
-                        color: hexToColor('#F5F5F5'),
-                        border: Border.all(
-                          color: hexToColor('#838383'),
-                          strokeAlign: BorderSide.strokeAlignInside,
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Row(
-                        children: [
-                          Image.asset(
-                            'assets/india_flag.png',
-                            height: 30,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            '+91',
-                            style: TextStyle(
-                              color: hexToColor('#636363'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
+                    SizedBox(height: 40),
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          height: 175,
+                          width: 375,
+                          decoration: BoxDecoration(
+                            color: hexToColor('#F5F5F5'),
+                            border: Border.all(
+                              color: hexToColor('#838383'),
+                              strokeAlign: BorderSide.strokeAlignInside,
+                              style: BorderStyle.solid,
                             ),
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          SizedBox(width: 8),
-                          Expanded(
-                            child: TextField(
-                              controller: phoneController(),
-                              style: TextStyle(
-                                color: hexToColor('#636363'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16,
+                          padding: EdgeInsets.symmetric(horizontal: 50),
+                          margin: EdgeInsets.only(bottom: 25),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/india_flag.png',
+                                height: 40,
                               ),
-                              decoration: InputDecoration(
-                                border: UnderlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context).primaryColor,
-                                  ),
+                              SizedBox(width: 15),
+                              Text(
+                                '+91',
+                                style: TextStyle(
+                                  color: hexToColor('#636363'),
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 18,
+                                  letterSpacing: 2,
                                 ),
                               ),
-                              maxLength: 10,
-                              keyboardType: TextInputType.phone,
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: TextField(
+                                  controller: phoneController,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: hexToColor('#636363'),
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 18,
+                                    letterSpacing: 2,
+                                  ),
+                                  decoration: InputDecoration(
+                                      border: UnderlineInputBorder(
+                                        borderSide: BorderSide(
+                                          color: Theme.of(context).primaryColor,
+                                        ),
+                                      ),
+                                      contentPadding:
+                                          EdgeInsets.only(bottom: -15)),
+                                  maxLength: 10,
+                                  keyboardType: TextInputType.phone,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              _pageController.nextPage(
+                                  duration: Duration(milliseconds: 500),
+                                  curve: Curves.easeInOut);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context).primaryColor,
+                              shape: CircleBorder(),
+                              padding: EdgeInsets.all(15),
+                            ),
+                            child: Icon(
+                              Icons.check,
+                              color: Colors.white,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.nextPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          shape: CircleBorder(),
-                          padding: EdgeInsets.all(16),
                         ),
-                        child: Icon(
-                          Icons.check,
-                          color: Colors.white,
-                        ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -976,7 +324,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -1010,7 +357,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           Text(
                             'Verification',
                             style: TextStyle(
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w400,
                               fontSize: 26,
                             ),
                           ),
@@ -1026,92 +373,101 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Container(
-                      height: 175,
-                      width: 350,
-                      decoration: BoxDecoration(
-                        color: hexToColor('#F5F5F5'),
-                        border: Border.all(
-                          color: hexToColor('#838383'),
-                          strokeAlign: BorderSide.strokeAlignInside,
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Center(
-                        child: Wrap(
-                          spacing: 10,
-                          children: List.generate(
-                            _otpControllers.length,
-                            (index) {
-                              return Container(
-                                height: 50.0,
-                                width: 50.0,
-                                child: TextField(
-                                  controller: _otpControllers[index],
-                                  focusNode: _focusNodes[index],
-                                  textAlign: TextAlign.center,
-                                  keyboardType: TextInputType.number,
-                                  maxLength: 1,
-                                  cursorColor: Theme.of(context).primaryColor,
-                                  decoration: InputDecoration(
-                                    counterText: '',
-                                    border: UnderlineInputBorder(
-                                      borderSide: BorderSide(
-                                        color: hexToColor('#838383'),
+                    SizedBox(height: 40),
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Container(
+                          height: 175,
+                          width: 375,
+                          decoration: BoxDecoration(
+                            color: hexToColor('#F5F5F5'),
+                            border: Border.all(
+                              color: hexToColor('#838383'),
+                              strokeAlign: BorderSide.strokeAlignInside,
+                              style: BorderStyle.solid,
+                            ),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          margin: EdgeInsets.only(bottom: 25),
+                          child: Center(
+                            child: Wrap(
+                              spacing: 10,
+                              children: List.generate(
+                                _otpControllers.length,
+                                (index) {
+                                  return Container(
+                                    height: 50.0,
+                                    width: 50.0,
+                                    child: TextField(
+                                      controller: _otpControllers[index],
+                                      focusNode: _focusNodes[index],
+                                      textAlign: TextAlign.center,
+                                      keyboardType: TextInputType.number,
+                                      maxLength: 1,
+                                      cursorColor:
+                                          Theme.of(context).primaryColor,
+                                      decoration: InputDecoration(
+                                        counterText: '',
+                                        border: UnderlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: hexToColor('#838383'),
+                                          ),
+                                        ),
                                       ),
+                                      onChanged: (value) {
+                                        if (value.isNotEmpty) {
+                                          if (index + 1 <
+                                              _otpControllers.length) {
+                                            FocusScope.of(context).nextFocus();
+                                          } else {
+                                            setState(() {
+                                              isButtonEnabled = true;
+                                            });
+                                            FocusScope.of(context).unfocus();
+                                          }
+                                        } else {
+                                          if (index > 0) {
+                                            FocusScope.of(context)
+                                                .previousFocus();
+                                            setState(() {
+                                              isButtonEnabled = false;
+                                            });
+                                          }
+                                        }
+                                      },
                                     ),
-                                  ),
-                                  onChanged: (value) {
-                                    if (value.isNotEmpty) {
-                                      if (index + 1 < _otpControllers.length) {
-                                        FocusScope.of(context).nextFocus();
-                                      } else {
-                                        setState(() {
-                                          isButtonEnabled = true;
-                                        });
-                                        FocusScope.of(context).unfocus();
-                                      }
-                                    } else {
-                                      if (index > 0) {
-                                        FocusScope.of(context).previousFocus();
-                                        setState(() {
-                                          isButtonEnabled = false;
-                                        });
-                                      }
-                                    }
-                                  },
-                                ),
-                              );
-                            },
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                    Center(
-                      child: ElevatedButton(
-                        onPressed: isButtonEnabled
-                            ? () {
-                                _pageController.nextPage(
-                                    duration: Duration(milliseconds: 500),
-                                    curve: Curves.easeInOut);
-                              }
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: isButtonEnabled
-                              ? Theme.of(context).primaryColor
-                              : Colors.grey,
-                          shape: CircleBorder(),
-                          padding: EdgeInsets.all(16),
+                        Positioned(
+                          bottom: 0,
+                          child: ElevatedButton(
+                            onPressed: isButtonEnabled
+                                ? () {
+                                    _pageController.nextPage(
+                                        duration: Duration(milliseconds: 500),
+                                        curve: Curves.easeInOut);
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: isButtonEnabled
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.grey,
+                              shape: CircleBorder(),
+                              padding: EdgeInsets.all(15),
+                            ),
+                            child: Icon(
+                              Icons.arrow_forward_ios,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
-                        child: Icon(
-                          Icons.arrow_forward_ios,
-                          color: Colors.white,
-                        ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -1142,7 +498,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -1176,12 +531,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           Text(
                             'Enter Your Business/Store email',
                             style: TextStyle(
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w400,
                               fontSize: 20,
                             ),
                           ),
                           Text(
-                            'email regarding store will be sent to this email',
+                            'Email regarding store will be sent to this email',
                             style: TextStyle(
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
@@ -1192,19 +547,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 40),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: hexToColor('#F5F5F5'),
-                        border: Border.all(
-                          color: hexToColor('#838383'),
-                          strokeAlign: BorderSide.strokeAlignInside,
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                       child: TextField(
                         style: TextStyle(
                           fontFamily: 'Gotham',
@@ -1212,20 +557,30 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           fontSize: 16,
                         ),
                         decoration: InputDecoration(
-                            label: Text('Email'),
-                            labelStyle: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 16,
+                          label: Text('Email'),
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 16,
+                          ),
+                          filled: true,
+                          fillColor: hexToColor('#F5F5F5'),
+                          suffixIcon: Icon(Icons.email_outlined),
+                          suffixIconColor: Theme.of(context).primaryColor,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: hexToColor('#838383'),
+                              strokeAlign: BorderSide.strokeAlignInside,
+                              style: BorderStyle.solid,
                             ),
-                            suffixIcon: Icon(Icons.email_outlined),
-                            suffixIconColor: Theme.of(context).primaryColor,
-                            border: InputBorder.none),
+                          ),
+                        ),
                         keyboardType: TextInputType.emailAddress,
                       ),
                     ),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.4),
                     Container(
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        padding: EdgeInsets.symmetric(horizontal: 12),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -1328,7 +683,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -1362,7 +716,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           Text(
                             'Your Store Name',
                             style: TextStyle(
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w400,
                               fontSize: 20,
                             ),
                           ),
@@ -1378,19 +732,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 40),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: hexToColor('#F5F5F5'),
-                        border: Border.all(
-                          color: hexToColor('#838383'),
-                          strokeAlign: BorderSide.strokeAlignInside,
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                       child: TextField(
                         style: TextStyle(
                           fontFamily: 'Gotham',
@@ -1398,16 +742,26 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           fontSize: 16,
                         ),
                         decoration: InputDecoration(
-                            label: Text('Store Name'),
-                            labelStyle: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 16,
+                          label: Text('Store Name'),
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 16,
+                          ),
+                          filled: true,
+                          fillColor: hexToColor('#F5F5F5'),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: hexToColor('#838383'),
+                              strokeAlign: BorderSide.strokeAlignInside,
+                              style: BorderStyle.solid,
                             ),
-                            border: InputBorder.none),
+                          ),
+                        ),
                         keyboardType: TextInputType.name,
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.5),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.475),
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
@@ -1470,7 +824,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -1504,7 +857,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           Text(
                             'Set Your Store Domain',
                             style: TextStyle(
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w400,
                               fontSize: 20,
                             ),
                           ),
@@ -1520,19 +873,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 40),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: hexToColor('#F5F5F5'),
-                        border: Border.all(
-                          color: hexToColor('#838383'),
-                          strokeAlign: BorderSide.strokeAlignInside,
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                       child: TextField(
                         style: TextStyle(
                           fontFamily: 'Gotham',
@@ -1540,19 +883,29 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           fontSize: 16,
                         ),
                         decoration: InputDecoration(
-                            label: Text('Store Name'),
-                            labelStyle: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 16,
+                          label: Text('Store Name'),
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 16,
+                          ),
+                          suffixText: '.tnennt.com',
+                          suffixStyle: TextStyle(
+                            color: hexToColor('#636363'),
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                          ),
+                          filled: true,
+                          fillColor: hexToColor('#F5F5F5'),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: hexToColor('#838383'),
+                              strokeAlign: BorderSide.strokeAlignInside,
+                              style: BorderStyle.solid,
                             ),
-                            suffixText: '.tnennt.com',
-                            suffixStyle: TextStyle(
-                              color: hexToColor('#636363'),
-                              fontFamily: 'Gotham',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16,
-                            ),
-                            border: InputBorder.none),
+                          ),
+                        ),
                         keyboardType: TextInputType.name,
                       ),
                     ),
@@ -1582,7 +935,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             ),
                           ],
                         )),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.45),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.4375),
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
@@ -1628,7 +981,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       child: Row(
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
                             decoration: BoxDecoration(
                               color: hexToColor('#272822'),
                               borderRadius: BorderRadius.circular(20.0),
@@ -1644,7 +998,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -1656,12 +1009,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             child: CircleAvatar(
                               backgroundColor: Colors.grey[100],
                               child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                                icon: Icon(Icons.arrow_back_ios_new,
+                                    color: Colors.black),
                                 onPressed: () {
-                                    _pageController.previousPage(
-                                      duration: Duration(milliseconds: 300),
-                                      curve: Curves.easeOut,
-                                    );
+                                  _pageController.previousPage(
+                                    duration: Duration(milliseconds: 300),
+                                    curve: Curves.easeOut,
+                                  );
                                 },
                               ),
                             ),
@@ -1669,7 +1023,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.025),
+                    SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.025),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -1678,7 +1033,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           Text(
                             'Choose Your Store Category',
                             style: TextStyle(
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w400,
                               fontSize: 20,
                             ),
                           ),
@@ -1694,7 +1049,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 40),
                     Expanded(
                       child: GridView.count(
                         crossAxisCount: 2,
@@ -1719,14 +1074,14 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.0),
                     Center(
                       child: ElevatedButton(
                         onPressed: _onContinuePressed,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
                           foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(horizontal: 100, vertical: 18),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 100, vertical: 18),
                           textStyle: TextStyle(
                             fontSize: 16,
                             fontFamily: 'Gotham',
@@ -1744,7 +1099,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 30),
                   ],
                 ),
                 // Page 8: UPI Details
@@ -1774,7 +1129,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -1808,7 +1162,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           Text(
                             'Enter Your UPI Details',
                             style: TextStyle(
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w400,
                               fontSize: 20,
                             ),
                           ),
@@ -1824,19 +1178,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 40),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: hexToColor('#F5F5F5'),
-                        border: Border.all(
-                          color: hexToColor('#838383'),
-                          strokeAlign: BorderSide.strokeAlignInside,
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                       child: TextField(
                         style: TextStyle(
                           fontFamily: 'Gotham',
@@ -1844,28 +1188,28 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           fontSize: 16,
                         ),
                         decoration: InputDecoration(
-                            label: Text('Username'),
-                            labelStyle: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 16,
+                          label: Text('Username'),
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 16,
+                          ),
+                          filled: true,
+                          fillColor: hexToColor('#F5F5F5'),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: hexToColor('#838383'),
+                              strokeAlign: BorderSide.strokeAlignInside,
+                              style: BorderStyle.solid,
                             ),
-                            border: InputBorder.none),
+                          ),
+                        ),
                         keyboardType: TextInputType.name,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    SizedBox(height: 20),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: hexToColor('#F5F5F5'),
-                        border: Border.all(
-                          color: hexToColor('#838383'),
-                          strokeAlign: BorderSide.strokeAlignInside,
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                       child: TextField(
                         style: TextStyle(
                           fontFamily: 'Gotham',
@@ -1873,12 +1217,22 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           fontSize: 16,
                         ),
                         decoration: InputDecoration(
-                            label: Text('UPI ID'),
-                            labelStyle: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 16,
+                          label: Text('UPI ID'),
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 16,
+                          ),
+                          filled: true,
+                          fillColor: hexToColor('#F5F5F5'),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: hexToColor('#838383'),
+                              strokeAlign: BorderSide.strokeAlignInside,
+                              style: BorderStyle.solid,
                             ),
-                            border: InputBorder.none),
+                          ),
+                        ),
                         keyboardType: TextInputType.name,
                       ),
                     ),
@@ -1908,7 +1262,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             ),
                           ],
                         )),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.35),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.34),
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
@@ -1971,7 +1325,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -2005,7 +1358,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           Text(
                             'Enter Your Store Location',
                             style: TextStyle(
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w400,
                               fontSize: 20,
                             ),
                           ),
@@ -2021,19 +1374,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 40),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      decoration: BoxDecoration(
-                        color: hexToColor('#F5F5F5'),
-                        border: Border.all(
-                          color: hexToColor('#838383'),
-                          strokeAlign: BorderSide.strokeAlignInside,
-                          style: BorderStyle.solid,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
                       child: TextField(
                         style: TextStyle(
                           fontFamily: 'Gotham',
@@ -2041,24 +1384,34 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           fontSize: 16,
                         ),
                         decoration: InputDecoration(
-                            label: Text('Location'),
-                            labelStyle: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 16,
+                          label: Text('Location'),
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 16,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.location_on,
+                            size: 20,
+                          ),
+                          prefixIconConstraints: BoxConstraints(
+                            minWidth: 40,
+                          ),
+                          prefixIconColor: Theme.of(context).primaryColor,
+                          filled: true,
+                          fillColor: hexToColor('#F5F5F5'),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(
+                              color: hexToColor('#838383'),
+                              strokeAlign: BorderSide.strokeAlignInside,
+                              style: BorderStyle.solid,
                             ),
-                            prefixIcon: Icon(
-                              Icons.location_on,
-                              size: 20,
-                            ),
-                            prefixIconConstraints: BoxConstraints(
-                              minWidth: 40,
-                            ),
-                            prefixIconColor: Theme.of(context).primaryColor,
-                            border: InputBorder.none),
+                          ),
+                        ),
                         keyboardType: TextInputType.name,
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.5),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.475),
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
@@ -2121,7 +1474,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -2421,7 +1773,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     'Tnennt inc.',
                                     style: TextStyle(
                                       color: hexToColor('#E6E6E6'),
-                                      fontWeight: FontWeight.w900,
                                       fontSize: 14.0,
                                     ),
                                   ),
@@ -2511,6 +1862,171 @@ class _StoreRegistrationState extends State<StoreRegistration> {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStoreFeaturePage(
+      String title, String subtitle, String imagePath) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset(
+          imagePath,
+          width: MediaQuery.of(context).size.width * 0.7,
+          height: MediaQuery.of(context).size.height * 0.35,
+          fit: BoxFit.contain,
+        ),
+        SizedBox(height: 50),
+        Text(
+          title,
+          style: TextStyle(color: hexToColor('#1E1E1E'), fontSize: 26.0),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 10),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Text(
+            subtitle,
+            style: TextStyle(
+              color: hexToColor('#858585'),
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w500,
+              fontSize: 16.0,
+            ),
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStoreFeatureHeader() {
+    return Positioned(
+      top: 0,
+      left: 0,
+      right: 0,
+      child: Container(
+        height: 100,
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                color: hexToColor('#272822'),
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset('assets/white_tnennt_logo.png',
+                      width: 20, height: 20),
+                  SizedBox(width: 10),
+                  Text(
+                    'Tnennt inc.',
+                    style: TextStyle(
+                      color: hexToColor('#E6E6E6'),
+                      fontSize: 14.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Spacer(),
+            Container(
+              margin: EdgeInsets.all(8.0),
+              child: CircleAvatar(
+                backgroundColor: Colors.grey[100],
+                child: IconButton(
+                  icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                  onPressed: () {
+                    if (_storeFeaturesPageController.hasClients &&
+                        _currentPageIndex > 0) {
+                      _storeFeaturesPageController.previousPage(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.easeOut,
+                      );
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStoreFeaturePageIndicator() {
+    return Positioned(
+      bottom: 100,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: SmoothPageIndicator(
+          controller: _storeFeaturesPageController,
+          count: 5,
+          effect: ExpandingDotsEffect(
+            dotColor: hexToColor('#787878'),
+            activeDotColor: Theme.of(context).primaryColor,
+            dotHeight: 4,
+            dotWidth: 4,
+            spacing: 10,
+            expansionFactor: 5,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStoreFeatureNavigationButton() {
+    return Positioned(
+      bottom: 20,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            if (_storeFeaturesPageController.hasClients) {
+              if (_currentPageIndex < 4) {
+                _storeFeaturesPageController.nextPage(
+                  duration: Duration(milliseconds: 100),
+                  curve: Curves.easeInOut,
+                );
+              } else {
+                _pageController.nextPage(
+                  duration: Duration(milliseconds: 500),
+                  curve: Curves.easeInOut,
+                );
+                _currentPageIndex = 0;
+                _storeFeaturesPageController.jumpToPage(0);
+              }
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).primaryColor,
+            foregroundColor: Colors.white,
+            padding: EdgeInsets.symmetric(horizontal: 75, vertical: 20),
+            textStyle: TextStyle(
+              fontSize: 16,
+              fontFamily: 'Gotham',
+              fontWeight: FontWeight.w500,
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30),
+            ),
+          ),
+          child: Text(
+            _currentPageIndex >= 4 ? 'Finish' : 'Next',
+            style: TextStyle(fontSize: 16),
+          ),
         ),
       ),
     );

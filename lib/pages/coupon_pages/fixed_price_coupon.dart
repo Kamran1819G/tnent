@@ -94,7 +94,6 @@ class _FixedPriceCouponState extends State<FixedPriceCoupon> {
                             'Coupon'.toUpperCase(),
                             style: TextStyle(
                               color: hexToColor('#1E1E1E'),
-                              fontWeight: FontWeight.w900,
                               fontSize: 24.0,
                               letterSpacing: 1.5,
                             ),
@@ -102,7 +101,6 @@ class _FixedPriceCouponState extends State<FixedPriceCoupon> {
                           Text(
                             ' •',
                             style: TextStyle(
-                              fontWeight: FontWeight.w900,
                               fontSize: 24.0,
                               color: hexToColor('#FF0000'),
                             ),
@@ -194,7 +192,6 @@ class _FixedPriceCouponState extends State<FixedPriceCoupon> {
                                   '₹',
                                   style: TextStyle(
                                     color: hexToColor('#343434'),
-                                    fontWeight: FontWeight.w900,
                                     fontSize: 38.0,
                                   ),
                                 ),
@@ -202,7 +199,6 @@ class _FixedPriceCouponState extends State<FixedPriceCoupon> {
                                   _discountController.text,
                                   style: TextStyle(
                                     color: hexToColor('#343434'),
-                                    fontWeight: FontWeight.w900,
                                     fontSize: 38.0,
                                   ),
                                 ),
@@ -210,7 +206,6 @@ class _FixedPriceCouponState extends State<FixedPriceCoupon> {
                                   ' OFF',
                                   style: TextStyle(
                                     color: hexToColor('#343434'),
-                                    fontWeight: FontWeight.w900,
                                     fontSize: 18.0,
                                   ),
                                 ),

@@ -88,7 +88,6 @@ class OrderUpdateNotification extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16.0,
                     color: statusColor,
-                    fontWeight: FontWeight.w900,
                   ),
                 ),
                 SizedBox(width: 8.0),
@@ -97,7 +96,6 @@ class OrderUpdateNotification extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 8.0,
                     color: hexToColor('#747474'),
-                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -111,7 +109,6 @@ class OrderUpdateNotification extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10.0,
                     color: hexToColor('#343434'),
-                    fontWeight: FontWeight.w900,
                   ),
                 ),
                 SizedBox(width: 4.0),
@@ -120,7 +117,6 @@ class OrderUpdateNotification extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 10.0,
                     fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
                     color: hexToColor('#343434'),
                   ),
                 ),
@@ -145,7 +141,6 @@ class OrderUpdateNotification extends StatelessWidget {
                 style: TextStyle(
                   color: hexToColor('#343434'),
                   fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w500,
                   fontSize: 12.0,
                 ),
               )
@@ -155,7 +150,6 @@ class OrderUpdateNotification extends StatelessWidget {
                     productName!,
                     style: TextStyle(
                       color: hexToColor('#343434'),
-                      fontWeight: FontWeight.w900,
                       fontSize: 12.0,
                     ),
                   ),
@@ -174,7 +168,6 @@ class OrderUpdateNotification extends StatelessWidget {
                       '₹${price}',
                       style: TextStyle(
                         color: hexToColor('#838383'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 10.0,
                       ),
                     ),

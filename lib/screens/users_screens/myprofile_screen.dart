@@ -79,15 +79,28 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                     ),
                                   );
                                 },
-                                child: CircleAvatar(
-                                  radius: 30,
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                  child: Icon(
-                                    Icons.person,
-                                    color: Colors.white,
-                                    size: 30,
+                                child: Stack(
+                                  children: [
+                                    CircleAvatar(
+                                    radius: 40,
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    child: Icon(
+                                      Icons.person,
+                                      color: Colors.white,
+                                      size: 40,
+                                    ),
                                   ),
+                                    Positioned(
+                                      bottom: 8,
+                                      right: 0,
+                                      child: Icon(
+                                        Icons.edit,
+                                        color: Colors.white,
+                                        size: 24.0,
+                                      ),
+                                    ),
+                                  ]
                                 ),
                               ),
                             ),
@@ -99,7 +112,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                   'Kamran Khan',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontWeight: FontWeight.w900,
                                     fontSize: 26.0,
                                   ),
                                   overflow: TextOverflow.ellipsis,
@@ -144,7 +156,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     style: TextStyle(
                       color: hexToColor('#4A4F4C'),
                       fontSize: 16.0,
-                      fontWeight: FontWeight.w600,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -251,7 +262,6 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
             title,
             style: TextStyle(
               color: hexToColor('#9B9B9B'),
-              fontWeight: FontWeight.w900,
               fontSize: 14.0,
               letterSpacing: 1,
             ),
@@ -350,7 +360,6 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                                 'Tnennt inc.',
                                 style: TextStyle(
                                   color: hexToColor('#E6E6E6'),
-                                  fontWeight: FontWeight.w900,
                                   fontSize: 14.0,
                                 ),
                               ),
@@ -468,7 +477,6 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                                 'Tnennt inc.',
                                 style: TextStyle(
                                   color: hexToColor('#E6E6E6'),
-                                  fontWeight: FontWeight.w900,
                                   fontSize: 14.0,
                                 ),
                               ),

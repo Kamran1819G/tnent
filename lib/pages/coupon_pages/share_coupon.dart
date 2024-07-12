@@ -47,7 +47,6 @@ class _ShareCouponState extends State<ShareCoupon> {
                               'Tnennt inc.',
                               style: TextStyle(
                                 color: hexToColor('#E6E6E6'),
-                                fontWeight: FontWeight.w900,
                                 fontSize: 14.0,
                               ),
                             ),
@@ -74,7 +73,6 @@ class _ShareCouponState extends State<ShareCoupon> {
                 'Your Coupon Has Been Generated !',
                 style: TextStyle(
                   color: Colors.black,
-                  fontWeight: FontWeight.w900,
                   fontSize: 24.0,
                 ),
                 maxLines: 2,
@@ -131,7 +129,6 @@ class _ShareCouponState extends State<ShareCoupon> {
                   Text(
                     'Share Coupon',
                     style: TextStyle(
-                      fontWeight: FontWeight.w900,
                       fontSize: 16.0,
                     ),
                   ),

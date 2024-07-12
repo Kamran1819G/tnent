@@ -34,7 +34,6 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                             'Payments'.toUpperCase(),
                             style: TextStyle(
                               color: hexToColor('#1E1E1E'),
-                              fontWeight: FontWeight.w900,
                               fontSize: 24.0,
                               letterSpacing: 1.5,
                             ),
@@ -42,7 +41,6 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                           Text(
                             ' •',
                             style: TextStyle(
-                              fontWeight: FontWeight.w900,
                               fontSize: 28.0,
                               color: hexToColor('#42FF00'),
                             ),
@@ -78,7 +76,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
               ),
             ),
             Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
+              margin: EdgeInsets.symmetric(horizontal: 8.0, vertical: 20.0),
               padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               decoration: BoxDecoration(
                 color: hexToColor('#F5F5F5'),
@@ -131,7 +129,6 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                         'Monthly Earning',
                         style: TextStyle(
                           color: hexToColor('#838383'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 18.0,
                         ),
                       ),
@@ -139,7 +136,6 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                         '₹25k',
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
-                          fontWeight: FontWeight.w900,
                           fontSize: 18.0,
                           height: 1.5,
                         ),
@@ -159,7 +155,6 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                       padding: EdgeInsets.symmetric(horizontal: 25.0),
                       style: TextStyle(
                         color: hexToColor('#272822'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                       icon: Icon(Icons.keyboard_arrow_down_rounded),
@@ -195,13 +190,15 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
               ),
             ),
             SizedBox(height: 20.0),
-            ListView.separated(
-              shrinkWrap: true,
-              itemCount: 5,
-              separatorBuilder: (context, index) => SizedBox(height: 10.0),
-              itemBuilder: (context, index) {
-                return PaymentInfoTile();
-              },
+            Expanded(
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: 10,
+                separatorBuilder: (context, index) => SizedBox(height: 10.0),
+                itemBuilder: (context, index) {
+                  return PaymentInfoTile();
+                },
+              ),
             )
           ],
         ),
@@ -235,8 +232,7 @@ class PaymentInfoTile extends StatelessWidget {
                     'Order ID:',
                     style: TextStyle(
                       color: hexToColor('#343434'),
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
+                      fontSize: 12,
                     ),
                   ),
                   SizedBox(width: 8.0),
@@ -244,7 +240,7 @@ class PaymentInfoTile extends StatelessWidget {
                     '123456',
                     style: TextStyle(
                       color: hexToColor('#747474'),
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       fontFamily: 'Poppins',
                     ),
@@ -256,7 +252,7 @@ class PaymentInfoTile extends StatelessWidget {
                 style: TextStyle(
                   color: hexToColor('#747474'),
                   fontFamily: 'Poppins',
-                  fontSize: 10,
+                  fontSize: 12,
                 ),
               ),
             ],
@@ -291,7 +287,6 @@ class PaymentInfoTile extends StatelessWidget {
               Text(
                 '₹ 2500',
                 style: TextStyle(
-                  fontWeight: FontWeight.w600,
                   color: Theme.of(context).primaryColor,
                   fontSize: 24.0,
                 ),

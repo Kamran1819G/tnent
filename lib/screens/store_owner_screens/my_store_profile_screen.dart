@@ -28,7 +28,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
             SizedBox(height: 20.0),
             // Profile Card
             Container(
-              height: 190,
+              height: 200,
               width: double.infinity,
               margin: EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
@@ -42,12 +42,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                     top: 16.0,
                     child: CircleAvatar(
                       backgroundColor: hexToColor('#F5F5F5'),
-                      radius: 16,
+                      radius: 20,
                       child: IconButton(
                         icon: Icon(
                           Icons.arrow_back_ios_new,
                           color: Colors.black,
-                          size: 16,
+                          size: 18,
                         ),
                         onPressed: () {
                           Navigator.pop(context);
@@ -56,18 +56,20 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                     ),
                   ),
                   Align(
-                    alignment: Alignment(-0.9, -0.2),
+                    alignment: Alignment(-0.9, -0.5),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Padding(
+                        Container(
+                          margin: EdgeInsets.only(top: 8),
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20.0),
+                            borderRadius: BorderRadius.circular(12.0),
                             child: Image.asset(
                               'assets/jain_brothers.png',
-                              height: 85,
-                              width: 85,
+                              height: 90,
+                              width: 90,
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -76,25 +78,39 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 12.0, vertical: 6.0),
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                border: Border.all(color: hexToColor('#DEFF98')),
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              child: Text(
+                                'clothings',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 8.0,
+                                ),
+                              ),
+                            ),
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                RichText(
-                                  text: TextSpan(
-                                    text: 'Jain Brothers',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Gotham Black',
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 28.0,
-                                    ),
+                                Text(
+                                  'Jain Brothers',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 24.0,
                                   ),
                                 ),
                                 SizedBox(width: 10.0),
                                 Container(
                                   width: 10,
                                   height: 10,
-                                  margin: EdgeInsets.symmetric(vertical: 25),
+                                  margin: EdgeInsets.symmetric(vertical: 15),
                                   decoration: BoxDecoration(
                                     color: Colors.green,
                                     borderRadius: BorderRadius.circular(5),
@@ -106,8 +122,11 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                               mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Icon(Icons.web,
-                                    color: hexToColor('#00F0FF'), size: 16),
+                                Image.asset(
+                                  'assets/icons/blue_globe.png',
+                                  height: 12.0,
+                                  width: 12.0,
+                                ),
                                 SizedBox(width: 5.0),
                                 Text(
                                   'jainbrothers.tnennet.store',
@@ -129,21 +148,23 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Icon(Icons.ios_share, color: Colors.white, size: 18),
+                        Icon(Icons.ios_share, color: Colors.white, size: 22),
                         SizedBox(width: 10.0),
                         Container(
                           padding: EdgeInsets.symmetric(
-                              horizontal: 10.0, vertical: 5.0),
+                              horizontal: 12.0, vertical: 8.0),
                           decoration: BoxDecoration(
-                            color: Colors.grey[600],
+                            color: hexToColorWithOpacity('#C0C0C0', 0.2),
                             borderRadius: BorderRadius.circular(20.0),
                           ),
                           child: Text(
-                            'Navi Mumbai',
+                            'Navi Mumbai, MH',
                             style: TextStyle(
                                 color: Colors.white,
                                 fontFamily: 'Poppins',
                                 fontSize: 12.0),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
                           ),
                         ),
                         Spacer(),
@@ -151,18 +172,18 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                           "Accepting Orders: ",
                           style: TextStyle(
                             color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 10.0,
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w700,
+                            fontSize: 11.0,
                           ),
                         ),
                         Switch(
                             value: isAccepting,
                             activeColor: hexToColor('#41FA00'),
-                            trackOutlineColor: MaterialStateColor.resolveWith(
+                            trackOutlineColor: WidgetStateColor.resolveWith(
                                 (states) => Colors.grey),
-                            trackOutlineWidth:
-                                WidgetStateProperty.resolveWith(
-                                    (states) => 1.0),
+                            trackOutlineWidth: WidgetStateProperty.resolveWith(
+                                (states) => 1.0),
                             activeTrackColor: Colors.transparent,
                             inactiveTrackColor: Colors.transparent,
                             onChanged: (value) {
@@ -176,12 +197,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 20.0),
+            SizedBox(height: 30.0),
 
             Expanded(
               flex: 0,
               child: GridView.count(
-                padding: EdgeInsets.all(8.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 crossAxisCount: 3,
@@ -207,39 +228,40 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'List'.toUpperCase(),
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'Gotham Black',
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 14.0,
-                                  ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'List'.toUpperCase(),
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'Gotham Black',
+                                        fontSize: 14.0,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: ' •',
+                                      style: TextStyle(
+                                        fontFamily: 'Gotham Black',
+                                        fontSize: 14.0,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                TextSpan(
-                                  text: ' •',
-                                  style: TextStyle(
-                                    fontFamily: 'Gotham Black',
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 14.0,
-                                    color: Colors.red,
-                                  ),
+                              ),
+                              Text(
+                                'Product'.toUpperCase(),
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14.0,
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            'Product'.toUpperCase(),
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          SizedBox(height: 8.0),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.end,
@@ -252,7 +274,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 16.0,
-                                      fontWeight: FontWeight.w900,
                                     ),
                                   ),
                                   Text(
@@ -309,7 +330,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontFamily: 'Gotham Black',
-                                    fontWeight: FontWeight.w900,
                                     fontSize: 14.0,
                                   ),
                                 ),
@@ -317,7 +337,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                   text: ' •',
                                   style: TextStyle(
                                     fontFamily: 'Gotham Black',
-                                    fontWeight: FontWeight.w900,
                                     fontSize: 14.0,
                                     color: Colors.green,
                                   ),
@@ -325,7 +344,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                               ],
                             ),
                           ),
-                          SizedBox(height: 8.0),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.end,
@@ -373,45 +391,46 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          RichText(
-                            text: TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: 'Store'.toUpperCase(),
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontFamily: 'Gotham Black',
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 14.0,
-                                  ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Store'.toUpperCase(),
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'Gotham Black',
+                                        fontSize: 14.0,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: ' •',
+                                      style: TextStyle(
+                                        fontFamily: 'Gotham Black',
+                                        fontSize: 14.0,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                TextSpan(
-                                  text: ' •',
-                                  style: TextStyle(
-                                    fontFamily: 'Gotham Black',
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 14.0,
-                                    color: Colors.red,
-                                  ),
+                              ),
+                              Text(
+                                'Community'.toUpperCase(),
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14.0,
                                 ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            'Community'.toUpperCase(),
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w900,
-                            ),
-                          ),
-                          Text(
-                            'Post'.toUpperCase(),
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontSize: 14.0,
-                              fontWeight: FontWeight.w900,
-                            ),
+                              ),
+                              Text(
+                                'Post'.toUpperCase(),
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 14.0,
+                                ),
+                              ),
+                            ],
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -425,7 +444,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 16.0,
-                                      fontWeight: FontWeight.w900,
                                     ),
                                   ),
                                   Text(
@@ -467,16 +485,18 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
                             child: Container(
-                              padding: EdgeInsets.all(12),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal:12, vertical: 16),
+                              margin: EdgeInsets.only(right: 8.0),
                               decoration: BoxDecoration(
                                 color: hexToColor('#F3F3F3'),
-                                borderRadius: BorderRadius.circular(50.0),
+                                borderRadius: BorderRadius.circular(30.0),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -501,7 +521,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                           'Store Engagement',
                                           style: TextStyle(
                                             fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w600,
+                                            fontWeight: FontWeight.w700,
                                             fontSize: 12.0,
                                           ),
                                         ),
@@ -511,13 +531,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                             color:
                                                 Theme.of(context).primaryColor,
                                             fontSize: 22.0,
-                                            fontWeight: FontWeight.w900,
                                           ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  SizedBox(height: 10.0),
+                                  SizedBox(height: 15.0),
                                   Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 8.0),
@@ -543,7 +562,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                               style: TextStyle(
                                                 color: hexToColor('#838383'),
                                                 fontSize: 12.0,
-                                                fontWeight: FontWeight.w900,
                                               ),
                                             ),
                                           ],
@@ -590,7 +608,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                               Text(
                                                 'Orders & Pays',
                                                 style: TextStyle(
-                                                  color: hexToColor('#272822'),
                                                   fontFamily: 'Poppins',
                                                   fontWeight: FontWeight.w600,
                                                   fontSize: 14.0,
@@ -646,22 +663,23 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text('My Settings',
-                                                  style: TextStyle(
-                                                    color:
-                                                        hexToColor('#272822'),
-                                                    fontFamily: 'Poppins',
-                                                    fontWeight: FontWeight.w600,
-                                                    fontSize: 14.0,
-                                                  )),
-                                              Text('Store Settings',
-                                                  style: TextStyle(
-                                                    color:
-                                                        hexToColor('#838383'),
-                                                    fontFamily: 'Gotham',
-                                                    fontSize: 10.0,
-                                                    fontWeight: FontWeight.w500,
-                                                  )),
+                                              Text(
+                                                'My Settings',
+                                                style: TextStyle(
+                                                  fontFamily: 'Poppins',
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 14.0,
+                                                ),
+                                              ),
+                                              Text(
+                                                'Store Settings',
+                                                style: TextStyle(
+                                                  color: hexToColor('#838383'),
+                                                  fontFamily: 'Gotham',
+                                                  fontSize: 10.0,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
                                             ],
                                           )
                                         ],
@@ -682,13 +700,13 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Text( 'Updates',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 16.0,
-                              ),
+                          child: Text(
+                            'Updates',
+                            style: TextStyle(
+                              color: hexToColor('#343434'),
+                              fontSize: 18.0,
                             ),
+                          ),
                         ),
                         SizedBox(height: 10.0),
                         Container(
@@ -742,7 +760,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                             'Featured',
                             style: TextStyle(
                               color: hexToColor('#343434'),
-                              fontWeight: FontWeight.w900,
                               fontSize: 18.0,
                             ),
                           ),
@@ -814,7 +831,6 @@ class _StoreCommunityState extends State<StoreCommunity> {
                           '17',
                           style: TextStyle(
                             color: hexToColor('#343434'),
-                            fontWeight: FontWeight.w900,
                             fontSize: 20.0,
                           ),
                         ),
@@ -931,7 +947,6 @@ class CommunityPost extends StatelessWidget {
                       Text(
                         name,
                         style: const TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 18.0,
                         ),
                       ),
@@ -980,7 +995,6 @@ class CommunityPost extends StatelessWidget {
               style: TextStyle(
                 color: hexToColor('#737373'),
                 fontSize: 12.0,
-                fontWeight: FontWeight.w900,
               ),
             ),
           SizedBox(height: 10),
@@ -1083,7 +1097,6 @@ class CommunityPost extends StatelessWidget {
             'Report',
             style: TextStyle(
               color: hexToColor('#9B9B9B'),
-              fontWeight: FontWeight.w900,
               fontSize: 16.0,
             ),
           ),
@@ -1243,7 +1256,6 @@ class _ProductTileState extends State<ProductTile> {
                                           'Edit',
                                           style: TextStyle(
                                               color: hexToColor('#9C9C9C'),
-                                              fontWeight: FontWeight.w900,
                                               fontSize: 16.0),
                                         ),
                                       ],
@@ -1268,7 +1280,6 @@ class _ProductTileState extends State<ProductTile> {
                                           'Delete',
                                           style: TextStyle(
                                               color: hexToColor('#9C9C9C'),
-                                              fontWeight: FontWeight.w900,
                                               fontSize: 16.0),
                                         ),
                                       ],
@@ -1306,18 +1317,14 @@ class _ProductTileState extends State<ProductTile> {
                 children: [
                   Text(
                     widget.name,
-                    style: TextStyle(
-                        color: hexToColor('#343434'),
-                        fontWeight: FontWeight.w900,
-                        fontSize: 10.0),
+                    style:
+                        TextStyle(color: hexToColor('#343434'), fontSize: 10.0),
                   ),
                   SizedBox(height: 8.0),
                   Text(
                     '\$${widget.price.toString()}',
-                    style: TextStyle(
-                        color: hexToColor('#343434'),
-                        fontWeight: FontWeight.w900,
-                        fontSize: 10.0),
+                    style:
+                        TextStyle(color: hexToColor('#343434'), fontSize: 10.0),
                   ),
                 ],
               ),

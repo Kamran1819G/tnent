@@ -27,7 +27,6 @@ class _CommunityState extends State<Community> {
                     'Community'.toUpperCase(),
                     style: TextStyle(
                       color: hexToColor('#1E1E1E'),
-                      fontWeight: FontWeight.w900,
                       fontSize: 24.0,
                       letterSpacing: 1.5,
                     ),
@@ -35,7 +34,6 @@ class _CommunityState extends State<Community> {
                   Text(
                     ' •',
                     style: TextStyle(
-                      fontWeight: FontWeight.w900,
                       fontSize: 28.0,
                       color: hexToColor('#FF0000'),
                     ),
@@ -136,7 +134,6 @@ class CommunityPost extends StatelessWidget {
                       Text(
                         name,
                         style: const TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 18.0,
                         ),
                       ),
@@ -183,9 +180,9 @@ class CommunityPost extends StatelessWidget {
             Text(
               caption!,
               style: TextStyle(
-                color: hexToColor('#737373'),
+                color: Colors.black,
+                fontFamily: 'Gotham',
                 fontSize: 12.0,
-                fontWeight: FontWeight.w900,
               ),
             ),
           SizedBox(height: 10),
@@ -287,7 +284,6 @@ class CommunityPost extends StatelessWidget {
             'Report',
             style: TextStyle(
               color: hexToColor('#9B9B9B'),
-              fontWeight: FontWeight.w900,
               fontSize: 16.0,
             ),
           ),
@@ -308,14 +304,29 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
   File? _image;
   List<File> _images = [];
 
-  Future pickImage() async {
+  Future<void> pickImage() async {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
     if (image != null) {
-      setState(() {
-        _image = File(image.path);
-        _images.add(_image!);
-      });
+      final File file = File(image.path);
+      final int fileSize = await file.length();
+
+      const int maxSizeInBytes = 500 * 1024; // 500 KB
+
+      if (fileSize <= maxSizeInBytes) {
+        setState(() {
+          _image = file;
+          _images.add(_image!);
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'The selected image is too large. Please select an image smaller than 500 KB.'),
+          ),
+        );
+      }
     }
   }
 
@@ -334,10 +345,9 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                   Row(
                     children: [
                       Text(
-                        'Community Post'.toUpperCase(),
+                        'Create Post'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 24.0,
                           letterSpacing: 1.5,
                         ),
@@ -345,7 +355,6 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                           color: hexToColor('#FF0000'),
                         ),
@@ -378,7 +387,7 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                 children: [
                   Text(
                     'Add Image',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                   ),
                   SizedBox(height: 10),
                   Row(
@@ -462,13 +471,18 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                           ),
                         ),
                       if (_images.isEmpty)
-                        Text(
-                          '(you can add up to 3 images)',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                            color: hexToColor('#636363'),
+                        Container(
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          child: Text(
+                            'Note: You can add up to 3 images, and the file size should not exceed 500 KB.',
+                            style: TextStyle(
+                              fontSize: 10,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              color: hexToColor('#636363'),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
                           ),
                         ),
                     ],
@@ -485,7 +499,7 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                 children: [
                   Text(
                     'Caption',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                   ),
                   SizedBox(height: 20),
                   TextField(
@@ -497,7 +511,6 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                       labelText: 'Description',
                       labelStyle: TextStyle(
                         color: hexToColor('#545454'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                       hintText: 'Write a caption...',
@@ -527,7 +540,7 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                 children: [
                   Text(
                     'Product Link',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                   ),
                   SizedBox(height: 10),
                   TextField(

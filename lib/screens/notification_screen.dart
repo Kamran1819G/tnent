@@ -15,6 +15,7 @@ class _NotificationScreenState extends State<NotificationScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   bool isStoreOwner = true;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -26,6 +27,17 @@ class _NotificationScreenState extends State<NotificationScreen>
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  _getTabLabel(int index) {
+    switch (index) {
+      case 0:
+        return 'General';
+      case 1:
+        return 'Store';
+      default:
+        return '';
+    }
   }
 
   @override
@@ -43,18 +55,16 @@ class _NotificationScreenState extends State<NotificationScreen>
                 Row(
                   children: [
                     Text(
-                      'Updates'.toUpperCase(),
+                      'Update'.toUpperCase(),
                       style: TextStyle(
                         color: hexToColor('#1E1E1E'),
-                        fontWeight: FontWeight.w900,
-                        fontSize: 28.0,
+                        fontSize: 24.0,
                         letterSpacing: 1.5,
                       ),
                     ),
                     Text(
                       ' •',
                       style: TextStyle(
-                        fontWeight: FontWeight.w900,
                         fontSize: 28.0,
                         color: hexToColor('#1770B5'),
                       ),
@@ -78,48 +88,37 @@ class _NotificationScreenState extends State<NotificationScreen>
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            child: TabBar(
-              controller: _tabController,
-              isScrollable: true,
-              tabAlignment: TabAlignment.start,
-              unselectedLabelColor: Colors.black,
-              labelColor: Colors.white,
-              indicator: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
-              labelStyle: TextStyle(
-                fontSize: 14.0,
-              ),
-              indicatorSize: TabBarIndicatorSize.tab,
-              overlayColor: MaterialStateProperty.all(Colors.transparent),
-              dividerColor: Colors.transparent,
-              tabs: <Widget>[
-                Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: Theme.of(context).primaryColor, width: 1.0),
-                      borderRadius: BorderRadius.circular(12.0),
+            padding: const EdgeInsets.only(left: 8.0),
+            child: Wrap(
+              children: List.generate(2, (index) {
+                return Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                  child: ChoiceChip(
+                    label: Text(_getTabLabel(index)),
+                    labelStyle: TextStyle(
+                      fontSize: 12.0,
+                      color: _selectedIndex == index ? Colors.white : hexToColor("#343434"),
                     ),
-                    child: Text("General")),
-                if (isStoreOwner)
-                  Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                          color: Theme.of(context).primaryColor, width: 1.0),
-                      borderRadius: BorderRadius.circular(12.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                      side: BorderSide(
+                        color: hexToColor('#343434'),
+                      ),
                     ),
-                    child: Text(
-                      "Store",
-                    ),
+                    showCheckmark: false,
+                    selected: _selectedIndex == index,
+                    selectedColor:  Theme.of(context).primaryColor,
+                    backgroundColor: Colors.white,
+                    onSelected: (selected) {
+                      setState(() {
+                        _selectedIndex = index;
+                        _tabController.index = index;
+                      });
+                    },
                   ),
-              ],
+                );
+              }),
             ),
           ),
           SizedBox(height: 20.0),
@@ -135,20 +134,20 @@ class _NotificationScreenState extends State<NotificationScreen>
                     orderID: '123456',
                     time: '2024-04-24 10:00 AM',
                   ),
-                  SizedBox(height: 16.0),
+                  SizedBox(height: 20.0),
                   OrderUpdateNotification(
                     type: NotificationType.cancelled,
                     orderID: '123456',
                     time: '2024-04-24 10:00 AM',
                   ),
-                  SizedBox(height: 16.0),
+                  SizedBox(height: 20.0),
                   OrderUpdateNotification(
                     type: NotificationType.delivered,
                     name: 'Kamran Khan',
                     orderID: '789012',
                     time: '2024-04-23 3:00 PM',
                   ),
-                  SizedBox(height: 16.0),
+                  SizedBox(height: 20.0),
                   OrderUpdateNotification(
                     type: NotificationType.refunded, // or delivered
                     orderID: '345678',
@@ -170,6 +169,20 @@ class _NotificationScreenState extends State<NotificationScreen>
           )
         ],
       ),
+    );
+  }
+
+  Widget _buildTab(BuildContext context, String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: Theme.of(context).primaryColor,
+          width: 1.0,
+        ),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: Text(text),
     );
   }
 }

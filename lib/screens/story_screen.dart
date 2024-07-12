@@ -152,7 +152,7 @@ class _StoryScreenState extends State<StoryScreen> {
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 18,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
                       Spacer(),

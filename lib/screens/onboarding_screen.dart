@@ -101,7 +101,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           'Tnennt inc.',
                           style: TextStyle(
                             color: hexToColor('#E6E6E6'),
-                            fontWeight: FontWeight.w900,
                             fontSize: 14.0,
                           ),
                         ),

@@ -65,10 +65,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     Row(
                       children: [
                         Text(
-                          'Products'.toUpperCase(),
+                          'Product'.toUpperCase(),
                           style: TextStyle(
                             color: hexToColor('#1E1E1E'),
-                            fontWeight: FontWeight.w900,
                             fontSize: 24.0,
                             letterSpacing: 1.5,
                           ),
@@ -76,7 +75,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         Text(
                           ' •',
                           style: TextStyle(
-                            fontWeight: FontWeight.w900,
                             fontSize: 28.0,
                             color: hexToColor('#FF0000'),
                           ),
@@ -265,7 +263,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       style: TextStyle(
                         color: hexToColor('#343434'),
                         fontSize: 20,
-                        fontWeight: FontWeight.w900,
                       ),
                     ),
                     SizedBox(height: 20),
@@ -306,7 +303,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     style: TextStyle(
                                       color: hexToColor('#343434'),
                                       fontSize: 28,
-                                      fontWeight: FontWeight.w900,
                                     ),
                                   ),
                                   SizedBox(width: 10),
@@ -315,7 +311,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     style: TextStyle(
                                       color: hexToColor('#FF0000'),
                                       fontSize: 16,
-                                      fontWeight: FontWeight.w900,
                                     ),
                                   ),
                                 ],
@@ -325,7 +320,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 style: TextStyle(
                                   color: hexToColor('#B9B9B9'),
                                   fontSize: 16,
-                                  fontWeight: FontWeight.w900,
                                   decoration: TextDecoration.lineThrough,
                                   decorationColor: hexToColor('#B9B9B9'),
                                 ),
@@ -360,14 +354,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           'Description',
                           style: TextStyle(
                             color: hexToColor('#1E1E1E'),
-                            fontWeight: FontWeight.w900,
                             fontSize: 20.0,
                           ),
                         ),
                         Text(
                           ' •',
                           style: TextStyle(
-                            fontWeight: FontWeight.w900,
                             fontSize: 20.0,
                             color: hexToColor('#FF0000'),
                           ),
@@ -380,7 +372,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       style: TextStyle(
                         color: hexToColor('#9C9C9C'),
                         fontSize: 14,
-                        fontWeight: FontWeight.w900,
                       ),
                     ),
                   ],
@@ -399,14 +390,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           'Related Products',
                           style: TextStyle(
                             color: hexToColor('#1E1E1E'),
-                            fontWeight: FontWeight.w900,
                             fontSize: 20.0,
                           ),
                         ),
                         Text(
                           ' •',
                           style: TextStyle(
-                            fontWeight: FontWeight.w900,
                             fontSize: 20.0,
                             color: hexToColor('#FF0000'),
                           ),
@@ -444,14 +433,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           'Reviews',
                           style: TextStyle(
                             color: hexToColor('#1E1E1E'),
-                            fontWeight: FontWeight.w900,
                             fontSize: 20.0,
                           ),
                         ),
                         Text(
                           ' •',
                           style: TextStyle(
-                            fontWeight: FontWeight.w900,
                             fontSize: 20.0,
                             color: hexToColor('#FF0000'),
                           ),
@@ -488,6 +475,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 fontSize: 16,
                                 fontFamily: 'Gotham',
                                 fontWeight: FontWeight.w600,
+                              ),
+                              suffixIcon: Icon(
+                                Icons.send,
+                                color: Theme.of(context).primaryColor,
                               ),
                               border: InputBorder.none,
                               focusedBorder: InputBorder.none,
@@ -577,7 +568,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             'Report',
             style: TextStyle(
               color: hexToColor('#9B9B9B'),
-              fontWeight: FontWeight.w900,
               fontSize: 16.0,
             ),
           ),
@@ -611,11 +601,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               Text('Add Your Rating',
                 style: TextStyle(
                     color: hexToColor('#343434'),
-                    fontWeight: FontWeight.w900,
                     fontSize: 16.0),
               ),
               Spacer(),
               CircleAvatar(
+                radius: 15,
                 backgroundColor: hexToColor('#F5F5F5'),
                 child: Icon(
                   Icons.flag_rounded,
@@ -623,10 +613,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   size: 16,
                 ),
               ),
+              SizedBox(width: 4),
               Text('900',
                 style: TextStyle(
                     color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.w900,
                     fontSize: 16.0),
               ),
             ],
@@ -638,17 +628,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               Column(
                 children: [
                   CircleAvatar(
+                    radius: 30,
                     backgroundColor: hexToColor('#F5F5F5'),
                     child: Image.asset('assets/red-flag.png',
-                      width: 25,
-                      height: 25,
+                      width: 30,
+                      height: 30,
                     ),
                   ),
                   SizedBox(height: 10),
                   Text('100',
                     style: TextStyle(
                         color: hexToColor('#9C9C9C'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0),
                   ),
                 ],
@@ -657,24 +647,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               Column(
                 children: [
                   CircleAvatar(
+                    radius: 30,
                     backgroundColor: hexToColor('#F5F5F5'),
                     child: Image.asset('assets/green-flag.png',
-                      width: 25,
-                      height: 25,
+                      width: 30,
+                      height: 30,
                     ),
                   ),
                   SizedBox(height: 10),
                   Text('800',
                     style: TextStyle(
                         color: hexToColor('#9C9C9C'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0),
                   ),
                 ],
               ),
             ],
           ),
-
         ],
       ),
     );

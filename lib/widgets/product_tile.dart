@@ -95,7 +95,7 @@ class _ProductTileState extends State<ProductTile> {
                       child: Icon(
                         _isInWishlist ? Icons.favorite : Icons.favorite_border,
                         color: _isInWishlist ? Colors.red : Colors.grey,
-                        size: 14.0,
+                        size: 18.0,
                       ),
                     ),
                   ),

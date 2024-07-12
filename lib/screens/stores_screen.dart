@@ -30,7 +30,6 @@ class _StoresScreenState extends State<StoresScreen> {
                         'Stores'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                           letterSpacing: 1.5,
                         ),
@@ -38,7 +37,6 @@ class _StoresScreenState extends State<StoresScreen> {
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                           color: hexToColor('#FF0000'),
                         ),

@@ -30,7 +30,7 @@ class _CatalogState extends State<Catalog> {
                     'Catalog'.toUpperCase(),
                     style: TextStyle(
                       color: hexToColor('#1E1E1E'),
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w400,
                       fontSize: 24.0,
                       letterSpacing: 1.5,
                     ),
@@ -38,7 +38,7 @@ class _CatalogState extends State<Catalog> {
                   Text(
                     ' •',
                     style: TextStyle(
-                      fontWeight: FontWeight.w900,
+                      fontWeight: FontWeight.w400,
                       fontSize: 28.0,
                       color: hexToColor('#FAD524'),
                     ),
@@ -62,7 +62,7 @@ class _CatalogState extends State<Catalog> {
                         fit: BoxFit.cover,
                         colorBlendMode: BlendMode.overlay,
                       )),
-                  SizedBox(width: 10),
+                  SizedBox(width: 20),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -70,11 +70,11 @@ class _CatalogState extends State<Catalog> {
                           MaterialPageRoute(
                               builder: (context) => MyProfileScreen()));
                     },
-                    child: Container(
-                      margin: EdgeInsets.all(8.0),
-                      child: CircleAvatar(
-                        backgroundImage: AssetImage('assets/profile_image.png'),
-                      ),
+                    child: CircleAvatar(
+                      radius: 30.0,
+                      backgroundColor: Theme.of(context).primaryColor,
+                      child:
+                      Icon(Icons.person, color: Colors.white, size: 30.0),
                     ),
                   ),
                 ],
@@ -83,8 +83,8 @@ class _CatalogState extends State<Catalog> {
           ),
         ),
         Container(
-          height: MediaQuery.of(context).size.height * 0.3,
-          margin: EdgeInsets.symmetric(horizontal: 12.0),
+          height: MediaQuery.of(context).size.height * 0.275,
+          margin: EdgeInsets.symmetric(horizontal: 18.0),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
@@ -105,6 +105,7 @@ class _CatalogState extends State<Catalog> {
           child: GridView.count(
             crossAxisCount: 2,
             physics: NeverScrollableScrollPhysics(),
+            childAspectRatio: 1.05,
             children: [
               GestureDetector(
                 onTap: () {
@@ -114,15 +115,15 @@ class _CatalogState extends State<Catalog> {
                   );
                 },
                 child: Container(
-                  margin: EdgeInsets.all(8.0),
-                  padding: EdgeInsets.all(8.0),
+                  margin: EdgeInsets.all(10),
+                  padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: hexToColor('#FFFCE4'),
                     image: DecorationImage(
                       image: AssetImage('assets/catalog_container_graphic.png'),
                       fit: BoxFit.cover,
                     ),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,7 +133,7 @@ class _CatalogState extends State<Catalog> {
                         'Wishlist',
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w400,
                           fontSize: 20.0,
                         ),
                       ),
@@ -165,15 +166,15 @@ class _CatalogState extends State<Catalog> {
                   );
                 },
                 child: Container(
-                  margin: EdgeInsets.all(8.0),
-                  padding: EdgeInsets.all(8.0),
+                  margin: EdgeInsets.all(10.0),
+                  padding: EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: hexToColor('#FFDFDF'),
                     image: DecorationImage(
                       image: AssetImage('assets/catalog_container_graphic.png'),
                       fit: BoxFit.cover,
                     ),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +184,7 @@ class _CatalogState extends State<Catalog> {
                         'My Purchases',
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w400,
                           fontSize: 20.0,
                         ),
                       ),
@@ -209,15 +210,15 @@ class _CatalogState extends State<Catalog> {
                 ),
               ),
               Container(
-                margin: EdgeInsets.all(8.0),
-                padding: EdgeInsets.all(8.0),
+                margin: EdgeInsets.all(10.0),
+                padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: hexToColor('#EAE6F6'),
                   image: DecorationImage(
                     image: AssetImage('assets/catalog_container_graphic.png'),
                     fit: BoxFit.cover,
                   ),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(18),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -227,7 +228,7 @@ class _CatalogState extends State<Catalog> {
                       'Premium',
                       style: TextStyle(
                         color: hexToColor('#1E1E1E'),
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w400,
                         fontSize: 20.0,
                       ),
                     ),
@@ -252,15 +253,15 @@ class _CatalogState extends State<Catalog> {
                 ),
               ),
               Container(
-                margin: EdgeInsets.all(8.0),
-                padding: EdgeInsets.all(8.0),
+                margin: EdgeInsets.all(10.0),
+                padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: hexToColor('#E2FDD9'),
                   image: DecorationImage(
                     image: AssetImage('assets/catalog_container_graphic.png'),
                     fit: BoxFit.cover,
                   ),
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(18),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,7 +271,7 @@ class _CatalogState extends State<Catalog> {
                       'Coming Soon...',
                       style: TextStyle(
                         color: hexToColor('#1E1E1E'),
-                        fontWeight: FontWeight.w900,
+                        fontWeight: FontWeight.w400,
                         fontSize: 20.0,
                       ),
                     ),

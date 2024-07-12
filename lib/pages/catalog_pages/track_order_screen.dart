@@ -36,7 +36,6 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
                         'Track Order'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 24.0,
                           letterSpacing: 1.5,
                         ),
@@ -44,7 +43,6 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                           color: hexToColor('#42FF00'),
                         ),
@@ -92,7 +90,6 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
                         widget.productName,
                         style: TextStyle(
                             color: hexToColor('#343434'),
-                            fontWeight: FontWeight.w900,
                             fontSize: 16.0),
                       ),
                       SizedBox(
@@ -104,7 +101,6 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
                             'Order ID:',
                             style: TextStyle(
                                 color: hexToColor('#878787'),
-                                fontWeight: FontWeight.w900,
                                 fontSize: 14.0),
                           ),
                           SizedBox(width: 8.0),
@@ -123,7 +119,6 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
                         '₹ ${widget.productPrice}',
                         style: TextStyle(
                             color: hexToColor('#343434'),
-                            fontWeight: FontWeight.w900,
                             fontSize: 18.0),
                       ),
                     ],
@@ -170,7 +165,6 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
                         'Provided Middlemen:',
                         style: TextStyle(
                             color: hexToColor('#343434'),
-                            fontWeight: FontWeight.w900,
                             fontSize: 16.0),
                       ),
                       SizedBox(height: 15.0),
@@ -279,7 +273,6 @@ class OrderStatusItem extends StatelessWidget {
                   status.title,
                   style: TextStyle(
                     color: hexToColor('#727272'),
-                    fontWeight: FontWeight.w900,
                     fontSize: 14,
                   ),
                 ),

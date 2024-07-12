@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:tnennt/screens/store_owner_screens/optionals_screen.dart';
 import 'package:image_picker/image_picker.dart';
@@ -62,7 +63,6 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                       'Choose Your Personalized Category',
                       style: TextStyle(
                           fontSize: 24,
-                          fontWeight: FontWeight.w900,
                           color: Colors.black),
                     ),
                   ),
@@ -117,7 +117,6 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                     'New Categories:',
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w900,
                       color: hexToColor('#545454'),
                     ),
                   ),
@@ -151,7 +150,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                             style: TextStyle(
                                 color: Colors.black,
                                 fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w700,
                                 fontSize: 14.0
                             ),
                             decoration: InputDecoration(
@@ -161,7 +160,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                                 color: hexToColor('#A1A1A1'),
                                 fontSize: 14,
                                 fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w700,
                               ),
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.symmetric(
@@ -198,37 +197,32 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
               ),
             ),
             SizedBox(height: 40),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Created Categories:',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                      color: hexToColor('#545454'),
-                    ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Created Categories:',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: hexToColor('#545454'),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+            Expanded(
+              child: GridView.count(
+                shrinkWrap: true,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                crossAxisCount: 3,
+                crossAxisSpacing: 14,
+                mainAxisSpacing: 14,
+                childAspectRatio: 1.1,
+                children: List.generate(
+                  categories.length,
+                  (index) => CategoryTile(
+                    categoryName: categories[index],
+                    itemCount: 0,
                   ),
-                  SizedBox(height: 20),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      childAspectRatio: 1.2,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
-                    itemCount: categories.length,
-                    itemBuilder: (context, index) {
-                      return CategoryTile(
-                        categoryName: categories[index],
-                        itemCount: 0,
-                      );
-                    },
-                  )
-                ],
+                ),
               ),
             ),
           ],
@@ -243,11 +237,19 @@ class CategoryTile extends StatelessWidget {
   final Color color;
   final int itemCount;
 
-  const CategoryTile({
+  static final List<Color> colorList = [
+    Color(0xFFDDF1EF),
+    Color(0xFFFFF0E6),
+    Color(0xFFE6F3FF),
+    Color(0xFFF0E6FF),
+    Color(0xFFE6FFEA),
+    Color(0xFFFFE6E6),
+  ];
+
+  CategoryTile({
     required this.categoryName,
-    this.color = const Color(0xFFDDF1EF),
     required this.itemCount,
-  });
+  }) : color = colorList[Random().nextInt(colorList.length)];
 
   @override
   Widget build(BuildContext context) {
@@ -266,7 +268,7 @@ class CategoryTile extends StatelessWidget {
         padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,7 +278,6 @@ class CategoryTile extends StatelessWidget {
               categoryName.toUpperCase(),
               style: TextStyle(
                 color: Colors.black,
-                fontWeight: FontWeight.w900,
                 fontSize: 12.0,
               ),
               overflow: TextOverflow.ellipsis,
@@ -294,7 +295,6 @@ class CategoryTile extends StatelessWidget {
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 18.0,
-                        fontWeight: FontWeight.w900,
                       ),
                     ),
                     Text(
@@ -399,7 +399,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         'Add Products'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 24.0,
                           letterSpacing: 1.5,
                         ),
@@ -407,7 +406,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                           color: hexToColor('#FF0000'),
                         ),
@@ -446,7 +444,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           Text(
                             'Add Image',
                             style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w900),
+                                fontSize: 16,),
                           ),
                           SizedBox(height: 10),
                           Row(
@@ -536,13 +534,16 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   ),
                                 ),
                               if (_images.isEmpty)
-                                Text(
-                                  '(Add more than one image of the product)',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w500,
-                                    color: hexToColor('#636363'),
+                                Container(
+                                  width: MediaQuery.of(context).size.width * 0.6,
+                                  child: Text(
+                                    'Note: Add more than one image of the product',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      color: hexToColor('#636363'),
+                                    ),
                                   ),
                                 ),
                             ],
@@ -567,7 +568,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               padding: EdgeInsets.symmetric(horizontal: 25.0),
                               style: TextStyle(
                                 color: hexToColor('#272822'),
-                                fontWeight: FontWeight.w900,
                                 fontSize: 16.0,
                               ),
                               icon: Icon(Icons.keyboard_arrow_down_rounded),
@@ -621,7 +621,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           Text(
                             'Item Name',
                             style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w900),
+                                fontSize: 16,),
                           ),
                           SizedBox(height: 10),
                           TextField(
@@ -631,7 +631,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               hintStyle: TextStyle(
                                 color: hexToColor('#989898'),
                                 fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w700,
                                 fontSize: 14.0,
                               ),
                               border: OutlineInputBorder(
@@ -655,12 +655,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           Text(
                             'Item Price',
                             style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w900),
+                                fontSize: 16,),
                           ),
                           Text(
                             '(Fill any two slots and the third will be calculated automatically)',
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 11,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
                               color: hexToColor('#636363'),
@@ -678,7 +678,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontFamily: 'Gotham',
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w700,
                                     fontSize: 14.0,
                                   ),
                                   decoration: InputDecoration(
@@ -686,7 +686,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                     hintStyle: TextStyle(
                                       color: hexToColor('#989898'),
                                       fontFamily: 'Gotham',
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.w700,
                                       fontSize: 14.0,
                                     ),
                                     prefixIcon: Text(
@@ -721,7 +721,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontFamily: 'Gotham',
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w700,
                                     fontSize: 14.0,
                                   ),
                                   decoration: InputDecoration(
@@ -729,7 +729,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                     hintStyle: TextStyle(
                                       color: hexToColor('#989898'),
                                       fontFamily: 'Gotham',
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.w700,
                                       fontSize: 14.0,
                                     ),
                                     prefixIcon: Text(
@@ -764,7 +764,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontFamily: 'Gotham',
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w700,
                                     fontSize: 14.0,
                                   ),
                                   decoration: InputDecoration(
@@ -772,7 +772,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                     hintStyle: TextStyle(
                                       color: hexToColor('#989898'),
                                       fontFamily: 'Gotham',
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.w700,
                                       fontSize: 14.0,
                                     ),
                                     prefixIcon: Text(
@@ -806,7 +806,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     ),
                     SizedBox(height: 30),
                     // Optional
-                    Container(
+                    /*Container(
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -814,12 +814,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           Text(
                             'Item Optional',
                             style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w900),
+                                fontSize: 16,),
                           ),
                           Text(
                             '(Use if your product has different size, weight & volume )',
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 11,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
                               color: hexToColor('#636363'),
@@ -875,6 +875,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       ),
                     ),
                     SizedBox(height: 30),
+                    */
                     // Product Description
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -884,7 +885,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           Text(
                             'Add Product Description & More Details',
                             style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w900),
+                                fontSize: 16,),
                           ),
                           SizedBox(height: 20),
                           TextField(
@@ -897,14 +898,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               labelText: 'Description',
                               labelStyle: TextStyle(
                                 color: hexToColor('#545454'),
-                                fontWeight: FontWeight.w900,
                                 fontSize: 14.0,
                               ),
                               hintText: 'Write product description...',
                               hintStyle: TextStyle(
                                 color: hexToColor('#989898'),
                                 fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w700,
                                 fontSize: 16.0,
                               ),
                               border: OutlineInputBorder(
@@ -927,7 +927,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           Text(
                             'Product Stock Quantity',
                             style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w900),
+                                fontSize: 16,),
                           ),
                           SizedBox(height: 10),
                           Row(
@@ -938,7 +938,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontFamily: 'Gotham',
-                                    fontWeight: FontWeight.w500,
+                                    fontWeight: FontWeight.w700,
                                     fontSize: 14.0,
                                   ),
                                   decoration: InputDecoration(
@@ -946,7 +946,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                     hintStyle: TextStyle(
                                       color: hexToColor('#989898'),
                                       fontFamily: 'Gotham',
-                                      fontWeight: FontWeight.w500,
+                                      fontWeight: FontWeight.w700,
                                       fontSize: 14.0,
                                     ),
                                     border: OutlineInputBorder(
@@ -997,7 +997,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               'Continue',
                               style: TextStyle(
                                   color: Colors.white,
-                                  fontWeight: FontWeight.w900,
                                   fontSize: 16.0),
                             ),
                           ),
@@ -1040,7 +1039,6 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                       'All Products'.toUpperCase(),
                       style: TextStyle(
                         color: hexToColor('#1E1E1E'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 24.0,
                         letterSpacing: 1.5,
                       ),
@@ -1048,7 +1046,6 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                     Text(
                       ' •',
                       style: TextStyle(
-                        fontWeight: FontWeight.w900,
                         fontSize: 28.0,
                         color: hexToColor('#FF0000'),
                       ),
@@ -1143,7 +1140,6 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
               'Category Products',
               style: TextStyle(
                 color: hexToColor('#343434'),
-                fontWeight: FontWeight.w900,
                 fontSize: 18.0,
               ),
             ),
@@ -1287,7 +1283,6 @@ class _ProductTileState extends State<ProductTile> {
                     widget.name,
                     style: TextStyle(
                       color: hexToColor('#343434'),
-                      fontWeight: FontWeight.w900,
                       fontSize: 10.0,
                     ),
                     maxLines: 1,
@@ -1298,7 +1293,6 @@ class _ProductTileState extends State<ProductTile> {
                     '\$${widget.price.toString()}',
                     style: TextStyle(
                       color: hexToColor('#343434'),
-                      fontWeight: FontWeight.w900,
                       fontSize: 10.0,
                     ),
                   ),

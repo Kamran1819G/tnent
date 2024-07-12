@@ -36,7 +36,6 @@ class _DetailScreenState extends State<DetailScreen> {
                         'Details'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 24.0,
                           letterSpacing: 1.5,
                         ),
@@ -44,7 +43,6 @@ class _DetailScreenState extends State<DetailScreen> {
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                           color: hexToColor('#42FF00'),
                         ),
@@ -97,7 +95,6 @@ class _DetailScreenState extends State<DetailScreen> {
                                 widget.productName,
                                 style: TextStyle(
                                     color: hexToColor('#343434'),
-                                    fontWeight: FontWeight.w900,
                                     fontSize: 16.0),
                               ),
                               SizedBox(
@@ -109,7 +106,6 @@ class _DetailScreenState extends State<DetailScreen> {
                                     'Order ID:',
                                     style: TextStyle(
                                         color: hexToColor('#878787'),
-                                        fontWeight: FontWeight.w900,
                                         fontSize: 14.0),
                                   ),
                                   SizedBox(width: 8.0),
@@ -117,7 +113,6 @@ class _DetailScreenState extends State<DetailScreen> {
                                     '123456',
                                     style: TextStyle(
                                         color: hexToColor('#A9A9A9'),
-                                        fontWeight: FontWeight.w900,
                                         fontSize: 14.0),
                                   ),
                                 ],
@@ -127,7 +122,6 @@ class _DetailScreenState extends State<DetailScreen> {
                                 '₹ ${widget.productPrice}',
                                 style: TextStyle(
                                     color: hexToColor('#343434'),
-                                    fontWeight: FontWeight.w900,
                                     fontSize: 16.0),
                               ),
                             ],
@@ -148,7 +142,6 @@ class _DetailScreenState extends State<DetailScreen> {
                                 'Provided Middlemen:',
                                 style: TextStyle(
                                     color: hexToColor('#343434'),
-                                    fontWeight: FontWeight.w900,
                                     fontSize: 16.0),
                               ),
                               SizedBox(height: 15.0),
@@ -205,7 +198,6 @@ class _DetailScreenState extends State<DetailScreen> {
                             'Amount Details:',
                             style: TextStyle(
                                 color: hexToColor('#343434'),
-                                fontWeight: FontWeight.w900,
                                 fontSize: 16.0),
                           ),
                           SizedBox(height: 15.0),
@@ -292,14 +284,12 @@ class _DetailScreenState extends State<DetailScreen> {
                                 'Total Amount',
                                 style: TextStyle(
                                     color: hexToColor('#343434'),
-                                    fontWeight: FontWeight.w900,
                                     fontSize: 16.0),
                               ),
                               Text(
                                 '₹ 1049.00',
                                 style: TextStyle(
                                     color: hexToColor('#838383'),
-                                    fontWeight: FontWeight.w900,
                                     fontSize: 16.0),
                               ),
                             ],
@@ -317,7 +307,6 @@ class _DetailScreenState extends State<DetailScreen> {
                             'Payment Details:',
                             style: TextStyle(
                                 color: hexToColor('#343434'),
-                                fontWeight: FontWeight.w900,
                                 fontSize: 16.0),
                           ),
                           SizedBox(height: 15.0),
@@ -384,7 +373,6 @@ class _DetailScreenState extends State<DetailScreen> {
                             'Delivery Details:',
                             style: TextStyle(
                                 color: hexToColor('#343434'),
-                                fontWeight: FontWeight.w900,
                                 fontSize: 16.0),
                           ),
                           SizedBox(height: 15.0),
@@ -460,7 +448,6 @@ class _DetailScreenState extends State<DetailScreen> {
                             'Cancel Order',
                             style: TextStyle(
                                 color: Colors.white,
-                                fontWeight: FontWeight.w900,
                                 fontSize: 12.0),
                           ),
                         ),

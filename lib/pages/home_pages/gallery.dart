@@ -29,7 +29,7 @@ class _GalleryState extends State<Gallery> {
         children: <Widget>[
           Container(
             height: 100,
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            padding: EdgeInsets.symmetric(horizontal: 2.0),
             child: Row(
               children: [
                 Row(
@@ -38,15 +38,13 @@ class _GalleryState extends State<Gallery> {
                       'Gallery'.toUpperCase(),
                       style: TextStyle(
                         color: hexToColor('#1E1E1E'),
-                        fontWeight: FontWeight.w900,
-                        fontSize: 28.0,
+                        fontSize: 24.0,
                         letterSpacing: 1.5,
                       ),
                     ),
                     Text(
                       ' •',
                       style: TextStyle(
-                        fontWeight: FontWeight.w900,
                         fontSize: 28.0,
                         color: Colors.green,
                       ),
@@ -56,9 +54,9 @@ class _GalleryState extends State<Gallery> {
                 Spacer(),
                 Container(
                   padding:
-                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
                   decoration: BoxDecoration(
-                    color: Colors.grey[900],
+                    color: hexToColor("#131312"),
                     borderRadius: BorderRadius.circular(20.0),
                   ),
                   child: Text(
@@ -81,12 +79,11 @@ class _GalleryState extends State<Gallery> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
                     child: Text(
                       'Store',
                       style: TextStyle(
                         color: Colors.black,
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                     ),
@@ -136,18 +133,17 @@ class _GalleryState extends State<Gallery> {
                                             style: TextStyle(
                                               color: Colors.white,
                                               fontFamily: 'Gotham Black',
-                                              fontWeight: FontWeight.w900,
-                                              fontSize: 24.0,
+                                              fontSize: 20.0,
                                             ),
                                           ),
                                         ),
                                       ),
-                                      SizedBox(width: 10.0),
+                                      SizedBox(width: 8.0),
                                       Container(
-                                        width: 10,
-                                        height: 10,
+                                        width: 8,
+                                        height: 8,
                                         margin:
-                                            EdgeInsets.symmetric(vertical: 15),
+                                            EdgeInsets.symmetric(vertical: 10),
                                         decoration: BoxDecoration(
                                           color: Colors.green,
                                           borderRadius:
@@ -158,11 +154,13 @@ class _GalleryState extends State<Gallery> {
                                   ),
                                   Row(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                        CrossAxisAlignment.center,
                                     children: [
-                                      Icon(Icons.web,
-                                          color: hexToColor('#00F0FF'),
-                                          size: 14),
+                                      Image.asset(
+                                        'assets/icons/blue_globe.png',
+                                        height: 10.0,
+                                        width: 10.0,
+                                      ),
                                       SizedBox(width: 5.0),
                                       Text(
                                         'jainbrothers.tnennt.store',
@@ -180,15 +178,16 @@ class _GalleryState extends State<Gallery> {
                             ],
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(right: 15.0),
+                            padding:
+                                const EdgeInsets.only(right: 15.0, top: 25),
                             child: Switch(
                               value: isAccepting,
                               activeColor: hexToColor('#41FA00'),
-                              trackOutlineColor: MaterialStateColor.resolveWith(
+                              trackOutlineColor: WidgetStateColor.resolveWith(
                                 (states) => Colors.grey,
                               ),
                               trackOutlineWidth:
-                                  MaterialStateProperty.resolveWith(
+                                  WidgetStateProperty.resolveWith(
                                 (states) => 1.0,
                               ),
                               activeTrackColor: Colors.transparent,
@@ -207,12 +206,6 @@ class _GalleryState extends State<Gallery> {
                 ],
               ),
             ),
-          Dash(
-            direction: Axis.horizontal,
-            length: MediaQuery.of(context).size.width - 32,
-            dashLength: 8,
-            dashColor: Colors.grey,
-          ),
           SizedBox(height: 20.0),
           if (!isStoreRegistered)
             GestureDetector(
@@ -233,14 +226,16 @@ class _GalleryState extends State<Gallery> {
             },
             child: Text('Change isStoreRegistered'),
           ),
-          // GestureDetector(
-          //  onTap: () {
-          //    Navigator.push(context,
-          //        MaterialPageRoute(builder: (context) => DeliverAnythingAnywhere()));
-          //  },
-          //  child: Image.asset("assets/deliver_anything_banner.png"),
-          // ),
-          // SizedBox(height: 20.0),
+          /*GestureDetector(
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => DeliverAnythingAnywhere()));
+            },
+            child: Image.asset("assets/deliver_anything_banner.png"),
+          ),*/
+          SizedBox(height: 20.0),
           GestureDetector(
               onTap: () {
                 Navigator.push(context,
@@ -256,16 +251,15 @@ class _GalleryState extends State<Gallery> {
               dashColor: Colors.grey,
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
               decoration: BoxDecoration(
                 color: Colors.grey[900],
-                borderRadius: BorderRadius.circular(20.0),
+                borderRadius: BorderRadius.circular(8.0),
               ),
               child: Text(
                 'Coming Soon',
                 style: TextStyle(
                   color: Colors.white,
-                  fontWeight: FontWeight.bold,
                   fontSize: 12.0,
                 ),
               ),

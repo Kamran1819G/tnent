@@ -34,7 +34,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         'Checkout'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 24.0,
                           letterSpacing: 1.5,
                         ),
@@ -42,7 +41,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                           color: hexToColor('#FF0000'),
                         ),
@@ -82,7 +80,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           'Kamran Khan',
                           style: TextStyle(
                             color: hexToColor('#2D332F'),
-                            fontWeight: FontWeight.w900,
                             fontSize: 22.0,
                           ),
                         ),
@@ -99,7 +96,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             'Home',
                             style: TextStyle(
                               color: Theme.of(context).primaryColor,
-                              fontWeight: FontWeight.w900,
                               fontSize: 12.0,
                             ),
                           ),
@@ -161,7 +157,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           '1234567890',
                           style: TextStyle(
                             color: hexToColor('#2D332F'),
-                            fontWeight: FontWeight.w900,
                             fontSize: 12.0,
                           ),
                         ),
@@ -191,7 +186,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               'Change Your Address',
                               style: TextStyle(
                                   color: hexToColor('#343434'),
-                                  fontWeight: FontWeight.w900,
                                   fontSize: 12.0),
                             ),
                           ),
@@ -232,7 +226,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       'Continue',
                       style: TextStyle(
                           color: Colors.white,
-                          fontWeight: FontWeight.w900,
                           fontSize: 16.0),
                     ),
                   ),
@@ -309,7 +302,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                   style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 14.0,
-                      fontWeight: FontWeight.w900),
+                      fontWeight: FontWeight.w400),
                 ),
                 SizedBox(height: 8.0),
                 Container(
@@ -340,7 +333,6 @@ class _ProductDetailsState extends State<ProductDetails> {
                           style: TextStyle(
                             color: hexToColor('#343434'),
                             fontSize: 22,
-                            fontWeight: FontWeight.w900,
                           ),
                         ),
                         SizedBox(width: 8.0),
@@ -349,7 +341,6 @@ class _ProductDetailsState extends State<ProductDetails> {
                           style: TextStyle(
                             color: hexToColor('#FF0000'),
                             fontSize: 10,
-                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ],
@@ -359,7 +350,6 @@ class _ProductDetailsState extends State<ProductDetails> {
                       style: TextStyle(
                         color: hexToColor('#B9B9B9'),
                         fontSize: 10,
-                        fontWeight: FontWeight.w900,
                         decoration: TextDecoration.lineThrough,
                         decorationColor: hexToColor('#B9B9B9'),
                       ),
@@ -377,7 +367,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                   style: TextStyle(
                       color: hexToColor('#222230'),
                       fontSize: 10.0,
-                      fontWeight: FontWeight.w900),
+                      fontWeight: FontWeight.w400),
                 ),
                 SizedBox(height: 4.0),
                 Container(
@@ -445,7 +435,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                         'Checkout'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 24.0,
                           letterSpacing: 1.5,
                         ),
@@ -453,7 +442,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                           color: hexToColor('#FF0000'),
                         ),
@@ -501,7 +489,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                         style: TextStyle(
                           color: hexToColor('#343434'),
                           fontSize: 18.0,
-                          fontWeight: FontWeight.w900,
                         ),
                       ),
                       SizedBox(height: 4.0),
@@ -517,7 +504,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                           style: TextStyle(
                             color: hexToColor('#A9A9A9'),
                             fontSize: 10.0,
-                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ])
@@ -531,7 +517,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                         style: TextStyle(
                           color: hexToColor('#2D332F'),
                           fontSize: 12.0,
-                          fontWeight: FontWeight.w900,
                         ),
                       ),
                       SizedBox(width: 4.0),
@@ -578,7 +563,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                       style: TextStyle(
                                         color: hexToColor('#2D332F'),
                                         fontSize: 12.0,
-                                        fontWeight: FontWeight.w900,
                                       ),
                                     ),
                                     SizedBox(height: 4.0),
@@ -656,7 +640,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                   Text('Coupons',
                                       style: TextStyle(
                                         color: hexToColor('#272822'),
-                                        fontWeight: FontWeight.w600,
                                         fontSize: 14.0,
                                       )),
                                   SizedBox(
@@ -693,7 +676,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                 'Enter Code:',
                                 style: TextStyle(
                                   color: hexToColor('#272822'),
-                                  fontWeight: FontWeight.w600,
                                   fontSize: 12.0,
                                 ),
                               ),
@@ -712,7 +694,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                             'Summary',
                             style: TextStyle(
                                 color: hexToColor('#343434'),
-                                fontWeight: FontWeight.w900,
                                 fontSize: 18.0),
                           ),
                           SizedBox(height: 20.0),
@@ -799,14 +780,12 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                 'Total',
                                 style: TextStyle(
                                     color: hexToColor('#343434'),
-                                    fontWeight: FontWeight.w900,
                                     fontSize: 22.0),
                               ),
                               Text(
                                 '₹ 200.00',
                                 style: TextStyle(
                                     color: hexToColor('#343434'),
-                                    fontWeight: FontWeight.w900,
                                     fontSize: 22.0),
                               ),
                             ],
@@ -841,7 +820,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
                       'Pay ₹ 200',
                       style: TextStyle(
                         color: Colors.white,
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                     ),
@@ -881,7 +859,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                         'Checkout'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 24.0,
                           letterSpacing: 1.5,
                         ),
@@ -889,7 +866,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                           color: hexToColor('#FF0000'),
                         ),
@@ -991,7 +967,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                             style: TextStyle(
                               color: hexToColor('#343434'),
                               fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w400,
                               fontSize: 12.0,
                             ),
                           ),
@@ -1016,7 +991,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                             style: TextStyle(
                               color: hexToColor('#343434'),
                               fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w400,
                               fontSize: 12.0,
                             ),
                           ),
@@ -1044,7 +1018,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                             style: TextStyle(
                               color: hexToColor('#343434'),
                               fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w400,
                               fontSize: 12.0,
                             ),
                           ),
@@ -1052,7 +1025,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                               style: TextStyle(
                                 color: hexToColor('#4B8284'),
                                 fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w400,
                                 fontSize: 12.0,
                               )),
                           children: [
@@ -1071,7 +1043,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                         color: hexToColor('#2A2A2A'),
                                         fontFamily: 'Gotham',
                                         fontSize: 14,
-                                        fontWeight: FontWeight.w900,
                                       ),
                                       decoration: InputDecoration(
                                         helperText:
@@ -1079,7 +1050,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                         helperStyle: TextStyle(
                                           color: hexToColor('#6F6F6F'),
                                           fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w400,
                                           fontSize: 8.0,
                                         ),
                                         border: OutlineInputBorder(
@@ -1169,14 +1139,12 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                     color: hexToColor('#2A2A2A'),
                                     fontFamily: 'Gotham',
                                     fontSize: 14,
-                                    fontWeight: FontWeight.w900,
                                   ),
                                   decoration: InputDecoration(
                                     hintText: 'Card Number',
                                     hintStyle: TextStyle(
                                       color: hexToColor('#6F6F6F'),
                                       fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w400,
                                       fontSize: 14.0,
                                     ),
                                     border: OutlineInputBorder(
@@ -1202,14 +1170,12 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                         color: hexToColor('#2A2A2A'),
                                         fontFamily: 'Gotham',
                                         fontSize: 14,
-                                        fontWeight: FontWeight.w900,
                                       ),
                                       decoration: InputDecoration(
                                         hintText: 'Expiry(MM/YY)',
                                         hintStyle: TextStyle(
                                           color: hexToColor('#6F6F6F'),
                                           fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w400,
                                           fontSize: 14.0,
                                         ),
                                         border: OutlineInputBorder(
@@ -1234,14 +1200,12 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                         color: hexToColor('#2A2A2A'),
                                         fontFamily: 'Gotham',
                                         fontSize: 14,
-                                        fontWeight: FontWeight.w900,
                                       ),
                                       decoration: InputDecoration(
                                         hintText: 'CVV',
                                         hintStyle: TextStyle(
                                           color: hexToColor('#6F6F6F'),
                                           fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w400,
                                           fontSize: 14.0,
                                         ),
                                         border: OutlineInputBorder(
@@ -1272,7 +1236,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                       'Pay ₹ 200',
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontWeight: FontWeight.w900,
                                         fontSize: 16.0,
                                       ),
                                     ),
@@ -1387,7 +1350,6 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                         'Checkout'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 24.0,
                           letterSpacing: 1.5,
                         ),
@@ -1395,7 +1357,6 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                           color: hexToColor('#FF0000'),
                         ),
@@ -1536,7 +1497,6 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                     'Confirm Address',
                     style: TextStyle(
                         color: Colors.white,
-                        fontWeight: FontWeight.w900,
                         fontSize: 14.0),
                   ),
                 ),
@@ -1568,7 +1528,6 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
             type,
             style: TextStyle(
                 color: isSelected ? Colors.white : hexToColor('#343434'),
-                fontWeight: FontWeight.w900,
                 fontSize: 12.0),
           ),
         ),
@@ -1589,7 +1548,6 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
         color: hexToColor('#2A2A2A'),
         fontFamily: 'Gotham',
         fontSize: 14,
-        fontWeight: FontWeight.w900,
       ),
       decoration: InputDecoration(
         floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -1719,7 +1677,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                             style: TextStyle(
                               color: hexToColor('#1E1E1E'),
                               fontSize: 24.0,
-                              fontWeight: FontWeight.w900,
                             ),
                           ),
                           SizedBox(height: 8.0),
@@ -1831,7 +1788,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                       style: TextStyle(
                                         color: hexToColor('#343434'),
                                         fontSize: 20.0,
-                                        fontWeight: FontWeight.w900,
                                       ),
                                     ),
                                     SizedBox(width: 8.0),
@@ -1840,7 +1796,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                       style: TextStyle(
                                         color: hexToColor('#343434'),
                                         fontSize: 20.0,
-                                        fontWeight: FontWeight.w900,
                                       ),
                                     ),
                                   ],
@@ -1877,7 +1832,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                       style: TextStyle(
                                         color: hexToColor('#2D332F'),
                                         fontSize: 20.0,
-                                        fontWeight: FontWeight.w900,
                                       ),
                                     ),
                                     SizedBox(width: 8.0),

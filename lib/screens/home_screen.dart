@@ -1,7 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:tnennt/services/firebase/firebase_auth_service.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/pages/home_pages/catalog.dart';
 import 'package:tnennt/pages/home_pages/community.dart';
@@ -22,6 +19,7 @@ class _HomeScreenState extends State<HomeScreen> {
   PageController _pageController = PageController();
   UserModel? currentUser;
   List<Widget> _widgetOptions = [];
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -56,97 +54,92 @@ class _HomeScreenState extends State<HomeScreen> {
       body: SafeArea(
         child: currentUser == null
             ? Center(
-              child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              RichText(
+                text: TextSpan(
                   children: [
-                    RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'Tnennt',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 32.0,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' •',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 32.0,
-                              color: hexToColor('#42FF00'),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-            )
-            : Stack(
-                children: [
-                  PageView(
-                    physics: NeverScrollableScrollPhysics(),
-                    controller: _pageController,
-                    children: _widgetOptions,
-                  ),
-                  // Bottom Navigation Bar
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      margin: EdgeInsets.only(
-                        bottom: 20,
-                        left: 40,
-                        right: 40,
-                      ),
-                      padding: EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: hexToColor('#2D332F'),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: GNav(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        color: hexToColor('#747474'),
-                        activeColor: Colors.black,
-                        tabBackgroundColor: Colors.white,
-                        hoverColor: Colors.white,
-                        iconSize: 24,
-                        onTabChange: (index) {
-                          setState(() {
-                            _pageController.animateToPage(
-                              index,
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut,
-                            );
-                          });
-                        },
-                        tabs:  [
-                          GButton(
-                            icon: Icons.home,
-                            leading: Image.asset('assets/home.png', width: 20.0),
-                          ),
-                          GButton(
-                            icon: Icons.collections_bookmark,
-                            leading: Image.asset('assets/catalog.png', width: 20.0),
-                          ),
-                          GButton(
-                            icon: Icons.layers_outlined,
-                            leading: Image.asset('assets/gallery.png', width: 20.0),
-                          ),
-                          GButton(
-                            icon: Icons.coffee,
-                            leading: Image.asset('assets/community.png', width: 20.0),
-                          )
-                        ],
+                    TextSpan(
+                      text: 'Tnennt',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 32.0,
                       ),
                     ),
-                  ),
-                ],
+                    TextSpan(
+                      text: ' •',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 32.0,
+                        color: hexToColor('#42FF00'),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        )
+            : Stack(
+          children: [
+            PageView(
+              physics: NeverScrollableScrollPhysics(),
+              controller: _pageController,
+              children: _widgetOptions,
+            ),
+            // Custom Bottom Navigation Bar
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                margin: EdgeInsets.only(
+                  bottom: 20,
+                  left: 40,
+                  right: 40,
+                ),
+                padding: EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  color: hexToColor('#2D332F'),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildNavItem(0, 'assets/home.png'),
+                    _buildNavItem(1, 'assets/catalog.png'),
+                    _buildNavItem(2, 'assets/gallery.png'),
+                    _buildNavItem(3, 'assets/community.png'),
+                  ],
+                ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(int index, String assetName) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedIndex = index;
+          _pageController.jumpToPage(index);
+        });
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        decoration: BoxDecoration(
+          color: _selectedIndex == index ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: Image.asset(
+          assetName,
+          width: 20.0,
+          color: _selectedIndex == index ? Colors.black : hexToColor('#747474'),
+        ),
       ),
     );
   }

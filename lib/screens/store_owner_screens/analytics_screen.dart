@@ -36,7 +36,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                               'Analytics'.toUpperCase(),
                               style: TextStyle(
                                 color: hexToColor('#1E1E1E'),
-                                fontWeight: FontWeight.w900,
                                 fontSize: 24.0,
                                 letterSpacing: 1.5,
                               ),
@@ -44,7 +43,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                             Text(
                               ' •',
                               style: TextStyle(
-                                fontWeight: FontWeight.w900,
                                 fontSize: 28.0,
                                 color: hexToColor('#42FF00'),
                               ),
@@ -96,7 +94,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         padding: EdgeInsets.symmetric(horizontal: 25.0),
                         style: TextStyle(
                           color: hexToColor('#272822'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 16.0,
                         ),
                         icon: Icon(Icons.keyboard_arrow_down_rounded),
@@ -155,7 +152,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: 40),
+              SizedBox(height: 60),
 
               // Total Customers
               Container(
@@ -172,7 +169,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     Text(
                       'Total Customers',
                       style: TextStyle(
-                        fontWeight: FontWeight.w900,
                         color: hexToColor('#272822'),
                         fontSize: 18,
                       ),
@@ -184,9 +180,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         Text(
                           '760',
                           style: TextStyle(
-                            fontWeight: FontWeight.w900,
                             color: Theme.of(context).primaryColor,
-                            fontSize: 30,
+                            fontSize: 26,
                           ),
                         ),
                         SizedBox(width: 8),
@@ -223,7 +218,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         Text(
                           'Total Ordered item',
                           style: TextStyle(
-                            fontWeight: FontWeight.w900,
                             color: hexToColor('#272822'),
                             fontSize: 18,
                           ),
@@ -242,7 +236,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 28,
-                            fontWeight: FontWeight.w900,
                           ),
                         ),
                         SizedBox(height: 10),
@@ -261,7 +254,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                               style: TextStyle(
                                 color: Theme.of(context).primaryColor,
                                 fontSize: 28,
-                                fontWeight: FontWeight.w900,
                               ),
                             ),
                             SizedBox(width: 8),
@@ -292,7 +284,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         Text(
                           'Item Name',
                           style: TextStyle(color: hexToColor('#343434'),
-                            fontWeight: FontWeight.w900,
                             fontSize: 12.0,
                           ),
                         ),
@@ -332,12 +323,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        SizedBox(height: 8),
                         Text(
                           '800k',
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 28,
-                            fontWeight: FontWeight.w900,
                           ),
                         ),
                         SizedBox(height: 20),
@@ -354,12 +345,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        SizedBox(height: 8),
                         Text(
                           '0.00%',
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 28,
-                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ],
@@ -380,12 +371,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        SizedBox(height: 8),
                         Text(
                           '10k',
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 28,
-                            fontWeight: FontWeight.w900,
                           ),
                         ),
                         SizedBox(height: 20),
@@ -402,12 +393,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
+                        SizedBox(height: 8),
                         Text(
                           '0.00%',
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 28,
-                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ],
@@ -433,7 +424,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     Text(
                       'Average Order Value',
                       style: TextStyle(
-                        fontWeight: FontWeight.w900,
                         color: hexToColor('#272822'),
                         fontSize: 18,
                       ),
@@ -445,17 +435,15 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         Text(
                           '₹',
                           style: TextStyle(
-                            fontWeight: FontWeight.w900,
                             color: Theme.of(context).primaryColor,
-                            fontSize: 30,
+                            fontSize: 26,
                           ),
                         ),
                         Text(
                           '760',
                           style: TextStyle(
-                            fontWeight: FontWeight.w900,
                             color: Theme.of(context).primaryColor,
-                            fontSize: 30,
+                            fontSize: 26,
                           ),
                         ),
                         SizedBox(width: 8),
@@ -513,7 +501,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 28,
-                            fontWeight: FontWeight.w900,
                           ),
                         ),
                         SizedBox(height: 20),
@@ -550,7 +537,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 28,
-                            fontWeight: FontWeight.w900,
                           ),
                         ),
                       ],
@@ -577,7 +563,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 28,
-                            fontWeight: FontWeight.w900,
                           ),
                         ),
                         SizedBox(height: 20),
@@ -603,7 +588,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                               style: TextStyle(
                                 color: Theme.of(context).primaryColor,
                                 fontSize: 28,
-                                fontWeight: FontWeight.w900,
                               ),
                             ),
                             Text(
@@ -654,7 +638,6 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             'Print Data As',
             style: TextStyle(
                 color: hexToColor('#343434'),
-                fontWeight: FontWeight.w900,
                 fontSize: 16.0),
           ),
           SizedBox(height: 25),

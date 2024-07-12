@@ -38,7 +38,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     });
   }
 
-
   @override
   void dispose() {
     _tabController.dispose();
@@ -58,7 +57,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       case 4:
         return 'Books';
       case 5:
-        return 'More+';
+        return 'More';
       default:
         return '';
     }
@@ -92,9 +91,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   children: [
                     Text(getGreeting().toUpperCase(),
                         style: TextStyle(
-                            color: Colors.grey[500],
-                            fontWeight: FontWeight.w900,
-                            fontSize: 12.0)),
+                            color: hexToColor('#727272'), fontSize: 12.0)),
                     SizedBox(height: 4.0),
                     RichText(
                       text: TextSpan(
@@ -106,8 +103,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                             style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Gotham Black',
-                              fontWeight: FontWeight.w900,
-                              fontSize: 28.0,
+                              fontSize: 24.0,
                             ),
                           ),
                           TextSpan(
@@ -150,12 +146,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 child: widget.currentUser != null &&
                         widget.currentUser!.photoURL.isNotEmpty
                     ? CircleAvatar(
+                        radius: 30.0,
                         backgroundImage:
                             NetworkImage(widget.currentUser!.photoURL),
                       )
                     : CircleAvatar(
+                        radius: 30.0,
                         backgroundColor: Theme.of(context).primaryColor,
-                        child: Icon(Icons.person, color: Colors.white),
+                        child:
+                            Icon(Icons.person, color: Colors.white, size: 30.0),
                       ),
               ),
             ],
@@ -200,7 +199,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       'Search Products & Store',
                       style: TextStyle(
                         color: hexToColor('#6D6D6D'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 16.0,
                       ),
                     ),
@@ -208,8 +206,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       'clothings, electronics, groceries & more...',
                       style: TextStyle(
                         color: hexToColor('#989898'),
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
+                        fontFamily: 'Gotham',
                         fontSize: 10.0,
                       ),
                     ),
@@ -227,18 +224,18 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         SizedBox(height: 20.0),
         // Updates Section
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           child: Text(
             'Updates',
             style: TextStyle(
               color: hexToColor('#343434'),
-              fontWeight: FontWeight.w900,
               fontSize: 18.0,
             ),
           ),
         ),
-        SizedBox(
+        Container(
           height: 150.0,
+          padding: EdgeInsets.only(left: 8.0),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: 5,
@@ -248,34 +245,43 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             },
           ),
         ),
-        SizedBox(height: 40.0),
+        SizedBox(height: 20.0),
         // Featured Section
-        Wrap(
-          children: List.generate(6, (index) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2.0),
-              child: ChoiceChip(
-                label: Text(_getTabLabel(index)),
-                labelStyle: TextStyle(
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.w900,
-                  color: _selectedIndex == index ? Colors.white : Colors.black,
+        Padding(
+          padding: const EdgeInsets.only(left: 12.0),
+          child: Wrap(
+            children: List.generate(6, (index) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                child: ChoiceChip(
+                  label: Text(_getTabLabel(index)),
+                  labelStyle: TextStyle(
+                    fontSize: 12.0,
+                    color: _selectedIndex == index
+                        ? Colors.white
+                        : hexToColor("#343434"),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50.0),
+                    side: BorderSide(
+                      color: hexToColor('#343434'),
+                    ),
+                  ),
+                  showCheckmark: false,
+                  selected: _selectedIndex == index,
+                  selectedColor: hexToColor('#343434'),
+                  backgroundColor: Colors.white,
+                  onSelected: (selected) {
+                    setState(() {
+                      _selectedIndex = index;
+                      _tabController.index = index;
+                    });
+                  },
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(50.0),
-                ),
-                showCheckmark: false,
-                selected: _selectedIndex == index,
-                selectedColor:  hexToColor('#343434'),
-                onSelected: (selected) {
-                  setState(() {
-                    _selectedIndex = index;
-                    _tabController.index = index;
-                  });
-                },
-              ),
-            );
-          }),
+              );
+            }),
+          ),
         ),
 
         SizedBox(height: 40.0),
@@ -286,8 +292,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             'Featured',
             style: TextStyle(
               color: hexToColor('#343434'),
-              fontWeight: FontWeight.w900,
-              fontSize: 24.0,
+              fontSize: 22.0,
             ),
           ),
         ),
@@ -300,6 +305,16 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           child: TabBarView(
             controller: _tabController,
             children: [
+              ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 5,
+                itemBuilder: (context, index) {
+                  return ProductTile(
+                      name: "Cannon XYZ",
+                      image: "assets/product_image.png",
+                      price: 200);
+                },
+              ),
               ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
@@ -365,33 +380,32 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 'Featured Stores',
                 style: TextStyle(
                   color: hexToColor('#343434'),
-                  fontWeight: FontWeight.w900,
                   fontSize: 22.0,
                 ),
               ),
               Spacer(),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => StoresScreen()));
-                },
-                child: Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                  decoration: BoxDecoration(
-                    color: hexToColor('#F5F5F5'),
-                    borderRadius: BorderRadius.circular(50.0),
-                  ),
-                  child: Text(
-                    'View All',
-                    style: TextStyle(
-                      color: hexToColor('#272822'),
-                      fontWeight: FontWeight.w900,
-                      fontSize: 12.0,
-                    ),
-                  ),
-                ),
-              ),
+              // GestureDetector(
+              //   onTap: () {
+              //     Navigator.push(context,
+              //         MaterialPageRoute(builder: (context) => StoresScreen()));
+              //   },
+              //   child: Container(
+              //     padding:
+              //         EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              //     decoration: BoxDecoration(
+              //       color: hexToColor('#F5F5F5'),
+              //       borderRadius: BorderRadius.circular(50.0),
+              //     ),
+              //     child: Text(
+              //       'View All',
+              //       style: TextStyle(
+              //         color: hexToColor('#272822'),
+              //
+              //         fontSize: 12.0,
+              //       ),
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),
@@ -446,7 +460,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             'Category',
             style: TextStyle(
               color: hexToColor('#343434'),
-              fontWeight: FontWeight.w900,
               fontSize: 22.0,
             ),
           ),
@@ -457,8 +470,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             padding: EdgeInsets.all(16.0),
             physics: NeverScrollableScrollPhysics(),
             crossAxisCount: 2,
-            crossAxisSpacing: 16.0,
-            mainAxisSpacing: 16.0,
+            crossAxisSpacing: 20.0,
+            mainAxisSpacing: 30.0,
             childAspectRatio: 0.75,
             children: [
               CategoryTile(
@@ -529,7 +542,7 @@ class StoreTile extends StatelessWidget {
           Expanded(
             child: Text(
               storeName,
-              style: TextStyle(fontWeight: FontWeight.w900, fontSize: 10.0),
+              style: TextStyle(fontSize: 10.0),
             ),
           ),
         ],
@@ -557,7 +570,7 @@ class CategoryTile extends StatelessWidget {
       child: Column(
         children: [
           Container(
-            height: 190,
+            height: 200,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.0),
               image: DecorationImage(
@@ -571,7 +584,6 @@ class CategoryTile extends StatelessWidget {
             name,
             style: TextStyle(
               color: hexToColor('#343434'),
-              fontWeight: FontWeight.w900,
               fontSize: 14.0,
             ),
             textAlign: TextAlign.center,

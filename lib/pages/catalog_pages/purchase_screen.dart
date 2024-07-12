@@ -30,7 +30,6 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                       'Purchase'.toUpperCase(),
                       style: TextStyle(
                         color: hexToColor('#1E1E1E'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 24.0,
                         letterSpacing: 1.5,
                       ),
@@ -38,7 +37,6 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                     Text(
                       ' •',
                       style: TextStyle(
-                        fontWeight: FontWeight.w900,
                         fontSize: 28.0,
                         color: hexToColor('#FF0000'),
                       ),
@@ -71,7 +69,6 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                   'Total Amount',
                   style: TextStyle(
                     color: hexToColor('#343434'),
-                    fontWeight: FontWeight.w900,
                     fontSize: 18.0,
                   ),
                 ),
@@ -79,7 +76,6 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                   '₹ 0',
                   style: TextStyle(
                     color: hexToColor('#A9A9A9'),
-                    fontWeight: FontWeight.w900,
                     fontSize: 18.0,
                   ),
                 ),
@@ -181,7 +177,6 @@ class _PurchaseProductTileState extends State<PurchaseProductTile> {
                 '${widget.productName}',
                 style: TextStyle(
                   color: hexToColor('#343434'),
-                  fontWeight: FontWeight.w900,
                   fontSize: 20.0,
                 ),
               ),
@@ -190,7 +185,6 @@ class _PurchaseProductTileState extends State<PurchaseProductTile> {
                 '₹${widget.productPrice}',
                 style: TextStyle(
                   color: hexToColor('#343434'),
-                  fontWeight: FontWeight.w900,
                   fontSize: 20.0,
                 ),
               ),
@@ -221,7 +215,6 @@ class _PurchaseProductTileState extends State<PurchaseProductTile> {
                         'Details',
                         style: TextStyle(
                           color: hexToColor('#737373'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 12.0,
                         ),
                       ),
@@ -252,7 +245,6 @@ class _PurchaseProductTileState extends State<PurchaseProductTile> {
                         'Track Order',
                         style: TextStyle(
                           color: Colors.white,
-                          fontWeight: FontWeight.w900,
                           fontSize: 12.0,
                         ),
                       ),

@@ -109,7 +109,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         'Explore'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 24.0,
                           letterSpacing: 1.5,
                         ),
@@ -194,7 +193,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         hintText: 'Search Products & Store',
                         hintStyle: TextStyle(
                           color: hexToColor('#6D6D6D'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 16.0,
                         ),
                         border: InputBorder.none,
@@ -219,7 +217,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         'Showing ${filteredProducts.length} results for "$searchQuery"',
                         style: TextStyle(
                           color: hexToColor('#6D6D6D'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 14.0,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -307,7 +304,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
             'Add Filter',
             style: TextStyle(
                 color: hexToColor('#343434'),
-                fontWeight: FontWeight.w900,
                 fontSize: 16.0),
           ),
           SizedBox(height: 25),
@@ -496,7 +492,6 @@ class _ResultTileState extends State<ResultTile> {
                     widget.name,
                     style: TextStyle(
                         color: hexToColor('#222230'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 12.0),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -506,7 +501,6 @@ class _ResultTileState extends State<ResultTile> {
                     '\$${widget.price.toString()}',
                     style: TextStyle(
                         color: hexToColor('#343434'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 12.0),
                   ),
                 ],

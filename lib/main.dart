@@ -33,6 +33,7 @@ class MyApp extends StatelessWidget {
       enableScaleText: () => false,
       child: MaterialApp(
         theme: ThemeData(
+          scaffoldBackgroundColor: Colors.white,
          primaryColor: hexToColor('#094446'),
           fontFamily: 'Gotham Black',
         ),

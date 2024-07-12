@@ -29,153 +29,184 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
             SizedBox(height: 20.0),
             // Profile Card
             Container(
-                height: 200,
-                margin: EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  color: hexToColor('#2D332F'),
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(children: [
-                      Container(
-                        height: 75,
-                        width: 75,
-                        margin: EdgeInsets.symmetric(horizontal: 15.0),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(20.0),
-                            image: DecorationImage(
-                                image: AssetImage(widget.storeLogo),
-                                fit: BoxFit.cover)),
+              height: 200,
+              width: double.infinity,
+              margin: EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: hexToColor('#2D332F'),
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              child: Stack(
+                children: [
+                  Positioned(
+                    right: 16.0,
+                    top: 16.0,
+                    child: CircleAvatar(
+                      backgroundColor: hexToColor('#F5F5F5'),
+                      radius: 20,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.black,
+                          size: 18,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                       ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              RichText(
-                                text: TextSpan(
-                                  text: '${widget.storeName}',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Gotham Black',
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 28.0,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 10.0),
-                              Container(
-                                width: 10,
-                                height: 10,
-                                margin: EdgeInsets.symmetric(vertical: 25),
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(Icons.web,
-                                  color: hexToColor('#00F0FF'), size: 16),
-                              SizedBox(width: 5.0),
-                              Text(
-                                'jainbrothers.tnennet.store',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Poppins',
-                                    fontSize: 12.0),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(left: 30.0, bottom: 50),
-                        child: CircleAvatar(
-                          backgroundColor: Colors.grey[100],
-                          child: IconButton(
-                            icon: Icon(Icons.arrow_back_ios_new,
-                                color: Colors.black),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment(-0.9, -0.5),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          margin: EdgeInsets.only(top: 8),
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12.0),
+                            child: Image.asset(
+                              'assets/jain_brothers.png',
+                              height: 90,
+                              width: 90,
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
-                      ),
-                    ]),
-                    SizedBox(height: 20.0),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20.0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Icon(Icons.ios_share,
-                              color: Colors.white, size: 18),
-                          SizedBox(width: 10.0),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10.0, vertical: 5.0),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[600],
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Text(
-                              'Navi Mumbai',
-                              style: TextStyle(
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 12.0, vertical: 6.0),
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                border:
+                                    Border.all(color: hexToColor('#DEFF98')),
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                              child: Text(
+                                'clothings',
+                                style: TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'Poppins',
-                                  fontSize: 12.0),
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 8.0,
+                                ),
+                              ),
                             ),
-                          ),
-                          Spacer(),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16.0, vertical: 8.0),
-                            decoration: BoxDecoration(
-                              border:
-                                  Border.all(color: Colors.white, width: 0.5),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            child: Column(
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  '17',
+                                  'Jain Brothers',
                                   style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 16.0),
+                                    color: Colors.white,
+                                    fontSize: 24.0,
+                                  ),
                                 ),
-                                Text(
-                                  'Customers',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 8.0),
+                                SizedBox(width: 10.0),
+                                Container(
+                                  width: 10,
+                                  height: 10,
+                                  margin: EdgeInsets.symmetric(vertical: 15),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green,
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
                                 ),
                               ],
                             ),
-                          )
-                        ],
-                      ),
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/icons/blue_globe.png',
+                                  height: 12.0,
+                                  width: 12.0,
+                                ),
+                                SizedBox(width: 5.0),
+                                Text(
+                                  'jainbrothers.tnennet.store',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: 'Poppins',
+                                      fontSize: 12.0),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      ],
                     ),
-                  ],
-                )),
-            SizedBox(height: 20.0),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    alignment: Alignment(0.9, 0.9),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Icon(Icons.ios_share, color: Colors.white, size: 22),
+                        SizedBox(width: 10.0),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12.0, vertical: 8.0),
+                          decoration: BoxDecoration(
+                            color: hexToColorWithOpacity('#C0C0C0', 0.2),
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                          child: Text(
+                            'Navi Mumbai, MH',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Poppins',
+                                fontSize: 12.0),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                        Spacer(),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12.0, vertical: 6.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.white, width: 0.5),
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                '17',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16.0),
+                              ),
+                              Text(
+                                'Customers',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 8.0),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 30.0),
 
             Container(
-              height: 140,
-              margin: EdgeInsets.symmetric(horizontal: 5),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade400),
-                borderRadius: BorderRadius.circular(20.0),
-              ),
+              height: 125,
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -203,15 +234,14 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                         'Store'.toUpperCase(),
                                         style: TextStyle(
                                           color: Colors.black,
-                                          fontWeight: FontWeight.w900,
                                           fontSize: 15.0,
                                         ),
                                       ),
                                       Text(
                                         ' •',
                                         style: TextStyle(
-                                          fontWeight: FontWeight.w900,
                                           fontSize: 15.0,
+                                          fontFamily: 'Gotham Black',
                                           color: Colors.red,
                                         ),
                                       ),
@@ -222,15 +252,13 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 15.0,
-                                      fontWeight: FontWeight.w900,
                                     ),
                                   ),
                                 ],
                               ),
                               Spacer(),
                               Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Text(
                                       '800/900',
@@ -251,8 +279,10 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                         borderRadius:
                                             BorderRadius.circular(50.0),
                                       ),
-                                      child: Image.asset('assets/green-flag.png',
-                                          height: 10, width: 10),
+                                      child: Image.asset(
+                                          'assets/green-flag.png',
+                                          height: 10,
+                                          width: 10),
                                     ),
                                   ])
                             ],
@@ -267,8 +297,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                   borderRadius: BorderRadius.circular(50.0),
                                 ),
                                 child: Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Container(
                                       padding: EdgeInsets.all(4.0),
@@ -288,7 +317,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                       'Connect'.toUpperCase(),
                                       style: TextStyle(
                                         color: hexToColor("#272822"),
-                                        fontWeight: FontWeight.w900,
                                         fontSize: 10.0,
                                       ),
                                     ),
@@ -304,7 +332,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 18.0,
-                                      fontWeight: FontWeight.w900,
                                     ),
                                   ),
                                   Text(
@@ -320,6 +347,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                           )
                         ]),
                   ),
+                  SizedBox(width: 4.0),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -349,15 +377,14 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontFamily: 'Gotham Black',
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 15.0,
+                                    fontSize: 14.0,
                                   ),
                                 ),
                                 TextSpan(
                                   text: ' •',
                                   style: TextStyle(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 20.0,
+                                    fontSize: 14.0,
+                                    fontFamily: 'Gotham Black',
                                     color: Colors.red,
                                   ),
                                 ),
@@ -368,16 +395,14 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                             'Community'.toUpperCase(),
                             style: TextStyle(
                               color: Colors.black,
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.w900,
+                              fontSize: 14.0,
                             ),
                           ),
                           Text(
                             'Post'.toUpperCase(),
                             style: TextStyle(
                               color: Colors.black,
-                              fontSize: 15.0,
-                              fontWeight: FontWeight.w900,
+                              fontSize: 14.0,
                             ),
                           ),
                           Row(
@@ -392,7 +417,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 18.0,
-                                      fontWeight: FontWeight.w900,
                                     ),
                                   ),
                                   Text(
@@ -436,12 +460,11 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                   children: [
                     // Updates Section
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       child: Text(
                         'Updates',
                         style: TextStyle(
                           color: hexToColor('#343434'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 18.0,
                         ),
                       ),
@@ -469,7 +492,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                             'Featured Products',
                             style: TextStyle(
                               color: hexToColor('#343434'),
-                              fontWeight: FontWeight.w900,
                               fontSize: 18.0,
                             ),
                           ),
@@ -496,7 +518,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                 ),
               ),
             ),
-
           ],
         ),
       ),
@@ -526,9 +547,11 @@ class _StoreCommunityState extends State<StoreCommunity> {
                   Container(
                     height: 75,
                     width: 100,
-                    padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
                     decoration: BoxDecoration(
-                      border: Border.all(color: hexToColor('#BEBEBE'), width: 1.0),
+                      border:
+                          Border.all(color: hexToColor('#BEBEBE'), width: 1.0),
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: Column(
@@ -539,7 +562,6 @@ class _StoreCommunityState extends State<StoreCommunity> {
                           '17',
                           style: TextStyle(
                             color: hexToColor('#343434'),
-                            fontWeight: FontWeight.w900,
                             fontSize: 20.0,
                           ),
                         ),
@@ -580,7 +602,7 @@ class _StoreCommunityState extends State<StoreCommunity> {
                       profileImage: 'assets/profile_image.png',
                       postTime: '8 h ago',
                       caption:
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                       image: 'assets/post_image.png',
                       likes: 991,
                       productLink: 'https://example.com/product',
@@ -590,7 +612,7 @@ class _StoreCommunityState extends State<StoreCommunity> {
                       profileImage: 'assets/profile_image.png',
                       postTime: '8 h ago',
                       caption:
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                       likes: 991,
                     ),
                     CommunityPost(
@@ -598,7 +620,7 @@ class _StoreCommunityState extends State<StoreCommunity> {
                       profileImage: 'assets/profile_image.png',
                       postTime: '8 h ago',
                       caption:
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                          'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                       likes: 991,
                     ),
                     SizedBox(height: 100.0),
@@ -656,7 +678,6 @@ class CommunityPost extends StatelessWidget {
                       Text(
                         name,
                         style: const TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 18.0,
                         ),
                       ),
@@ -705,7 +726,6 @@ class CommunityPost extends StatelessWidget {
               style: TextStyle(
                 color: hexToColor('#737373'),
                 fontSize: 12.0,
-                fontWeight: FontWeight.w900,
               ),
             ),
           SizedBox(height: 10),
@@ -724,7 +744,7 @@ class CommunityPost extends StatelessWidget {
             children: [
               Container(
                 padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
                 decoration: BoxDecoration(
                   border: Border.all(color: hexToColor('#BEBEBE')),
                   borderRadius: BorderRadius.circular(50.0),
@@ -808,7 +828,6 @@ class CommunityPost extends StatelessWidget {
             'Report',
             style: TextStyle(
               color: hexToColor('#9B9B9B'),
-              fontWeight: FontWeight.w900,
               fontSize: 16.0,
             ),
           ),

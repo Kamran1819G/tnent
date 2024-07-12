@@ -85,7 +85,6 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: hexToColor('#E6E6E6'),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,7 +112,6 @@ class _SignInScreenState extends State<SignInScreen> {
                             'Tnennt inc.',
                             style: TextStyle(
                               color: hexToColor('#E6E6E6'),
-                              fontWeight: FontWeight.w900,
                               fontSize: 14.0,
                             ),
                           ),

@@ -31,7 +31,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         'Wishlist'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 24.0,
                           letterSpacing: 1.5,
                         ),
@@ -39,7 +38,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                           color: hexToColor('#42FF00'),
                         ),
@@ -76,7 +74,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         'Total Amount',
                         style: TextStyle(
                           color: hexToColor('#343434'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 18.0,
                         ),
                       ),
@@ -84,7 +81,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         '₹ 0.00',
                         style: TextStyle(
                           color: hexToColor('#A9A9A9'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 18.0,
                         ),
                       ),
@@ -99,7 +95,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
                             'Select Items',
                             style: TextStyle(
                               color: hexToColor('#343434'),
-                              fontWeight: FontWeight.w900,
                               fontSize: 16.0,
                             ),
                           ),
@@ -227,7 +222,6 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                 '${widget.productName}',
                 style: TextStyle(
                   color: hexToColor('#343434'),
-                  fontWeight: FontWeight.w900,
                   fontSize: 20.0,
                 ),
               ),
@@ -236,7 +230,6 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                 '₹${widget.productPrice}',
                 style: TextStyle(
                   color: hexToColor('#343434'),
-                  fontWeight: FontWeight.w900,
                   fontSize: 20.0,
                 ),
               ),
@@ -255,7 +248,6 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                       'Remove',
                       style: TextStyle(
                         color: hexToColor('#737373'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 12.0,
                       ),
                     ),
@@ -281,7 +273,6 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                         'Buy Now',
                         style: TextStyle(
                           color: Colors.white,
-                          fontWeight: FontWeight.w900,
                           fontSize: 12.0,
                         ),
                       ),

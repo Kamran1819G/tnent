@@ -39,7 +39,6 @@ class StoreConnectionNotification extends StatelessWidget {
                 name,
                 style: TextStyle(
                   color: Colors.black,
-                  fontWeight: FontWeight.w900,
                   fontSize: 14.0,
                 ),
               ),

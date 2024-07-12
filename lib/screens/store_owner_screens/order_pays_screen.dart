@@ -36,7 +36,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                               'Orders & Pays'.toUpperCase(),
                               style: TextStyle(
                                 color: hexToColor('#1E1E1E'),
-                                fontWeight: FontWeight.w900,
                                 fontSize: 24.0,
                                 letterSpacing: 1.5,
                               ),
@@ -44,7 +43,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                             Text(
                               ' •',
                               style: TextStyle(
-                                fontWeight: FontWeight.w900,
                                 fontSize: 28.0,
                                 color: hexToColor('#42FF00'),
                               ),
@@ -108,7 +106,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                             Text('Payments',
                                 style: TextStyle(
                                   color: hexToColor('#272822'),
-                                  fontWeight: FontWeight.w600,
                                   fontSize: 14.0,
                                 )),
                             Text(
@@ -153,7 +150,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                             Text('Coupons',
                                 style: TextStyle(
                                   color: hexToColor('#272822'),
-                                  fontWeight: FontWeight.w600,
                                   fontSize: 14.0,
                                 )),
                             Text('My Coupons',
@@ -177,7 +173,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                   'Orders',
                   style: TextStyle(
                     color: hexToColor('#343434'),
-                    fontWeight: FontWeight.w900,
                     fontSize: 18.0,
                   ),
                 ),
@@ -211,7 +206,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                             '100',
                             style: TextStyle(
                               fontSize: 20,
-                              fontWeight: FontWeight.w900,
                               color: Theme.of(context).primaryColor,
                             ),
                           ),
@@ -278,7 +272,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                             '100',
                             style: TextStyle(
                               fontSize: 20,
-                              fontWeight: FontWeight.w900,
                               color: Theme.of(context).primaryColor,
                             ),
                           ),
@@ -345,7 +338,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                             '100',
                             style: TextStyle(
                               fontSize: 20,
-                              fontWeight: FontWeight.w900,
                               color: Theme.of(context).primaryColor,
                             ),
                           ),
@@ -383,14 +375,13 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                 ),
               ),
 
-              SizedBox(height: 20),
+              SizedBox(height: 40),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
                   'Orders Matrix',
                   style: TextStyle(
                     color: hexToColor('#343434'),
-                    fontWeight: FontWeight.w900,
                     fontSize: 18.0,
                   ),
                 ),
@@ -416,7 +407,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                               'Confirmed Orders',
                               style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w900,
                                 color: hexToColor('#272822'),
                               ),
                             ),
@@ -438,7 +428,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                               '400',
                               style: TextStyle(
                                 fontSize: 18,
-                                fontWeight: FontWeight.w900,
                                 color: Theme.of(context).primaryColor,
                               ),
                             ),
@@ -462,7 +451,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                                   '₹',
                                   style: TextStyle(
                                     fontSize: 18,
-                                    fontWeight: FontWeight.w900,
                                     color: hexToColor('#272822'),
                                   ),
                                 ),
@@ -470,7 +458,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                                   '400k',
                                   style: TextStyle(
                                     fontSize: 18,
-                                    fontWeight: FontWeight.w900,
                                     color: Theme.of(context).primaryColor,
                                   ),
                                 ),
@@ -500,7 +487,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                               'Cancelled Orders',
                               style: TextStyle(
                                 fontSize: 16,
-                                fontWeight: FontWeight.w900,
                                 color: hexToColor('#272822'),
                               ),
                             ),
@@ -522,7 +508,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                               '80',
                               style: TextStyle(
                                 fontSize: 18,
-                                fontWeight: FontWeight.w900,
                                 color: Theme.of(context).primaryColor,
                               ),
                             ),
@@ -546,7 +531,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                                   '₹',
                                   style: TextStyle(
                                     fontSize: 18,
-                                    fontWeight: FontWeight.w900,
                                     color: hexToColor('#272822'),
                                   ),
                                 ),
@@ -554,7 +538,6 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                                   '80k',
                                   style: TextStyle(
                                     fontSize: 18,
-                                    fontWeight: FontWeight.w900,
                                     color: Theme.of(context).primaryColor,
                                   ),
                                 ),
@@ -576,6 +559,7 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                   ],
                 ),
               ),
+              SizedBox(height: 40),
             ],
           ),
         ),
@@ -616,7 +600,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                             'Orders'.toUpperCase(),
                             style: TextStyle(
                               color: hexToColor('#1E1E1E'),
-                              fontWeight: FontWeight.w900,
                               fontSize: 24.0,
                               letterSpacing: 1.5,
                             ),
@@ -624,7 +607,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                           Text(
                             ' •',
                             style: TextStyle(
-                              fontWeight: FontWeight.w900,
                               fontSize: 28.0,
                               color: hexToColor('#42FF00'),
                             ),
@@ -669,7 +651,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     '${widget.orderType} Orders',
                     style: TextStyle(
                       color: hexToColor('#343434'),
-                      fontWeight: FontWeight.w900,
                       fontSize: 18.0,
                     ),
                   ),
@@ -677,7 +658,6 @@ class _OrdersScreenState extends State<OrdersScreen> {
                     '5',
                     style: TextStyle(
                       color: Theme.of(context).primaryColor,
-                      fontWeight: FontWeight.w900,
                       fontSize: 18.0,
                     ),
                   ),
@@ -801,8 +781,7 @@ class OrderCard extends StatelessWidget {
                           productName,
                           style: TextStyle(
                             color: hexToColor('#343434'),
-                            fontWeight: FontWeight.w900,
-                            fontSize: 12.0,
+                            fontSize: 14.0,
                           ),
                         ),
                         SizedBox(height: 6),
@@ -836,57 +815,52 @@ class OrderCard extends StatelessWidget {
                             color: Theme
                                 .of(context)
                                 .primaryColor,
-                            fontWeight: FontWeight.w900,
                             fontSize: 12.0,
                           ),
                         ),
                       ],
                     ),
                   ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            'Provided Middleman',
-                            style: TextStyle(
-                              color: hexToColor('#2D332F'),
-                              fontWeight: FontWeight.w900,
-                              fontSize: 12.0,
-                            ),
-                            textDirection: TextDirection.rtl,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Provided Middleman',
+                          style: TextStyle(
+                            color: hexToColor('#2D332F'),
+                            fontSize: 10.0,
                           ),
-                          SizedBox(height: 6),
+                          textDirection: TextDirection.rtl,
+                        ),
+                        SizedBox(height: 6),
+                        Text(
+                          middlemanName,
+                          style: TextStyle(
+                            color: hexToColor('#878787'),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 10.0,
+                          ),
+                        ),
+                        Text(
+                          middlemanPhone,
+                          style: TextStyle(
+                            color: hexToColor('#878787'),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 10.0,
+                          ),
+                        ),
+                        SizedBox(height: 15),
+                        if (orderStatus == OrderStatus.Ongoing)
                           Text(
-                            middlemanName,
+                            '$uniqueCode',
                             style: TextStyle(
-                              color: hexToColor('#878787'),
-                              fontWeight: FontWeight.w500,
-                              fontSize: 10.0,
+                              color: Theme
+                                  .of(context)
+                                  .primaryColor,
+                              fontSize: 22.0,
                             ),
                           ),
-                          Text(
-                            middlemanPhone,
-                            style: TextStyle(
-                              color: hexToColor('#878787'),
-                              fontWeight: FontWeight.w500,
-                              fontSize: 10.0,
-                            ),
-                          ),
-                          SizedBox(height: 15),
-                          if (orderStatus == OrderStatus.Ongoing)
-                            Text(
-                              '$uniqueCode',
-                              style: TextStyle(
-                                color: Theme
-                                    .of(context)
-                                    .primaryColor,
-                                fontWeight: FontWeight.w900,
-                                fontSize: 22.0,
-                              ),
-                            ),
-                        ],
-                      ),
+                      ],
                     ),
                   ],
               ),
@@ -894,6 +868,7 @@ class OrderCard extends StatelessWidget {
               if (orderStatus == OrderStatus.Ongoing ||
                   orderStatus == OrderStatus.Delivered)
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
                       "Delivery Address:",
@@ -901,20 +876,17 @@ class OrderCard extends StatelessWidget {
                         color: Theme
                             .of(context)
                             .primaryColor,
-                        fontWeight: FontWeight.w900,
                         fontSize: 10.0,
                       ),
                     ),
                     SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        deliveryAddress ?? 'Not Available',
-                        style: TextStyle(
-                          color: hexToColor('#878787'),
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 10.0,
-                        ),
+                    Text(
+                      deliveryAddress ?? 'Not Available',
+                      style: TextStyle(
+                        color: hexToColor('#878787'),
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 10.0,
                       ),
                     ),
                   ],
@@ -926,7 +898,6 @@ class OrderCard extends StatelessWidget {
                       "Cancel Reason:",
                       style: TextStyle(
                         color: hexToColor('#FF0000'),
-                        fontWeight: FontWeight.w900,
                         fontSize: 10.0,
                       ),
                     ),

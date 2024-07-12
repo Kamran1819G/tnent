@@ -65,7 +65,6 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                         'Optionals'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w900,
                           fontSize: 24.0,
                           letterSpacing: 1.5,
                         ),
@@ -73,7 +72,6 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontWeight: FontWeight.w900,
                           fontSize: 28.0,
                           color: hexToColor('#FF0000'),
                         ),
@@ -108,7 +106,6 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                       'Add Option Type',
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w900,
                       ),
                     ),
                     SizedBox(height: 20),
@@ -126,7 +123,6 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                       labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
                       labelStyle: TextStyle(
                         fontSize: 14.0,
-                        fontWeight: FontWeight.w900,
                       ),
                       indicatorSize: TabBarIndicatorSize.label,
                       overlayColor:
@@ -328,7 +324,6 @@ class SizeTabView extends StatelessWidget {
           'Add Size',
           style: TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.w900,
           ),
         ),
         SizedBox(height: 20),
@@ -345,7 +340,6 @@ class SizeTabView extends StatelessWidget {
           labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
           labelStyle: TextStyle(
             fontSize: 14.0,
-            fontWeight: FontWeight.w900,
           ),
           indicatorSize: TabBarIndicatorSize.label,
           overlayColor: MaterialStateProperty.all(Colors.transparent),
@@ -483,7 +477,6 @@ class WeightTabView extends StatelessWidget {
           'Add Weight',
           style: TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.w900,
           ),
         ),
         SizedBox(height: 20),
@@ -500,7 +493,6 @@ class WeightTabView extends StatelessWidget {
           labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
           labelStyle: TextStyle(
             fontSize: 14.0,
-            fontWeight: FontWeight.w900,
           ),
           indicatorSize: TabBarIndicatorSize.label,
           overlayColor: MaterialStateProperty.all(Colors.transparent),
@@ -613,7 +605,6 @@ class VolumeTabView extends StatelessWidget {
           'Add Volume',
           style: TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.w900,
           ),
         ),
         SizedBox(height: 20),
@@ -630,7 +621,6 @@ class VolumeTabView extends StatelessWidget {
           labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
           labelStyle: TextStyle(
             fontSize: 14.0,
-            fontWeight: FontWeight.w900,
           ),
           indicatorSize: TabBarIndicatorSize.label,
           overlayColor: MaterialStateProperty.all(Colors.transparent),
@@ -743,7 +733,6 @@ class BakeryTabView extends StatelessWidget {
           'Add Bakery',
           style: TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.w900,
           ),
         ),
         SizedBox(height: 20),
@@ -760,7 +749,6 @@ class BakeryTabView extends StatelessWidget {
           labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
           labelStyle: TextStyle(
             fontSize: 14.0,
-            fontWeight: FontWeight.w900,
           ),
           indicatorSize: TabBarIndicatorSize.label,
           overlayColor: MaterialStateProperty.all(Colors.transparent),
@@ -868,7 +856,6 @@ class StorageTabView extends StatelessWidget {
           'Add Storage',
           style: TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.w900,
           ),
         ),
         SizedBox(height: 20),
@@ -885,7 +872,6 @@ class StorageTabView extends StatelessWidget {
           labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
           labelStyle: TextStyle(
             fontSize: 14.0,
-            fontWeight: FontWeight.w900,
           ),
           indicatorSize: TabBarIndicatorSize.label,
           overlayColor: MaterialStateProperty.all(Colors.transparent),
@@ -1010,7 +996,6 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
                     'Add Price To Your Optionals',
                     style: TextStyle(
                         fontSize: 24,
-                        fontWeight: FontWeight.w900,
                         color: Colors.black),
                   ),
                   SizedBox(height: 8),
