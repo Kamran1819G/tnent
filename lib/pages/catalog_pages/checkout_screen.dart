@@ -493,14 +493,12 @@ class _SummaryScreenState extends State<SummaryScreen> {
                       ),
                       SizedBox(height: 4.0),
                       Row(children: [
-                        Icon(
-                          Icons.web,
-                          color: Theme.of(context).primaryColor,
-                          size: 12.0,
+                        Image.asset('assets/icons/blue_globe.png',
+                        width: 8,
                         ),
                         SizedBox(width: 4.0),
                         Text(
-                          'www.jainbrothers.com',
+                          'jainbrothers.tnennt.store',
                           style: TextStyle(
                             color: hexToColor('#A9A9A9'),
                             fontSize: 10.0,
@@ -543,7 +541,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                       productName: 'Nikon Camera',
                       productPrice: '200',
                     ),
-                    SizedBox(height: 8.0),
+                    /*SizedBox(height: 8.0),
                     Card(
                       margin: EdgeInsets.symmetric(horizontal: 8.0),
                       color: Colors.white,
@@ -612,7 +610,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                           ],
                         ),
                       ),
-                    ),
+                    ),*/
                     SizedBox(height: 20.0),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -820,7 +818,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                       'Pay ₹ 200',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 16.0,
+                        fontSize: 18.0,
                       ),
                     ),
                   ),
@@ -834,6 +832,13 @@ class _SummaryScreenState extends State<SummaryScreen> {
   }
 }
 
+enum ExpandedTile {
+  none,
+  upi,
+  otherUpi,
+  card
+}
+
 class PaymentOptionScreen extends StatefulWidget {
   const PaymentOptionScreen({super.key});
 
@@ -842,6 +847,8 @@ class PaymentOptionScreen extends StatefulWidget {
 }
 
 class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
+  ExpandedTile expandedTile = ExpandedTile.none;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -889,29 +896,37 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                 ],
               ),
             ),
-            ProductDetails(
+            /*ProductDetails(
               productImage: 'assets/product_image.png',
               productName: 'Nikon Camera',
               productPrice: '200',
             ),
-            SizedBox(height: 50.0),
+            SizedBox(height: 50.0),*/
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    SizedBox(height: 50),
                     Text(
                       'Select Payment Option',
                       style: TextStyle(
-                        color: hexToColor('#343434'),
+                        color: Colors.black,
                         fontFamily: 'Gotham',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16.0,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18.0,
                       ),
                     ),
-                    SizedBox(height: 16.0),
+                    SizedBox(height: 30.0),
                     ExpansionTile(
+                      key: Key('upi'),
+                      initiallyExpanded: expandedTile == ExpandedTile.upi,
+                      onExpansionChanged: (expanded) {
+                        setState(() {
+                          expandedTile = expanded ? ExpandedTile.upi : ExpandedTile.none;
+                        });
+                      },
                       collapsedShape: RoundedRectangleBorder(
                         side: BorderSide(color: hexToColor('#E0E0E0')),
                         borderRadius: BorderRadius.circular(8.0),
@@ -932,7 +947,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                             style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Gotham',
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w800,
                               fontSize: 16.0,
                             ),
                           ),
@@ -997,6 +1012,13 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                           onTap: () {},
                         ),
                         ExpansionTile(
+                          key: Key('other_upi'),
+                          initiallyExpanded: expandedTile == ExpandedTile.otherUpi,
+                          onExpansionChanged: (expanded) {
+                            setState(() {
+                              expandedTile = expanded ? ExpandedTile.otherUpi : ExpandedTile.upi;
+                            });
+                          },
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8.0),
                           ),
@@ -1087,8 +1109,15 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 8.0),
+                    SizedBox(height: 16.0),
                     ExpansionTile(
+                      key: Key('card'),
+                      initiallyExpanded: expandedTile == ExpandedTile.card,
+                      onExpansionChanged: (expanded) {
+                        setState(() {
+                          expandedTile = expanded ? ExpandedTile.card : ExpandedTile.none;
+                        });
+                      },
                       collapsedShape: RoundedRectangleBorder(
                         side: BorderSide(color: hexToColor('#E0E0E0')),
                         borderRadius: BorderRadius.circular(8.0),
@@ -1109,7 +1138,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                             style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Gotham',
-                              fontWeight: FontWeight.w500,
+                              fontWeight: FontWeight.w800,
                               fontSize: 16.0,
                             ),
                           ),
@@ -1247,7 +1276,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 8.0),
+                    SizedBox(height: 16.0),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -1274,7 +1303,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                               style: TextStyle(
                                 color: Colors.black,
                                 fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w800,
                                 fontSize: 16.0,
                               ),
                             ),

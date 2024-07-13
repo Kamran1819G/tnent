@@ -135,7 +135,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                                         NotificationScreen()));
                           },
                           child: Image.asset(
-                            'assets/icons/notification_box.png',
+                            'assets/icons/new_notification_box.png',
                             height: 24,
                             width: 24,
                             fit: BoxFit.cover,

@@ -34,9 +34,9 @@ class _HomeScreenState extends State<HomeScreen> {
         currentUser = user;
         _widgetOptions = <Widget>[
           SingleChildScrollView(child: Home(currentUser: currentUser)),
-          SingleChildScrollView(child: Catalog()),
-          SingleChildScrollView(child: Gallery()),
           SingleChildScrollView(child: Community()),
+          SingleChildScrollView(child: Gallery()),
+          SingleChildScrollView(child: Catalog()),
         ];
       });
     } catch (e) {
@@ -108,9 +108,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildNavItem(0, 'assets/home.png'),
-                    _buildNavItem(1, 'assets/catalog.png'),
+                    _buildNavItem(1, 'assets/community.png'),
                     _buildNavItem(2, 'assets/gallery.png'),
-                    _buildNavItem(3, 'assets/community.png'),
+                    _buildNavItem(3, 'assets/catalog.png'),
                   ],
                 ),
               ),

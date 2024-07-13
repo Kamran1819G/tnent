@@ -38,7 +38,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontSize: 28.0,
+                          fontSize: 24.0,
                           color: hexToColor('#42FF00'),
                         ),
                       ),
@@ -64,32 +64,38 @@ class _WishlistScreenState extends State<WishlistScreen> {
             SizedBox(height: 16.0),
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.0),
+              height: 75,
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Total Amount',
-                        style: TextStyle(
-                          color: hexToColor('#343434'),
-                          fontSize: 18.0,
+                  Container(
+                    margin: EdgeInsets.only(top: 4.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Total Amount',
+                          style: TextStyle(
+                            color: hexToColor('#343434'),
+                            fontSize: 16.0,
+                          ),
                         ),
-                      ),
-                      Text(
-                        '₹ 0.00',
-                        style: TextStyle(
-                          color: hexToColor('#A9A9A9'),
-                          fontSize: 18.0,
+                        Text(
+                          '₹ 0.00',
+                          style: TextStyle(
+                            color: hexToColor('#A9A9A9'),
+                            fontSize: 18.0,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   Row(
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             'Select Items',
@@ -99,12 +105,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
                             ),
                           ),
                           Text(
-                            'Rent All The Selected Products Together',
+                            'Buy All The Selected Products Together',
                             style: TextStyle(
                               color: hexToColor('#989898'),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              fontSize: 8.0,
+                              fontSize: 9.0,
                             ),
                           ),
                         ],
@@ -125,6 +131,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
             SizedBox(height: 16.0),
             Expanded(
               child: ListView.builder(
+                padding: EdgeInsets.symmetric(horizontal: 8.0),
                 itemCount: 5,
                 itemBuilder: (context, index) {
                   return WishlistProductTile(
@@ -172,7 +179,7 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 14.0),
+      padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 14.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,

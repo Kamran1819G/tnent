@@ -69,7 +69,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                   'Total Amount',
                   style: TextStyle(
                     color: hexToColor('#343434'),
-                    fontSize: 18.0,
+                    fontSize: 16.0,
                   ),
                 ),
                 Text(
@@ -85,6 +85,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
           SizedBox(height: 16.0),
           Expanded(
             child: ListView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 10.0),
               itemCount: 5,
               itemBuilder: (context, index) {
                 return PurchaseProductTile(

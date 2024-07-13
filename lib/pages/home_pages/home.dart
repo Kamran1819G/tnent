@@ -23,6 +23,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with TickerProviderStateMixin {
   late TabController _tabController;
   int _selectedIndex = 0;
+  bool isNewNotification = true;
 
   @override
   void initState() {
@@ -92,13 +93,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     Text(getGreeting().toUpperCase(),
                         style: TextStyle(
                             color: hexToColor('#727272'), fontSize: 12.0)),
-                    SizedBox(height: 4.0),
-                    RichText(
-                      text: TextSpan(
-                        children: [
+                    SizedBox(height: 8.0),
+                    SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.55,
+                      child: RichText(
+                        text: TextSpan(children: [
                           TextSpan(
                             text: (widget.currentUser!.firstName.isNotEmpty)
-                                ? 'Hello, ${widget.currentUser!.firstName} ${widget.currentUser!.lastName}'
+                                ? 'Hello, ${widget.currentUser!.firstName}'
                                 : 'Hello, User',
                             style: TextStyle(
                               color: Colors.black,
@@ -109,12 +111,13 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                           TextSpan(
                             text: ' •',
                             style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 30.0,
+                              fontFamily: 'Gotham Black',
+                              fontSize: 24.0,
                               color: hexToColor('#42FF00'),
                             ),
                           ),
-                        ],
+                        ]),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     )
                   ],
@@ -127,14 +130,23 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                         context,
                         MaterialPageRoute(
                             builder: (context) => NotificationScreen()));
+                    setState(() {
+                      isNewNotification = false;
+                    });
                   },
-                  child: Image.asset(
-                    'assets/icons/notification_box.png',
-                    height: 24,
-                    width: 24,
-                    fit: BoxFit.cover,
-                    colorBlendMode: BlendMode.overlay,
-                  )),
+                  child: isNewNotification
+                      ? Image.asset(
+                          'assets/icons/new_notification_box.png',
+                          height: 24,
+                          width: 24,
+                          fit: BoxFit.cover,
+                        )
+                      : Image.asset(
+                          'assets/icons/no_new_notification_box.png',
+                          height: 24,
+                          width: 24,
+                          fit: BoxFit.cover,
+                        )),
               SizedBox(width: 16.0),
               GestureDetector(
                 onTap: () {

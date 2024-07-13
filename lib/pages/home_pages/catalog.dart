@@ -56,7 +56,7 @@ class _CatalogState extends State<Catalog> {
                                 builder: (context) => NotificationScreen()));
                       },
                       child: Image.asset(
-                        'assets/icons/notification_box.png',
+                        'assets/icons/new_notification_box.png',
                         height: 24,
                         width: 24,
                         fit: BoxFit.cover,

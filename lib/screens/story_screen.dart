@@ -23,8 +23,9 @@ class _StoryScreenState extends State<StoryScreen> {
   late String _storeName;
 
   final List<Widget> Stories = [
-    Container(
-      color: Colors.green[200],
+    Image.asset(
+      'assets/sample_update.png',
+      fit: BoxFit.cover,
     ),
     Container(
       color: Colors.blue[200],
