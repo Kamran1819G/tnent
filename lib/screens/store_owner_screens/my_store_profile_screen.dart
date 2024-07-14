@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/screens/store_owner_screens/all_products_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/analytics_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/order_pays_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/product_categories_screen.dart';
@@ -15,8 +16,78 @@ class MyStoreProfileScreen extends StatefulWidget {
   State<MyStoreProfileScreen> createState() => _MyStoreProfileScreenState();
 }
 
-class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
+class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
+    with SingleTickerProviderStateMixin {
+  String storeImage = 'assets/jain_brothers.png';
+  String storeName = 'Jain Brothers';
+  String storeCategory = 'Clothings';
+  String storeLocation = 'Navi Mumbai, MH';
+  String storeWebsite = 'jainbrothers.tnennet.store';
   bool isAccepting = true;
+  int totalProducts = 1370;
+  int totalPosts = 250;
+  int storeEngagement = 2500;
+  int goodReviews = 700;
+  int badReviews = 200;
+  int totalReviews = 900;
+  bool isGoodReview = true;
+  bool isExpanded = false;
+
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  List<dynamic> updates = List.generate(10, (index) {
+    return {
+      "name": "Sahachari",
+      "coverImage": "assets/sahachari_image.png",
+    };
+  });
+
+  List<dynamic> featuredProducts = List.generate(10, (index) {
+    return {
+      'name': 'Cannon XYZ',
+      'image': 'assets/product_image.png',
+      'price': 200.00,
+    };
+  });
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggleExpansion() {
+    setState(() {
+      isExpanded = !isExpanded;
+      if (isExpanded) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    });
+  }
+
+  void _selectFlag(bool isGood) {
+    setState(() {
+      isGoodReview = isGood;
+      isExpanded = false;
+      _controller.reverse();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +138,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12.0),
                             child: Image.asset(
-                              'assets/jain_brothers.png',
+                              '$storeImage',
                               height: 90,
                               width: 90,
                               fit: BoxFit.cover,
@@ -83,11 +154,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                   horizontal: 12.0, vertical: 6.0),
                               decoration: BoxDecoration(
                                 color: Colors.transparent,
-                                border: Border.all(color: hexToColor('#DEFF98')),
+                                border:
+                                    Border.all(color: hexToColor('#DEFF98')),
                                 borderRadius: BorderRadius.circular(20.0),
                               ),
                               child: Text(
-                                'clothings',
+                                '$storeCategory',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'Poppins',
@@ -100,7 +172,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  'Jain Brothers',
+                                  '$storeName',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 24.0,
@@ -129,7 +201,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                 ),
                                 SizedBox(width: 5.0),
                                 Text(
-                                  'jainbrothers.tnennet.store',
+                                  '$storeWebsite',
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontFamily: 'Poppins',
@@ -158,7 +230,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                             borderRadius: BorderRadius.circular(20.0),
                           ),
                           child: Text(
-                            'Navi Mumbai, MH',
+                            '$storeLocation',
                             style: TextStyle(
                                 color: Colors.white,
                                 fontFamily: 'Poppins',
@@ -270,7 +342,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '137',
+                                    '$totalProducts',
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 16.0,
@@ -440,7 +512,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '17',
+                                    '$totalPosts',
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontSize: 16.0,
@@ -492,7 +564,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                           Expanded(
                             child: Container(
                               padding: EdgeInsets.symmetric(
-                                  horizontal:12, vertical: 16),
+                                  horizontal: 12, vertical: 16),
                               margin: EdgeInsets.only(right: 8.0),
                               decoration: BoxDecoration(
                                 color: hexToColor('#F3F3F3'),
@@ -507,7 +579,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                       left: 20.0,
                                       right: 25.0,
                                       top: 12.0,
-                                      bottom: 12.0,
+                                      bottom: 6.0,
                                     ),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
@@ -526,7 +598,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                           ),
                                         ),
                                         Text(
-                                          '2500',
+                                          '$storeEngagement',
                                           style: TextStyle(
                                             color:
                                                 Theme.of(context).primaryColor,
@@ -537,28 +609,104 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                     ),
                                   ),
                                   SizedBox(height: 15.0),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 8.0),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Image.asset('assets/green-flag.png',
-                                            height: 20.0, width: 20.0),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceEvenly,
+                                    children: [
+                                      AnimatedBuilder(
+                                        animation: _animation,
+                                        builder: (context, child) {
+                                          return GestureDetector(
+                                            onTap: _toggleExpansion,
+                                            child: isExpanded
+                                                ? Container(
+                                                    width: isExpanded
+                                                        ? (_animation.value *
+                                                                60 +
+                                                            40)
+                                                        : 40,
+                                                    height: 45.0,
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 16.0),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              50.0),
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        GestureDetector(
+                                                          onTap: () =>
+                                                              _selectFlag(true),
+                                                          child: Image.asset(
+                                                              'assets/green-flag.png',
+                                                              height: 20.0,
+                                                              width: 20.0),
+                                                        ),
+                                                        if (isExpanded)
+                                                          SizedBox(
+                                                              width: _animation
+                                                                      .value *
+                                                                  25),
+                                                        if (isExpanded)
+                                                          GestureDetector(
+                                                            onTap: () =>
+                                                                _selectFlag(
+                                                                    false),
+                                                            child: Image.asset(
+                                                                'assets/red-flag.png',
+                                                                height: 20.0,
+                                                                width: 20.0),
+                                                          ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                : Container(
+                                                    width: 40,
+                                                    height: 35.0,
+                                                    padding:
+                                                        EdgeInsets.all(8.0),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              50.0),
+                                                    ),
+                                                    child: Image.asset(
+                                                        isGoodReview
+                                                            ? 'assets/green-flag.png'
+                                                            : 'assets/red-flag.png',
+                                                        height: 20.0,
+                                                        width: 20.0),
+                                                  ),
+                                          );
+                                        },
+                                      ),
+                                      if (!isExpanded)
                                         Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
-                                            Text('Total Reviews',
-                                                style: TextStyle(
-                                                  color: hexToColor('#272822'),
-                                                  fontFamily: 'Poppins',
-                                                  fontWeight: FontWeight.w600,
-                                                  fontSize: 14.0,
-                                                )),
                                             Text(
-                                              '700/900',
+                                              isGoodReview
+                                                  ? 'Good Reviews'
+                                                  : 'Bad Reviews',
+                                              style: TextStyle(
+                                                color: hexToColor('#272822'),
+                                                fontFamily: 'Poppins',
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14.0,
+                                              ),
+                                            ),
+                                            Text(
+                                              isGoodReview
+                                                  ? '$goodReviews/$totalReviews'
+                                                  : '$badReviews/$totalReviews',
                                               style: TextStyle(
                                                 color: hexToColor('#838383'),
                                                 fontSize: 12.0,
@@ -566,8 +714,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                                             ),
                                           ],
                                         ),
-                                      ],
-                                    ),
+                                    ],
                                   )
                                 ],
                               ),
@@ -710,42 +857,46 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                         ),
                         SizedBox(height: 10.0),
                         Container(
-                            margin: EdgeInsets.symmetric(horizontal: 4.0),
-                            height: 150.0,
-                            child: ListView(
-                                scrollDirection: Axis.horizontal,
-                                children: [
-                                  Container(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          height: 100,
-                                          width: 100,
+                          margin: EdgeInsets.symmetric(horizontal: 4.0),
+                          height: 150.0,
+                          child: ListView(
+                            scrollDirection: Axis.horizontal,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(8.0),
+                                child: Column(
+                                  children: [
+                                    Container(
+                                      height: 100,
+                                      width: 100,
+                                      decoration: BoxDecoration(
+                                        color: hexToColor('#F3F3F3'),
+                                        borderRadius:
+                                        BorderRadius.circular(12.0),
+                                      ),
+                                      child: Container(
+                                          margin: EdgeInsets.all(16.0),
                                           decoration: BoxDecoration(
-                                            color: hexToColor('#F3F3F3'),
-                                            borderRadius:
-                                                BorderRadius.circular(12.0),
+                                            shape: BoxShape.circle,
+                                            color: Colors.white,
                                           ),
-                                          child: Container(
-                                              margin: EdgeInsets.all(16.0),
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: Colors.white,
-                                              ),
-                                              child: Icon(Icons.add,
-                                                  size: 34.0,
-                                                  color:
-                                                      hexToColor('#B5B5B5'))),
-                                        ),
-                                      ],
+                                          child: Icon(Icons.add,
+                                              size: 34.0,
+                                              color:
+                                              hexToColor('#B5B5B5'))),
                                     ),
-                                  ),
-                                  for (int i = 0; i < 5; i++)
-                                    UpdateTile(
-                                        name: "Sahachari",
-                                        image: "assets/sahachari_image.png"),
-                                ])),
+                                  ],
+                                ),
+                              ),
+                              ...updates.map((update) {
+                                return UpdateTile(
+                                  name: update['name'],
+                                  image: update['coverImage'],
+                                );
+                              }).toList(),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
 
@@ -756,12 +907,39 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                         // Featured Products Section
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Text(
-                            'Featured',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontSize: 18.0,
-                            ),
+                          child: Row(
+                            children: [
+                              Text(
+                                'Featured',
+                                style: TextStyle(
+                                  color: hexToColor('#343434'),
+                                  fontSize: 18.0,
+                                ),
+                              ),
+                              Spacer(),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => AllProductsScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(6.0),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    borderRadius: BorderRadius.circular(6.0),
+                                  ),
+                                  child: Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 16.0,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         SizedBox(height: 20.0),
@@ -770,12 +948,13 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen> {
                           padding: EdgeInsets.only(left: 8.0),
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
-                            itemCount: 5,
+                            itemCount: featuredProducts.length,
                             itemBuilder: (context, index) {
                               return ProductTile(
-                                  name: "Cannon XYZ",
-                                  image: "assets/product_image.png",
-                                  price: 200);
+                                name: featuredProducts[index]['name'],
+                                image: featuredProducts[index]['image'],
+                                price: featuredProducts[index]['price'],
+                              );
                             },
                           ),
                         ),

@@ -1,14 +1,16 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/user_model.dart';
+import 'package:tnennt/pages/catalog_pages/cart_screen.dart';
 import 'package:tnennt/screens/explore_screen.dart';
 import 'package:tnennt/screens/notification_screen.dart';
 import 'package:tnennt/screens/stores_screen.dart';
 import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
 import 'package:tnennt/widgets/product_tile.dart';
 
-import '../../screens/story_screen.dart';
+import '../../screens/update_screen.dart';
 import '../../screens/store_owner_screens/storeprofile_screen.dart';
 
 class Home extends StatefulWidget {
@@ -21,13 +23,88 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
+  String firstName = 'User';
   late TabController _tabController;
   int _selectedIndex = 0;
   bool isNewNotification = true;
 
+  final List<String> carouselImgList = [
+    'assets/carousel1.png',
+    'assets/carousel2.png',
+    'assets/carousel3.png',
+  ];
+
+  List<dynamic> updates = List.generate(5, (index) {
+    return {
+      "name": "Sahachari",
+      "coverImage": "assets/sahachari_image.png",
+    };
+  });
+
+  List<dynamic> featuredProducts = List.generate(5, (index) {
+    return {
+      "name": "Cannon XYZ",
+      "image": "assets/product_image.png",
+      "price": 200.00,
+    };
+  });
+
+  List<dynamic> featuredStores = [
+    {
+      "name": "Sahachari",
+      "image": "assets/sahachari_image.png",
+    },
+    {
+      "name": "Jain Brothers",
+      "image": "assets/jain_brothers.png",
+    },
+    {
+      "name": "Sahachari",
+      "image": "assets/sahachari_image.png",
+    },
+    {
+      "name": "Jain Brothers",
+      "image": "assets/jain_brothers.png",
+    },
+    {
+      "name": "Sahachari",
+      "image": "assets/sahachari_image.png",
+    },
+  ];
+
+  List<dynamic> categories = [
+    {
+      "name": "Clothings",
+      "image": "assets/product_image.png",
+    },
+    {
+      "name": "Electronics",
+      "image": "assets/product_image.png",
+    },
+    {
+      "name": "Groceries",
+      "image": "assets/product_image.png",
+    },
+    {
+      "name": "Accessories",
+      "image": "assets/product_image.png",
+    },
+    {
+      "name": "Sports",
+      "image": "assets/product_image.png",
+    },
+    {
+      "name": "Books",
+      "image": "assets/product_image.png",
+    },
+  ];
+
   @override
   void initState() {
     super.initState();
+    if (widget.currentUser!.firstName.isNotEmpty) {
+      firstName = widget.currentUser!.firstName;
+    }
     _tabController = TabController(
       length: 6,
       vsync: this,
@@ -69,7 +146,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     if (hour < 12) {
       return 'Good Morning ⛅';
     } else if (hour < 18) {
-      return 'Good Afternoon ';
+      return 'Good Afternoon 🌤️';
     } else {
       return 'Good Evening 🌕';
     }
@@ -99,9 +176,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       child: RichText(
                         text: TextSpan(children: [
                           TextSpan(
-                            text: (widget.currentUser!.firstName.isNotEmpty)
-                                ? 'Hello, ${widget.currentUser!.firstName}'
-                                : 'Hello, User',
+                            text: '$firstName',
                             style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Gotham Black',
@@ -123,7 +198,19 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   ],
                 ),
               ),
-              SizedBox(width: 10.0),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return CartScreen();
+                  }));
+                },
+                child: Icon(
+                  Icons.shopping_cart_outlined,
+                  color: hexToColor('#999999'),
+                  size: 24,
+                ),
+              ),
+              SizedBox(width: 16.0),
               GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -231,7 +318,85 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         SizedBox(height: 10.0),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Image.asset('assets/store_profile_banner.png'),
+          child: Stack(
+            children: [
+              Image.asset('assets/store_profile_banner.png'),
+              Positioned(
+                right: 20,
+                bottom: 50,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    RichText(
+                      text: TextSpan(children: [
+                        TextSpan(
+                          text: 'Tnennt',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: 'Gotham Black',
+                            fontSize: 14.0,
+                          ),
+                        ),
+                        TextSpan(
+                          text: ' •',
+                          style: TextStyle(
+                            fontFamily: 'Gotham Black',
+                            fontSize: 14.0,
+                            color: hexToColor('#42FF00'),
+                          ),
+                        ),
+                      ]),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'Store',
+                      style: TextStyle(color: Colors.white, fontSize: 14),
+                    )
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 10,
+                left: 50,
+                right: 120,
+                child: Text(
+                  "Buy From Your Local Store At A Discounted Price",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14.0,
+                  ),
+                ),
+              ),
+              Positioned(
+                left: 10,
+                bottom: 10,
+                child: Container(
+                  width: 175,
+                  child: CarouselSlider(
+                    options: CarouselOptions(
+                      enlargeStrategy: CenterPageEnlargeStrategy.scale,
+                      autoPlay: true,
+                      enlargeCenterPage: true,
+                      enlargeFactor: 0.4,
+                      aspectRatio: 2.5,
+                      autoPlayInterval: Duration(seconds: 3),
+                      autoPlayAnimationDuration: Duration(milliseconds: 800),
+                      enableInfiniteScroll: true,
+                      viewportFraction: 0.35,
+                    ),
+                    items: carouselImgList
+                        .map((item) => Center(
+                              child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.asset(item, fit: BoxFit.cover)),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         SizedBox(height: 20.0),
         // Updates Section
@@ -250,10 +415,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           padding: EdgeInsets.only(left: 8.0),
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: 5,
+            itemCount: updates.length,
             itemBuilder: (context, index) {
               return UpdateTile(
-                  name: "Sahachari", image: "assets/sahachari_image.png");
+                  name: updates[index]["name"],
+                  image: updates[index]["coverImage"]);
             },
           ),
         ),
@@ -319,12 +485,13 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             children: [
               ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: 5,
+                itemCount: featuredProducts.length,
                 itemBuilder: (context, index) {
                   return ProductTile(
-                      name: "Cannon XYZ",
-                      image: "assets/product_image.png",
-                      price: 200);
+                    name: featuredProducts[index]["name"],
+                    image: featuredProducts[index]["image"],
+                    price: featuredProducts[index]["price"],
+                  );
                 },
               ),
               ListView.builder(
@@ -426,39 +593,51 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
         Container(
           height: 125.0,
-          padding: EdgeInsets.only(left: 16.0),
+          padding: EdgeInsets.only(left: 8.0),
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
-              StoreTile(
-                storeName: 'Sanachari',
-                storeLogo: 'assets/sahachari_image.png',
-              ),
-              SizedBox(width: 15.0),
-              StoreTile(
-                storeName: 'Jain Brothers',
-                storeLogo: 'assets/jain_brothers.png',
-              ),
-              SizedBox(width: 15.0),
-              StoreTile(
-                storeName: 'Sanachari',
-                storeLogo: 'assets/sahachari_image.png',
-              ),
-              SizedBox(width: 15.0),
-              StoreTile(
-                storeName: 'Jain Brothers',
-                storeLogo: 'assets/jain_brothers.png',
-              ),
-              SizedBox(width: 15.0),
-              StoreTile(
-                storeName: 'Sanachari',
-                storeLogo: 'assets/sahachari_image.png',
-              ),
-              SizedBox(width: 15.0),
-              StoreTile(
-                storeName: 'Jain Brothers',
-                storeLogo: 'assets/jain_brothers.png',
-              ),
+              ...featuredStores.map((store) {
+                return StoreTile(
+                  storeName: store["name"],
+                  storeLogo: store["image"],
+                );
+              }).toList(),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => StoresScreen()));
+                },
+                child: Container(
+                  margin: EdgeInsets.only(right: 16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        height: 75,
+                        width: 75,
+                        decoration: BoxDecoration(
+                          color: hexToColor('#F5F5F5'),
+                          borderRadius: BorderRadius.circular(18.0),
+                        ),
+                        child: Center(
+                          child: Icon(
+                            Icons.arrow_forward_ios,
+                            color: hexToColor('#B5B5B5'),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 8.0),
+                      Expanded(
+                        child: Text(
+                          'View All',
+                          style: TextStyle(fontSize: 10.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
             ],
           ),
         ),
@@ -478,36 +657,36 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         ),
         Container(
           height: MediaQuery.of(context).size.height * 1.05,
-          child: GridView.count(
+          child: GridView.builder(
             padding: EdgeInsets.all(16.0),
             physics: NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,
-            crossAxisSpacing: 20.0,
-            mainAxisSpacing: 30.0,
-            childAspectRatio: 0.75,
-            children: [
-              CategoryTile(
-                name: 'Clothings',
-                image: 'assets/product_image.png',
-              ),
-              CategoryTile(
-                name: 'Electronics',
-                image: 'assets/product_image.png',
-              ),
-              CategoryTile(
-                name: 'groceries',
-                image: 'assets/product_image.png',
-              ),
-              CategoryTile(
-                name: 'Accessories',
-                image: 'assets/product_image.png',
-              ),
-              CategoryTile(name: 'Sports', image: 'assets/product_image.png'),
-              CategoryTile(name: 'Books', image: 'assets/product_image.png'),
-            ],
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 4.0,
+              mainAxisSpacing: 4.0,
+              childAspectRatio: 3 / 4,
+            ),
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              return CategoryTile(
+                name: categories[index]["name"]!,
+                image: categories[index]["image"]!,
+              );
+            },
           ),
         ),
       ],
+    );
+  }
+
+  Widget Tile({required int index, required double extent}) {
+    return Container(
+      color: Colors.blue,
+      height: extent,
+      child: Center(
+        child: Text('$index'),
+      ),
     );
   }
 }
@@ -535,29 +714,32 @@ class StoreTile extends StatelessWidget {
           ),
         );
       },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            height: 75,
-            width: 75,
-            decoration: BoxDecoration(
-              border: Border.all(color: hexToColor('#B5B5B5')),
-              borderRadius: BorderRadius.circular(18.0),
-              image: DecorationImage(
-                image: AssetImage(storeLogo),
-                fit: BoxFit.fill,
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 8.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 75,
+              width: 75,
+              decoration: BoxDecoration(
+                border: Border.all(color: hexToColor('#B5B5B5')),
+                borderRadius: BorderRadius.circular(18.0),
+                image: DecorationImage(
+                  image: AssetImage(storeLogo),
+                  fit: BoxFit.fill,
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 8.0),
-          Expanded(
-            child: Text(
-              storeName,
-              style: TextStyle(fontSize: 10.0),
+            SizedBox(height: 8.0),
+            Expanded(
+              child: Text(
+                storeName,
+                style: TextStyle(fontSize: 10.0),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -567,40 +749,49 @@ class CategoryTile extends StatelessWidget {
   final String name;
   final String image;
 
-  CategoryTile({
+  const CategoryTile({
+    Key? key,
     required this.name,
     required this.image,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8.0),
-        color: hexToColor('#F5F5F5'),
-      ),
-      child: Column(
-        children: [
-          Container(
-            height: 200,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-              image: DecorationImage(
-                image: AssetImage(image),
-                fit: BoxFit.fill,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.0),
+          color: hexToColor('#F5F5F5'),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8.0),
+                child: Image.asset(
+                  image,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                ),
               ),
             ),
-          ),
-          SizedBox(height: 6.0),
-          Text(
-            name,
-            style: TextStyle(
-              color: hexToColor('#343434'),
-              fontSize: 14.0,
+            const SizedBox(height: 6.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                name,
+                style: TextStyle(
+                  color: hexToColor('#343434'),
+                  fontSize: 14.0,
+                ),
+                textAlign: TextAlign.center,
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            const SizedBox(height: 6.0),
+          ],
+        ),
       ),
     );
   }
@@ -622,7 +813,7 @@ class UpdateTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => StoryScreen(
+            builder: (context) => UpdateScreen(
               storeName: name,
               storeImage: Image.asset(image),
             ),

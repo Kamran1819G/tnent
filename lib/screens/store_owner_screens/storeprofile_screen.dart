@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tnennt/widgets/product_tile.dart';
 import '../../helpers/color_utils.dart';
-import '../story_screen.dart';
+import '../update_screen.dart';
 
 class StoreProfileScreen extends StatefulWidget {
   String storeName;
@@ -853,7 +853,7 @@ class UpdateTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => StoryScreen(
+            builder: (context) => UpdateScreen(
               storeName: name,
               storeImage: Image.asset(image),
             ),
