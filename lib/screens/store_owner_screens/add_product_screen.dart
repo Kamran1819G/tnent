@@ -254,55 +254,39 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     ),
                     SizedBox(height: 30),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Row(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: hexToColor('#AFAFAF'),
-                                width: 1.0,
-                              ),
-                              borderRadius: BorderRadius.circular(50.0),
-                            ),
-                            child: DropdownButton<String>(
-                              hint: Text('Select Category'),
-                              dropdownColor: Colors.white,
-                              padding: EdgeInsets.symmetric(horizontal: 15.0),
-                              style: TextStyle(
-                                color: hexToColor('#272822'),
-                                fontSize: 16.0,
-                              ),
-                              icon: Icon(Icons.keyboard_arrow_down_rounded),
-                              underline: SizedBox(),
-                              value: selectedCategory,
-                              onChanged: (String? newValue) {
-                                setState(() {
-                                  selectedCategory = newValue!;
-                                });
-                              },
-                              items: categories.map<DropdownMenuItem<String>>((String value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value, style: TextStyle(
-                                    fontFamily: 'Gotham',
-                                    fontWeight: FontWeight.w800,
-                                  ),),
-                                );
-                              }).toList(),
-                            ),
-                          ),
-                          SizedBox(width: 20),
-                          Text(
-                            'Select Product Category',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              color: hexToColor('#636363'),
-                            ),
-                          ),
-                        ],
+                      margin: EdgeInsets.symmetric(horizontal: 12.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: hexToColor('#AFAFAF'),
+                          width: 1.0,
+                        ),
+                        borderRadius: BorderRadius.circular(50.0),
+                      ),
+                      child: DropdownButton<String>(
+                        hint: Text('Select Product Category'),
+                        dropdownColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        style: TextStyle(
+                          color: hexToColor('#272822'),
+                          fontSize: 16.0,
+                        ),
+                        icon: Icon(Icons.keyboard_arrow_down_rounded),
+                        underline: SizedBox(),
+                        value: selectedCategory,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedCategory = newValue!;
+                          });
+                        },
+                        items: categories.map<DropdownMenuItem<String>>((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value, style: TextStyle(
+                              fontFamily: 'Gotham',
+                              fontWeight: FontWeight.w800,
+                            ),),
+                          );
+                        }).toList(),
                       ),
                     ),
                     SizedBox(height: 30),
