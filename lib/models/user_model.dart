@@ -9,6 +9,7 @@ class UserModel {
   String lastName;
   String phoneNumber;
   String location;
+  String pincode;
   Map<String, bool> interests;
 
   UserModel({
@@ -20,6 +21,7 @@ class UserModel {
     this.lastName = '',
     this.phoneNumber = '',
     this.location = '',
+    this.pincode='',
     this.interests = const {},
   });
 
@@ -39,6 +41,7 @@ class UserModel {
       lastName: data['lastName'] ?? '',
       phoneNumber: data['phoneNumber'] ?? '',
       location: data['location'] ?? '',
+      pincode: data['pincode'] ??'',
       interests: Map<String, bool>.from(data['interests'] ?? {}),
     );
   }

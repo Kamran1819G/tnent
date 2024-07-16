@@ -10,7 +10,6 @@ import 'package:tnennt/services/user_service.dart';
 
 import '../../services/firebase/firebase_auth_service.dart';
 import '../../helpers/color_utils.dart';
-import '../../helpers/color_utils.dart';
 import '../signin_screen.dart';
 
 class MyProfileScreen extends StatefulWidget {
@@ -22,6 +21,26 @@ class MyProfileScreen extends StatefulWidget {
 
 class _MyProfileScreenState extends State<MyProfileScreen> {
   User? currentUser = Auth().currentUser;
+  UserModel? userData;
+  final UserService _userService = UserService();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchUserData();
+  }
+
+  Future<void> fetchUserData() async {
+    try {
+      UserModel user = await _userService.fetchUserDetails();
+      setState(() {
+        userData = user;
+      });
+    } catch (e) {
+      print('Error fetching user data: $e');
+      // You might want to show an error message to the user here
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,126 +52,129 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               SizedBox(height: 20.0),
               // Profile Card
               Container(
-                  height: 125,
-                  width: double.infinity,
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: hexToColor('#2D332F'),
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        right: 16.0,
-                        top: 25.0,
-                        child: CircleAvatar(
-                          backgroundColor: hexToColor('#F5F5F5'),
-                          radius: 16,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.arrow_back_ios_new,
-                              color: Colors.black,
-                              size: 16,
-                            ),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
+                height: 125,
+                width: double.infinity,
+                margin: EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  color: hexToColor('#2D332F'),
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: 16.0,
+                      top: 25.0,
+                      child: CircleAvatar(
+                        backgroundColor: hexToColor('#F5F5F5'),
+                        radius: 16,
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.arrow_back_ios_new,
+                            color: Colors.black,
+                            size: 16,
                           ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
                         ),
                       ),
-                      Align(
-                        alignment: const Alignment(-0.9, 0.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10),
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          AddProfileImageScreen(),
-                                    ),
-                                  );
-                                },
-                                child: Stack(
-                                  children: [
-                                    CircleAvatar(
+                    ),
+                    Align(
+                      alignment: const Alignment(-0.9, 0.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => AddProfileImageScreen(),
+                                  ),
+                                ).then((_) => fetchUserData());
+                              },
+                              child: Stack(
+                                children: [
+                                  CircleAvatar(
                                     radius: 40,
-                                    backgroundColor:
-                                        Theme.of(context).primaryColor,
-                                    child: Icon(
+                                    backgroundColor: Theme.of(context).primaryColor,
+                                    backgroundImage: userData?.photoURL != null
+                                        ? NetworkImage(userData!.photoURL!)
+                                        : null,
+                                    child: userData?.photoURL == null
+                                        ? Icon(
                                       Icons.person,
                                       color: Colors.white,
                                       size: 40,
+                                    )
+                                        : null,
+                                  ),
+                                  Positioned(
+                                    bottom: 8,
+                                    right: 0,
+                                    child: Icon(
+                                      Icons.edit,
+                                      color: Colors.white,
+                                      size: 24.0,
                                     ),
                                   ),
-                                    Positioned(
-                                      bottom: 8,
-                                      right: 0,
-                                      child: Icon(
-                                        Icons.edit,
-                                        color: Colors.white,
-                                        size: 24.0,
-                                      ),
-                                    ),
-                                  ]
-                                ),
+                                ],
                               ),
                             ),
-                            SizedBox(width: 10.0),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  'Kamran Khan',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 26.0,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(width: 10.0),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                userData?.displayName ?? 'Loading...',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 26.0,
                                 ),
-                                SizedBox(width: 10.0),
-                                Container(
-                                  width: 8,
-                                  height: 8,
-                                  margin: EdgeInsets.symmetric(vertical: 25),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green,
-                                    borderRadius: BorderRadius.circular(5),
-                                  ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              SizedBox(width: 10.0),
+                              Container(
+                                width: 8,
+                                height: 8,
+                                margin: EdgeInsets.symmetric(vertical: 25),
+                                decoration: BoxDecoration(
+                                  color: Colors.green,
+                                  borderRadius: BorderRadius.circular(5),
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
-                  )),
+                    ),
+                  ],
+                ),
+              ),
 
               SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: ListTile(
-                  contentPadding:
-                  EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
                   tileColor: hexToColor('#EDEDED'),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16.0),
                   ),
                   leading: Container(
-                      padding: EdgeInsets.all(10.0),
-                      decoration: BoxDecoration(
-                          color: Theme.of(context).primaryColor,
-                          borderRadius: BorderRadius.circular(10.0)),
-                      child: Icon(CupertinoIcons.location_fill,
-                          color: Colors.white)),
+                    padding: EdgeInsets.all(10.0),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).primaryColor,
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
+                    child: Icon(CupertinoIcons.location_fill, color: Colors.white),
+                  ),
                   title: Text(
-                    'Taloja Phase 1, Navi Mumbai',
+                    userData?.location ?? 'Address not set',
                     style: TextStyle(
                       color: hexToColor('#4A4F4C'),
                       fontSize: 16.0,
@@ -171,7 +193,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                         ),
                       ),
                       TextSpan(
-                        text: '410208',
+                        text: userData?.pincode ?? 'Not set',
                         style: TextStyle(
                           color: hexToColor('#787878'),
                           fontFamily: 'Poppins',
@@ -184,10 +206,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   trailing: Container(
                     padding: EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(100.0)),
-                    child: Icon(Icons.arrow_forward_ios,
-                        size: 18, color: Theme.of(context).primaryColor),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(100.0),
+                    ),
+                    child: Icon(Icons.arrow_forward_ios, size: 18, color: Theme.of(context).primaryColor),
                   ),
                 ),
               ),
@@ -196,11 +218,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Column(
                   children: [
-                    // _buildMenuItem(Icons.report_problem, 'Report Issue'),
                     _buildMenuItem(Icons.person, 'About'),
-                    // _buildMenuItem(Icons.feedback, 'Send Feedback'),
-                    // _buildMenuItem(Icons.shopping_cart, 'Purchase History'),
-                    // _buildMenuItem(Icons.password, 'Change Password & Email'),
                     _buildMenuItem(Icons.delete, 'Delete Account'),
                     _buildMenuItem(Icons.help, 'Help'),
                     _buildMenuItem(Icons.gavel, 'Legal'),
@@ -220,18 +238,14 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,
-                    // Set the button color to black
                     foregroundColor: Colors.white,
-                    // Set the text color to white
                     padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                    // Set the padding
                     textStyle: TextStyle(
-                      fontSize: 16, // Set the text size
-                      fontWeight: FontWeight.bold, // Set the text weight
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                          50), // Set the button corner radius
+                      borderRadius: BorderRadius.circular(50),
                     ),
                   ),
                   child: Text('Sign Out', style: TextStyle(fontSize: 14)),
@@ -251,12 +265,13 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
       child: Row(
         children: [
           CircleAvatar(
-              backgroundColor: hexToColor('#2B2B2B'),
-              child: Icon(
-                icon,
-                color: Colors.white,
-                size: 16,
-              )),
+            backgroundColor: hexToColor('#2B2B2B'),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 16,
+            ),
+          ),
           SizedBox(width: 16.0),
           Text(
             title,
@@ -298,9 +313,11 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
   Future<void> uploadImage() async {
     try {
       final user = this.user;
-      if (user != null) {
-        photoURL = await UserService()
-            .uploadProfilePicture(uid: user.uid, file: profileImage!);
+      if (user != null && profileImage != null) {
+        photoURL = await UserService().uploadProfilePicture(uid: user.uid, file: profileImage!);
+
+        // Update user data in Firebase
+        await UserService().updateUser(uid: user.uid, data: {'profilePicture': photoURL});
       }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -429,7 +446,7 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                       foregroundColor: Colors.white,
                       // Set the text color to white
                       padding:
-                          EdgeInsets.symmetric(horizontal: 100, vertical: 18),
+                      EdgeInsets.symmetric(horizontal: 100, vertical: 18),
                       // Set the padding
                       textStyle: TextStyle(
                         fontSize: 16, // Set the text size
