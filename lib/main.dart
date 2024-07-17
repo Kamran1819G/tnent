@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/onboarding_screen.dart';
 import 'package:tnennt/widget_tree.dart';

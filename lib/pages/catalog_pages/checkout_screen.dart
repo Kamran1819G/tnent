@@ -8,194 +8,238 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  const CheckoutScreen({super.key});
+  const CheckoutScreen({Key? key}) : super(key: key);
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  String userName = '';
+  String userAddress = '';
+  String userMobile = '';
+  Map<String, dynamic> productDetails = {};
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData();
+  }
+
+  Future<void> _fetchUserData() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        DocumentSnapshot userData = await _firestore.collection('Users').doc(user.uid).get();
+        
+        setState(() {
+          userName = userData['firstName'] ?? '';
+          userAddress = userData['address'] ?? '';
+          userMobile = userData['mobile'] ?? '';
+          isLoading = false;
+        });
+      } else {
+        // Handle case where user is not logged in
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+  Future<void> _fetchProductDetails() async {
+    try {
+      // Assuming you have a product ID, replace 'productId' with the actual ID
+      DocumentSnapshot productDoc = await _firestore.collection('Products').doc('productID').get();
+
+      if (productDoc.exists) {
+        setState(() {
+          productDetails = productDoc.data() as Map<String, dynamic>;
+          isLoading = false;
+        });
+      } else {
+        print('Product not found');
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching product details: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
+        child: isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Column(
                 children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Checkout'.toUpperCase(),
-                        style: TextStyle(
-                          color: hexToColor('#1E1E1E'),
-                          fontSize: 24.0,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                      Text(
-                        ' •',
-                        style: TextStyle(
-                          fontSize: 28.0,
-                          color: hexToColor('#FF0000'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Spacer(),
                   Container(
-                    margin: EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey[100],
-                      child: IconButton(
-                        icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Card(
-              margin: EdgeInsets.all(16.0),
-              color: Colors.white,
-              surfaceTintColor: Colors.white,
-              child: Container(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    height: 100,
+                    padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
                       children: [
                         Text(
-                          'Kamran Khan',
+                          'Checkout'.toUpperCase(),
                           style: TextStyle(
-                            color: hexToColor('#2D332F'),
-                            fontSize: 22.0,
+                            color: hexToColor('#1E1E1E'),
+                            fontSize: 24.0,
+                            letterSpacing: 1.5,
                           ),
                         ),
+                        Text(
+                          ' •',
+                          style: TextStyle(
+                            fontSize: 28.0,
+                            color: hexToColor('#FF0000'),
+                          ),
+                        ),
+                        Spacer(),
                         Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 12.0, vertical: 6.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            borderRadius: BorderRadius.circular(100.0),
-                          ),
-                          child: Text(
-                            'Home',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 12.0,
+                          margin: EdgeInsets.all(8.0),
+                          child: CircleAvatar(
+                            backgroundColor: Colors.grey[100],
+                            child: IconButton(
+                              icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
                             ),
                           ),
-                        )
+                        ),
                       ],
                     ),
-                    SizedBox(height: 16.0),
-                    Container(
-                      width: 250,
+                  ),
+                  Card(
+                    margin: EdgeInsets.all(16.0),
+                    color: Colors.white,
+                    surfaceTintColor: Colors.white,
+                    child: Container(
+                      padding: EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Flat No. 505 Ammar Residency,',
-                            style: TextStyle(
-                              color: hexToColor('#727272'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12.0,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                userName,
+                                style: TextStyle(
+                                  color: hexToColor('#2D332F'),
+                                  fontSize: 22.0,
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12.0, vertical: 6.0),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  borderRadius: BorderRadius.circular(100.0),
+                                ),
+                                child: Text(
+                                  'Home',
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontSize: 12.0,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                          SizedBox(height: 16.0),
+                          Container(
+                            width: 250,
+                            child: Text(
+                              userAddress,
+                              style: TextStyle(
+                                color: hexToColor('#727272'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12.0,
+                              ),
                             ),
                           ),
-                          SizedBox(height: 4.0),
-                          Text(
-                            'Plot No 21 Sector 9 Taloja Phase 1',
-                            style: TextStyle(
-                              color: hexToColor('#727272'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12.0,
-                            ),
+                          SizedBox(height: 16.0),
+                          Row(
+                            children: [
+                              Text(
+                                'Mobile:',
+                                style: TextStyle(
+                                  color: hexToColor('#727272'),
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 12.0,
+                                ),
+                              ),
+                              SizedBox(width: 4.0),
+                              Text(
+                                userMobile,
+                                style: TextStyle(
+                                  color: hexToColor('#2D332F'),
+                                  fontSize: 12.0,
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(height: 4.0),
-                          Text(
-                            'Navi Mumbai, Maharashtra 410208',
-                            style: TextStyle(
-                              color: hexToColor('#727272'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12.0,
+                          SizedBox(height: 25.0),
+                          Center(
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChangeAddressScreen(),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                height: 50,
+                                width: 300,
+                                margin: EdgeInsets.symmetric(vertical: 15.0),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: hexToColor('#E3E3E3')),
+                                  borderRadius: BorderRadius.circular(100.0),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Change Your Address',
+                                    style: TextStyle(
+                                        color: hexToColor('#343434'),
+                                        fontSize: 12.0),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 16.0),
-                    Row(
-                      children: [
-                        Text(
-                          'Mobile:',
-                          style: TextStyle(
-                            color: hexToColor('#727272'),
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12.0,
-                          ),
-                        ),
-                        SizedBox(width: 4.0),
-                        Text(
-                          '1234567890',
-                          style: TextStyle(
-                            color: hexToColor('#2D332F'),
-                            fontSize: 12.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 25.0),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ChangeAddressScreen(),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          height: 50,
-                          width: 300,
-                          margin: EdgeInsets.symmetric(vertical: 15.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: hexToColor('#E3E3E3')),
-                            borderRadius: BorderRadius.circular(100.0),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'Change Your Address',
-                              style: TextStyle(
-                                  color: hexToColor('#343434'),
-                                  fontSize: 12.0),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                  ),
             SizedBox(height: 16.0),
             ProductDetails(
               productImage: 'assets/product_image.png',
