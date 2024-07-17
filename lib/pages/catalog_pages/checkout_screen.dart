@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/pages/catalog_pages/store_coupon_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -43,8 +44,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     try {
       User? user = _auth.currentUser;
       if (user != null) {
-        DocumentSnapshot userData = await _firestore.collection('Users').doc(user.uid).get();
-        
+        DocumentSnapshot userData =
+            await _firestore.collection('Users').doc(user.uid).get();
+
         setState(() {
           userName = userData['firstName'] ?? '';
           userAddress = userData['address'] ?? '';
@@ -64,10 +66,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       });
     }
   }
+
   Future<void> _fetchProductDetails() async {
     try {
       // Assuming you have a product ID, replace 'productId' with the actual ID
-      DocumentSnapshot productDoc = await _firestore.collection('Products').doc('productID').get();
+      DocumentSnapshot productDoc =
+          await _firestore.collection('Products').doc('productID').get();
 
       if (productDoc.exists) {
         setState(() {
@@ -87,7 +91,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       });
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +126,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           child: CircleAvatar(
                             backgroundColor: Colors.grey[100],
                             child: IconButton(
-                              icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                              icon: Icon(Icons.arrow_back_ios_new,
+                                  color: Colors.black),
                               onPressed: () {
                                 Navigator.pop(context);
                               },
@@ -222,7 +226,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 width: 300,
                                 margin: EdgeInsets.symmetric(vertical: 15.0),
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: hexToColor('#E3E3E3')),
+                                  border:
+                                      Border.all(color: hexToColor('#E3E3E3')),
                                   borderRadius: BorderRadius.circular(100.0),
                                 ),
                                 child: Center(
@@ -240,44 +245,43 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     ),
                   ),
-            SizedBox(height: 16.0),
-            ProductDetails(
-              productImage: 'assets/product_image.png',
-              productName: 'Nikon Camera',
-              productPrice: '200',
-            ),
-            Spacer(),
-            Center(
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SummaryScreen(),
-                    ),
-                  );
-                },
-                child: Container(
-                  height: 50,
-                  width: 250,
-                  margin: EdgeInsets.symmetric(vertical: 15.0),
-                  decoration: BoxDecoration(
-                    color: hexToColor('#2B2B2B'),
-                    borderRadius: BorderRadius.circular(100.0),
+                  SizedBox(height: 16.0),
+                  ProductDetails(
+                    productImage: 'assets/product_image.png',
+                    productName: 'Nikon Camera',
+                    productPrice: '200',
                   ),
-                  child: Center(
-                    child: Text(
-                      'Continue',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16.0),
+                  Spacer(),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SummaryScreen(),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        height: 50,
+                        width: 250,
+                        margin: EdgeInsets.symmetric(vertical: 15.0),
+                        decoration: BoxDecoration(
+                          color: hexToColor('#2B2B2B'),
+                          borderRadius: BorderRadius.circular(100.0),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Continue',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 16.0),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -537,8 +541,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
                       ),
                       SizedBox(height: 4.0),
                       Row(children: [
-                        Image.asset('assets/icons/blue_globe.png',
-                        width: 8,
+                        Image.asset(
+                          'assets/icons/blue_globe.png',
+                          width: 8,
                         ),
                         SizedBox(width: 4.0),
                         Text(
@@ -659,70 +664,77 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Container(
-                          width: 200.0,
-                          padding: EdgeInsets.all(16.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: hexToColor('#E3E3E3')),
-                            borderRadius: BorderRadius.circular(50.0),
-                          ),
-                          child: Row(
-                            children: [
-                              CircleAvatar(
-                                backgroundColor: hexToColor('#F3F3F3'),
-                                child: Icon(
-                                  Icons.discount_outlined,
-                                  color: Colors.black,
-                                ),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StoreCouponScreen(),
                               ),
-                              SizedBox(width: 10.0),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Coupons',
-                                      style: TextStyle(
-                                        color: hexToColor('#272822'),
-                                        fontSize: 14.0,
-                                      )),
-                                  SizedBox(
-                                    width: 100,
-                                    child: Text(
-                                      'View All Coupons',
-                                      style: TextStyle(
-                                        color: hexToColor('#838383'),
-                                        fontFamily: 'Poppins',
-                                        fontSize: 10.0,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      maxLines: 2,
-                                    ),
+                            );
+                          },
+                          child: Container(
+                            width: 200.0,
+                            padding: EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: hexToColor('#E3E3E3')),
+                              borderRadius: BorderRadius.circular(50.0),
+                            ),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  backgroundColor: hexToColor('#F3F3F3'),
+                                  child: Icon(
+                                    Icons.discount_outlined,
+                                    color: Colors.black,
                                   ),
-                                ],
-                              )
-                            ],
+                                ),
+                                SizedBox(width: 10.0),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Coupons',
+                                        style: TextStyle(
+                                          color: hexToColor('#272822'),
+                                          fontSize: 14.0,
+                                        )),
+                                    SizedBox(
+                                      width: 100,
+                                      child: Text(
+                                        'View All Coupons',
+                                        style: TextStyle(
+                                          color: hexToColor('#838383'),
+                                          fontFamily: 'Poppins',
+                                          fontSize: 10.0,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                        maxLines: 2,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
                           ),
                         ),
                         Container(
                           height: 75,
                           width: 200.0,
-                          padding: EdgeInsets.all(16.0),
+                          padding: EdgeInsets.all(12.0),
                           decoration: BoxDecoration(
                             border: Border.all(color: hexToColor('#E3E3E3')),
                             borderRadius: BorderRadius.circular(50.0),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Enter Code:',
-                                style: TextStyle(
-                                  color: hexToColor('#272822'),
-                                  fontSize: 12.0,
-                                ),
-                              ),
-                            ],
-                          ),
+                          child: TextField(
+                              decoration: InputDecoration(
+                            hintText: 'Enter Code:',
+                            hintStyle: TextStyle(
+                              color: hexToColor('#272822'),
+                              fontFamily: 'Gotham',
+                              fontSize: 16.0,
+                            ),
+                            border: InputBorder.none,
+                          )),
                         ),
                       ],
                     ),
@@ -735,8 +747,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                           Text(
                             'Summary',
                             style: TextStyle(
-                                color: hexToColor('#343434'),
-                                fontSize: 18.0),
+                                color: hexToColor('#343434'), fontSize: 18.0),
                           ),
                           SizedBox(height: 20.0),
                           Padding(
@@ -876,12 +887,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
   }
 }
 
-enum ExpandedTile {
-  none,
-  upi,
-  otherUpi,
-  card
-}
+enum ExpandedTile { none, upi, otherUpi, card }
 
 class PaymentOptionScreen extends StatefulWidget {
   const PaymentOptionScreen({super.key});
@@ -968,7 +974,8 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                       initiallyExpanded: expandedTile == ExpandedTile.upi,
                       onExpansionChanged: (expanded) {
                         setState(() {
-                          expandedTile = expanded ? ExpandedTile.upi : ExpandedTile.none;
+                          expandedTile =
+                              expanded ? ExpandedTile.upi : ExpandedTile.none;
                         });
                       },
                       collapsedShape: RoundedRectangleBorder(
@@ -1057,10 +1064,13 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                         ),
                         ExpansionTile(
                           key: Key('other_upi'),
-                          initiallyExpanded: expandedTile == ExpandedTile.otherUpi,
+                          initiallyExpanded:
+                              expandedTile == ExpandedTile.otherUpi,
                           onExpansionChanged: (expanded) {
                             setState(() {
-                              expandedTile = expanded ? ExpandedTile.otherUpi : ExpandedTile.upi;
+                              expandedTile = expanded
+                                  ? ExpandedTile.otherUpi
+                                  : ExpandedTile.upi;
                             });
                           },
                           shape: RoundedRectangleBorder(
@@ -1159,7 +1169,8 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                       initiallyExpanded: expandedTile == ExpandedTile.card,
                       onExpansionChanged: (expanded) {
                         setState(() {
-                          expandedTile = expanded ? ExpandedTile.card : ExpandedTile.none;
+                          expandedTile =
+                              expanded ? ExpandedTile.card : ExpandedTile.none;
                         });
                       },
                       collapsedShape: RoundedRectangleBorder(
@@ -1568,9 +1579,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                 child: Center(
                   child: Text(
                     'Confirm Address',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14.0),
+                    style: TextStyle(color: Colors.white, fontSize: 14.0),
                   ),
                 ),
               ),
@@ -1658,7 +1667,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           .findRenderObject() as RenderRepaintBoundary;
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       ByteData? byteData =
-      await image.toByteData(format: ui.ImageByteFormat.png);
+          await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
     } catch (e) {
       print(e);
@@ -1762,7 +1771,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                          SizedBox(
+                              height:
+                                  MediaQuery.of(context).size.height * 0.05),
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.8,
                             child: Column(
@@ -1875,14 +1886,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 ),
                                 SizedBox(height: 16.0),
                                 Container(
-                                  height: MediaQuery.of(context).size.height * 0.1,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.1,
                                   decoration: BoxDecoration(
                                     color: hexToColor('#FFFFFF'),
                                     borderRadius: BorderRadius.circular(12.0),
                                   ),
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
                                         'Cash on Delivery',
@@ -1897,7 +1908,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                   ),
                                 ),
                                 SizedBox(height: 25.0),
-                                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                                SizedBox(
+                                    height: MediaQuery.of(context).size.height *
+                                        0.1),
                                 Row(
                                   children: [
                                     Text(
@@ -1919,25 +1932,25 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                     ),
                                     Spacer(),
                                     Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 16.0, vertical: 8.0),
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: hexToColor('#094446')),
-                                        borderRadius: BorderRadius.circular(12.0),
-                                      ),
-                                      child: Center(
-                                        child: Text(
-                                          'Unpaid'.toUpperCase(),
-                                          style: TextStyle(
-                                            color: hexToColor('#094446'),
-                                            fontSize: 20.0,
-                                            fontFamily: 'Poppins',
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: 16.0, vertical: 8.0),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: hexToColor('#094446')),
+                                          borderRadius:
+                                              BorderRadius.circular(12.0),
                                         ),
-                                      )
-                                    )
+                                        child: Center(
+                                          child: Text(
+                                            'Unpaid'.toUpperCase(),
+                                            style: TextStyle(
+                                              color: hexToColor('#094446'),
+                                              fontSize: 20.0,
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ))
                                   ],
                                 )
                               ],

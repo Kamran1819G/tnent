@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/pages/coupon_pages/fixed_price_coupon.dart';
+import 'package:tnennt/pages/coupon_pages/my_coupons.dart';
 import 'package:tnennt/pages/coupon_pages/percentage_coupon.dart';
 
 class CreateCouponScreen extends StatefulWidget {
@@ -225,6 +226,31 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                       ),
                     ),
                   ],
+                ),
+              ),
+            ),
+            SizedBox(height: 50),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return MyCoupons();
+                  }));
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: hexToColor('#323232'),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50.0),
+                  ),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 80.0, vertical: 20.0),
+                ),
+                child: Text(
+                  'My Coupons',
+                  style: TextStyle(
+                    fontSize: 16.0,
+                  ),
                 ),
               ),
             ),
