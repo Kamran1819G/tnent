@@ -1,24 +1,68 @@
-import 'dart:math';
+//CategoryProductsScreen(category: category),
 
+import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/store_owner_screens/add_product_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/all_products_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/category_products_screen.dart';
 
+class Category {
+  final String id;
+  final String name;
+  final int itemCount;
+
+  Category({required this.id, required this.name, required this.itemCount});
+
+  factory Category.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map<String, dynamic>;
+    return Category(
+      id: doc.id,
+      name: data['name'] ?? '',
+      itemCount: data['itemCount'] ?? 0,
+    );
+  }
+}
+
 class ProductCategoriesScreen extends StatefulWidget {
-  const ProductCategoriesScreen({super.key});
+  const ProductCategoriesScreen({Key? key}) : super(key: key);
 
   @override
-  State<ProductCategoriesScreen> createState() =>
-      _ProductCategoriesScreenState();
+  State<ProductCategoriesScreen> createState() => _ProductCategoriesScreenState();
 }
 
 class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
   TextEditingController _newCategoryController = TextEditingController();
-  List categories = [
-    'Sarees',
-  ];
+  List<Category> categories = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    QuerySnapshot querySnapshot = await _firestore.collection('categories').get();
+    setState(() {
+      categories = querySnapshot.docs
+          .map((doc) => Category.fromFirestore(doc))
+          .toList();
+    });
+  }
+
+  Future<void> _addCategory(String name) async {
+    DocumentReference docRef = await _firestore.collection('categories').add({
+      'name': name,
+      'itemCount': 0,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    setState(() {
+      categories.add(Category(id: docRef.id, name: name, itemCount: 0));
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,16 +76,14 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
               padding: EdgeInsets.only(left: 16, right: 8),
               child: Row(
                 children: [
-                  Image.asset('assets/black_tnennt_logo.png',
-                      width: 30, height: 30),
+                  Image.asset('assets/black_tnennt_logo.png', width: 30, height: 30),
                   Spacer(),
                   Container(
                     margin: EdgeInsets.all(8.0),
                     child: CircleAvatar(
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
-                        icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -85,8 +127,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                       );
                     },
                     child: Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.circular(100),
@@ -169,10 +210,10 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            setState(() {
-                              categories.add(_newCategoryController.text);
+                            if (_newCategoryController.text.isNotEmpty) {
+                              _addCategory(_newCategoryController.text);
                               _newCategoryController.clear();
-                            });
+                            }
                           },
                           child: Container(
                             margin: EdgeInsets.only(right: 8),
@@ -206,19 +247,18 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
             ),
             SizedBox(height: 20),
             Expanded(
-              child: GridView.count(
+              child: GridView.builder(
                 shrinkWrap: true,
                 padding: EdgeInsets.symmetric(horizontal: 16),
-                crossAxisCount: 3,
-                crossAxisSpacing: 14,
-                mainAxisSpacing: 14,
-                childAspectRatio: 1.1,
-                children: List.generate(
-                  categories.length,
-                  (index) => CategoryTile(
-                    categoryName: categories[index],
-                    itemCount: 0,
-                  ),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
+                  childAspectRatio: 1.1,
+                ),
+                itemCount: categories.length,
+                itemBuilder: (context, index) => CategoryTile(
+                  category: categories[index],
                 ),
               ),
             ),
@@ -230,9 +270,8 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
 }
 
 class CategoryTile extends StatelessWidget {
-  final String categoryName;
+  final Category category;
   final Color color;
-  final int itemCount;
 
   static final List<Color> colorList = [
     Color(0xFFDDF1EF),
@@ -244,8 +283,7 @@ class CategoryTile extends StatelessWidget {
   ];
 
   CategoryTile({
-    required this.categoryName,
-    required this.itemCount,
+    required this.category,
   }) : color = colorList[Random().nextInt(colorList.length)];
 
   @override
@@ -272,7 +310,7 @@ class CategoryTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              categoryName.toUpperCase(),
+              category.name.toUpperCase(),
               style: TextStyle(
                 color: Colors.black,
                 fontSize: 12.0,
@@ -288,7 +326,7 @@ class CategoryTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      itemCount.toString(),
+                      category.itemCount.toString(),
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 18.0,
@@ -334,4 +372,3 @@ class CategoryTile extends StatelessWidget {
     );
   }
 }
-
