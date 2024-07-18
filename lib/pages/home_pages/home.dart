@@ -2,12 +2,14 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/models/category_model.dart';
 import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/pages/catalog_pages/cart_screen.dart';
 import 'package:tnennt/screens/explore_screen.dart';
 import 'package:tnennt/screens/notification_screen.dart';
 import 'package:tnennt/screens/stores_screen.dart';
 import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
+import 'package:tnennt/services/firebase/firestore_service.dart';
 import 'package:tnennt/widgets/product_tile.dart';
 
 import '../../screens/update_screen.dart';
@@ -27,6 +29,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   late TabController _tabController;
   int _selectedIndex = 0;
   bool isNewNotification = true;
+  List<dynamic> categories = [];
+
+  final FirestoreService _firestoreService = FirestoreService();
 
   final List<String> carouselImgList = [
     'assets/carousel1.png',
@@ -72,36 +77,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     },
   ];
 
-  List<dynamic> categories = [
-    {
-      "name": "Clothings",
-      "image": "assets/product_image.png",
-    },
-    {
-      "name": "Electronics",
-      "image": "assets/product_image.png",
-    },
-    {
-      "name": "Groceries",
-      "image": "assets/product_image.png",
-    },
-    {
-      "name": "Accessories",
-      "image": "assets/product_image.png",
-    },
-    {
-      "name": "Sports",
-      "image": "assets/product_image.png",
-    },
-    {
-      "name": "Books",
-      "image": "assets/product_image.png",
-    },
-  ];
-
   @override
   void initState() {
     super.initState();
+    initialize();
     if (widget.currentUser!.firstName.isNotEmpty) {
       firstName = widget.currentUser!.firstName;
     }
@@ -120,6 +99,21 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  void initialize() async {
+    await _fetchCategories();
+  }
+
+  Future<void> _fetchCategories() async {
+    await _firestoreService
+        .getCollection(collection: 'categories')
+        .then((value) {
+      setState(() {
+        categories =
+            value.docs.map((e) => CategoryModel.fromFirestore(e)).toList();
+      });
+    });
   }
 
   String _getTabLabel(int index) {
@@ -643,39 +637,39 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         ),
 
         SizedBox(height: 20.0),
-
-        // Category Section
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            'Category',
-            style: TextStyle(
-              color: hexToColor('#343434'),
-              fontSize: 22.0,
+        if (categories.isNotEmpty) ...[
+          // Category Section
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              'Category',
+              style: TextStyle(
+                color: hexToColor('#343434'),
+                fontSize: 22.0,
+              ),
             ),
           ),
-        ),
-        Container(
-          height: MediaQuery.of(context).size.height * 1.05,
-          child: GridView.builder(
-            padding: EdgeInsets.all(16.0),
-            physics: NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 4.0,
-              mainAxisSpacing: 4.0,
-              childAspectRatio: 3 / 4,
+          Container(
+            height: MediaQuery.of(context).size.height * 1.05,
+            child: GridView.builder(
+              padding: EdgeInsets.all(16.0),
+              physics: NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 4.0,
+                mainAxisSpacing: 4.0,
+                childAspectRatio: 3 / 4,
+              ),
+              itemCount: categories.length,
+              itemBuilder: (context, index) {
+                return CategoryTile(
+                  category: categories[index],
+                );
+              },
             ),
-            itemCount: categories.length,
-            itemBuilder: (context, index) {
-              return CategoryTile(
-                name: categories[index]["name"]!,
-                image: categories[index]["image"]!,
-              );
-            },
           ),
-        ),
+        ],
       ],
     );
   }
@@ -746,52 +740,138 @@ class StoreTile extends StatelessWidget {
 }
 
 class CategoryTile extends StatelessWidget {
-  final String name;
-  final String image;
+  CategoryModel category;
 
-  const CategoryTile({
-    Key? key,
-    required this.name,
-    required this.image,
-  }) : super(key: key);
+  CategoryTile({required this.category});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8.0),
-          color: hexToColor('#F5F5F5'),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: Image.asset(
-                  image,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CategoryProductsScreen(
+              category: category,
+            ),
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8.0),
+            color: hexToColor('#F5F5F5'),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: Image.network(
+                    category.image,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 6.0),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                name,
-                style: TextStyle(
-                  color: hexToColor('#343434'),
-                  fontSize: 14.0,
+              const SizedBox(height: 6.0),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Text(
+                  category.name,
+                  style: TextStyle(
+                    color: hexToColor('#343434'),
+                    fontSize: 14.0,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 6.0),
-          ],
+              const SizedBox(height: 6.0),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+}
+
+class CategoryProductsScreen extends StatelessWidget {
+  CategoryModel category;
+
+  CategoryProductsScreen({required this.category});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Container(
+            height: 100,
+            padding: EdgeInsets.only(left: 16, right: 8),
+            child: Row(
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      category.name.toUpperCase(),
+                      style: TextStyle(
+                        color: hexToColor('#1E1E1E'),
+                        fontWeight: FontWeight.w400,
+                        fontSize: 24.0,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                    Text(
+                      ' •',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w400,
+                        fontSize: 28.0,
+                        color: hexToColor('#FAD524'),
+                      ),
+                    ),
+                  ],
+                ),
+                Spacer(),
+                Container(
+                  margin: EdgeInsets.all(8.0),
+                  child: CircleAvatar(
+                    backgroundColor: Colors.grey[100],
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 10),
+          Expanded(
+            child: GridView.builder(
+              shrinkWrap: true,
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 8.0,
+                mainAxisSpacing: 16.0,
+                childAspectRatio: 3 / 4,
+              ),
+              itemCount: 10,
+              itemBuilder: (context, index) {
+                return ProductTile(
+                  name: 'Product $index',
+                  image: 'assets/product_image.png',
+                  price: 100.0,
+                );
+              },
+            ),
+          )
+        ]),
       ),
     );
   }
