@@ -26,8 +26,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String userName = '';
   String userAddress = '';
   String userMobile = '';
-  Map<String, dynamic> productDetails = {};
+  ///List<CartItem> cartItems = [];
   bool isLoading = true;
+  double totalAmount = 0;
+
 
   @override
   void initState() {
@@ -44,11 +46,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       User? user = _auth.currentUser;
       if (user != null) {
         DocumentSnapshot userData = await _firestore.collection('Users').doc(user.uid).get();
-        
+
         setState(() {
-          userName = userData['firstName'] ?? '';
+          userName = '${userData['firstName']} ${userData['lastName']}';
           userAddress = userData['address'] ?? '';
           userMobile = userData['mobile'] ?? '';
+
+
           isLoading = false;
         });
       } else {
@@ -64,30 +68,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       });
     }
   }
-  Future<void> _fetchProductDetails() async {
-    try {
-      // Assuming you have a product ID, replace 'productId' with the actual ID
-      DocumentSnapshot productDoc = await _firestore.collection('Products').doc('productID').get();
-
-      if (productDoc.exists) {
-        setState(() {
-          productDetails = productDoc.data() as Map<String, dynamic>;
-          isLoading = false;
-        });
-      } else {
-        print('Product not found');
-        setState(() {
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      print('Error fetching product details: $e');
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
 
   @override
   Widget build(BuildContext context) {

@@ -17,87 +17,87 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
     return Scaffold(
       body: SafeArea(
           child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 100,
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 100,
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
                   children: [
-                    Text(
-                      'Purchase'.toUpperCase(),
-                      style: TextStyle(
-                        color: hexToColor('#1E1E1E'),
-                        fontSize: 24.0,
-                        letterSpacing: 1.5,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          'Purchase'.toUpperCase(),
+                          style: TextStyle(
+                            color: hexToColor('#1E1E1E'),
+                            fontSize: 24.0,
+                            letterSpacing: 1.5,
+                          ),
+                        ),
+                        Text(
+                          ' •',
+                          style: TextStyle(
+                            fontSize: 28.0,
+                            color: hexToColor('#FF0000'),
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      ' •',
-                      style: TextStyle(
-                        fontSize: 28.0,
-                        color: hexToColor('#FF0000'),
+                    Spacer(),
+                    Container(
+                      margin: EdgeInsets.all(8.0),
+                      child: CircleAvatar(
+                        backgroundColor: Colors.grey[100],
+                        child: IconButton(
+                          icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
                       ),
                     ),
                   ],
                 ),
-                Spacer(),
-                Container(
-                  margin: EdgeInsets.all(8.0),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.grey[100],
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+              ),
+              SizedBox(height: 16.0),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Total Amount',
+                      style: TextStyle(
+                        color: hexToColor('#343434'),
+                        fontSize: 16.0,
+                      ),
                     ),
-                  ),
+                    Text(
+                      '₹ 0',
+                      style: TextStyle(
+                        color: hexToColor('#A9A9A9'),
+                        fontSize: 18.0,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          SizedBox(height: 16.0),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Total Amount',
-                  style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontSize: 16.0,
-                  ),
+              ),
+              SizedBox(height: 16.0),
+              Expanded(
+                child: ListView.builder(
+                  padding: EdgeInsets.symmetric(horizontal: 10.0),
+                  itemCount: 5,
+                  itemBuilder: (context, index) {
+                    return PurchaseProductTile(
+                      productImage: 'assets/product_image.png',
+                      productName: 'Nikon Camera',
+                      productPrice: 999,
+                    );
+                  },
                 ),
-                Text(
-                  '₹ 0',
-                  style: TextStyle(
-                    color: hexToColor('#A9A9A9'),
-                    fontSize: 18.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 16.0),
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 10.0),
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return PurchaseProductTile(
-                  productImage: 'assets/product_image.png',
-                  productName: 'Nikon Camera',
-                  productPrice: 999,
-                );
-              },
-            ),
-          ),
-        ],
-      )),
+              ),
+            ],
+          )),
     );
   }
 }
@@ -207,7 +207,7 @@ class _PurchaseProductTileState extends State<PurchaseProductTile> {
                     },
                     child: Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                       decoration: BoxDecoration(
                         border: Border.all(color: hexToColor('#343434')),
                         borderRadius: BorderRadius.circular(100.0),
@@ -237,7 +237,7 @@ class _PurchaseProductTileState extends State<PurchaseProductTile> {
                     },
                     child: Container(
                       padding:
-                          EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                      EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                       decoration: BoxDecoration(
                         color: hexToColor('#343434'),
                         borderRadius: BorderRadius.circular(100.0),

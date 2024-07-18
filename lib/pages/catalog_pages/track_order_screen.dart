@@ -56,7 +56,7 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
                         icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -142,7 +142,7 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
                 OrderStatus(
                   title: 'Dispatched',
                   description:
-                      'Provided Middlemen picked the item from the Store',
+                  'Provided Middlemen picked the item from the Store',
                   time: '12:43 pm',
                 ),
                 OrderStatus(
