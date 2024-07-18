@@ -16,13 +16,9 @@ class UserService{
   Future<UserModel> fetchUserDetails() async {
     User? user = currentUser;
     if (user != null) {
-      if(user.isAnonymous){
-        return UserModel(uid: user.uid);
-      }else {
         DocumentSnapshot doc = await FirebaseFirestore.instance.collection(
             'Users').doc(user.uid).get();
         return UserModel.fromFirestore(doc);
-      }
     } else {
       throw Exception("No user is signed in");
     }

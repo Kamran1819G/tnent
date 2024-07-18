@@ -130,7 +130,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                userData?.displayName ?? 'Loading...',
+                                '${userData?.firstName} ${userData?.lastName}' ?? 'Loading...',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 26.0,

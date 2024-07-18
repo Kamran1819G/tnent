@@ -243,11 +243,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                           builder: (context) => MyProfileScreen()));
                 },
                 child: widget.currentUser != null &&
-                        widget.currentUser!.photoURL.isNotEmpty
+                        widget.currentUser!.photoURL != null
                     ? CircleAvatar(
                         radius: 30.0,
                         backgroundImage:
-                            NetworkImage(widget.currentUser!.photoURL),
+                            NetworkImage(widget.currentUser!.photoURL ?? ''),
                       )
                     : CircleAvatar(
                         radius: 30.0,
