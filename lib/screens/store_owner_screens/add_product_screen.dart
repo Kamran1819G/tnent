@@ -130,6 +130,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
         productData['variants'] = [
           ProductVariant(
             id: Uuid().v4(),
+            attributes: {},
             discount: double.tryParse(_discountController.text) ?? 0.0,
             mrp: double.tryParse(_mrpController.text) ?? 0.0,
             price: double.tryParse(_itemPriceController.text) ?? 0.0,
