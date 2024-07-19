@@ -5,12 +5,41 @@ import 'package:flutter/widgets.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/widgets/customCheckboxListTile.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class StoreRegistration extends StatefulWidget {
   const StoreRegistration({super.key});
 
   @override
   State<StoreRegistration> createState() => _StoreRegistrationState();
+}
+String storeName = '';
+String storeDomain = '';
+String storeEmail = '';
+String storePhoneNumber = '';
+String storeUpiId = '';
+String storeLocation = '';
+String selectedCategory = '';
+
+// Function to add store data to Firestore
+Future<void> addStoreToFirestore() async {
+  try {
+    await FirebaseFirestore.instance.collection('Stores').add({
+      'storeName': storeName,
+      'storeDomain': storeDomain,
+      'storeEmail': storeEmail,
+      'storePhoneNumber': storePhoneNumber,
+      'storeCategory': selectedCategory,
+      'storeUpiId': storeUpiId,
+      'storeLocation': storeLocation,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    print('Store added successfully');
+  } catch (e) {
+    print('Error adding store: $e');
+  }
 }
 
 class _StoreRegistrationState extends State<StoreRegistration> {
@@ -105,6 +134,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 });
                 if(index == 10) {
                   _confettiController.play();
+                  addStoreToFirestore();
                 }
               },
               physics: NeverScrollableScrollPhysics(),
@@ -520,11 +550,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
                       child: TextField(
-                        style: TextStyle(
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16,
-                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            storeName = value;
+                          });
+                        },
                         decoration: InputDecoration(
                           label: Text('Store Name'),
                           labelStyle: TextStyle(
@@ -613,11 +643,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
                       child: TextField(
-                        style: TextStyle(
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16,
-                        ),
+                        onChanged: (value) {
+                          setState(() {
+                            storeDomain = value;
+                          });
+                        },
                         decoration: InputDecoration(
                           label: Text('Store Name'),
                           labelStyle: TextStyle(

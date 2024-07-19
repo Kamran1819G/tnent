@@ -1,17 +1,14 @@
-//CategoryProductsScreen(category: category),
-
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/store_owner_screens/add_product_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/all_products_screen.dart';
-import 'package:tnennt/screens/store_owner_screens/category_products_screen.dart';
 
 class Category {
   final String id;
   final String name;
-  final int itemCount;
+  int itemCount;
 
   Category({required this.id, required this.name, required this.itemCount});
 
@@ -21,6 +18,23 @@ class Category {
       id: doc.id,
       name: data['name'] ?? '',
       itemCount: data['itemCount'] ?? 0,
+    );
+  }
+}
+
+class Product {
+  final String id;
+  final String name;
+  final String category;
+
+  Product({required this.id, required this.name, required this.category});
+
+  factory Product.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map<String, dynamic>;
+    return Product(
+      id: doc.id,
+      name: data['name'] ?? '',
+      category: data['category'] ?? '',
     );
   }
 }
@@ -45,11 +59,30 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
 
   Future<void> _loadCategories() async {
     QuerySnapshot querySnapshot = await _firestore.collection('categories').get();
+    List<Category> loadedCategories = querySnapshot.docs
+        .map((doc) => Category.fromFirestore(doc))
+        .toList();
+
+    for (var category in loadedCategories) {
+      await _updateCategoryItemCount(category);
+    }
+
     setState(() {
-      categories = querySnapshot.docs
-          .map((doc) => Category.fromFirestore(doc))
-          .toList();
+      categories = loadedCategories;
     });
+  }
+
+  Future<void> _updateCategoryItemCount(Category category) async {
+    QuerySnapshot productsSnapshot = await _firestore
+        .collection('Products')
+        .where('category', isEqualTo: category.name)
+        .get();
+
+    int itemCount = productsSnapshot.docs.length;
+
+    await _firestore.collection('categories').doc(category.id).update({'itemCount': itemCount});
+
+    category.itemCount = itemCount;
   }
 
   Future<void> _addCategory(String name) async {
@@ -59,8 +92,11 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
       'createdAt': FieldValue.serverTimestamp(),
     });
 
+    Category newCategory = Category(id: docRef.id, name: name, itemCount: 0);
+    await _updateCategoryItemCount(newCategory);
+
     setState(() {
-      categories.add(Category(id: docRef.id, name: name, itemCount: 0));
+      categories.add(newCategory);
     });
   }
 
@@ -293,7 +329,7 @@ class CategoryTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CategoryProductsScreen(),
+            builder: (context) => CategoryProductsScreen(category: category),
           ),
         );
       },
@@ -346,7 +382,7 @@ class CategoryTile extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AddProductScreen(),
+                        builder: (context) => AddProductScreen(category: category.name),
                       ),
                     );
                   },
@@ -368,6 +404,76 @@ class CategoryTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class CategoryProductsScreen extends StatefulWidget {
+  final Category category;
+
+  const CategoryProductsScreen({Key? key, required this.category}) : super(key: key);
+
+  @override
+  State<CategoryProductsScreen> createState() => _CategoryProductsScreenState();
+}
+
+class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
+  List<Product> products = [];
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('Products')
+        .where('category', isEqualTo: widget.category.name)
+        .get();
+
+    setState(() {
+      products = querySnapshot.docs
+          .map((doc) => Product.fromFirestore(doc))
+          .toList();
+    });
+
+    await _firestore.collection('categories').doc(widget.category.id).update({
+      'itemCount': products.length,
+    });
+
+    setState(() {
+      widget.category.itemCount = products.length;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('${widget.category.name} (${widget.category.itemCount} items)'),
+      ),
+      body: ListView.builder(
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          return ListTile(
+            title: Text(products[index].name),
+            // Add more product details as needed
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddProductScreen(category: widget.category.name),
+            ),
+          ).then((_) => _loadProducts());
+        },
+        child: Icon(Icons.add),
       ),
     );
   }

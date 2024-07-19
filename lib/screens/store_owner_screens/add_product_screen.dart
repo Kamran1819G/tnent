@@ -6,9 +6,12 @@ import 'package:tnennt/screens/store_owner_screens/optionals_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:tnennt/constants/constants.dart';
 
 class AddProductScreen extends StatefulWidget {
-  const AddProductScreen({Key? key}) : super(key: key);
+  final String? category;
+
+  const AddProductScreen({Key? key,this.category}) : super(key: key);
 
   @override
   State<AddProductScreen> createState() => _AddProductScreenState();
@@ -121,12 +124,25 @@ class _AddProductScreenState extends State<AddProductScreen> {
       // Set the data in Firestore
       await productRef.set(productData);
 
+      // Update Constants.productId
+      Constants.productId = productId;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Product added successfully')),
       );
 
-      // Clear form or navigate back
-      _clearForm();
+      // Navigate to the next page if it's a multi-option category
+      if (isMultiOptionCategory) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => OptionalsScreen(productId: productId),
+          ),
+        );
+      } else {
+        // Clear form or navigate back
+        _clearForm();
+      }
     } catch (e) {
       print('Error adding product: $e');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -432,39 +448,38 @@ class _AddProductScreenState extends State<AddProductScreen> {
     keyboardType: TextInputType.number,
     style: TextStyle(
     color: Colors.black,
-    fontFamily: 'Gotham',
-    fontWeight: FontWeight.w700,
-    fontSize: 14.0,
-    ),
-    decoration: InputDecoration(
-    hintText: 'Discount',
-    hintStyle: TextStyle(
-      color: hexToColor('#989898'),
-      fontFamily: 'Gotham',
-      fontWeight: FontWeight.w700,
+    fontFamily: 'Gotham',fontWeight: FontWeight.w700,
       fontSize: 14.0,
     ),
-      prefixIcon: Text(
-        '%',
-        style: TextStyle(
-          color: Theme.of(context).primaryColor,
+      decoration: InputDecoration(
+        hintText: 'Discount',
+        hintStyle: TextStyle(
+          color: hexToColor('#989898'),
           fontFamily: 'Gotham',
-          fontWeight: FontWeight.w600,
-          fontSize: 18.0,
+          fontWeight: FontWeight.w700,
+          fontSize: 14.0,
         ),
-        textAlign: TextAlign.center,
-      ),
-      prefixIconConstraints: BoxConstraints(
-        minWidth: 30,
-        minHeight: 0,
-      ),
-      border: OutlineInputBorder(
-        borderSide: BorderSide(
-          color: hexToColor('#848484'),
+        prefixIcon: Text(
+          '%',
+          style: TextStyle(
+            color: Theme.of(context).primaryColor,
+            fontFamily: 'Gotham',
+            fontWeight: FontWeight.w600,
+            fontSize: 18.0,
+          ),
+          textAlign: TextAlign.center,
         ),
-        borderRadius: BorderRadius.circular(18),
+        prefixIconConstraints: BoxConstraints(
+          minWidth: 30,
+          minHeight: 0,
+        ),
+        border: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: hexToColor('#848484'),
+          ),
+          borderRadius: BorderRadius.circular(18),
+        ),
       ),
-    ),
       onSubmitted: (_) => _calculateValues(),
     ),
     ),
@@ -686,18 +701,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
         ),
       Center(
         child: ElevatedButton(
-          onPressed: () {
-            if (isMultiOptionCategory) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => OptionalsScreen(),
-                ),
-              );
-            } else {
-              _uploadProduct();
-            }
-          },
+          onPressed: _uploadProduct,
           style: ElevatedButton.styleFrom(
             backgroundColor: hexToColor('#2B2B2B'),
             padding: EdgeInsets.symmetric(horizontal: 75, vertical: 16),
@@ -706,7 +710,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
             ),
           ),
           child: Text(
-            isMultiOptionCategory ? 'Next' : 'List Item',
+            'List Item',
             style: TextStyle(color: Colors.white, fontSize: 16.0),
           ),
         ),

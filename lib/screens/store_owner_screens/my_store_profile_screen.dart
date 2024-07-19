@@ -8,6 +8,7 @@ import 'package:tnennt/screens/store_owner_screens/analytics_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/order_pays_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/product_categories_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/store_settings_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MyStoreProfileScreen extends StatefulWidget {
   const MyStoreProfileScreen({super.key});
@@ -33,6 +34,20 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   bool isGoodReview = true;
   bool isExpanded = false;
 
+  List<dynamic> categories = [];
+
+
+  Future<void> fetchCategories() async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('categories').get();
+      setState(() {
+        categories = querySnapshot.docs.map((doc) => doc.data()).toList();
+      });
+    } catch (e) {
+      print('Error fetching categories: $e');
+    }
+  }
+
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -52,16 +67,21 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   });
 
   @override
-  void initState() {
+  void initState()
+  {
     super.initState();
-    _controller = AnimationController(
+    _controller = AnimationController
+      (
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _animation = CurvedAnimation(
+    _animation = CurvedAnimation
+      (
       parent: _controller,
       curve: Curves.easeInOut,
     );
+    super.initState();
+    fetchCategories();
   }
 
   @override

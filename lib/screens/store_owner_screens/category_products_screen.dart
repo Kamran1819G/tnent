@@ -1,78 +1,136 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
 
+class Product {
+  final String id;
+  final String name;
+  final String imageUrl;
+  final double price;
+  final String category;
+
+  Product({
+    required this.id,
+    required this.name,
+    required this.imageUrl,
+    required this.price,
+    required this.category,
+  });
+
+  factory Product.fromFirestore(DocumentSnapshot doc) {
+    Map data = doc.data() as Map<String, dynamic>;
+    return Product(
+      id: doc.id,
+      name: data['name'] ?? '',
+      imageUrl: data['imageUrl'] ?? '',
+      price: (data['price'] ?? 0).toDouble(),
+      category: data['category'] ?? '',
+    );
+  }
+}
+
 class CategoryProductsScreen extends StatefulWidget {
-  const CategoryProductsScreen({super.key});
+  final String category;
+  const CategoryProductsScreen({Key? key, required this.category}) : super(key: key);
 
   @override
   State<CategoryProductsScreen> createState() => _CategoryProductsScreenState();
 }
 
 class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
+  late Stream<QuerySnapshot> _productsStream;
+
+  @override
+  void initState() {
+    super.initState();
+    _productsStream = FirebaseFirestore.instance
+        .collection('Products')
+        .where('category', isEqualTo: widget.category)
+        .snapshots();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            height: 100,
-            padding: EdgeInsets.only(left: 16, right: 8),
-            child: Row(
-              children: [
-                Image.asset('assets/black_tnennt_logo.png',
-                    width: 30, height: 30),
-                Spacer(),
-                Container(
-                  margin: EdgeInsets.all(8.0),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.grey[100],
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 100,
+              padding: EdgeInsets.only(left: 16, right: 8),
+              child: Row(
+                children: [
+                  Image.asset('assets/black_tnennt_logo.png', width: 30, height: 30),
+                  Spacer(),
+                  Container(
+                    margin: EdgeInsets.all(8.0),
+                    child: CircleAvatar(
+                      backgroundColor: Colors.grey[100],
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              'Category Products',
-              style: TextStyle(
-                color: hexToColor('#343434'),
-                fontSize: 18.0,
+                ],
               ),
             ),
-          ),
-          SizedBox(height: 30),
-          Expanded(
-            child: GridView.builder(
-              shrinkWrap: true,
+            SizedBox(height: 10),
+            Container(
               padding: EdgeInsets.symmetric(horizontal: 8.0),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 16.0,
-                childAspectRatio: 0.7,
+              child: Text(
+                widget.category,
+                style: TextStyle(
+                  color: hexToColor('#343434'),
+                  fontSize: 18.0,
+                ),
               ),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return ProductTile(
-                  name: 'Product $index',
-                  image: 'assets/product_image.png',
-                  price: 100.0,
-                );
-              },
             ),
-          )
-        ]),
+            SizedBox(height: 30),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _productsStream,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Something went wrong'));
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  List<Product> products = snapshot.data!.docs
+                      .map((doc) => Product.fromFirestore(doc))
+                      .toList();
+
+                  return GridView.builder(
+                    shrinkWrap: true,
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 8.0,
+                      mainAxisSpacing: 16.0,
+                      childAspectRatio: 0.7,
+                    ),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return ProductTile(
+                        name: product.name,
+                        image: product.imageUrl,
+                        price: product.price,
+                      );
+                    },
+                  );
+                },
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -120,9 +178,9 @@ class _ProductTileState extends State<ProductTile> {
           MaterialPageRoute(
             builder: (context) => ProductDetailScreen(
               images: [
-                Image.asset(widget.image),
-                Image.asset(widget.image),
-                Image.asset(widget.image),
+                Image.network(widget.image),
+                Image.network(widget.image),
+                Image.network(widget.image),
               ],
               productName: widget.name,
               productDescription:
@@ -136,7 +194,7 @@ class _ProductTileState extends State<ProductTile> {
         );
       },
       child: Container(
-        height: 200, // Adjust the height as needed
+        height: 200,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6.0),
           color: hexToColor('#F5F5F5'),
@@ -151,8 +209,8 @@ class _ProductTileState extends State<ProductTile> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),
                       image: DecorationImage(
-                        image: AssetImage(widget.image),
-                        fit: BoxFit.fill,
+                        image: NetworkImage(widget.image),
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ),
@@ -168,9 +226,7 @@ class _ProductTileState extends State<ProductTile> {
                           borderRadius: BorderRadius.circular(100.0),
                         ),
                         child: Icon(
-                          _isInWishlist
-                              ? Icons.favorite
-                              : Icons.favorite_border,
+                          _isInWishlist ? Icons.favorite : Icons.favorite_border,
                           color: _isInWishlist ? Colors.red : Colors.grey,
                           size: 12.0,
                         ),
@@ -197,7 +253,7 @@ class _ProductTileState extends State<ProductTile> {
                   ),
                   SizedBox(height: 4.0),
                   Text(
-                    '\$${widget.price.toString()}',
+                    '\$${widget.price.toStringAsFixed(2)}',
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 10.0,
@@ -212,5 +268,3 @@ class _ProductTileState extends State<ProductTile> {
     );
   }
 }
-
-
