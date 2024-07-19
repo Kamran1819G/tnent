@@ -6,26 +6,41 @@ import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
 import 'package:tnennt/helpers/text_utils.dart';
 
-
 class CategoryProductsScreen extends StatefulWidget {
-  CategoryModel category;
+  final CategoryModel category;
+  final String storeId;
 
-  CategoryProductsScreen({required this.category});
+  CategoryProductsScreen({required this.category, required this.storeId});
 
   @override
   State<CategoryProductsScreen> createState() => _CategoryProductsScreenState();
 }
 
 class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
-  late Stream<QuerySnapshot> _productsStream;
+  late Future<List<ProductModel>> _productsFuture;
 
   @override
   void initState() {
     super.initState();
-    _productsStream = FirebaseFirestore.instance
-        .collection('Products')
-        .where('category', isEqualTo: widget.category)
-        .snapshots();
+    _productsFuture = _fetchProducts();
+  }
+
+  Future<List<ProductModel>> _fetchProducts() async {
+    final storeDoc = await FirebaseFirestore.instance
+        .collection('Stores')
+        .doc(widget.storeId)
+        .collection('categories')
+        .doc(widget.category.id)
+        .get();
+
+    final productIds = List<String>.from(storeDoc['products'] as List<dynamic>);
+    final productDocs = await Future.wait(productIds.map((productId) =>
+        FirebaseFirestore.instance.collection('products').doc(productId).get()));
+
+    return productDocs
+        .where((doc) => doc.exists)
+        .map((doc) => ProductModel.fromFirestore(doc))
+        .toList();
   }
 
   @override
@@ -70,10 +85,11 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
             ),
             SizedBox(height: 30),
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: _productsStream,
+              child: FutureBuilder<List<ProductModel>>(
+                future: _productsFuture,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
+                    print(snapshot.error);
                     return Center(child: Text('Something went wrong'));
                   }
 
@@ -81,9 +97,11 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                     return Center(child: CircularProgressIndicator());
                   }
 
-                  List<ProductModel> products = snapshot.data!.docs
-                      .map((doc) => ProductModel.fromFirestore(doc))
-                      .toList();
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Center(child: Text('No products found'));
+                  }
+
+                  List<ProductModel> products = snapshot.data!;
 
                   return GridView.builder(
                     shrinkWrap: true,
@@ -97,16 +115,28 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                     itemCount: products.length,
                     itemBuilder: (context, index) {
                       final product = products[index];
-                      return ProductTile(
-                        name: product.name,
-                        image: product.imageUrls.first,
-                        price: product.variants.first.price,
-                        onRemove: () {
-                          // Remove product from category
-                          setState(() {
-                            widget.category.products.removeWhere((element) => element['id'] == product.id);
-                          });
+                      return GestureDetector(
+                        onTap: () {
+                         /* Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProductDetailScreen(
+
+                              ),
+                            ),
+                          );*/
                         },
+                        child: ProductTile(
+                          name: product.name,
+                          image: product.imageUrls.first,
+                          price: product.variants.first.price,
+                          onRemove: () {
+                            // Remove product from category
+                            setState(() {
+                              widget.category.products.removeWhere((element) => element == product.id);
+                            });
+                          },
+                        ),
                       );
                     },
                   );

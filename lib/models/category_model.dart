@@ -1,17 +1,17 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CategoryModel{
-  String id;
-  String name;
-  String coverImage;
-  int itemCount;
-  List<Map<String, dynamic>> products;
+  final String id;
+  final String name;
+  final String coverImage;
+  final int totalProduct;
+  List<dynamic> products;
 
   CategoryModel({
     required this.id,
     required this.name,
     required this.coverImage,
-    required this.itemCount,
+    required this.totalProduct,
     required this.products,
   });
 
@@ -20,8 +20,8 @@ class CategoryModel{
     return CategoryModel(
       id: doc.id,
       name: data['name'] ?? '',
-      coverImage: data['image'] ?? '',
-      itemCount: data['itemCount'] ?? 0,
+      coverImage: data['coverImage'] ?? '',
+      totalProduct: data['products'].length ?? 0,
       products: data['products'] ?? [],
     );
   }
@@ -31,7 +31,7 @@ class CategoryModel{
       'id': id,
       'name': name,
       'image': coverImage,
-      'itemCount': itemCount,
+      'itemCount': totalProduct,
       'products': products,
     };
   }

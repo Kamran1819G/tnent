@@ -312,7 +312,9 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ProductCategoriesScreen(),
+                          builder: (context) => ProductCategoriesScreen(
+                            storeId: store.id,
+                          ),
                         ),
                       );
                     },

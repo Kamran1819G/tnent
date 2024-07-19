@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,9 +6,12 @@ import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/category_model.dart';
 import 'package:tnennt/screens/store_owner_screens/add_product_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/all_products_screen.dart';
+import 'package:tnennt/screens/store_owner_screens/category_products_screen.dart';
 
 class ProductCategoriesScreen extends StatefulWidget {
-  const ProductCategoriesScreen({Key? key}) : super(key: key);
+  final String storeId;
+
+  ProductCategoriesScreen({required this.storeId});
 
   @override
   State<ProductCategoriesScreen> createState() => _ProductCategoriesScreenState();
@@ -25,42 +29,41 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
   }
 
   Future<void> _loadCategories() async {
-    QuerySnapshot querySnapshot = await _firestore.collection('categories').get();
+    QuerySnapshot querySnapshot = await _firestore
+        .collection('Stores')
+        .doc(widget.storeId)
+        .collection('categories')
+        .get();
+
     List<CategoryModel> loadedCategories = querySnapshot.docs
         .map((doc) => CategoryModel.fromFirestore(doc))
         .toList();
-
-    for (var category in loadedCategories) {
-      await _updateCategoryItemCount(category);
-    }
 
     setState(() {
       categories = loadedCategories;
     });
   }
 
-  Future<void> _updateCategoryItemCount(CategoryModel category) async {
-    QuerySnapshot productsSnapshot = await _firestore
-        .collection('Products')
-        .where('category', isEqualTo: category.name)
-        .get();
 
-    int itemCount = productsSnapshot.docs.length;
-
-    await _firestore.collection('categories').doc(category.id).update({'itemCount': itemCount});
-
-    category.itemCount = itemCount;
-  }
-
-  Future<void> _addCategory(String name) async {
-    DocumentReference docRef = await _firestore.collection('categories').add({
+  Future<void> _addNewCategory(String name) async {
+    DocumentReference docRef = await _firestore
+        .collection('Stores')
+        .doc(widget.storeId)
+        .collection('categories')
+        .add({
       'name': name,
-      'itemCount': 0,
+      'totalProduct': 0,
+      'products': [],
       'createdAt': FieldValue.serverTimestamp(),
     });
 
-    CategoryModel newCategory = CategoryModel(id: docRef.id, name: name, itemCount: 0, coverImage: '', products: [], );
-    await _updateCategoryItemCount(newCategory);
+    CategoryModel newCategory = CategoryModel(
+      id: docRef.id,
+      name: name,
+      totalProduct: 0,
+      coverImage: '',
+      products: [],
+    );
 
     setState(() {
       categories.add(newCategory);
@@ -214,7 +217,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                         GestureDetector(
                           onTap: () {
                             if (_newCategoryController.text.isNotEmpty) {
-                              _addCategory(_newCategoryController.text);
+                              _addNewCategory(_newCategoryController.text);
                               _newCategoryController.clear();
                             }
                           },
@@ -262,6 +265,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                 itemCount: categories.length,
                 itemBuilder: (context, index) => CategoryTile(
                   category: categories[index],
+                  storeId: widget.storeId,
                 ),
               ),
             ),
@@ -274,6 +278,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
 
 class CategoryTile extends StatelessWidget {
   final CategoryModel category;
+  final String storeId;
   final Color color;
 
   static final List<Color> colorList = [
@@ -287,7 +292,9 @@ class CategoryTile extends StatelessWidget {
 
   CategoryTile({
     required this.category,
+    required this.storeId,
   }) : color = colorList[Random().nextInt(colorList.length)];
+
 
   @override
   Widget build(BuildContext context) {
@@ -296,7 +303,7 @@ class CategoryTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CategoryProductsScreen(category: category),
+            builder: (context) => CategoryProductsScreen(category: category, storeId: storeId),
           ),
         );
       },
@@ -329,7 +336,7 @@ class CategoryTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      category.itemCount.toString(),
+                      category.totalProduct.toString(),
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 18.0,
@@ -349,7 +356,7 @@ class CategoryTile extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => AddProductScreen(category: category.name),
+                        builder: (context) => AddProductScreen(category: category, storeId: storeId),
                       ),
                     );
                   },
@@ -371,52 +378,6 @@ class CategoryTile extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class CategoryProductsScreen extends StatelessWidget {
-  final CategoryModel category;
-
-  CategoryProductsScreen({required this.category});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(category.name),
-      ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('Products')
-            .where('category', isEqualTo: category.name)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('No products found in this category.'));
-          }
-
-          return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
-            itemBuilder: (context, index) {
-              var product = snapshot.data!.docs[index];
-              return ListTile(
-                title: Text(product['name']),
-                subtitle: Text('Price: \$${product['price']}'),
-                // Add more product details as needed
-              );
-            },
-          );
-        },
       ),
     );
   }

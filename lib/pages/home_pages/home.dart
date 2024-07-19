@@ -446,7 +446,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         ),
 
         SizedBox(height: 40.0),
-
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(

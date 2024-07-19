@@ -2,19 +2,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ProductVariant {
   final String id;
-  final Map<String, dynamic> attributes; // e.g., {'size': 'M', 'color': 'Blue'}
-  final double price;
+  final Map<String, dynamic>? attributes; // e.g., {'size': 'M', 'color': 'Blue'}
+  final double discount;
   final double mrp;
-  final double? discountedPrice;
+  final double price;
   final int stockQuantity;
   final String? sku;
 
   ProductVariant({
     required this.id,
-    required this.attributes,
-    required this.price,
+    this.attributes,
+    required this.discount,
     required this.mrp,
-    this.discountedPrice,
+    required this.price,
     required this.stockQuantity,
     this.sku,
   });
@@ -22,10 +22,10 @@ class ProductVariant {
   factory ProductVariant.fromMap(Map<String, dynamic> data) {
     return ProductVariant(
       id: data['id'],
-      attributes: Map<String, dynamic>.from(data['attributes']),
+      attributes: Map<String, dynamic>.from(data['attributes']) ?? {},
       price: data['price'].toDouble(),
       mrp: data['mrp'].toDouble(),
-      discountedPrice: data['discountedPrice']?.toDouble(),
+      discount: data['discounted']?.toDouble(),
       stockQuantity: data['stockQuantity'],
       sku: data['sku'],
     );
@@ -37,7 +37,7 @@ class ProductVariant {
       'attributes': attributes,
       'price': price,
       'mrp': mrp,
-      'discountedPrice': discountedPrice,
+      'discounted': discount,
       'stockQuantity': stockQuantity,
       'sku': sku,
     };
@@ -49,7 +49,8 @@ class ProductModel {
   final String storeId;
   final String name;
   final String description;
-  final String category;
+  final String productCategory;
+  final String storeCategory;
   final List<String> tags;
   final List<String> imageUrls;
   final bool isAvailable;
@@ -65,7 +66,8 @@ class ProductModel {
     required this.storeId,
     required this.name,
     required this.description,
-    required this.category,
+    required this.productCategory,
+    required this.storeCategory,
     required this.tags,
     required this.imageUrls,
     required this.isAvailable,
@@ -84,7 +86,8 @@ class ProductModel {
       storeId: data['storeId'],
       name: data['name'],
       description: data['description'],
-      category: data['category'],
+      productCategory: data['productCategory'],
+      storeCategory: data['storeCategory'],
       tags: List<String>.from(data['tags'] ?? []),
       imageUrls: List<String>.from(data['imageUrls'] ?? []),
       isAvailable: data['isAvailable'],
@@ -102,7 +105,8 @@ class ProductModel {
       'storeId': storeId,
       'name': name,
       'description': description,
-      'category': category,
+      'productCategory': productCategory,
+      'storeCategory': storeCategory,
       'tags': tags,
       'imageUrls': imageUrls,
       'isAvailable': isAvailable,
@@ -114,38 +118,7 @@ class ProductModel {
       'variantOptions': variantOptions,
     };
   }
-
-  ProductModel copyWith({
-    String? name,
-    String? description,
-    String? category,
-    List<String>? tags,
-    List<String>? imageUrls,
-    bool? isAvailable,
-    double? averageRating,
-    int? numberOfRatings,
-    List<ProductVariant>? variants,
-    Map<String, List<String>>? variantOptions,
-  }) {
-    return ProductModel(
-      id: this.id,
-      storeId: this.storeId,
-      name: name ?? this.name,
-      description: description ?? this.description,
-      category: category ?? this.category,
-      tags: tags ?? this.tags,
-      imageUrls: imageUrls ?? this.imageUrls,
-      isAvailable: isAvailable ?? this.isAvailable,
-      createdAt: this.createdAt,
-      updatedAt: Timestamp.now(),
-      averageRating: averageRating ?? this.averageRating,
-      numberOfRatings: numberOfRatings ?? this.numberOfRatings,
-      variants: variants ?? this.variants,
-      variantOptions: variantOptions ?? this.variantOptions,
-    );
-  }
 }
-
 /*
 // Creating a new product with variants
 final newProduct = ProductModel(
@@ -240,3 +213,4 @@ query.get().then((querySnapshot) {
     print('${product.name}: ${product.variants.length} variants');
   }
 });*/
+
