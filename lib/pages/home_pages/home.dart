@@ -309,7 +309,21 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ),
           ),
         ),
-        SizedBox(height: 10.0),
+        // Updates Section
+        Container(
+          height: 125.0,
+          padding: EdgeInsets.only(left: 8.0),
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: updates.length,
+            itemBuilder: (context, index) {
+              return UpdateTile(
+                  name: updates[index]["name"],
+                  image: updates[index]["coverImage"]);
+            },
+          ),
+        ),
+        SizedBox(height: 20.0),
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.0),
           child: Stack(
@@ -390,31 +404,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 ),
               ),
             ],
-          ),
-        ),
-        SizedBox(height: 20.0),
-        // Updates Section
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Text(
-            'Updates',
-            style: TextStyle(
-              color: hexToColor('#343434'),
-              fontSize: 18.0,
-            ),
-          ),
-        ),
-        Container(
-          height: 150.0,
-          padding: EdgeInsets.only(left: 8.0),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: updates.length,
-            itemBuilder: (context, index) {
-              return UpdateTile(
-                  name: updates[index]["name"],
-                  image: updates[index]["coverImage"]);
-            },
           ),
         ),
         SizedBox(height: 20.0),
@@ -771,7 +760,7 @@ class CategoryTile extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Image.network(
-                    category.image,
+                    category.coverImage,
                     fit: BoxFit.cover,
                     width: double.infinity,
                   ),
@@ -905,24 +894,44 @@ class UpdateTile extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: Image.asset(image),
+            Container(
+              width: 75.0,
+              height: 75.0,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(2.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(2.0),
+                    child: ClipOval(
+                      child: Image.asset(
+                        image,
+                        fit: BoxFit.cover,
+                        width: 75.0,
+                        height: 75.0,
+                      ),
+                    ),
+                  ),
+                ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4.0),
-              child: Text(
-                name,
-                style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10.0),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
-                textAlign: TextAlign.center,
+            SizedBox(height: 4.0),
+            Text(
+              name,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
+                fontSize: 11.0,
               ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+              textAlign: TextAlign.center,
             ),
           ],
         ),

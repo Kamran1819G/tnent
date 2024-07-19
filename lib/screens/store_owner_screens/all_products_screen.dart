@@ -72,6 +72,13 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                   name: 'Product $index',
                   image: 'assets/product_image.png',
                   price: 100.0,
+                  onRemove: () {
+                    print('Removing product $index');
+                    setState(() {
+                      // Remove product from list
+
+                    });
+                  },
                 );
               },
             ),
@@ -82,39 +89,18 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
   }
 }
 
-
-class ProductTile extends StatefulWidget {
+class ProductTile extends StatelessWidget {
   final String name;
   final String image;
   final double price;
+  final Function onRemove;
 
   ProductTile({
     required this.name,
     required this.image,
     required this.price,
+    required this.onRemove,
   });
-
-  @override
-  _ProductTileState createState() => _ProductTileState();
-}
-
-class _ProductTileState extends State<ProductTile> {
-  bool _isInWishlist = false;
-
-  void _toggleWishlist() {
-    setState(() {
-      _isInWishlist = !_isInWishlist;
-    });
-
-    // Send wishlist request to the server
-    if (_isInWishlist) {
-      // Code to send wishlist request to the server
-      print('Adding to wishlist...');
-    } else {
-      // Code to remove from wishlist request to the server
-      print('Removing from wishlist...');
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,14 +111,14 @@ class _ProductTileState extends State<ProductTile> {
           MaterialPageRoute(
             builder: (context) => ProductDetailScreen(
               images: [
-                Image.asset(widget.image),
-                Image.asset(widget.image),
-                Image.asset(widget.image),
+                Image.asset(image),
+                Image.asset(image),
+                Image.asset(image),
               ],
-              productName: widget.name,
+              productName: name,
               productDescription:
               'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. eiusmod tempor incididunt ut labore et do.',
-              productPrice: widget.price,
+              productPrice: price,
               storeName: 'Jain Brothers',
               storeLogo: 'assets/jain_brothers.png',
               Discount: 10,
@@ -141,7 +127,7 @@ class _ProductTileState extends State<ProductTile> {
         );
       },
       child: Container(
-        height: 200, // Adjust the height as needed
+        height: 200,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6.0),
           color: hexToColor('#F5F5F5'),
@@ -156,7 +142,7 @@ class _ProductTileState extends State<ProductTile> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),
                       image: DecorationImage(
-                        image: AssetImage(widget.image),
+                        image: AssetImage(image),
                         fit: BoxFit.fill,
                       ),
                     ),
@@ -165,7 +151,7 @@ class _ProductTileState extends State<ProductTile> {
                     right: 8.0,
                     top: 8.0,
                     child: GestureDetector(
-                      onTap: _toggleWishlist,
+                      onTap: () => onRemove(),
                       child: Container(
                         padding: EdgeInsets.all(6.0),
                         decoration: BoxDecoration(
@@ -173,10 +159,8 @@ class _ProductTileState extends State<ProductTile> {
                           borderRadius: BorderRadius.circular(100.0),
                         ),
                         child: Icon(
-                          _isInWishlist
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color: _isInWishlist ? Colors.red : Colors.grey,
+                          Icons.remove,
+                          color: Colors.red,
                           size: 12.0,
                         ),
                       ),
@@ -192,7 +176,7 @@ class _ProductTileState extends State<ProductTile> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.name,
+                    name,
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 10.0,
@@ -202,7 +186,7 @@ class _ProductTileState extends State<ProductTile> {
                   ),
                   SizedBox(height: 4.0),
                   Text(
-                    '\$${widget.price.toString()}',
+                    '\$${price.toString()}',
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 10.0,

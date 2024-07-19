@@ -1,9 +1,12 @@
 import 'dart:ui' as ui;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/pages/gallery_pages/deliver_anything_anywhere.dart';
 import 'package:tnennt/pages/delivery_service_pages/deliver_product.dart';
 import 'package:tnennt/pages/gallery_pages/store_registration.dart';
@@ -18,8 +21,48 @@ class Gallery extends StatefulWidget {
 }
 
 class _GalleryState extends State<Gallery> {
-  bool isStoreRegistered = true;
-  bool isAccepting = true;
+  bool isStoreRegistered = false;
+  bool isActive = true;
+  late StoreModel store;
+
+  @override
+  void initState() {
+    super.initState();
+    intialize();
+  }
+
+  void intialize() async {
+    await _checkStoreRegistration();
+  }
+
+  Future<void> _checkStoreRegistration() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final storeId = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .get()
+          .then((doc) => doc.get('storeId'));
+      if (storeId.isNotEmpty) {
+        final storeDoc = await FirebaseFirestore.instance
+            .collection('Stores')
+            .doc(storeId)
+            .get();
+        setState(() {
+          isStoreRegistered = storeDoc.exists;
+          store = StoreModel.fromFirestore(storeDoc);
+          isActive = store.isActive;
+        });
+      }
+    }
+  }
+
+  Future<void> _updateStoreStatus(bool isActive) async {
+      await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(store.id)
+          .update({'isActive': isActive});
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +141,10 @@ class _GalleryState extends State<Gallery> {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => MyStoreProfileScreen()));
+                                builder: (context) => MyStoreProfileScreen(
+                                      store: store,
+                                    )));
+
                       },
                       child: Container(
                         height: 100,
@@ -133,7 +179,7 @@ class _GalleryState extends State<Gallery> {
                                         Container(
                                           child: RichText(
                                             text: TextSpan(
-                                              text: 'Jain Brothers',
+                                              text: store.name,
                                               style: TextStyle(
                                                 color: Colors.white,
                                                 fontFamily: 'Gotham Black',
@@ -167,7 +213,7 @@ class _GalleryState extends State<Gallery> {
                                         ),
                                         SizedBox(width: 5.0),
                                         Text(
-                                          'jainbrothers.tnennt.store',
+                                          store.website,
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 10.0,
@@ -185,7 +231,7 @@ class _GalleryState extends State<Gallery> {
                               padding:
                                   const EdgeInsets.only(right: 15.0, top: 25),
                               child: Switch(
-                                value: isAccepting,
+                                value: isActive,
                                 activeColor: hexToColor('#41FA00'),
                                 trackOutlineColor: WidgetStateColor.resolveWith(
                                   (states) => Colors.grey,
@@ -198,8 +244,9 @@ class _GalleryState extends State<Gallery> {
                                 inactiveTrackColor: Colors.transparent,
                                 onChanged: (value) {
                                   setState(() {
-                                    isAccepting = !isAccepting;
+                                    isActive = value;
                                   });
+                                  _updateStoreStatus(value);
                                 },
                               ),
                             ),
@@ -211,7 +258,7 @@ class _GalleryState extends State<Gallery> {
                 ),
               ),
             SizedBox(height: 20.0),
-            if (!isStoreRegistered)
+            if (!isStoreRegistered) ...[
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -221,16 +268,8 @@ class _GalleryState extends State<Gallery> {
                 },
                 child: Image.asset("assets/digital_store_banner.png"),
               ),
-            if (!isStoreRegistered) SizedBox(height: 20.0),
-            MaterialButton(
-              onPressed: () {
-                setState(() {
-                  isStoreRegistered = !isStoreRegistered;
-                });
-              },
-              child: Text('Change isStoreRegistered'),
-            ),
-            SizedBox(height: 20.0),
+              SizedBox(height: 20.0),
+            ],
             GestureDetector(
                 onTap: () {
                   Navigator.push(context,

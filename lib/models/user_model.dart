@@ -9,6 +9,7 @@ class UserModel {
   final String? phoneNumber;
   final String? location;
   final String? pincode;
+  final String storeId;
   final Timestamp createdAt;
   final Timestamp lastUpdated;
 
@@ -21,6 +22,7 @@ class UserModel {
     this.phoneNumber,
     this.location,
     this.pincode,
+    required this.storeId,
     required this.createdAt,
     required this.lastUpdated,
   });
@@ -37,6 +39,7 @@ class UserModel {
       phoneNumber: data['phoneNumber'],
       location: data['location'],
       pincode: data['pincode'],
+      storeId: data['storeId'] ?? '',
       createdAt: data['createdAt'] ?? Timestamp.now(),
       lastUpdated: data['lastUpdated'] ?? Timestamp.now(),
     );
@@ -51,6 +54,7 @@ class UserModel {
       'phoneNumber': phoneNumber,
       'location': location,
       'pincode': pincode,
+      'storeId': storeId,
       'createdAt': createdAt,
       'lastUpdated': lastUpdated,
     };
@@ -64,8 +68,7 @@ class UserModel {
     String? phoneNumber,
     String? location,
     String? pincode,
-    List<String>? roles,
-    Map<String, dynamic>? preferences,
+    String? storeId,
   }) {
     return UserModel(
       uid: this.uid,
@@ -76,6 +79,7 @@ class UserModel {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       location: location ?? this.location,
       pincode: pincode ?? this.pincode,
+      storeId: storeId ?? this.storeId,
       createdAt: this.createdAt,
       lastUpdated: Timestamp.now(),
     );

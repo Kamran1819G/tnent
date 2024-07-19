@@ -1,9 +1,11 @@
 import 'package:confetti/confetti.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/widgets/customCheckboxListTile.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -15,39 +17,13 @@ class StoreRegistration extends StatefulWidget {
   @override
   State<StoreRegistration> createState() => _StoreRegistrationState();
 }
-String storeName = '';
-String storeDomain = '';
-String storeEmail = '';
-String storePhoneNumber = '';
-String storeUpiId = '';
-String storeLocation = '';
-String selectedCategory = '';
 
-// Function to add store data to Firestore
-Future<void> addStoreToFirestore() async {
-  try {
-    await FirebaseFirestore.instance.collection('Stores').add({
-      'storeName': storeName,
-      'storeDomain': storeDomain,
-      'storeEmail': storeEmail,
-      'storePhoneNumber': storePhoneNumber,
-      'storeCategory': selectedCategory,
-      'storeUpiId': storeUpiId,
-      'storeLocation': storeLocation,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-    print('Store added successfully');
-  } catch (e) {
-    print('Error adding store: $e');
-  }
-}
 
 class _StoreRegistrationState extends State<StoreRegistration> {
   PageController _pageController = PageController();
   late final PageController _storeFeaturesPageController;
   int _featuresCurrentPageIndex = 0;
   int _currentPageIndex = 0;
-  TextEditingController phoneController = TextEditingController();
   late ConfettiController _confettiController;
 
   bool value = false;
@@ -70,8 +46,15 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     'Musical Instrument',
     'Sports'
   ];
-  String? selectedCategory;
+  String selectedCategory= '';
 
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _websiteController = TextEditingController();
+  final _upiUsernameController = TextEditingController();
+  final _upiIdController = TextEditingController();
+  final _locationController = TextEditingController();
   final _otpControllers = List.generate(4, (_) => TextEditingController());
   final _focusNodes = List.generate(4, (_) => FocusNode());
   bool isButtonEnabled = false;
@@ -79,11 +62,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 5));
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 5));
     _storeFeaturesPageController = PageController()
       ..addListener(() {
         setState(() {
-          _featuresCurrentPageIndex = _storeFeaturesPageController.page?.round() ?? 0;
+          _featuresCurrentPageIndex =
+              _storeFeaturesPageController.page?.round() ?? 0;
         });
       });
   }
@@ -96,13 +81,77 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     for (var node in _focusNodes) {
       node.dispose();
     }
+
+    _confettiController.dispose();
+    _storeFeaturesPageController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
+
+
+  Future<void> _registerStore() async {
+    try {
+      // Get the current user's ID (assuming they're logged in)
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        throw Exception('No user logged in');
+      }
+
+      // Create a new StoreModel instance
+      final newStore = StoreModel(
+        id: FirebaseFirestore.instance.collection('stores').doc().id,
+        ownerId: currentUser.uid,
+        analyticsId: 'analytics_${DateTime.now().millisecondsSinceEpoch}',
+        name: _nameController.text,
+        phone: _phoneController.text,
+        email: _emailController.text,
+        website: '${_websiteController.text}.tnennt.com',
+        upiUsername: _upiUsernameController.text,
+        upiId: _upiIdController.text,
+        location: _locationController.text,
+        category: selectedCategory,
+        isActive: true,
+        createdAt: Timestamp.now(),
+        reviewIds: [],
+        totalProducts: 0,
+        totalPosts: 0,
+        storeEngagement: 0,
+        goodReviews: 0,
+        badReviews: 0,
+        postIds: [],
+        productIds: [],
+        followerIds: [],
+      );
+
+      // Add the store to Firestore
+      await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(newStore.id)
+          .set(newStore.toFirestore());
+
+      // Add storeId to user's document
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(currentUser.uid)
+          .update({'storeId':  newStore.id});
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Store registered successfully')),
+      );
+    } catch (e) {
+      // Handle any errors
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error registering store: $e')),
+      );
+    }
+  }
+
 
   void _onCategoryChanged(String category) {
     setState(() {
       if (selectedCategory == category) {
-        selectedCategory = null;
+        selectedCategory = '';
       } else {
         selectedCategory = category;
       }
@@ -110,7 +159,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   }
 
   void _onContinuePressed() {
-    if (selectedCategory != null) {
+    if (selectedCategory != '') {
       print('Selected category: $selectedCategory');
       _pageController.jumpToPage(_currentPageIndex + 1);
     } else {
@@ -132,9 +181,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 setState(() {
                   _currentPageIndex = index;
                 });
-                if(index == 10) {
+                if (index == 10) {
                   _confettiController.play();
-                  addStoreToFirestore();
                 }
               },
               physics: NeverScrollableScrollPhysics(),
@@ -144,8 +192,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 // Page 2: Registration
                 Column(
                   children: [
-                    _buildStoreRegistrationPageHeader(context ,_pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    _buildStoreRegistrationPageHeader(
+                        context, _pageController, _currentPageIndex),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -209,7 +261,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               SizedBox(width: 8),
                               Expanded(
                                 child: TextField(
-                                  controller: phoneController,
+                                  controller: _phoneController,
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: hexToColor('#636363'),
@@ -221,11 +273,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                   decoration: InputDecoration(
                                       border: UnderlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Theme.of(context).primaryColor,
+                                          color: Theme
+                                              .of(context)
+                                              .primaryColor,
                                         ),
                                       ),
                                       contentPadding:
-                                          EdgeInsets.only(bottom: -15)),
+                                      EdgeInsets.only(bottom: -15)),
                                   maxLength: 10,
                                   keyboardType: TextInputType.phone,
                                 ),
@@ -240,7 +294,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               _pageController.jumpToPage(_currentPageIndex + 1);
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme.of(context).primaryColor,
+                              backgroundColor: Theme
+                                  .of(context)
+                                  .primaryColor,
                               shape: CircleBorder(),
                               padding: EdgeInsets.all(15),
                             ),
@@ -257,8 +313,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 // Page 3: Verification
                 Column(
                   children: [
-                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    _buildStoreRegistrationPageHeader(
+                        context, _pageController, _currentPageIndex),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -306,7 +366,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               spacing: 10,
                               children: List.generate(
                                 _otpControllers.length,
-                                (index) {
+                                    (index) {
                                   return Container(
                                     height: 50.0,
                                     width: 50.0,
@@ -317,7 +377,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                       keyboardType: TextInputType.number,
                                       maxLength: 1,
                                       cursorColor:
-                                          Theme.of(context).primaryColor,
+                                      Theme
+                                          .of(context)
+                                          .primaryColor,
                                       decoration: InputDecoration(
                                         counterText: '',
                                         border: UnderlineInputBorder(
@@ -360,11 +422,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             onPressed: isButtonEnabled
                                 ? () {
                               _pageController.jumpToPage(_currentPageIndex + 1);
-                                  }
+                            }
                                 : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: isButtonEnabled
-                                  ? Theme.of(context).primaryColor
+                                  ? Theme
+                                  .of(context)
+                                  .primaryColor
                                   : Colors.grey,
                               shape: CircleBorder(),
                               padding: EdgeInsets.all(15),
@@ -383,8 +447,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    _buildStoreRegistrationPageHeader(
+                        context, _pageController, _currentPageIndex),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -413,6 +481,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
                       child: TextField(
+                        controller: _emailController,
                         style: TextStyle(
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
@@ -421,13 +490,17 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         decoration: InputDecoration(
                           label: Text('Email'),
                           labelStyle: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme
+                                .of(context)
+                                .primaryColor,
                             fontSize: 16,
                           ),
                           filled: true,
                           fillColor: hexToColor('#F5F5F5'),
                           suffixIcon: Icon(Icons.email_outlined),
-                          suffixIconColor: Theme.of(context).primaryColor,
+                          suffixIconColor: Theme
+                              .of(context)
+                              .primaryColor,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
@@ -440,14 +513,19 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         keyboardType: TextInputType.emailAddress,
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.4),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.4),
                     Container(
                         padding: EdgeInsets.symmetric(horizontal: 12),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Checkbox(
-                              activeColor: Theme.of(context).primaryColor,
+                              activeColor: Theme
+                                  .of(context)
+                                  .primaryColor,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4),
                               ),
@@ -473,7 +551,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               child: Text(
                                 'Terms and Conditions',
                                 style: TextStyle(
-                                  color: Theme.of(context).primaryColor,
+                                  color: Theme
+                                      .of(context)
+                                      .primaryColor,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w500,
                                   fontSize: 14,
@@ -520,8 +600,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    _buildStoreRegistrationPageHeader(
+                        context, _pageController, _currentPageIndex),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -550,15 +634,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
                       child: TextField(
-                        onChanged: (value) {
-                          setState(() {
-                            storeName = value;
-                          });
-                        },
+                        controller: _nameController,
                         decoration: InputDecoration(
                           label: Text('Store Name'),
                           labelStyle: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme
+                                .of(context)
+                                .primaryColor,
                             fontSize: 16,
                           ),
                           filled: true,
@@ -575,7 +657,10 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         keyboardType: TextInputType.name,
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.475),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.475),
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
@@ -613,8 +698,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    _buildStoreRegistrationPageHeader(
+                        context, _pageController, _currentPageIndex),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -643,15 +732,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
                       child: TextField(
-                        onChanged: (value) {
-                          setState(() {
-                            storeDomain = value;
-                          });
-                        },
+                        controller : _websiteController,
                         decoration: InputDecoration(
                           label: Text('Store Name'),
                           labelStyle: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme
+                                .of(context)
+                                .primaryColor,
                             fontSize: 16,
                           ),
                           suffixText: '.tnennt.com',
@@ -681,7 +768,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         child: Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor: Theme.of(context).primaryColor,
+                              backgroundColor: Theme
+                                  .of(context)
+                                  .primaryColor,
                               radius: 8,
                               child: Icon(
                                 Icons.check,
@@ -701,7 +790,10 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             ),
                           ],
                         )),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.4375),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.4375),
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
@@ -739,9 +831,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
+                    _buildStoreRegistrationPageHeader(
+                        context, _pageController, _currentPageIndex),
                     SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.025),
+                        height: MediaQuery
+                            .of(context)
+                            .size
+                            .height * 0.025),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -822,8 +918,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    _buildStoreRegistrationPageHeader(
+                        context, _pageController, _currentPageIndex),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -852,6 +952,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
                       child: TextField(
+                        controller: _upiUsernameController,
                         style: TextStyle(
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
@@ -860,7 +961,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         decoration: InputDecoration(
                           label: Text('Username'),
                           labelStyle: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme
+                                .of(context)
+                                .primaryColor,
                             fontSize: 16,
                           ),
                           filled: true,
@@ -881,6 +984,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
                       child: TextField(
+                        controller: _upiIdController,
                         style: TextStyle(
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
@@ -889,7 +993,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         decoration: InputDecoration(
                           label: Text('UPI ID'),
                           labelStyle: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme
+                                .of(context)
+                                .primaryColor,
                             fontSize: 16,
                           ),
                           filled: true,
@@ -912,7 +1018,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         child: Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor: Theme.of(context).primaryColor,
+                              backgroundColor: Theme
+                                  .of(context)
+                                  .primaryColor,
                               radius: 8,
                               child: Icon(
                                 Icons.check,
@@ -932,7 +1040,10 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             ),
                           ],
                         )),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.34),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.34),
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
@@ -970,8 +1081,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    _buildStoreRegistrationPageHeader(
+                        context, _pageController, _currentPageIndex),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -1000,6 +1115,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 16),
                       child: TextField(
+                        controller: _locationController,
                         style: TextStyle(
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
@@ -1008,7 +1124,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         decoration: InputDecoration(
                           label: Text('Location'),
                           labelStyle: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme
+                                .of(context)
+                                .primaryColor,
                             fontSize: 16,
                           ),
                           prefixIcon: Icon(
@@ -1018,7 +1136,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           prefixIconConstraints: BoxConstraints(
                             minWidth: 40,
                           ),
-                          prefixIconColor: Theme.of(context).primaryColor,
+                          prefixIconColor: Theme
+                              .of(context)
+                              .primaryColor,
                           filled: true,
                           fillColor: hexToColor('#F5F5F5'),
                           border: OutlineInputBorder(
@@ -1033,7 +1153,10 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         keyboardType: TextInputType.name,
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.475),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.475),
                     Center(
                       child: ElevatedButton(
                         onPressed: () {
@@ -1071,9 +1194,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
+                    _buildStoreRegistrationPageHeader(
+                        context, _pageController, _currentPageIndex),
                     SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.025),
+                        height: MediaQuery
+                            .of(context)
+                            .size
+                            .height * 0.025),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -1101,7 +1228,10 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.1),
                     Container(
                         margin: EdgeInsets.symmetric(horizontal: 16),
                         padding: EdgeInsets.symmetric(horizontal: 20),
@@ -1112,7 +1242,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  Theme
+                                      .of(context)
+                                      .primaryColor,
                                   radius: 10,
                                   child: Icon(
                                     Icons.check,
@@ -1137,7 +1269,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  Theme
+                                      .of(context)
+                                      .primaryColor,
                                   radius: 10,
                                   child: Icon(
                                     Icons.check,
@@ -1162,7 +1296,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  Theme
+                                      .of(context)
+                                      .primaryColor,
                                   radius: 10,
                                   child: Icon(
                                     Icons.check,
@@ -1187,7 +1323,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  Theme
+                                      .of(context)
+                                      .primaryColor,
                                   radius: 10,
                                   child: Icon(
                                     Icons.check,
@@ -1212,7 +1350,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  Theme
+                                      .of(context)
+                                      .primaryColor,
                                   radius: 10,
                                   child: Icon(
                                     Icons.check,
@@ -1237,7 +1377,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  Theme
+                                      .of(context)
+                                      .primaryColor,
                                   radius: 10,
                                   child: Icon(
                                     Icons.check,
@@ -1259,7 +1401,10 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             ),
                           ],
                         )),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.2),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -1275,7 +1420,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         Text(
                           'Join Our Tnennt Community',
                           style: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme
+                                .of(context)
+                                .primaryColor,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w500,
                             fontSize: 12,
@@ -1286,11 +1433,18 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     SizedBox(height: 20),
                     Center(
                       child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.jumpToPage(_currentPageIndex + 1);
+                        onPressed: () async {
+                          try{
+                            await _registerStore();
+                            _pageController.jumpToPage(_currentPageIndex + 1);
+                          } catch (e) {
+                            print(e);
+                          }
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
+                          backgroundColor: Theme
+                              .of(context)
+                              .primaryColor,
                           // Set the button color to black
                           foregroundColor: Colors.white,
                           // Set the text color to white
@@ -1322,8 +1476,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _buildStoreRegistrationPageHeader(context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                    _buildStoreRegistrationPageHeader(
+                        context, _pageController, _currentPageIndex),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.1),
                     Stack(
                       alignment: Alignment.center,
                       children: [
@@ -1331,7 +1489,10 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           confettiController: _confettiController,
                           blastDirectionality: BlastDirectionality.explosive,
                           shouldLoop: false,
-                          colors: [Theme.of(context).primaryColor],
+                          colors: [Theme
+                              .of(context)
+                              .primaryColor
+                          ],
                         ),
                         ClipRRect(
                           borderRadius: BorderRadius.circular(100),
@@ -1343,7 +1504,10 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ),
                       ],
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.05),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
@@ -1371,7 +1535,10 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+                    SizedBox(height: MediaQuery
+                        .of(context)
+                        .size
+                        .height * 0.25),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -1387,7 +1554,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         Text(
                           'Join Our Tnennt Community',
                           style: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                            color: Theme
+                                .of(context)
+                                .primaryColor,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w500,
                             fontSize: 12,
@@ -1406,7 +1575,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     );
   }
 
-  Widget _buildStoreRegistrationPageHeader(BuildContext context, PageController controller, int currentPage) {
+  Widget _buildStoreRegistrationPageHeader(BuildContext context,
+      PageController controller, int currentPage) {
     return Container(
       height: 100,
       padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -1420,11 +1590,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
             ),
             child: Row(
               children: [
-                Image.asset('assets/white_tnennt_logo.png', width: 20, height: 20),
+                Image.asset(
+                    'assets/white_tnennt_logo.png', width: 20, height: 20),
                 SizedBox(width: 10),
                 Text(
                   'Tnennt inc.',
-                  style: TextStyle(color: hexToColor('#E6E6E6'), fontSize: 14.0),
+                  style: TextStyle(
+                      color: hexToColor('#E6E6E6'), fontSize: 14.0),
                 ),
               ],
             ),
@@ -1457,11 +1629,21 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         PageView(
           controller: _storeFeaturesPageController,
           children: [
-            _buildStoreFeaturePage('Create Your Own e-Store', 'Make your own digital store and start selling online', 'assets/create_your_own_e-store.png'),
-            _buildStoreFeaturePage('Delivery Support', 'Provided middlemen for product delivery', 'assets/delivery_support.png'),
-            _buildStoreFeaturePage('Packaging', 'Provide product delivery in our custom packaging', 'assets/packaging.png'),
-            _buildStoreFeaturePage('Analytics', 'See Your Business Insights & Store Matrics', 'assets/analytics.png'),
-            _buildStoreFeaturePage('Discount Coupons', 'Create Discount Coupons For Your Store And Products Easily And Instantly', 'assets/discount_coupons.png'),
+            _buildStoreFeaturePage('Create Your Own e-Store',
+                'Make your own digital store and start selling online',
+                'assets/create_your_own_e-store.png'),
+            _buildStoreFeaturePage(
+                'Delivery Support', 'Provided middlemen for product delivery',
+                'assets/delivery_support.png'),
+            _buildStoreFeaturePage(
+                'Packaging', 'Provide product delivery in our custom packaging',
+                'assets/packaging.png'),
+            _buildStoreFeaturePage(
+                'Analytics', 'See Your Business Insights & Store Matrics',
+                'assets/analytics.png'),
+            _buildStoreFeaturePage('Discount Coupons',
+                'Create Discount Coupons For Your Store And Products Easily And Instantly',
+                'assets/discount_coupons.png'),
           ],
         ),
         _buildStoreFeatureHeader(),
@@ -1471,14 +1653,21 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     );
   }
 
-  Widget _buildStoreFeaturePage(String title, String subtitle, String imagePath) {
+  Widget _buildStoreFeaturePage(String title, String subtitle,
+      String imagePath) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Image.asset(
           imagePath,
-          width: MediaQuery.of(context).size.width * 0.7,
-          height: MediaQuery.of(context).size.height * 0.35,
+          width: MediaQuery
+              .of(context)
+              .size
+              .width * 0.7,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height * 0.35,
           fit: BoxFit.contain,
         ),
         SizedBox(height: 50),
@@ -1578,7 +1767,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
           count: 5,
           effect: ExpandingDotsEffect(
             dotColor: hexToColor('#787878'),
-            activeDotColor: Theme.of(context).primaryColor,
+            activeDotColor: Theme
+                .of(context)
+                .primaryColor,
             dotHeight: 4,
             dotWidth: 4,
             spacing: 10,
@@ -1611,7 +1802,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
             }
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).primaryColor,
+            backgroundColor: Theme
+                .of(context)
+                .primaryColor,
             foregroundColor: Colors.white,
             padding: EdgeInsets.symmetric(horizontal: 75, vertical: 20),
             textStyle: TextStyle(

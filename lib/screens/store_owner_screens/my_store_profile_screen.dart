@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/store_owner_screens/all_products_screen.dart';
@@ -11,7 +12,9 @@ import 'package:tnennt/screens/store_owner_screens/store_settings_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MyStoreProfileScreen extends StatefulWidget {
-  const MyStoreProfileScreen({super.key});
+  StoreModel store;
+
+  MyStoreProfileScreen({required this.store});
 
   @override
   State<MyStoreProfileScreen> createState() => _MyStoreProfileScreenState();
@@ -19,18 +22,20 @@ class MyStoreProfileScreen extends StatefulWidget {
 
 class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     with SingleTickerProviderStateMixin {
-  String storeImage = 'assets/jain_brothers.png';
-  String storeName = 'Jain Brothers';
-  String storeCategory = 'Clothings';
-  String storeLocation = 'Navi Mumbai, MH';
-  String storeWebsite = 'jainbrothers.tnennet.store';
-  bool isAccepting = true;
-  int totalProducts = 1370;
-  int totalPosts = 250;
-  int storeEngagement = 2500;
-  int goodReviews = 700;
-  int badReviews = 200;
-  int totalReviews = 900;
+  late StoreModel store;
+
+  late String storeImage = 'assets/jain_brothers.png';
+  late String storeName = store.name;
+  late String storeCategory = store.category;
+  late String storeLocation = store.location;
+  late  String storeWebsite = store.website;
+  late bool isActive = store.isActive;
+  late int totalProducts = store.totalProducts;
+  late int totalPosts = store.totalPosts;
+  late int storeEngagement = store.storeEngagement;
+  late int goodReviews = store.goodReviews;
+  late int badReviews = store.badReviews;
+  late int totalReviews = store.goodReviews + store.badReviews;
   bool isGoodReview = true;
   bool isExpanded = false;
 
@@ -70,6 +75,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   void initState()
   {
     super.initState();
+    store = widget.store;
     _controller = AnimationController
       (
       duration: const Duration(milliseconds: 300),
@@ -270,7 +276,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                           ),
                         ),
                         Switch(
-                            value: isAccepting,
+                            value: isActive,
                             activeColor: hexToColor('#41FA00'),
                             trackOutlineColor: WidgetStateColor.resolveWith(
                                 (states) => Colors.grey),
@@ -280,7 +286,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                             inactiveTrackColor: Colors.transparent,
                             onChanged: (value) {
                               setState(() {
-                                isAccepting = !isAccepting;
+                                isActive = value;
                               });
                             })
                       ],
