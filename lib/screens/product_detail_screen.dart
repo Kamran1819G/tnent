@@ -6,6 +6,10 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
 import 'package:tnennt/widgets/product_tile.dart';
+import 'package:tnennt/pages/catalog_pages/cart_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:convert';
 
 class ProductDetailScreen extends StatefulWidget {
   List<Image> images;
@@ -365,8 +369,53 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 color: Theme.of(context).primaryColor,
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: Icon(Icons.add_shopping_cart,
-                                  color: Colors.white, size: 25),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  // Add the product to the cart
+                                  String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+                                  DocumentReference userRef = FirebaseFirestore.instance.collection('Users').doc(userId);
+
+                                  await FirebaseFirestore.instance.runTransaction((transaction) async {
+                                    DocumentSnapshot snapshot = await transaction.get(userRef);
+                                    if (!snapshot.exists) {
+                                      throw Exception("User does not exist!");
+                                    }
+
+                                    Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
+                                    List<dynamic> cartList = [];
+
+                                    if (userData.containsKey('mycart')) {
+                                      String cartJson = userData['mycart'] ?? '[]';
+                                      cartList = json.decode(cartJson);
+                                    }
+
+                                    // Check if the product is already in the cart
+                                    int existingIndex = cartList.indexWhere((item) => item['productID'] == widget.productName);
+
+                                    if (existingIndex != -1) {
+                                      // If the product is already in the cart, increase the quantity
+                                      cartList[existingIndex]['quantity'] += 1;
+                                    } else {
+                                      // If the product is not in the cart, add it
+                                      cartList.add({
+                                        'productID': widget.productName,
+                                        'variation': _selectedProductSize,
+                                        'price':widget.productPrice,
+                                        'quantity': 1,
+                                      });
+                                    }
+
+                                    transaction.update(userRef, {'mycart': json.encode(cartList)});
+                                  });
+
+                                  // Navigate to the cart screen
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => CartScreen()),
+                                  );
+                                },
+                                child: Icon(Icons.add_shopping_cart, color: Colors.white, size: 25),
+                              ),
                             ),
                           ],
                         ),

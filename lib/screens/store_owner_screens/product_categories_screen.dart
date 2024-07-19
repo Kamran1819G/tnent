@@ -5,7 +5,6 @@ import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/category_model.dart';
 import 'package:tnennt/screens/store_owner_screens/add_product_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/all_products_screen.dart';
-import 'package:tnennt/screens/store_owner_screens/category_products_screen.dart';
 
 class ProductCategoriesScreen extends StatefulWidget {
   const ProductCategoriesScreen({Key? key}) : super(key: key);
@@ -372,6 +371,52 @@ class CategoryTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class CategoryProductsScreen extends StatelessWidget {
+  final CategoryModel category;
+
+  CategoryProductsScreen({required this.category});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(category.name),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('Products')
+            .where('category', isEqualTo: category.name)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return Center(child: Text('No products found in this category.'));
+          }
+
+          return ListView.builder(
+            itemCount: snapshot.data!.docs.length,
+            itemBuilder: (context, index) {
+              var product = snapshot.data!.docs[index];
+              return ListTile(
+                title: Text(product['name']),
+                subtitle: Text('Price: \$${product['price']}'),
+                // Add more product details as needed
+              );
+            },
+          );
+        },
       ),
     );
   }

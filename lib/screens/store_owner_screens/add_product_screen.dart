@@ -7,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:tnennt/constants/constants.dart';
+import 'package:uuid/uuid.dart';
 
 class AddProductScreen extends StatefulWidget {
   final String? category;
@@ -98,8 +99,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
     try {
       // Generate a new document reference with auto-generated ID
-      DocumentReference productRef = FirebaseFirestore.instance.collection('Products').doc();
-      String productId = productRef.id;
+      String productId = 'ProductID-'+Uuid().v4();
+
+      DocumentReference productRef = FirebaseFirestore.instance.collection('Products').doc(productId);
 
       // Upload images to Firebase Storage
       List<String> imageUrls = await _uploadImages(productId);
@@ -126,6 +128,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
       // Update Constants.productId
       Constants.productId = productId;
+
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Product added successfully')),
