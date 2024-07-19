@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -27,15 +27,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String userName = '';
   String userAddress = '';
   String userMobile = '';
-  Map<String, dynamic> productDetails = {};
-  List<Map<String, dynamic>> cartData = []; // Add this line
+  List<Map<String, dynamic>> cartData = [];
   bool isLoading = true;
+  double totalPrice = 0.0;
 
   @override
   void initState() {
     super.initState();
     _fetchUserData();
   }
+
   Future<void> _fetchUserData() async {
     setState(() {
       isLoading = true;
@@ -54,37 +55,64 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             userAddress = userDataMap['address'] ?? '';
             userMobile = userDataMap['phoneNumber'] ?? '';
 
-            // Parse cart data
             if (userDataMap['mycart'] != null) {
-              List<dynamic> cartList = userDataMap['mycart'] as List<dynamic>;
+              String cartJson = userDataMap['mycart'];
+              List<dynamic> cartList = json.decode(cartJson);
               cartData = cartList.map((item) => item as Map<String, dynamic>).toList();
             }
+
+            isLoading = false;
           });
 
-          // Fetch product details for each item in the cart
-          await _fetchProductDetails();
+          calculateTotalPrice();
         }
+      } else {
+        setState(() {
+          isLoading = false;
+        });
       }
     } catch (e) {
       print('Error fetching user data: $e');
-    } finally {
       setState(() {
         isLoading = false;
       });
     }
   }
 
-  Future<void> _fetchProductDetails() async {
-    for (var cartItem in cartData) {
-      String productId = cartItem['productId'];
-      DocumentSnapshot productSnapshot = await _firestore.collection('Products').doc(productId).get();
+  void calculateTotalPrice() {
+    double sum = 0.0;
+    for (var item in cartData) {
+      sum += (item['productPrice'] ?? 0.0) * (item['quantity'] ?? 1);
+    }
+    setState(() {
+      totalPrice = sum;
+    });
+  }
 
-      if (productSnapshot.exists) {
-        Map<String, dynamic> productData = productSnapshot.data() as Map<String, dynamic>;
-        cartItem['productDetails'] = productData;
+  Future<void> updateQuantity(String productName, int newQuantity) async {
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        setState(() {
+          for (var item in cartData) {
+            if (item['productName'] == productName) {
+              item['quantity'] = newQuantity;
+              break;
+            }
+          }
+        });
+
+        calculateTotalPrice();
+
+        await _firestore.collection('Users').doc(user.uid).update({
+          'mycart': json.encode(cartData),
+        });
       }
+    } catch (e) {
+      print('Error updating quantity: $e');
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -92,212 +120,213 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         child: isLoading
             ? Center(child: CircularProgressIndicator())
             : Column(
+          children: [
+            Container(
+              height: 100,
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
                 children: [
-                  Container(
-                    height: 100,
-                    padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      children: [
-                        Text(
-                          'Checkout'.toUpperCase(),
-                          style: TextStyle(
-                            color: hexToColor('#1E1E1E'),
-                            fontSize: 24.0,
-                            letterSpacing: 1.5,
-                          ),
-                        ),
-                        Text(
-                          ' •',
-                          style: TextStyle(
-                            fontSize: 28.0,
-                            color: hexToColor('#FF0000'),
-                          ),
-                        ),
-                        Spacer(),
-                        Container(
-                          margin: EdgeInsets.all(8.0),
-                          child: CircleAvatar(
-                            backgroundColor: Colors.grey[100],
-                            child: IconButton(
-                              icon: Icon(Icons.arrow_back_ios_new,
-                                  color: Colors.black),
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                            ),
-                          ),
-                        ),
-                      ],
+                  Text(
+                    'Checkout'.toUpperCase(),
+                    style: TextStyle(
+                      color: hexToColor('#1E1E1E'),
+                      fontSize: 24.0,
+                      letterSpacing: 1.5,
                     ),
                   ),
-                  Card(
-                    margin: EdgeInsets.all(16.0),
-                    color: Colors.white,
-                    surfaceTintColor: Colors.white,
-                    child: Container(
-                      padding: EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                userName,
-                                style: TextStyle(
-                                  color: hexToColor('#2D332F'),
-                                  fontSize: 22.0,
-                                ),
-                              ),
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 12.0, vertical: 6.0),
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                  borderRadius: BorderRadius.circular(100.0),
-                                ),
-                                child: Text(
-                                  'Home',
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                    fontSize: 12.0,
-                                  ),
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(height: 16.0),
-                          Container(
-                            width: 250,
-                            child: Text(
-                              userAddress,
-                              style: TextStyle(
-                                color: hexToColor('#727272'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12.0,
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 16.0),
-                          Row(
-                            children: [
-                              Text(
-                                'Mobile:',
-                                style: TextStyle(
-                                  color: hexToColor('#727272'),
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 12.0,
-                                ),
-                              ),
-                              SizedBox(width: 4.0),
-                              Text(
-                                userMobile,
-                                style: TextStyle(
-                                  color: hexToColor('#2D332F'),
-                                  fontSize: 12.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 25.0),
-                          Center(
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ChangeAddressScreen(),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                height: 50,
-                                width: 300,
-                                margin: EdgeInsets.symmetric(vertical: 15.0),
-                                decoration: BoxDecoration(
-                                  border:
-                                      Border.all(color: hexToColor('#E3E3E3')),
-                                  borderRadius: BorderRadius.circular(100.0),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    'Change Your Address',
-                                    style: TextStyle(
-                                        color: hexToColor('#343434'),
-                                        fontSize: 12.0),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16.0),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: cartData.length,
-                      itemBuilder: (context, index) {
-                        var item = cartData[index];
-                        var productDetails = item['productDetails'];
-                        return ProductDetails(
-                          productImage: productDetails['image'] ?? 'assets/product_image.png',
-                          productName: productDetails['name'] ?? 'Unknown Product',
-                          productPrice: productDetails['price']?.toString() ?? '0',
-                        );
-                      },
+                  Text(
+                    ' •',
+                    style: TextStyle(
+                      fontSize: 28.0,
+                      color: hexToColor('#FF0000'),
                     ),
                   ),
                   Spacer(),
-                  Center(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SummaryScreen(),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        height: 50,
-                        width: 250,
-                        margin: EdgeInsets.symmetric(vertical: 15.0),
-                        decoration: BoxDecoration(
-                          color: hexToColor('#2B2B2B'),
-                          borderRadius: BorderRadius.circular(100.0),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'Continue',
-                            style:
-                                TextStyle(color: Colors.white, fontSize: 16.0),
-                          ),
-                        ),
+                  Container(
+                    margin: EdgeInsets.all(8.0),
+                    child: CircleAvatar(
+                      backgroundColor: Colors.grey[100],
+                      child: IconButton(
+                        icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
                       ),
                     ),
                   ),
                 ],
               ),
+            ),
+            Card(
+              margin: EdgeInsets.all(16.0),
+              color: Colors.white,
+              surfaceTintColor: Colors.white,
+              child: Container(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          userName,
+                          style: TextStyle(
+                            color: hexToColor('#2D332F'),
+                            fontSize: 22.0,
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: Theme.of(context).primaryColor,
+                            ),
+                            borderRadius: BorderRadius.circular(100.0),
+                          ),
+                          child: Text(
+                            'Home',
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontSize: 12.0,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
+                    SizedBox(height: 16.0),
+                    Container(
+                      width: 250,
+                      child: Text(
+                        userAddress,
+                        style: TextStyle(
+                          color: hexToColor('#727272'),
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.0,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 16.0),
+                    Row(
+                      children: [
+                        Text(
+                          'Mobile:',
+                          style: TextStyle(
+                            color: hexToColor('#727272'),
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                        SizedBox(width: 4.0),
+                        Text(
+                          userMobile,
+                          style: TextStyle(
+                            color: hexToColor('#2D332F'),
+                            fontSize: 12.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                itemCount: cartData.length,
+                itemBuilder: (context, index) {
+                  var item = cartData[index];
+                  return ProductDetails(
+                    productImage: item['image'] ?? 'assets/product_image.png',
+                    productName: item['productName'] ?? '',
+                    productPrice: item['productPrice'] ?? 0.0,
+                    quantity: item['quantity'] ?? 1,
+                    onQuantityChanged: (productName, newQuantity) {
+                      updateQuantity(productName, newQuantity);
+                    },
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total:',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    '₹${totalPrice.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SummaryScreen(
+                        cartData: cartData,
+                        totalPrice: totalPrice,
+                        userName: userName,
+                        userAddress: userAddress,
+                        userMobile: userMobile,
+                      ),
+                    ),
+                  );
+                },
+
+                child: Container(
+                  height: 50,
+                  width: 250,
+                  margin: EdgeInsets.symmetric(vertical: 15.0),
+                  decoration: BoxDecoration(
+                    color: hexToColor('#2B2B2B'),
+                    borderRadius: BorderRadius.circular(100.0),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Continue',
+                      style: TextStyle(color: Colors.white, fontSize: 16.0),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
 class ProductDetails extends StatefulWidget {
-  String productImage;
-  String productName;
-  String productPrice;
+  final String productImage;
+  final String productName;
+  final double productPrice;
+  final int quantity;
+  final Function(String, int) onQuantityChanged;
 
   ProductDetails({
     required this.productImage,
     required this.productName,
     required this.productPrice,
+    required this.quantity,
+    required this.onQuantityChanged,
   });
 
   @override
@@ -305,24 +334,34 @@ class ProductDetails extends StatefulWidget {
 }
 
 class _ProductDetailsState extends State<ProductDetails> {
-  int quantity = 1;
+  late int quantity;
+
+  @override
+  void initState() {
+    super.initState();
+    quantity = widget.quantity;
+  }
 
   void incrementQuantity() {
     setState(() {
       quantity++;
     });
+    widget.onQuantityChanged(widget.productName, quantity);
   }
 
   void decrementQuantity() {
     setState(() {
       if (quantity > 1) {
         quantity--;
+        widget.onQuantityChanged(widget.productName, quantity);
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    double totalItemPrice = widget.productPrice * quantity;
+
     return Card(
       margin: EdgeInsets.all(8.0),
       color: Colors.white,
@@ -356,8 +395,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                 ),
                 SizedBox(height: 8.0),
                 Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
                   decoration: BoxDecoration(
                     border: Border.all(color: hexToColor('#D0D0D0')),
                     borderRadius: BorderRadius.circular(4.0),
@@ -379,7 +417,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          '₹${widget.productPrice}',
+                          '₹${totalItemPrice.toStringAsFixed(2)}',
                           style: TextStyle(
                             color: hexToColor('#343434'),
                             fontSize: 22,
@@ -396,7 +434,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                       ],
                     ),
                     Text(
-                      'M.R.P \$${widget.productPrice}',
+                      'M.R.P ₹${(totalItemPrice * 1.1).toStringAsFixed(2)}',
                       style: TextStyle(
                         color: hexToColor('#B9B9B9'),
                         fontSize: 10,
@@ -461,13 +499,30 @@ class _ProductDetailsState extends State<ProductDetails> {
 }
 
 class SummaryScreen extends StatefulWidget {
-  const SummaryScreen({super.key});
+  final List<Map<String, dynamic>> cartData;
+  final double totalPrice;
+  final String userName;
+  final String userAddress;
+  final String userMobile;
+
+  const SummaryScreen({
+    Key? key,
+    required this.cartData,
+    required this.totalPrice,
+    required this.userName,
+    required this.userAddress,
+    required this.userMobile,
+  }) : super(key: key);
 
   @override
   State<SummaryScreen> createState() => _SummaryScreenState();
 }
 
 class _SummaryScreenState extends State<SummaryScreen> {
+  late double subtotal;
+  late double middlemenCharges;
+  late double discount;
+  late double total;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -505,7 +560,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
                         icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -590,7 +645,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     ProductDetails(
                       productImage: 'assets/product_image.png',
                       productName: 'Nikon Camera',
-                      productPrice: '200',
+                      productPrice: 200,
+                      quantity: 2,
+                      onQuantityChanged: (productName, newQuantity){},
                     ),
                     /*SizedBox(height: 8.0),
                     Card(
@@ -729,14 +786,14 @@ class _SummaryScreenState extends State<SummaryScreen> {
                           ),
                           child: TextField(
                               decoration: InputDecoration(
-                            hintText: 'Enter Code:',
-                            hintStyle: TextStyle(
-                              color: hexToColor('#272822'),
-                              fontFamily: 'Gotham',
-                              fontSize: 16.0,
-                            ),
-                            border: InputBorder.none,
-                          )),
+                                hintText: 'Enter Code:',
+                                hintStyle: TextStyle(
+                                  color: hexToColor('#272822'),
+                                  fontFamily: 'Gotham',
+                                  fontSize: 16.0,
+                                ),
+                                border: InputBorder.none,
+                              )),
                         ),
                       ],
                     ),
@@ -754,13 +811,13 @@ class _SummaryScreenState extends State<SummaryScreen> {
                           SizedBox(height: 20.0),
                           Padding(
                             padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
+                            const EdgeInsets.symmetric(horizontal: 8.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Subtotal',
@@ -781,7 +838,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                 SizedBox(height: 8.0),
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Middlemen Charges',
@@ -802,7 +859,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                                 SizedBox(height: 8.0),
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Discount',
@@ -938,7 +995,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
                         icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -977,7 +1034,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                       onExpansionChanged: (expanded) {
                         setState(() {
                           expandedTile =
-                              expanded ? ExpandedTile.upi : ExpandedTile.none;
+                          expanded ? ExpandedTile.upi : ExpandedTile.none;
                         });
                       },
                       collapsedShape: RoundedRectangleBorder(
@@ -1067,7 +1124,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                         ExpansionTile(
                           key: Key('other_upi'),
                           initiallyExpanded:
-                              expandedTile == ExpandedTile.otherUpi,
+                          expandedTile == ExpandedTile.otherUpi,
                           onExpansionChanged: (expanded) {
                             setState(() {
                               expandedTile = expanded
@@ -1124,7 +1181,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                       ),
                                       decoration: InputDecoration(
                                         helperText:
-                                            'Your UPI ID will be encrypted and in 100% safe with us',
+                                        'Your UPI ID will be encrypted and in 100% safe with us',
                                         helperStyle: TextStyle(
                                           color: hexToColor('#6F6F6F'),
                                           fontFamily: 'Poppins',
@@ -1133,7 +1190,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                         border: OutlineInputBorder(
                                           gapPadding: 0.0,
                                           borderRadius:
-                                              BorderRadius.circular(8.0),
+                                          BorderRadius.circular(8.0),
                                           borderSide: BorderSide(
                                             color: hexToColor('#E0E0E0'),
                                             width: 1.0,
@@ -1149,7 +1206,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                     decoration: BoxDecoration(
                                       color: Theme.of(context).primaryColor,
                                       borderRadius:
-                                          BorderRadius.circular(100.0),
+                                      BorderRadius.circular(100.0),
                                     ),
                                     child: Center(
                                       child: Icon(
@@ -1172,7 +1229,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                       onExpansionChanged: (expanded) {
                         setState(() {
                           expandedTile =
-                              expanded ? ExpandedTile.card : ExpandedTile.none;
+                          expanded ? ExpandedTile.card : ExpandedTile.none;
                         });
                       },
                       collapsedShape: RoundedRectangleBorder(
@@ -1267,7 +1324,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                         border: OutlineInputBorder(
                                           gapPadding: 0.0,
                                           borderRadius:
-                                              BorderRadius.circular(8.0),
+                                          BorderRadius.circular(8.0),
                                           borderSide: BorderSide(
                                             color: hexToColor('#E0E0E0'),
                                             width: 1.0,
@@ -1297,7 +1354,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                         border: OutlineInputBorder(
                                           gapPadding: 0.0,
                                           borderRadius:
-                                              BorderRadius.circular(8.0),
+                                          BorderRadius.circular(8.0),
                                           borderSide: BorderSide(
                                             color: hexToColor('#E0E0E0'),
                                             width: 1.0,
@@ -1456,7 +1513,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
                         icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -1669,7 +1726,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           .findRenderObject() as RenderRepaintBoundary;
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
+      await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
     } catch (e) {
       print(e);
@@ -1712,7 +1769,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
                         icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -1775,14 +1832,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           ),
                           SizedBox(
                               height:
-                                  MediaQuery.of(context).size.height * 0.05),
+                              MediaQuery.of(context).size.height * 0.05),
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.8,
                             child: Column(
                               children: [
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Date:',
@@ -1808,7 +1865,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 SizedBox(height: 12.0),
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Time:',
@@ -1834,7 +1891,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 SizedBox(height: 12.0),
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'To:',
@@ -1867,7 +1924,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 ),
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Total',
@@ -1889,7 +1946,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 SizedBox(height: 16.0),
                                 Container(
                                   height:
-                                      MediaQuery.of(context).size.height * 0.1,
+                                  MediaQuery.of(context).size.height * 0.1,
                                   decoration: BoxDecoration(
                                     color: hexToColor('#FFFFFF'),
                                     borderRadius: BorderRadius.circular(12.0),
@@ -1940,7 +1997,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                           border: Border.all(
                                               color: hexToColor('#094446')),
                                           borderRadius:
-                                              BorderRadius.circular(12.0),
+                                          BorderRadius.circular(12.0),
                                         ),
                                         child: Center(
                                           child: Text(
