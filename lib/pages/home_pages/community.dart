@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/models/community_post_model.dart';
+import 'package:tnennt/widgets/full_screen_image_view.dart';
 import '../../helpers/color_utils.dart';
 
 class Community extends StatefulWidget {
@@ -87,7 +88,10 @@ class _CommunityState extends State<Community> {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => CreateCommunityPost(storeId: storeId,)),
+                            MaterialPageRoute(
+                                builder: (context) => CreateCommunityPost(
+                                      storeId: storeId,
+                                    )),
                           );
                         },
                       ),
@@ -112,14 +116,17 @@ class _CommunityState extends State<Community> {
                 return ListView.builder(
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
-                    final postData = snapshot.data![index].data() as Map<String, dynamic>;
+                    final postData =
+                        snapshot.data![index].data() as Map<String, dynamic>;
                     final postId = snapshot.data![index].id;
                     return CommunityPost(
                       postId: postId,
                       storeId: postData['storeId'] ?? '',
                       postContent: postData['postContent'] ?? '',
-                      postImages: List<String>.from(postData['postImages'] ?? []),
+                      postImages:
+                          List<String>.from(postData['postImages'] ?? []),
                       postLikes: postData['postLikes'] ?? 0,
+                      productLink: postData['productLink'],
                       createdAt: postData['createdAt'] as Timestamp,
                     );
                   },
@@ -139,6 +146,7 @@ class CommunityPost extends StatefulWidget {
   final String postContent;
   final List<String> postImages;
   final int postLikes;
+  final String? productLink;
   final Timestamp createdAt;
 
   const CommunityPost({
@@ -148,6 +156,7 @@ class CommunityPost extends StatefulWidget {
     required this.postContent,
     required this.postImages,
     required this.postLikes,
+    this.productLink,
     required this.createdAt,
   }) : super(key: key);
 
@@ -214,140 +223,178 @@ class _CommunityPostState extends State<CommunityPost> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<DocumentSnapshot>(
-        future: _storeFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          if (!snapshot.hasData) {
-            return Center(child: Text('User not found'));
-          }
+      future: _storeFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData) {
+          return Center(child: Text('User not found'));
+        }
 
-          final storeData = snapshot.data!.data() as Map<String, dynamic>;
-          final userName = storeData['name'] ?? 'Unknown User';
-          final userProfileImage = storeData['profileImage'] ?? 'https://via.placeholder.com/150';
+        final storeData = snapshot.data!.data() as Map<String, dynamic>;
+        final userName = storeData['name'] ?? 'Unknown User';
+        final userProfileImage =
+            storeData['profileImage'] ?? 'https://via.placeholder.com/150';
 
-          return Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // User information row
-                Row(
-                  children: [
-                    Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundImage: NetworkImage(userProfileImage),
-                          radius: 20.0,
-                        ),
-                        const SizedBox(width: 16.0),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              userName,
-                              style: const TextStyle(
-                                fontSize: 18.0,
-                              ),
-                            ),
-                            Text(
-                              _formatTimestamp(widget.createdAt),
-                              style: TextStyle(
-                                color: hexToColor('#9C9C9C'),
-                                fontSize: 10.0,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: () {
-                        showModalBottomSheet(
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(12),
-                              topRight: Radius.circular(12),
-                            ),
-                          ),
-                          context: context,
-                          builder: (context) => _buildMoreBottomSheet(),
-                        );
-                      },
-                      child: CircleAvatar(
-                        backgroundColor: hexToColor('#F5F5F5'),
-                        child: Icon(
-                          Icons.more_horiz,
-                          color: hexToColor('#BEBEBE'),
-                          size: 20,
+        return Container(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // User information row
+              Row(
+                children: [
+                  CircleAvatar(
+                    backgroundImage: NetworkImage(userProfileImage),
+                    radius: 20.0,
+                  ),
+                  const SizedBox(width: 16.0),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        userName,
+                        style: const TextStyle(
+                          fontSize: 18.0,
                         ),
                       ),
+                      Text(
+                        _formatTimestamp(widget.createdAt),
+                        style: TextStyle(
+                          color: hexToColor('#9C9C9C'),
+                          fontSize: 10.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () {
+                      showModalBottomSheet(
+                        backgroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.only(
+                            topLeft: Radius.circular(12),
+                            topRight: Radius.circular(12),
+                          ),
+                        ),
+                        context: context,
+                        builder: (context) => _buildMoreBottomSheet(),
+                      );
+                    },
+                    child: CircleAvatar(
+                      backgroundColor: hexToColor('#F5F5F5'),
+                      child: Icon(
+                        Icons.more_horiz,
+                        color: hexToColor('#BEBEBE'),
+                        size: 20,
+                      ),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+              SizedBox(height: 16.0),
+              // Caption
+              Text(
+                widget.postContent,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontFamily: 'Gotham',
+                  fontSize: 12.0,
                 ),
-                SizedBox(height: 16.0),
-                // Caption
-                Text(
-                  widget.postContent,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontFamily: 'Gotham',
-                    fontSize: 12.0,
+              ),
+              SizedBox(height: 10),
+              // Post images
+              if (widget.postImages.isNotEmpty)
+                Container(
+                  height: 200.0, // Adjust the height as needed
+                  child: PageView.builder(
+                    itemCount: widget.postImages.length,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  FullScreenImageView(imageUrl: widget.postImages[index]),
+                            ),
+                          );
+                        },
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(8.0),
+                          child: Image.network(
+                            widget.postImages[index],
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ),
-                SizedBox(height: 10),
-                // Post image
-                if (widget.postImages.isNotEmpty)
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.network(
-                      widget.postImages[0],
-                      fit: BoxFit.cover,
+              SizedBox(height: 10),
+              // Likes
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: _likePost,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 6.0),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: hexToColor('#BEBEBE')),
+                        borderRadius: BorderRadius.circular(50.0),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.favorite,
+                            color: Colors.red,
+                          ),
+                          const SizedBox(width: 8.0),
+                          Text(
+                            '${widget.postLikes}',
+                            style: TextStyle(
+                                color: hexToColor('#989797'), fontSize: 12.0),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                SizedBox(height: 10),
-                // Likes
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: _likePost,
-                      child: Container(
-                        padding:
-                        const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: hexToColor('#BEBEBE')),
-                          borderRadius: BorderRadius.circular(50.0),
+                  Spacer(),
+                  if (widget.productLink?.isNotEmpty ?? false) ...[
+                    Chip(
+                      backgroundColor: hexToColor('#EDEDED'),
+                      side: BorderSide.none,
+                      label: Text(
+                        '${widget.productLink!}',
+                        style: TextStyle(
+                          color: hexToColor('#B4B4B4'),
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12.0,
                         ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.favorite,
-                              color: Colors.red,
-                            ),
-                            const SizedBox(width: 8.0),
-                            Text(
-                              '${widget.postLikes}',
-                              style: TextStyle(
-                                  color: hexToColor('#989797'), fontSize: 12.0),
-                            ),
-                          ],
-                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      avatar: Icon(
+                        Icons.link_outlined,
+                        color: hexToColor('#B4B4B4'),
                       ),
                     ),
                     Spacer(),
-                    Icon(Icons.ios_share_outlined)
                   ],
-                ),
-              ],
-            ),
-          );
-        }
+                  Icon(Icons.ios_share_outlined)
+                ],
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -414,7 +461,6 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
     super.initState();
   }
 
-
   Future<void> pickImage() async {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
@@ -446,8 +492,10 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
     final user = FirebaseAuth.instance.currentUser;
 
     for (var image in _images) {
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${user!.uid}.jpg';
-      final Reference storageRef = storage.ref().child('community_posts/$fileName');
+      final fileName =
+          '${DateTime.now().millisecondsSinceEpoch}_${user!.uid}.jpg';
+      final Reference storageRef =
+          storage.ref().child('community_posts/$fileName');
 
       try {
         await storageRef.putFile(image);
@@ -561,7 +609,8 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                   children: [
                     Text(
                       'Add Image',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                     ),
                     SizedBox(height: 10),
                     Row(
@@ -598,17 +647,19 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                                 scrollDirection: Axis.horizontal,
                                 physics: NeverScrollableScrollPhysics(),
                                 itemCount:
-                                _images.length > 3 ? 3 : _images.length,
+                                    _images.length > 3 ? 3 : _images.length,
                                 itemBuilder: (context, index) {
                                   return Stack(
                                     children: [
                                       Container(
                                         width: 75,
-                                        margin: const EdgeInsets.only(right: 10),
+                                        margin:
+                                            const EdgeInsets.only(right: 10),
                                         decoration: BoxDecoration(
                                           border: Border.all(
                                               color: hexToColor('#848484')),
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
                                           image: DecorationImage(
                                             image: FileImage(_images[index]),
                                             fit: BoxFit.cover,
@@ -672,7 +723,8 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                   children: [
                     Text(
                       'Caption',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                     ),
                     SizedBox(height: 20),
                     TextField(
@@ -714,7 +766,8 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                   children: [
                     Text(
                       'Product Link',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                     ),
                     SizedBox(height: 10),
                     TextField(
@@ -750,7 +803,8 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: hexToColor('#2D332F'),
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 100, vertical: 18),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 100, vertical: 18),
                     textStyle: TextStyle(
                       fontSize: 16,
                       fontFamily: 'Gotham',
