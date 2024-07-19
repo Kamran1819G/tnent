@@ -100,23 +100,6 @@ class _DetailScreenState extends State<DetailScreen> {
                               SizedBox(
                                 height: 10.0,
                               ),
-                              Row(
-                                children: [
-                                  Text(
-                                    'Order ID:',
-                                    style: TextStyle(
-                                        color: hexToColor('#878787'),
-                                        fontSize: 14.0),
-                                  ),
-                                  SizedBox(width: 8.0),
-                                  Text(
-                                    '123456',
-                                    style: TextStyle(
-                                        color: hexToColor('#A9A9A9'),
-                                        fontSize: 14.0),
-                                  ),
-                                ],
-                              ),
                               SizedBox(height: 50.0),
                               Text(
                                 '₹ ${widget.productPrice}',

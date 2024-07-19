@@ -28,6 +28,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String userAddress = '';
   String userMobile = '';
   Map<String, dynamic> productDetails = {};
+  List<Map<String, dynamic>> cartData = []; // Add this line
   bool isLoading = true;
 
   @override
@@ -35,7 +36,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.initState();
     _fetchUserData();
   }
-
   Future<void> _fetchUserData() async {
     setState(() {
       isLoading = true;
@@ -44,23 +44,30 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     try {
       User? user = _auth.currentUser;
       if (user != null) {
-        DocumentSnapshot userData =
-            await _firestore.collection('Users').doc(user.uid).get();
+        DocumentSnapshot userData = await _firestore.collection('Users').doc(user.uid).get();
 
-        setState(() {
-          userName = userData['firstName'] ?? '';
-          userAddress = userData['address'] ?? '';
-          userMobile = userData['mobile'] ?? '';
-          isLoading = false;
-        });
-      } else {
-        // Handle case where user is not logged in
-        setState(() {
-          isLoading = false;
-        });
+        if (userData.exists) {
+          Map<String, dynamic> userDataMap = userData.data() as Map<String, dynamic>;
+
+          setState(() {
+            userName = '${userDataMap['firstName'] ?? ''} ${userDataMap['lastName'] ?? ''}';
+            userAddress = userDataMap['address'] ?? '';
+            userMobile = userDataMap['phoneNumber'] ?? '';
+
+            // Parse cart data
+            if (userDataMap['mycart'] != null) {
+              List<dynamic> cartList = userDataMap['mycart'] as List<dynamic>;
+              cartData = cartList.map((item) => item as Map<String, dynamic>).toList();
+            }
+          });
+
+          // Fetch product details for each item in the cart
+          await _fetchProductDetails();
+        }
       }
     } catch (e) {
       print('Error fetching user data: $e');
+    } finally {
       setState(() {
         isLoading = false;
       });
@@ -68,30 +75,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _fetchProductDetails() async {
-    try {
-      // Assuming you have a product ID, replace 'productId' with the actual ID
-      DocumentSnapshot productDoc =
-          await _firestore.collection('Products').doc('productID').get();
+    for (var cartItem in cartData) {
+      String productId = cartItem['productId'];
+      DocumentSnapshot productSnapshot = await _firestore.collection('Products').doc(productId).get();
 
-      if (productDoc.exists) {
-        setState(() {
-          productDetails = productDoc.data() as Map<String, dynamic>;
-          isLoading = false;
-        });
-      } else {
-        print('Product not found');
-        setState(() {
-          isLoading = false;
-        });
+      if (productSnapshot.exists) {
+        Map<String, dynamic> productData = productSnapshot.data() as Map<String, dynamic>;
+        cartItem['productDetails'] = productData;
       }
-    } catch (e) {
-      print('Error fetching product details: $e');
-      setState(() {
-        isLoading = false;
-      });
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -246,10 +239,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                   ),
                   SizedBox(height: 16.0),
-                  ProductDetails(
-                    productImage: 'assets/product_image.png',
-                    productName: 'Nikon Camera',
-                    productPrice: '200',
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: cartData.length,
+                      itemBuilder: (context, index) {
+                        var item = cartData[index];
+                        var productDetails = item['productDetails'];
+                        return ProductDetails(
+                          productImage: productDetails['image'] ?? 'assets/product_image.png',
+                          productName: productDetails['name'] ?? 'Unknown Product',
+                          productPrice: productDetails['price']?.toString() ?? '0',
+                        );
+                      },
+                    ),
                   ),
                   Spacer(),
                   Center(

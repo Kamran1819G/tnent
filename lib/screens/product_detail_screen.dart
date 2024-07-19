@@ -396,12 +396,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       // If the product is already in the cart, increase the quantity
                                       cartList[existingIndex]['quantity'] += 1;
                                     } else {
-                                      // If the product is not in the cart, add it
+                                      // If the product is not in the cart, add it with all necessary information
                                       cartList.add({
                                         'productID': widget.productName,
+                                        'productName': widget.productName,
+                                        'productPrice': widget.productPrice,
+                                        'discount': widget.Discount,
                                         'variation': _selectedProductSize,
-                                        'price':widget.productPrice,
                                         'quantity': 1,
+                                        // You might want to add the first image from the images list
+                                        'image': widget.images.isNotEmpty ? widget.images[0].image.toString() : null,
                                       });
                                     }
 
