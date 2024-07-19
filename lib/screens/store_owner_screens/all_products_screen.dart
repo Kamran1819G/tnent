@@ -1,15 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
+import 'package:tnennt/models/product_model.dart'; // Ensure you have this model
 
 class AllProductsScreen extends StatefulWidget {
-  const AllProductsScreen({super.key});
+  final String storeId;
+
+  AllProductsScreen({required this.storeId});
 
   @override
   State<AllProductsScreen> createState() => _AllProductsScreenState();
 }
 
 class _AllProductsScreenState extends State<AllProductsScreen> {
+  late Future<List<ProductModel>> _productsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _productsFuture = _fetchProducts();
+  }
+
+  Future<List<ProductModel>> _fetchProducts() async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('products')
+        .where('storeId', isEqualTo: widget.storeId)
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => ProductModel.fromFirestore(doc))
+        .toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,27 +80,48 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
           ),
           SizedBox(),
           Expanded(
-            child: GridView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 16.0,
-                childAspectRatio: 0.7,
-              ),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return ProductTile(
-                  name: 'Product $index',
-                  image: 'assets/product_image.png',
-                  price: 100.0,
-                  onRemove: () {
-                    print('Removing product $index');
-                    setState(() {
-                      // Remove product from list
+            child: FutureBuilder<List<ProductModel>>(
+              future: _productsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  print(snapshot.error);
+                  return Center(child: Text('Something went wrong'));
+                }
 
-                    });
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No products found'));
+                }
+
+                List<ProductModel> products = snapshot.data!;
+
+                return GridView.builder(
+                  shrinkWrap: true,
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 8.0,
+                    mainAxisSpacing: 16.0,
+                    childAspectRatio: 0.7,
+                  ),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    return ProductTile(
+                      name: product.name,
+                      image: product.imageUrls.first,
+                      price: product.variants.first.price,
+                      onRemove: () {
+                        print('Removing product ${product.name}');
+                        setState(() {
+                          // Remove product from list
+                          products.removeAt(index);
+                        });
+                      },
+                    );
                   },
                 );
               },
@@ -111,9 +155,9 @@ class ProductTile extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) => ProductDetailScreen(
               images: [
-                Image.asset(image),
-                Image.asset(image),
-                Image.asset(image),
+                Image.network(image),
+                Image.network(image),
+                Image.network(image),
               ],
               productName: name,
               productDescription:
@@ -142,7 +186,7 @@ class ProductTile extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),
                       image: DecorationImage(
-                        image: AssetImage(image),
+                        image: NetworkImage(image),
                         fit: BoxFit.fill,
                       ),
                     ),

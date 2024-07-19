@@ -128,7 +128,9 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AllProductsScreen(),
+                          builder: (context) => AllProductsScreen(
+                            storeId: widget.storeId,
+                          ),
                         ),
                       );
                     },
