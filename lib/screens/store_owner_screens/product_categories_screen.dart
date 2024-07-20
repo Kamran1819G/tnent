@@ -53,7 +53,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
         .add({
       'name': name,
       'totalProduct': 0,
-      'products': [],
+      'productIds': [],
       'createdAt': FieldValue.serverTimestamp(),
     });
 
@@ -62,7 +62,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
       name: name,
       totalProduct: 0,
       coverImage: '',
-      products: [],
+      productIds: [],
     );
 
     setState(() {

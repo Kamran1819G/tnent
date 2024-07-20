@@ -534,7 +534,11 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
             : null,
       );
 
-      await CommunityPostModel.createPost(post);
+      String postId = await CommunityPostModel.createPost(post);
+
+      await FirebaseFirestore.instance.collection('Stores').doc(widget.storeId).update({
+        'postIds': FieldValue.arrayUnion([postId])
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Post created successfully!')),

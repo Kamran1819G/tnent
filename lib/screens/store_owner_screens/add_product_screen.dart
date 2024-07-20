@@ -8,7 +8,6 @@ import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/screens/store_owner_screens/optionals_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:tnennt/constants/constants.dart';
 import 'package:uuid/uuid.dart';
 
 class AddProductScreen extends StatefulWidget {
@@ -25,6 +24,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   File? _image;
   List<File> _images = [];
   String? selectedCategory;
+  bool isSubmitting = false;
   TextEditingController _discountController = TextEditingController();
   TextEditingController _mrpController = TextEditingController();
   TextEditingController _itemPriceController = TextEditingController();
@@ -91,10 +91,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
   }
 
   Future<void> _addProduct() async {
-    if (_images.isEmpty || selectedCategory == null || _nameController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill in all required fields and add at least one image')),
-      );
+    setState(() {
+      isSubmitting = true;
+    });
+
+    if (_images.isEmpty ||
+        selectedCategory == null ||
+        _nameController.text.isEmpty) {
+      _showSnackBar(
+          'Please fill in all required fields and add at least one image');
       return;
     }
 
@@ -102,97 +107,114 @@ class _AddProductScreenState extends State<AddProductScreen> {
       String productId = 'ProductID' + Uuid().v4();
       // Generate a new document reference with auto-generated ID
       productId = FirebaseFirestore.instance.collection('products').doc().id;
+      final imageUrls = await _uploadImages(productId);
+      final productData = _createProductData(productId, imageUrls);
 
-      DocumentReference productRef = FirebaseFirestore.instance.collection('products').doc(productId);
-
-      // Upload images to Firebase Storage
-      List<String> imageUrls = await _uploadImages(productId);
-
-      // Create product data map
-      Map<String, dynamic> productData = ProductModel(
-        id: productId,
-        storeId: widget.storeId,
-        name: _nameController.text,
-        description: _descriptionController.text,
-        productCategory: selectedCategory!,
-        storeCategory: widget.category.name,
-        tags: [],
-        imageUrls: imageUrls,
-        isAvailable: true,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now(),
-        averageRating: 0,
-        numberOfRatings: 0,
-        variants: [],
-        variantOptions: {},
-      ).toFirestore();
-
-      if (!isMultiOptionCategory) {
-        productData['variants'] = [
-          ProductVariant(
-            id: Uuid().v4(),
-            attributes: {},
-            discount: double.tryParse(_discountController.text) ?? 0.0,
-            mrp: double.tryParse(_mrpController.text) ?? 0.0,
-            price: double.tryParse(_itemPriceController.text) ?? 0.0,
-            stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
-          ).toMap()
-        ];
-      }
-
-      // Set the data in Firestore
-      await productRef.set(productData);
-
-      // Get the categories document reference
-      DocumentReference storeCategoryDocRef = FirebaseFirestore.instance
-          .collection('Stores')
-          .doc(widget.storeId)
-          .collection('categories')
-          .doc(widget.category.id);
-
-      // Get the current products array
-      DocumentSnapshot snapshot = await storeCategoryDocRef.get();
-
-      // Ensure the document exists and contains the 'products' field
-      if (!snapshot.exists) {
-        throw Exception("Category document does not exist.");
-      }
-
-      List<String> currentProducts = List.from(snapshot.get('products'));
-
-      // Add new product id to array
-      currentProducts.add(productId);
-
-      // Update document
-      await storeCategoryDocRef.update({'products': currentProducts});
-
-      // Update Constants.productId
-      Constants.productId = productId;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Product added successfully')),
-      );
-
-      // Navigate to the next page if it's a multi-option category
-      if (isMultiOptionCategory) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OptionalsScreen(productId: productId),
-          ),
-        );
-      } else {
-        // Clear form or navigate back
-        _clearForm();
-      }
+      await _saveProductData(productId, productData);
+      await _updateStoreProducts(productId);
+      await _updateCategoryProducts(productId);
+      setState(() {
+        isSubmitting = false;
+      });
+      isMultiOptionCategory
+          ? _navigateToOptionalsScreen(productId)
+          : _clearForm();
     } catch (e) {
       print('Error adding product: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error adding product. Please try again.')),
-      );
+      _showSnackBar('Error adding product. Please try again.');
     }
   }
 
+  String _generateSku(String productName, Map<String, dynamic> attributes) {
+    String skuBase = productName
+        .substring(0, 3)
+        .toUpperCase(); // First 3 letters of product name
+    String skuAttributes = attributes.entries
+        .map((entry) =>
+            '${entry.key.substring(0, 1).toUpperCase()}${entry.value.toString().substring(0, 1).toUpperCase()}')
+        .join('-');
+    return '$skuBase-$skuAttributes-${DateTime.now().millisecondsSinceEpoch}';
+  }
+
+  Map<String, dynamic> _createProductData(
+      String productId, List<String> imageUrls) {
+    final productData = ProductModel(
+      id: productId,
+      storeId: widget.storeId,
+      name: _nameController.text,
+      description: _descriptionController.text,
+      productCategory: selectedCategory!,
+      storeCategory: widget.category.name,
+      imageUrls: imageUrls,
+      isAvailable: true,
+      createdAt: Timestamp.now(),
+      badReviews: 0,
+      goodReviews: 0,
+      variants: [],
+      variantOptions: {},
+    );
+
+    if (!isMultiOptionCategory) {
+      String sku = _generateSku(productData.name, {});
+      productData.variants.add(
+        ProductVariant(
+          id: Uuid().v4(),
+          attributes: {},
+          discount: double.tryParse(_discountController.text) ?? 0.0,
+          mrp: double.tryParse(_mrpController.text) ?? 0.0,
+          price: double.tryParse(_itemPriceController.text) ?? 0.0,
+          stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
+          sku: sku,
+        ),
+      );
+    }
+
+    return productData.toFirestore();
+  }
+
+  Future<void> _saveProductData(
+      String productId, Map<String, dynamic> productData) async {
+    await FirebaseFirestore.instance
+        .collection('products')
+        .doc(productId)
+        .set(productData);
+  }
+
+  Future<void> _updateStoreProducts(String productId) async {
+    final storeRef =
+        FirebaseFirestore.instance.collection('Stores').doc(widget.storeId);
+    await _updateArrayField(storeRef, 'productIds', productId);
+  }
+
+  Future<void> _updateCategoryProducts(String productId) async {
+    final categoryRef = FirebaseFirestore.instance
+        .collection('Stores')
+        .doc(widget.storeId)
+        .collection('categories')
+        .doc(widget.category.id);
+    await _updateArrayField(categoryRef, 'productIds', productId);
+  }
+
+  Future<void> _updateArrayField(
+      DocumentReference docRef, String field, String value) async {
+    await docRef.update({
+      field: FieldValue.arrayUnion([value])
+    });
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  void _navigateToOptionalsScreen(String productId) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OptionalsScreen(productId: productId),
+      ),
+    );
+  }
 
   Future<List<String>> _uploadImages(String productId) async {
     List<String> imageUrls = [];
@@ -211,6 +233,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   }
 
   void _clearForm() {
+    _showSnackBar('Product added successfully');
     setState(() {
       _images.clear();
       selectedCategory = null;
@@ -221,6 +244,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       _itemPriceController.clear();
       _stockQuantityController.clear();
     });
+    Navigator.pop(context);
   }
 
   @override
@@ -682,7 +706,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     ),
                     SizedBox(height: 30),
                     // Product Stock Quantity
-                    if (!isMultiOptionCategory)
+                    if (!isMultiOptionCategory) ...[
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16.0),
                         child: Column(
@@ -745,7 +769,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           ],
                         ),
                       ),
-                    if (!isMultiOptionCategory) SizedBox(height: 30),
+                      SizedBox(height: 30),
+                    ],
                     if (isMultiOptionCategory)
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -762,21 +787,27 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         ),
                       ),
                     Center(
-                      child: ElevatedButton(
-                        onPressed: _addProduct,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: hexToColor('#2B2B2B'),
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 75, vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50),
-                          ),
-                        ),
-                        child: Text(
-                          'List Item',
-                          style: TextStyle(color: Colors.white, fontSize: 16.0),
-                        ),
-                      ),
+                      child: isSubmitting
+                          ? CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  hexToColor('#2B2B2B')),
+                            )
+                          : ElevatedButton(
+                              onPressed: _addProduct,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: hexToColor('#2B2B2B'),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 75, vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                              ),
+                              child: Text(
+                                'List Item',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 16.0),
+                              ),
+                            ),
                     ),
                     SizedBox(height: 30),
                   ],

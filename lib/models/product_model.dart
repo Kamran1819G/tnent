@@ -51,13 +51,11 @@ class ProductModel {
   final String description;
   final String productCategory;
   final String storeCategory;
-  final List<String> tags;
   final List<String> imageUrls;
   final bool isAvailable;
   final Timestamp createdAt;
-  final Timestamp updatedAt;
-  final double averageRating;
-  final int numberOfRatings;
+  final int badReviews;
+  final int goodReviews;
   final List<ProductVariant> variants;
   final Map<String, List<String>> variantOptions; // e.g., {'size': ['S', 'M', 'L'], 'color': ['Red', 'Blue']}
 
@@ -68,13 +66,11 @@ class ProductModel {
     required this.description,
     required this.productCategory,
     required this.storeCategory,
-    required this.tags,
     required this.imageUrls,
     required this.isAvailable,
     required this.createdAt,
-    required this.updatedAt,
-    required this.averageRating,
-    required this.numberOfRatings,
+    required this.badReviews,
+    required this.goodReviews,
     required this.variants,
     required this.variantOptions,
   });
@@ -83,20 +79,22 @@ class ProductModel {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return ProductModel(
       id: doc.id,
-      storeId: data['storeId'],
-      name: data['name'],
-      description: data['description'],
-      productCategory: data['productCategory'],
-      storeCategory: data['storeCategory'],
-      tags: List<String>.from(data['tags'] ?? []),
+      storeId: data['storeId'] ?? '',
+      name: data['name'] ?? '',
+      description: data['description'] ?? '',
+      productCategory: data['productCategory'] ?? '',
+      storeCategory: data['storeCategory'] ?? '',
       imageUrls: List<String>.from(data['imageUrls'] ?? []),
-      isAvailable: data['isAvailable'],
-      createdAt: data['createdAt'],
-      updatedAt: data['updatedAt'],
-      averageRating: data['averageRating'].toDouble(),
-      numberOfRatings: data['numberOfRatings'],
-      variants: (data['variants'] as List).map((v) => ProductVariant.fromMap(v)).toList(),
-      variantOptions: Map<String, List<String>>.from(data['variantOptions'] ?? {}),
+      isAvailable: data['isAvailable'] ?? false,
+      createdAt: data['createdAt'] ?? Timestamp.now(),
+      badReviews: data['badReviews'] ?? 0,
+      goodReviews: data['goodReviews'] ?? 0,
+      variants: (data['variants'] as List<dynamic>?)
+          ?.map((v) => ProductVariant.fromMap(v as Map<String, dynamic>))
+          .toList() ?? [],
+      variantOptions: (data['variantOptions'] as Map<String, dynamic>?)?.map(
+              (key, value) => MapEntry(key, List<String>.from(value as List<dynamic>))
+      ) ?? {},
     );
   }
 
@@ -107,13 +105,11 @@ class ProductModel {
       'description': description,
       'productCategory': productCategory,
       'storeCategory': storeCategory,
-      'tags': tags,
       'imageUrls': imageUrls,
       'isAvailable': isAvailable,
       'createdAt': createdAt,
-      'updatedAt': updatedAt,
-      'averageRating': averageRating,
-      'numberOfRatings': numberOfRatings,
+      'badReviews': badReviews,
+      'goodReviews': goodReviews,
       'variants': variants.map((v) => v.toMap()).toList(),
       'variantOptions': variantOptions,
     };

@@ -5,6 +5,7 @@ import 'package:tnennt/helpers/color_utils.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tnennt/models/product_model.dart';
 
 class OptionalsScreen extends StatefulWidget {
   final String productId;
@@ -88,7 +89,8 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                     child: CircleAvatar(
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
-                        icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        icon:
+                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -128,7 +130,8 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                         fontSize: 14.0,
                       ),
                       indicatorSize: TabBarIndicatorSize.label,
-                      overlayColor: MaterialStateProperty.all(Colors.transparent),
+                      overlayColor:
+                          MaterialStateProperty.all(Colors.transparent),
                       dividerColor: Colors.transparent,
                       tabs: <Widget>[
                         OptionTab('Size', hexToColor('#343434')),
@@ -218,7 +221,7 @@ class _OptionalsScreenState extends State<OptionalsScreen>
             Center(
               child: GestureDetector(
                 onTap: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
                       builder: (context) => OptionalsPriceScreen(
@@ -575,10 +578,11 @@ class OptionalsPriceScreen extends StatefulWidget {
 class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
   List<String> items = [];
   List<GlobalKey<_OptionalPriceAndQuantityState>> optionalPriceKeys = [];
+  Map<String, dynamic>? productData;
+  bool isLoading = true;
 
   @override
   void initState() {
-
     super.initState();
     items = [
       ...widget.selectedSizes,
@@ -588,32 +592,79 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
       ...widget.selectedStorages,
     ];
     optionalPriceKeys = List.generate(items.length, (_) => GlobalKey<_OptionalPriceAndQuantityState>());
+    fetchProductData();
+  }
+
+  Future<void> fetchProductData() async {
+    try {
+      DocumentSnapshot doc = await FirebaseFirestore.instance.collection('products').doc(widget.productId).get();
+      if (doc.exists) {
+        setState(() {
+          productData = doc.data() as Map<String, dynamic>?;
+          isLoading = false;
+        });
+      } else {
+        print('Product not found');
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching product data: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> saveDataToFirebase() async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
+    List<ProductVariant> variants = items.map((item) {
+      final index = items.indexOf(item);
+      return ProductVariant(
+        id: item,
+        attributes: {'type': _getVariantType(item)},
+        discount: double.tryParse(_getControllerValue(index, '_discountController')) ?? 0,
+        mrp: double.tryParse(_getControllerValue(index, '_mrpController')) ?? 0,
+        price: double.tryParse(_getControllerValue(index, '_itemPriceController')) ?? 0,
+        stockQuantity: int.tryParse(_getControllerValue(index, '_quantityController')) ?? 0,
+        sku: '${widget.productId}-${item.replaceAll(' ', '-')}',
+      );
+    }).toList();
+
     Map<String, dynamic> productData = {
-      'productId': widget.productId,
-      'optionals': items.map((item) {
-        final index = items.indexOf(item);
-        return {
-          'title': item,
-          'discount': _getControllerValue(index, '_discountController'),
-          'mrp': _getControllerValue(index, '_mrpController'),
-          'itemPrice': _getControllerValue(index, '_itemPriceController'),
-          'quantity': _getControllerValue(index, '_quantityController'),
-        };
-      }).toList(),
+      'variants': variants.map((v) => v.toMap()).toList(),
+      'variantOptions': _generateVariantOptions(),
     };
 
     try {
-      await firestore.collection('Products').doc(widget.productId).set(productData, SetOptions(merge: true));
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Data saved successfully')));
+      await firestore.collection('products').doc(widget.productId).set(productData, SetOptions(merge: true));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Product Added Successfully')));
+      Navigator.pop(context);
     } catch (e) {
       print('Error saving data: $e');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error saving data')));
     }
+  }
+
+  String _getVariantType(String item) {
+    if (widget.selectedSizes.contains(item)) return 'size';
+    if (widget.selectedWeights.contains(item)) return 'weight';
+    if (widget.selectedVolumes.contains(item)) return 'volume';
+    if (widget.selectedBakeries.contains(item)) return 'bakery';
+    if (widget.selectedStorages.contains(item)) return 'storage';
+    return 'unknown';
+  }
+
+  Map<String, List<String>> _generateVariantOptions() {
+    return {
+      'size': widget.selectedSizes,
+      'weight': widget.selectedWeights,
+      'volume': widget.selectedVolumes,
+      'bakery': widget.selectedBakeries,
+      'storage': widget.selectedStorages,
+    }..removeWhere((key, value) => value.isEmpty);
   }
 
   String _getControllerValue(int index, String controllerName) {
@@ -643,14 +694,16 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
               padding: EdgeInsets.only(left: 16, right: 8),
               child: Row(
                 children: [
-                  Image.asset('assets/black_tnennt_logo.png', width: 30, height: 30),
+                  Image.asset('assets/black_tnennt_logo.png',
+                      width: 30, height: 30),
                   Spacer(),
                   Container(
                     margin: EdgeInsets.all(8.0),
                     child: CircleAvatar(
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
-                        icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        icon:
+                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -689,7 +742,8 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
                       padding: EdgeInsets.all(8.0),
                       width: 175,
                       decoration: BoxDecoration(
-                        border: Border.all(color: Theme.of(context).primaryColor),
+                        border:
+                            Border.all(color: Theme.of(context).primaryColor),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -787,7 +841,8 @@ class OptionalPriceAndQuantity extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<OptionalPriceAndQuantity> createState() => _OptionalPriceAndQuantityState();
+  State<OptionalPriceAndQuantity> createState() =>
+      _OptionalPriceAndQuantityState();
 }
 
 class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
@@ -817,244 +872,244 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
   @override
   Widget build(BuildContext context) {
     return ExpansionTile(
-        collapsedShape: InputBorder.none,
-        shape: InputBorder.none,
-        onExpansionChanged: (value) {
-          setState(() {
-            _isExpanded = value;
-          });
-        },
-        title: Container(
-          margin: EdgeInsets.only(left: 16.0),
-          child: Text(
-            widget.title,
-            style: TextStyle(
-              color: Theme.of(context).primaryColor,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w500,
-              fontSize: 16.0,
-            ),
-          ),
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                _isExpanded ? 'Hide' : 'Price',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w500,
-                  color: hexToColor('#FFFFFF'),
-                ),
-              ),
-            ),
-            SizedBox(width: 8),
-            IconButton(
-              icon: Icon(
-                Icons.delete_outline,
-                color: hexToColor('#FF0000'),
-              ),
-              onPressed: widget.onDeletePressed,
-            ),
-          ],
-        ),
-        children: [
-    Container(
-    padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-    child: Column(
-    children: [
-    Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-    Container(
-    width: MediaQuery.of(context).size.width * 0.3,
-    child: TextField(
-    controller: _discountController,
-    keyboardType: TextInputType.number,
-    style: TextStyle(
-    color: Colors.black,
-    fontFamily: 'Gotham',
-    fontWeight: FontWeight.w500,
-    fontSize: 14.0,
-    ),
-    decoration: InputDecoration(
-    hintText: 'Discount',
-    hintStyle: TextStyle(
-    color: hexToColor('#989898'),
-    fontFamily: 'Gotham',
-    fontWeight: FontWeight.w500,
-    fontSize: 14.0,
-    ),
-    prefixIcon: Text(
-    '%',
-    style: TextStyle(
-    color: Theme.of(context).primaryColor,
-    fontFamily: 'Gotham',
-    fontWeight: FontWeight.w600,
-    fontSize: 18.0,
-    ),
-    textAlign: TextAlign.center,
-    ),
-    prefixIconConstraints: BoxConstraints(
-    minWidth: 30,
-    minHeight: 0,
-    ),
-    border: OutlineInputBorder(
-    borderSide: BorderSide(
-    color: hexToColor('#848484'),
-    ),
-    borderRadius: BorderRadius.circular(18),
-    ),
-    ),
-    onSubmitted: (_) => _calculateValues(),
-    ),
-    ),
-    Container(
-    width: MediaQuery.of(context).size.width * 0.3,
-    child: TextField(
-    controller: _mrpController,
-    keyboardType: TextInputType.number,
-    style: TextStyle(
-    color: Colors.black,
-    fontFamily: 'Gotham',
-    fontWeight: FontWeight.w500,
-    fontSize: 14.0,
-    ),
-    decoration: InputDecoration(
-    hintText: 'MRP Price',
-    hintStyle: TextStyle(
-    color: hexToColor('#989898'),
-    fontFamily: 'Gotham',
-    fontWeight: FontWeight.w500,
-    fontSize: 14.0,
-    ),
-    prefixIcon: Text(
-    '₹',
-    style: TextStyle(
-    color: Theme.of(context).primaryColor,
-    fontFamily: 'Gotham',
-    fontWeight: FontWeight.w600,
-    fontSize: 18.0,
-    ),
-    textAlign: TextAlign.center,
-    ),
-    prefixIconConstraints: BoxConstraints(
-    minWidth: 30,
-    minHeight: 0,
-    ),
-    border: OutlineInputBorder(
-    borderSide: BorderSide(
-    color: hexToColor('#848484'),
-    ),
-    borderRadius: BorderRadius.circular(18),
-    ),
-    ),
-    onSubmitted: (_) => _calculateValues(),
-    ),
-    ),
-    Container(
-    width: MediaQuery.of(context).size.width * 0.3,
-    child: TextField(
-    controller: _itemPriceController,
-    keyboardType: TextInputType.number,
-    style: TextStyle(
-    color: Colors.black,
-    fontFamily: 'Gotham',
-    fontWeight: FontWeight.w500,
-    fontSize: 14.0,
-    ),
-      decoration: InputDecoration(
-        hintText: 'Item Price',
-        hintStyle: TextStyle(
-          color: hexToColor('#989898'),
-          fontFamily: 'Gotham',
-          fontWeight: FontWeight.w500,
-          fontSize: 14.0,
-        ),
-        prefixIcon: Text(
-          '₹',
+      collapsedShape: InputBorder.none,
+      shape: InputBorder.none,
+      onExpansionChanged: (value) {
+        setState(() {
+          _isExpanded = value;
+        });
+      },
+      title: Container(
+        margin: EdgeInsets.only(left: 16.0),
+        child: Text(
+          widget.title,
           style: TextStyle(
             color: Theme.of(context).primaryColor,
-            fontFamily: 'Gotham',
-            fontWeight: FontWeight.w600,
-            fontSize: 18.0,
+            fontFamily: 'Poppins',
+            fontWeight: FontWeight.w500,
+            fontSize: 16.0,
           ),
-          textAlign: TextAlign.center,
-        ),
-        prefixIconConstraints: BoxConstraints(
-          minWidth: 30,
-          minHeight: 0,
-        ),
-        border: OutlineInputBorder(
-          borderSide: BorderSide(
-            color: hexToColor('#848484'),
-          ),
-          borderRadius: BorderRadius.circular(18),
         ),
       ),
-      onSubmitted: (_) => _calculateValues(),
-    ),
-    ),
-    ],
-    ),
-      SizedBox(height: 20),
-      Row(
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            width: 175,
-            child: TextField(
-              controller: _quantityController,
-              style: TextStyle(
-                color: Colors.black,
-                fontFamily: 'Gotham',
-                fontWeight: FontWeight.w500,
-                fontSize: 14.0,
-              ),
-              decoration: InputDecoration(
-                hintText: 'Ex. 100',
-                hintStyle: TextStyle(
-                  color: hexToColor('#989898'),
-                  fontFamily: 'Gotham',
-                  fontWeight: FontWeight.w500,
-                  fontSize: 14.0,
-                ),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(
-                    color: hexToColor('#848484'),
-                  ),
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 16,
-                ),
-              ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
+              borderRadius: BorderRadius.circular(8),
             ),
-          ),
-          SizedBox(width: 20),
-          Expanded(
             child: Text(
-              '(Add Total Product Stock Quantity)',
+              _isExpanded ? 'Hide' : 'Price',
               style: TextStyle(
-                fontSize: 12,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w500,
-                color: hexToColor('#636363'),
+                color: hexToColor('#FFFFFF'),
               ),
             ),
           ),
+          SizedBox(width: 8),
+          IconButton(
+            icon: Icon(
+              Icons.delete_outline,
+              color: hexToColor('#FF0000'),
+            ),
+            onPressed: widget.onDeletePressed,
+          ),
         ],
       ),
-    ],
-    ),
-    ),
-        ],
+      children: [
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    child: TextField(
+                      controller: _discountController,
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'Gotham',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14.0,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Discount',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#989898'),
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14.0,
+                        ),
+                        prefixIcon: Text(
+                          '%',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18.0,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        prefixIconConstraints: BoxConstraints(
+                          minWidth: 30,
+                          minHeight: 0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: hexToColor('#848484'),
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                      ),
+                      onSubmitted: (_) => _calculateValues(),
+                    ),
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    child: TextField(
+                      controller: _mrpController,
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'Gotham',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14.0,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'MRP Price',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#989898'),
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14.0,
+                        ),
+                        prefixIcon: Text(
+                          '₹',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18.0,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        prefixIconConstraints: BoxConstraints(
+                          minWidth: 30,
+                          minHeight: 0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: hexToColor('#848484'),
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                      ),
+                      onSubmitted: (_) => _calculateValues(),
+                    ),
+                  ),
+                  Container(
+                    width: MediaQuery.of(context).size.width * 0.3,
+                    child: TextField(
+                      controller: _itemPriceController,
+                      keyboardType: TextInputType.number,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'Gotham',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14.0,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Item Price',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#989898'),
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14.0,
+                        ),
+                        prefixIcon: Text(
+                          '₹',
+                          style: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18.0,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        prefixIconConstraints: BoxConstraints(
+                          minWidth: 30,
+                          minHeight: 0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: hexToColor('#848484'),
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                      ),
+                      onSubmitted: (_) => _calculateValues(),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 175,
+                    child: TextField(
+                      controller: _quantityController,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'Gotham',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14.0,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: 'Ex. 100',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#989898'),
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14.0,
+                        ),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: hexToColor('#848484'),
+                          ),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        contentPadding: EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 20),
+                  Expanded(
+                    child: Text(
+                      '(Add Total Product Stock Quantity)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        color: hexToColor('#636363'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

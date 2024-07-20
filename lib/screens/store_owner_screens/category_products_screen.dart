@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/category_model.dart';
 import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/screens/product_detail_screen.dart';
 import 'package:tnennt/helpers/text_utils.dart';
 
 class CategoryProductsScreen extends StatefulWidget {
@@ -26,21 +25,57 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
   }
 
   Future<List<ProductModel>> _fetchProducts() async {
-    final storeDoc = await FirebaseFirestore.instance
-        .collection('Stores')
-        .doc(widget.storeId)
-        .collection('categories')
-        .doc(widget.category.id)
-        .get();
+    try {
+      final storeDoc = await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(widget.storeId)
+          .collection('categories')
+          .doc(widget.category.id)
+          .get();
 
-    final productIds = List<String>.from(storeDoc['products'] as List<dynamic>);
-    final productDocs = await Future.wait(productIds.map((productId) =>
-        FirebaseFirestore.instance.collection('products').doc(productId).get()));
+      if (!storeDoc.exists) {
+        print('Store document does not exist');
+        return [];
+      }
 
-    return productDocs
-        .where((doc) => doc.exists)
-        .map((doc) => ProductModel.fromFirestore(doc))
-        .toList();
+      final data = storeDoc.data();
+      if (data == null || !data.containsKey('productIds')) {
+        print('productIds field is missing in the document');
+        return [];
+      }
+
+      final productIds = (data['productIds'] as List<dynamic>?)
+          ?.map((dynamic item) => item.toString())
+          .toList() ?? [];
+
+      print('Product IDs: $productIds');
+
+      final productDocs = await Future.wait(productIds.map((productId) =>
+          FirebaseFirestore.instance.collection('products').doc(productId).get()));
+
+      final products = productDocs
+          .where((doc) => doc.exists)
+          .map((doc) {
+        try {
+          return ProductModel.fromFirestore(doc);
+        } catch (e, stackTrace) {
+          print('Error creating ProductModel from document ${doc.id}: $e');
+          print('Stack trace: $stackTrace');
+          print('Document data: ${doc.data()}');
+          return null;
+        }
+      })
+          .where((product) => product != null)
+          .cast<ProductModel>()
+          .toList();
+
+      print('Fetched ${products.length} products');
+      return products;
+    } catch (e, stackTrace) {
+      print('Error in _fetchProducts: $e');
+      print('Stack trace: $stackTrace');
+      return [];
+    }
   }
 
   @override
@@ -133,7 +168,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                           onRemove: () {
                             // Remove product from category
                             setState(() {
-                              widget.category.products.removeWhere((element) => element == product.id);
+                              widget.category.productIds.removeWhere((element) => element == product.id);
                             });
                           },
                         ),

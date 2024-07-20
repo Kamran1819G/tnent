@@ -48,9 +48,10 @@ class CommunityPostModel {
     };
   }
 
-  static Future<void> createPost(CommunityPostModel post) async {
-    await FirebaseFirestore.instance
+  static Future<String> createPost(CommunityPostModel post) async {
+    DocumentReference docRef = await FirebaseFirestore.instance
         .collection('communityPosts')
         .add(post.toFirestore());
+    return docRef.id;
   }
 }
