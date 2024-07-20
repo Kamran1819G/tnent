@@ -40,7 +40,7 @@ class CartScreen extends StatefulWidget {
 }
 
 class _CartScreenState extends State<CartScreen> {
-  bool selectedItems = false;
+  bool allItemsSelected = false;
   List<CartItem> cartItems = [];
   double totalAmount = 0.0;
 
@@ -172,6 +172,15 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
+  void navigateToCheckout() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CheckoutScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -269,7 +278,7 @@ class _CartScreenState extends State<CartScreen> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Select Items',
+                                'Select All Items',
                                 style: TextStyle(
                                   color: hexToColor('#343434'),
                                   fontSize: 16.0,
@@ -288,10 +297,10 @@ class _CartScreenState extends State<CartScreen> {
                           ),
                           Checkbox(
                             activeColor: Theme.of(context).primaryColor,
-                            value: selectedItems,
+                            value: allItemsSelected,
                             onChanged: (value) {
                               setState(() {
-                                selectedItems = value!;
+                                allItemsSelected = value!;
                               });
                             },
                           ),
@@ -313,7 +322,7 @@ class _CartScreenState extends State<CartScreen> {
                         productPrice: cartItems[index].productPrice,
                         quantity: cartItems[index].quantity,
                         variation: cartItems[index].variation,
-                        selectedItem: selectedItems,
+                        selectedItem: allItemsSelected,
                         onRemove: removeFromCart,
                         onUpdateQuantity: updateQuantity,
                         onUpdatePrice: updatePrice,
@@ -321,6 +330,19 @@ class _CartScreenState extends State<CartScreen> {
                     },
                   ),
                 ),
+                if (allItemsSelected)
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: ElevatedButton(
+                      child: Text('Buy All Selected Items'),
+                      onPressed: navigateToCheckout,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: hexToColor('#343434'),
+                        foregroundColor: Colors.white,
+                        minimumSize: Size(double.infinity, 50),
+                      ),
+                    ),
+                  ),
               ],
             );
           },
@@ -360,13 +382,69 @@ class CartProductTile extends StatefulWidget {
 }
 
 class _CartProductTileState extends State<CartProductTile> {
-  bool _isInWishlist = true;
+  bool _isInWishlist = false;
   bool _isSelected = false;
 
-  void _toggleWishlist() {
+  @override
+  void initState() {
+    super.initState();
+    _checkIfInWishlist();
+  }
+
+  void _checkIfInWishlist() async {
+    String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userId)
+        .get();
+
+    if (userDoc.exists) {
+      String wishlistString = userDoc.get('wishlist') ?? '';
+      List<String> wishlist = wishlistString.split(',').where((item) => item.isNotEmpty).toList();
+      setState(() {
+        _isInWishlist = wishlist.contains(widget.id);
+      });
+    }
+  }
+
+  void _toggleWishlist() async {
     setState(() {
       _isInWishlist = !_isInWishlist;
     });
+
+    String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    DocumentReference userRef = FirebaseFirestore.instance.collection('Users').doc(userId);
+
+    try {
+      await FirebaseFirestore.instance.runTransaction((transaction) async {
+        DocumentSnapshot snapshot = await transaction.get(userRef);
+        if (snapshot.exists) {
+          Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
+          String wishlistString = userData['wishlist'] ?? '';
+          List<String> wishlist = wishlistString.split(',').where((item) => item.isNotEmpty).toList();
+
+          if (_isInWishlist) {
+            if (!wishlist.contains(widget.id)) {
+              wishlist.add(widget.id);
+            }
+          } else {
+            wishlist.remove(widget.id);
+          }
+
+          // Convert the wishlist back to a comma-separated string
+          String updatedWishlistString = wishlist.join(',');
+
+          // Update the user document with the new wishlist string
+          transaction.update(userRef, {'wishlist': updatedWishlistString});
+        }
+      });
+    } catch (e) {
+      print('Error updating wishlist: $e');
+      // Revert the state if the transaction fails
+      setState(() {
+        _isInWishlist = !_isInWishlist;
+      });
+    }
   }
 
   @override
@@ -432,102 +510,102 @@ class _CartProductTileState extends State<CartProductTile> {
     ),
     ),
     SizedBox(height: 25.0),
-    Text(
-    '₹${widget.productPrice.toStringAsFixed(2)}',
-    style: TextStyle(
-    color: hexToColor('#343434'),
-    fontSize: 20.0,
-    ),
-    ),
-    SizedBox(height: 15.0),
-    Row(
-    children: [
-    IconButton(
-    icon: Icon(Icons.remove),
-    onPressed: () {
-    int newQuantity = widget.quantity - 1;
-    if (newQuantity >= 0) {
-    widget.onUpdateQuantity(widget.id, newQuantity);
-    widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
-    }
-    },
-    ),
-    Text(widget.quantity.toString()),
-    IconButton(
-    icon: Icon(Icons.add),
-    onPressed: () {
-    int newQuantity = widget.quantity + 1;
-    widget.onUpdateQuantity(widget.id, newQuantity);
-    widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
-    },
-    ),
-    ],
-    ),
-    SizedBox(height: 15.0),
-    Row(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-    GestureDetector(
-    onTap: () => widget.onRemove(widget.id),
-    child: Container(
-    padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-    decoration: BoxDecoration(
-    border: Border.all(color: hexToColor('#343434')),
-    borderRadius: BorderRadius.circular(100.0),
-    ),
-    child: Text(
-    'Remove',
-    style: TextStyle(
-    color: hexToColor('#737373'),
-    fontSize: 12.0,
-    ),
-    ),
-    ),
-    ),
-    SizedBox(width: 8.0),
-    GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CheckoutScreen(),
-          ),
-        );
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-        decoration: BoxDecoration(
+      Text(
+        '₹${widget.productPrice.toStringAsFixed(2)}',
+        style: TextStyle(
           color: hexToColor('#343434'),
-          borderRadius: BorderRadius.circular(100.0),
-        ),
-        child: Text(
-          'Buy Now',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 12.0,
-          ),
+          fontSize: 20.0,
         ),
       ),
-    ),
-      SizedBox(width: 8.0),
-      if (widget.selectedItem)
-        Checkbox(
-          checkColor: Colors.black,
-          activeColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            side: BorderSide(color: Colors.black),
-            borderRadius: BorderRadius.circular(4.0),
+      SizedBox(height: 15.0),
+      Row(
+        children: [
+          IconButton(
+            icon: Icon(Icons.remove),
+            onPressed: () {
+              int newQuantity = widget.quantity - 1;
+              if (newQuantity >= 0) {
+                widget.onUpdateQuantity(widget.id, newQuantity);
+                widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
+              }
+            },
           ),
-          overlayColor: MaterialStateProperty.all(Colors.black),
-          value: _isSelected,
-          onChanged: (value) {
-            setState(() {
-              _isSelected = value!;
-            });
-          },
-        ),
-    ],
-    )
+          Text(widget.quantity.toString()),
+          IconButton(
+            icon: Icon(Icons.add),
+            onPressed: () {
+              int newQuantity = widget.quantity + 1;
+              widget.onUpdateQuantity(widget.id, newQuantity);
+              widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
+            },
+          ),
+        ],
+      ),
+      SizedBox(height: 15.0),
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          GestureDetector(
+            onTap: () => widget.onRemove(widget.id),
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                border: Border.all(color: hexToColor('#343434')),
+                borderRadius: BorderRadius.circular(100.0),
+              ),
+              child: Text(
+                'Remove',
+                style: TextStyle(
+                  color: hexToColor('#737373'),
+                  fontSize: 12.0,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 8.0),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CheckoutScreen(),
+                ),
+              );
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              decoration: BoxDecoration(
+                color: hexToColor('#343434'),
+                borderRadius: BorderRadius.circular(100.0),
+              ),
+              child: Text(
+                'Buy Now',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 12.0,
+                ),
+              ),
+            ),
+          ),
+          SizedBox(width: 8.0),
+          if (widget.selectedItem)
+            Checkbox(
+              checkColor: Colors.black,
+              activeColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                side: BorderSide(color: Colors.black),
+                borderRadius: BorderRadius.circular(4.0),
+              ),
+              overlayColor: MaterialStateProperty.all(Colors.black),
+              value: _isSelected,
+              onChanged: (value) {
+                setState(() {
+                  _isSelected = value!;
+                });
+              },
+            ),
+        ],
+      )
     ],
     ),
         ],

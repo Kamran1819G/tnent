@@ -33,6 +33,7 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
         .toList();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,6 +115,7 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                       name: product.name,
                       image: product.imageUrls.first,
                       price: product.variants.first.price,
+                      description: product.description,
                       onRemove: () {
                         print('Removing product ${product.name}');
                         setState(() {
@@ -137,12 +139,14 @@ class ProductTile extends StatelessWidget {
   final String name;
   final String image;
   final double price;
+  final String description;
   final Function onRemove;
 
   ProductTile({
     required this.name,
     required this.image,
     required this.price,
+    required this.description,
     required this.onRemove,
   });
 
@@ -160,10 +164,9 @@ class ProductTile extends StatelessWidget {
                 Image.network(image),
               ],
               productName: name,
-              productDescription:
-              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. eiusmod tempor incididunt ut labore et do.',
+              productDescription:description,
               productPrice: price,
-              storeName: 'Jain Brothers',
+              storeName: 'jain Brothers',
               storeLogo: 'assets/jain_brothers.png',
               Discount: 10,
             ),

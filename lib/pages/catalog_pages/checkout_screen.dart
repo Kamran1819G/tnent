@@ -5,11 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_dash/flutter_dash.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/pages/catalog_pages/store_coupon_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -23,7 +21,7 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
+  double discountedTotal = 0.0;
   String userName = '';
   String userAddress = '';
   String userMobile = '';
@@ -79,6 +77,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
+  Coupon? selectedCoupon = Coupon(code: 'SUMMER10', value: 50.0);
   void calculateTotalPrice() {
     double sum = 0.0;
     for (var item in cartData) {
@@ -86,6 +85,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
     setState(() {
       totalPrice = sum;
+      discountedTotal = sum - (selectedCoupon?.value ?? 0.0);
     });
   }
 
@@ -229,6 +229,36 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                       ],
                     ),
+                    SizedBox(height: 25.0),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ChangeAddressScreen(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          height: 50,
+                          width: 300,
+                          margin: EdgeInsets.symmetric(vertical: 15.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: hexToColor('#E3E3E3')),
+                            borderRadius: BorderRadius.circular(100.0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Change Your Address',
+                              style: TextStyle(
+                                  color: hexToColor('#343434'),
+                                  fontSize: 12.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -263,7 +293,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                   ),
                   Text(
-                    '₹${totalPrice.toStringAsFixed(2)}',
+                    '₹${discountedTotal.toStringAsFixed(2)}',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -273,6 +303,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ],
               ),
             ),
+            if (selectedCoupon != null)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Coupon Applied:',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.green,
+                      ),
+                    ),
+                    Text(
+                      '- ₹${selectedCoupon!.value.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.green,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             Center(
               child: GestureDetector(
                 onTap: () {
@@ -281,15 +334,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     MaterialPageRoute(
                       builder: (context) => SummaryScreen(
                         cartData: cartData,
-                        totalPrice: totalPrice,
+                        totalPrice: discountedTotal,
                         userName: userName,
                         userAddress: userAddress,
                         userMobile: userMobile,
+                        selectedCoupon: selectedCoupon,
                       ),
                     ),
                   );
                 },
-
                 child: Container(
                   height: 50,
                   width: 250,
@@ -486,6 +539,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                         iconSize: 12,
                         onPressed: incrementQuantity,
                       ),
+
                     ],
                   ),
                 ),
@@ -504,6 +558,7 @@ class SummaryScreen extends StatefulWidget {
   final String userName;
   final String userAddress;
   final String userMobile;
+  final Coupon? selectedCoupon;
 
   const SummaryScreen({
     Key? key,
@@ -512,6 +567,7 @@ class SummaryScreen extends StatefulWidget {
     required this.userName,
     required this.userAddress,
     required this.userMobile,
+    this.selectedCoupon,
   }) : super(key: key);
 
   @override
@@ -672,13 +728,13 @@ class _SummaryScreenState extends State<SummaryScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 GestureDetector(
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () { Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => StoreCouponScreen(),
                       ),
                     );
+
                   },
                   child: Container(
                     width: 200.0,
@@ -1632,6 +1688,40 @@ class _TransactionScreenState extends State<TransactionScreen> {
     }
   }
 
+  Future<void> _sendOrderToMiddleman() async {
+    Map<String, dynamic> order = {
+      "DropOfAddress": "Don Bosco High School & Junior College, Group No 1, Tagore Nagar, Vikhroli, Mumbai, Maharashtra 400083",
+      "OrderTotal": 120,
+      "PickUpAddress": "Shop No 27, Ground Floor, Galleria Shopping Mall, Hiranandani Gardens, Panchkutir Ganesh Nagar, Powai, Mumbai, Maharashtra 400076",
+      "StoreLogo": "https://lh3.googleusercontent.com/a/ACg8ocKMIbNOP57m7mErNOaiWawBVce1mPRqA1mkImhO7FIpgL-ujg=s96-c",
+      "StoreName": "sample store",
+      "deliveryId": "1234",
+      "items": [
+        {
+          "name": "camera",
+          "price": 1200,
+          "quantity": 21,
+        }
+      ],
+      "paymentMethod": "Cash on Delivery"
+    };
+
+    try {
+      // Send the order to the "middleman_orders" collection in Firestore
+      await FirebaseFirestore.instance.collection('middleman_orders').add(order);
+
+      // Show a success message to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Order sent to middleman_orders successfully')),
+      );
+    } catch (e) {
+      // If there's an error, show an error message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error sending order: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1842,7 +1932,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                   ],
                                 ),
                                 SizedBox(height: 16.0),
-                                Container(
+                                GestureDetector(
+                                  onTap: _sendOrderToMiddleman,
+                                child:Container(
                                   height:
                                   MediaQuery.of(context).size.height * 0.1,
                                   decoration: BoxDecoration(
@@ -1853,7 +1945,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        'Cash on Delivery',
+                                        'Click to assign Middle Man',
                                         style: TextStyle(
                                           color: Colors.black,
                                           fontSize: 18.0,
@@ -1863,6 +1955,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                       ),
                                     ],
                                   ),
+                                )
                                 ),
                                 SizedBox(height: 25.0),
                                 SizedBox(
@@ -1925,4 +2018,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
       ),
     );
   }
+}
+
+class Coupon {
+  final String code;
+  final double value;
+
+  Coupon({required this.code, required this.value});
 }

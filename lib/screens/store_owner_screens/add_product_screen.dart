@@ -99,10 +99,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
     }
 
     try {
+      String productId = 'ProductID' + Uuid().v4();
       // Generate a new document reference with auto-generated ID
-      String productId = FirebaseFirestore.instance.collection('Products').doc().id;
+      productId = FirebaseFirestore.instance.collection('products').doc().id;
 
-      DocumentReference productRef = FirebaseFirestore.instance.collection('Products').doc(productId);
+      DocumentReference productRef = FirebaseFirestore.instance.collection('products').doc(productId);
 
       // Upload images to Firebase Storage
       List<String> imageUrls = await _uploadImages(productId);
@@ -129,7 +130,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       if (!isMultiOptionCategory) {
         productData['variants'] = [
           ProductVariant(
-            id: 'ProductID-'+Uuid().v4(),
+            id: Uuid().v4(),
             attributes: {},
             discount: double.tryParse(_discountController.text) ?? 0.0,
             mrp: double.tryParse(_mrpController.text) ?? 0.0,
@@ -157,13 +158,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
         throw Exception("Category document does not exist.");
       }
 
-      List<String> currentProducts = List.from(snapshot.get('Products'));
+      List<String> currentProducts = List.from(snapshot.get('products'));
 
       // Add new product id to array
       currentProducts.add(productId);
 
       // Update document
-      await storeCategoryDocRef.update({'Products': currentProducts});
+      await storeCategoryDocRef.update({'products': currentProducts});
 
       // Update Constants.productId
       Constants.productId = productId;

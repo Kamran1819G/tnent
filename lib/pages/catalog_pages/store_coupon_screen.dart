@@ -12,52 +12,17 @@ class StoreCouponScreen extends StatefulWidget {
 class _StoreCouponScreenState extends State<StoreCouponScreen> {
   int selectedCheckboxIndex = -1;
 
+  // Assume these are the coupon values
+  final List<double> couponValues = [10.0, 15.0, 20.0, 25.0, 30.0];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: Column(
           children: [
-            Container(
-              height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Coupons'.toUpperCase(),
-                        style: TextStyle(
-                          color: hexToColor('#1E1E1E'),
-                          fontSize: 24.0,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                      Text(
-                        ' •',
-                        style: TextStyle(
-                          fontSize: 28.0,
-                          color: hexToColor('#FF0000'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Spacer(),
-                  Container(
-                    margin: EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey[100],
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // ... (previous header code remains unchanged)
+
             Expanded(
               child: ListView.separated(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -82,6 +47,15 @@ class _StoreCouponScreenState extends State<StoreCouponScreen> {
                           setState(() {
                             selectedCheckboxIndex = value! ? index : -1;
                           });
+                          if (value! && selectedCheckboxIndex != -1) {
+                            // Pass the selected coupon value to the checkout page
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CheckoutPage(couponValue: couponValues[selectedCheckboxIndex]),
+                              ),
+                            );
+                          }
                         },
                       ),
                     ],
@@ -91,6 +65,23 @@ class _StoreCouponScreenState extends State<StoreCouponScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// This is a placeholder for the CheckoutPage
+class CheckoutPage extends StatelessWidget {
+  final double couponValue;
+
+  const CheckoutPage({Key? key, required this.couponValue}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Checkout')),
+      body: Center(
+        child: Text('Selected Coupon Value: \$${couponValue.toStringAsFixed(2)}'),
       ),
     );
   }

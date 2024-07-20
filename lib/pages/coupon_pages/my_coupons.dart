@@ -2,7 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 
-class MyCoupons extends StatefulWidget {
+class MyCoupons extends StatefulWidget
+{
   const MyCoupons({super.key});
 
   @override
@@ -60,7 +61,7 @@ class _MyCouponsState extends State<MyCoupons> {
             Expanded(
               child: ListView.separated(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
-                itemCount: 5,
+                itemCount: 2,
                 separatorBuilder: (context, index) => SizedBox(height: 16.0),
                 itemBuilder: (context, index) {
                   return Row(
