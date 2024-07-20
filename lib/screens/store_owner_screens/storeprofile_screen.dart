@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/widgets/product_tile.dart';
 import '../../helpers/color_utils.dart';
 import '../update_screen.dart';
@@ -19,6 +21,32 @@ class StoreProfileScreen extends StatefulWidget {
 }
 
 class _StoreProfileScreenState extends State<StoreProfileScreen> {
+  List<ProductModel> featuredProducts = List.generate(5, (index) {
+    return ProductModel(
+      id: '1',
+      storeId: '1',
+      name: 'Product Name',
+      description: 'Product Description',
+      productCategory: 'Product Category',
+      storeCategory: 'Store Category',
+      imageUrls: ['https://via.placeholder.com/150'],
+      badReviews: 0,
+      goodReviews: 0,
+      isAvailable: true,
+      variantOptions: {},
+      variants: List.generate(3, (index) {
+        return ProductVariant(
+          id: '1',
+          price: 100,
+          mrp: 120,
+          discount: 20,
+          stockQuantity: 100,
+        );
+      }),
+      createdAt: Timestamp.now(),
+    );
+  });
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -502,12 +530,11 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                           padding: EdgeInsets.only(left: 8.0),
                           child: ListView.builder(
                             scrollDirection: Axis.horizontal,
-                            itemCount: 5,
+                            itemCount: featuredProducts.length,
                             itemBuilder: (context, index) {
                               return ProductTile(
-                                  name: "Cannon XYZ",
-                                  image: "assets/product_image.png",
-                                  price: 200);
+                                product: featuredProducts[index],
+                              );
                             },
                           ),
                         ),

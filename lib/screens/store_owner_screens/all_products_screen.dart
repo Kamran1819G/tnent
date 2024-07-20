@@ -112,10 +112,7 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                   itemBuilder: (context, index) {
                     final product = products[index];
                     return ProductTile(
-                      name: product.name,
-                      image: product.imageUrls.first,
-                      price: product.variants.first.price,
-                      description: product.description,
+                      product: product,
                       onRemove: () {
                         print('Removing product ${product.name}');
                         setState(() {
@@ -136,17 +133,11 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
 }
 
 class ProductTile extends StatelessWidget {
-  final String name;
-  final String image;
-  final double price;
-  final String description;
+  ProductModel product;
   final Function onRemove;
 
   ProductTile({
-    required this.name,
-    required this.image,
-    required this.price,
-    required this.description,
+    required this.product,
     required this.onRemove,
   });
 
@@ -158,17 +149,7 @@ class ProductTile extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => ProductDetailScreen(
-              images: [
-                Image.network(image),
-                Image.network(image),
-                Image.network(image),
-              ],
-              productName: name,
-              productDescription:description,
-              productPrice: price,
-              storeName: 'jain Brothers',
-              storeLogo: 'assets/jain_brothers.png',
-              Discount: 10,
+              product: product,
             ),
           ),
         );
@@ -189,7 +170,7 @@ class ProductTile extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),
                       image: DecorationImage(
-                        image: NetworkImage(image),
+                        image: NetworkImage(product.imageUrls[0]),
                         fit: BoxFit.fill,
                       ),
                     ),
@@ -223,7 +204,7 @@ class ProductTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                    product.name,
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 10.0,
@@ -233,7 +214,7 @@ class ProductTile extends StatelessWidget {
                   ),
                   SizedBox(height: 4.0),
                   Text(
-                    '\$${price.toString()}',
+                    '\$${product.variants.first.price.toString()}',
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 10.0,

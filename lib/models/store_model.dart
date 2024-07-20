@@ -5,6 +5,7 @@ class StoreModel {
   final String ownerId;
   final String analyticsId;
   final String name;
+  final String logoUrl;
   final String phone;
   final String email;
   final String website;
@@ -29,6 +30,7 @@ class StoreModel {
     required this.ownerId,
     required this.analyticsId,
     required this.name,
+    required this.logoUrl,
     required this.phone,
     required this.email,
     required this.website,
@@ -56,6 +58,7 @@ class StoreModel {
       ownerId: data['ownerId'],
       analyticsId: data['analyticsId'],
       name: data['name'],
+      logoUrl: data['logoUrl'] ?? 'https://via.placeholder.com/150',
       phone: data['phone'],
       email: data['email'],
       website: data['website'],
@@ -83,6 +86,7 @@ class StoreModel {
       'ownerId': ownerId,
       'analyticsId': analyticsId,
       'name': name,
+      'logoUrl': logoUrl,
       'phone': phone,
       'email': email,
       'website': website,

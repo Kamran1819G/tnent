@@ -428,25 +428,7 @@ class _ResultTileState extends State<ResultTile> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(
-              images: [
-                Image.asset(widget.image),
-                Image.asset(widget.image),
-                Image.asset(widget.image),
-              ],
-              productName: widget.name,
-              productDescription:
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. eiusmod tempor incididunt ut labore et do.',
-              productPrice: widget.price,
-              storeName: 'Jain Brothers',
-              storeLogo: 'assets/jain_brothers.png',
-              Discount: 10,
-            ),
-          ),
-        );
+
       },
       child: Container(
         decoration: BoxDecoration(

@@ -3,14 +3,12 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class CategoryModel {
   final String id;
   final String name;
-  final String coverImage;
   final int totalProduct;
   List<String> productIds; // Change to List<String>
 
   CategoryModel({
     required this.id,
     required this.name,
-    required this.coverImage,
     required this.totalProduct,
     required this.productIds,
   });
@@ -29,7 +27,6 @@ class CategoryModel {
     return CategoryModel(
       id: doc.id,
       name: data['name'] ?? '',
-      coverImage: data['coverImage'] ?? '',
       totalProduct: productIds.length,
       productIds: productIds,
     );
@@ -39,8 +36,6 @@ class CategoryModel {
     return {
       'id': id,
       'name': name,
-      'coverImage': coverImage,
-      'totalProduct': totalProduct,
       'productIds': productIds,
     };
   }

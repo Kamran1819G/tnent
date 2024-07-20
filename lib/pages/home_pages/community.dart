@@ -104,9 +104,6 @@ class _CommunityState extends State<Community> {
             child: StreamBuilder<List<DocumentSnapshot>>(
               stream: getCommunityPosts(),
               builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
                 if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
@@ -225,14 +222,69 @@ class _CommunityPostState extends State<CommunityPost> {
     return FutureBuilder<DocumentSnapshot>(
       future: _storeFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-        if (!snapshot.hasData) {
-          return Center(child: Text('User not found'));
+        if(snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // User information row
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundColor: Colors.grey,
+                      radius: 20.0,
+                    ),
+                    const SizedBox(width: 16.0),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          width: 100.0,
+                          height: 10.0,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(height: 5.0),
+                        Container(
+                          width: 50.0,
+                          height: 10.0,
+                          color: Colors.grey,
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    Container(
+                      width: 20.0,
+                      height: 20.0,
+                      color: Colors.grey,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10.0),
+                Container(
+                  width: double.infinity,
+                  height: 200.0,
+                  color: Colors.grey,
+                ),
+                const SizedBox(height: 10.0),
+                Row(
+                  children: [
+                    Container(
+                      width: 50.0,
+                      height: 20.0,
+                      color: Colors.grey,
+                    ),
+                    const Spacer(),
+                    Container(
+                      width: 20.0,
+                      height: 20.0,
+                      color: Colors.grey,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          );
         }
 
         final storeData = snapshot.data!.data() as Map<String, dynamic>;

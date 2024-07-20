@@ -46,6 +46,8 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
 
 
   Future<void> _addNewCategory(String name) async {
+
+
     DocumentReference docRef = await _firestore
         .collection('Stores')
         .doc(widget.storeId)
@@ -61,7 +63,6 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
       id: docRef.id,
       name: name,
       totalProduct: 0,
-      coverImage: '',
       productIds: [],
     );
 

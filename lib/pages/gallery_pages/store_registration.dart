@@ -103,6 +103,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         ownerId: currentUser.uid,
         analyticsId: 'analytics_${DateTime.now().millisecondsSinceEpoch}',
         name: _nameController.text,
+        logoUrl: '',
         phone: _phoneController.text,
         email: _emailController.text,
         website: '${_websiteController.text}.tnennt.com',

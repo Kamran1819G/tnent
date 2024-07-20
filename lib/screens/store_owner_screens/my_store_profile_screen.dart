@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:tnennt/models/category_model.dart';
+import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
 import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/screens/store_owner_screens/all_products_screen.dart';
+import 'package:tnennt/widgets/product_tile.dart';
 import 'package:tnennt/screens/store_owner_screens/analytics_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/order_pays_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/product_categories_screen.dart';
@@ -39,19 +41,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   bool isGoodReview = true;
   bool isExpanded = false;
 
-  List<dynamic> categories = [];
+  List<CategoryModel> categories = [];
 
-
-  Future<void> fetchCategories() async {
-    try {
-      QuerySnapshot querySnapshot = await FirebaseFirestore.instance.collection('categories').get();
-      setState(() {
-        categories = querySnapshot.docs.map((doc) => doc.data()).toList();
-      });
-    } catch (e) {
-      print('Error fetching categories: $e');
-    }
-  }
 
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -63,12 +54,29 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     };
   });
 
-  List<dynamic> featuredProducts = List.generate(10, (index) {
-    return {
-      'name': 'Cannon XYZ',
-      'image': 'assets/product_image.png',
-      'price': 200.00,
-    };
+  List<dynamic> featuredProducts = List.generate(5, (index) {
+    return ProductModel(
+      id: '1',
+      storeId: '1',
+      name: 'Product Name',
+      description: 'Product Description',
+      productCategory: 'Product Category',
+      storeCategory: 'Store Category',
+      imageUrls: ['https://via.placeholder.com/150'],
+      badReviews: 0,
+      goodReviews: 0,
+      isAvailable: true,
+      variantOptions: {},
+      variants: List.generate(3, (index) {
+        return ProductVariant(
+          id: '1',
+          price: 100,
+          mrp: 120,
+          discount: 20,
+          stockQuantity: 100,
+        );
+      }), createdAt: Timestamp.now(),
+    );
   });
 
   @override
@@ -94,6 +102,18 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<List<CategoryModel>> fetchCategories() async {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('Stores')
+        .doc(store.id)
+        .collection('categories')
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => CategoryModel.fromFirestore(doc))
+        .toList();
   }
 
   void _toggleExpansion() {
@@ -947,14 +967,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               Spacer(),
                               GestureDetector(
                                 onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => AllProductsScreen(
-                                        storeId: store.id,
-                                      ),
-                                    ),
-                                  );
+
                                 },
                                 child: Container(
                                   padding: EdgeInsets.all(6.0),
@@ -981,17 +994,34 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                             itemCount: featuredProducts.length,
                             itemBuilder: (context, index) {
                               return ProductTile(
-                                name: featuredProducts[index]['name'],
-                                image: featuredProducts[index]['image'],
-                                price: featuredProducts[index]['price'],
+                                product: featuredProducts[index],
                               );
                             },
                           ),
                         ),
                       ],
                     ),
-
                     SizedBox(height: 20.0),
+
+                    FutureBuilder<List<CategoryModel>>(
+                      future: fetchCategories(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return Center(child: CircularProgressIndicator());
+                        } else if (snapshot.hasError) {
+                          return Center(child: Text('Error: ${snapshot.error}'));
+                        } else {
+                          List<CategoryModel> categories = snapshot.data!;
+                          return Column(
+                            children: categories
+                                .map((category) =>
+                                CategoryProductsListView(category: category))
+                                .toList(),
+                          );
+                        }
+                      },
+                    ),
+
                   ],
                 ),
               ),
@@ -1002,6 +1032,75 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     );
   }
 }
+
+class CategoryProductsListView extends StatefulWidget {
+  final CategoryModel category;
+
+  const CategoryProductsListView({Key? key, required this.category}) : super(key: key);
+
+  @override
+  State<CategoryProductsListView> createState() => _CategoryProductsListViewState();
+}
+
+class _CategoryProductsListViewState extends State<CategoryProductsListView> {
+
+  Future<List<ProductModel>> fetchProducts() async {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('products')
+        .where(FieldPath.documentId, whereIn: widget.category.productIds)
+        .get();
+
+    print('Fetched ${querySnapshot.docs.length} products');
+    return querySnapshot.docs
+        .map((doc) => ProductModel.fromFirestore(doc))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            widget.category.name,
+            style: TextStyle(
+              color: hexToColor('#343434'),
+              fontSize: 18.0,
+            ),
+          ),
+        ),
+        SizedBox(height: 10.0),
+        Container(
+          height: 200.0,
+          child: FutureBuilder<List<ProductModel>>(
+            future: fetchProducts(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else {
+                List<ProductModel> products = snapshot.data!;
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    return ProductTile(
+                      product: products[index],
+                    );
+                  },
+                );
+              }
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 
 class StoreCommunity extends StatefulWidget {
   const StoreCommunity({super.key});
@@ -1339,207 +1438,6 @@ class UpdateTile extends StatelessWidget {
               ),
               child: Image.asset(image, height: 48.0)),
         ],
-      ),
-    );
-  }
-}
-
-class ProductTile extends StatefulWidget {
-  final String name;
-  final String image;
-  final double price;
-
-  ProductTile({
-    required this.name,
-    required this.image,
-    required this.price,
-  });
-
-  @override
-  _ProductTileState createState() => _ProductTileState();
-}
-
-class _ProductTileState extends State<ProductTile> {
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(
-              images: [
-                Image.asset(widget.image),
-                Image.asset(widget.image),
-                Image.asset(widget.image),
-              ],
-              productName: widget.name,
-              productDescription:
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. eiusmod tempor incididunt ut labore et do.',
-              productPrice: widget.price,
-              storeName: 'Jain Brothers',
-              storeLogo: 'assets/jain_brothers.png',
-              Discount: 10,
-            ),
-          ),
-        );
-      },
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 8.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6.0),
-          color: hexToColor('#F5F5F5'),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                Container(
-                  height: 150,
-                  width: 150,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    image: DecorationImage(
-                      image: AssetImage(widget.image),
-                      fit: BoxFit.fill,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: 8.0,
-                  top: 8.0,
-                  child: GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            topRight: Radius.circular(12),
-                          ),
-                        ),
-                        context: context,
-                        builder: (context) {
-                          return Container(
-                            height: 200,
-                            width: double.infinity,
-                            padding: EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Center(
-                                  child: Container(
-                                    width: 100,
-                                    height: 4,
-                                    margin: const EdgeInsets.symmetric(
-                                        vertical: 15),
-                                    decoration: BoxDecoration(
-                                      color: hexToColor('#CACACA'),
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 40),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Column(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.all(12.0),
-                                          decoration: BoxDecoration(
-                                            color: hexToColor('#2B2B2B'),
-                                            borderRadius:
-                                                BorderRadius.circular(100.0),
-                                          ),
-                                          child: Icon(
-                                            Icons.edit_note,
-                                            color: Colors.white,
-                                            size: 25,
-                                          ),
-                                        ),
-                                        SizedBox(height: 10),
-                                        Text(
-                                          'Edit',
-                                          style: TextStyle(
-                                              color: hexToColor('#9C9C9C'),
-                                              fontSize: 16.0),
-                                        ),
-                                      ],
-                                    ),
-                                    Column(
-                                      children: [
-                                        Container(
-                                          padding: EdgeInsets.all(12.0),
-                                          decoration: BoxDecoration(
-                                            color: hexToColor('#2B2B2B'),
-                                            borderRadius:
-                                                BorderRadius.circular(100.0),
-                                          ),
-                                          child: Icon(
-                                            Icons.delete,
-                                            color: Colors.white,
-                                            size: 25,
-                                          ),
-                                        ),
-                                        SizedBox(height: 10),
-                                        Text(
-                                          'Delete',
-                                          style: TextStyle(
-                                              color: hexToColor('#9C9C9C'),
-                                              fontSize: 16.0),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(100.0),
-                      ),
-                      child: Icon(
-                        Icons.remove,
-                        color: Colors.red,
-                        size: 14.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8.0),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text(
-                    widget.name,
-                    style:
-                        TextStyle(color: hexToColor('#343434'), fontSize: 10.0),
-                  ),
-                  SizedBox(height: 8.0),
-                  Text(
-                    '\$${widget.price.toString()}',
-                    style:
-                        TextStyle(color: hexToColor('#343434'), fontSize: 10.0),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

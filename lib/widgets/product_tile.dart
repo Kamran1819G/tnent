@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
 import '../helpers/color_utils.dart';
 
 class ProductTile extends StatefulWidget {
-  final String name;
-  final String image;
-  final double price;
+  ProductModel product;
   final double width;
   final double height;
 
-  const ProductTile({
-    Key? key,
-    required this.name,
-    required this.image,
-    required this.price,
-    this.width = 150,
-    this.height = 200,
-  }) : super(key: key);
+  ProductTile({
+    required this.product,
+    this.width = 150.0,
+    this.height = 200.0,
+  });
 
   @override
   _ProductTileState createState() => _ProductTileState();
@@ -46,13 +42,7 @@ class _ProductTileState extends State<ProductTile> {
           context,
           MaterialPageRoute(
             builder: (context) => ProductDetailScreen(
-              images: List.generate(3, (index) => Image.asset(widget.image)),
-              productName: widget.name,
-              productDescription: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-              productPrice: widget.price,
-              storeName: 'Jain Brothers',
-              storeLogo: 'assets/jain_brothers.png',
-              Discount: 10,
+              product: widget.product,
             ),
           ),
         );
@@ -74,8 +64,8 @@ class _ProductTileState extends State<ProductTile> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.vertical(top: Radius.circular(6.0)),
-                    child: Image.asset(
-                      widget.image,
+                    child: Image.network(
+                      widget.product.imageUrls.first,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -108,7 +98,7 @@ class _ProductTileState extends State<ProductTile> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    widget.name,
+                    widget.product.name,
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 12.0,
@@ -118,7 +108,7 @@ class _ProductTileState extends State<ProductTile> {
                   ),
                   SizedBox(height: 4.0),
                   Text(
-                    '\$${widget.price.toStringAsFixed(2)}',
+                    '\$${widget.product.variants.first.price.toStringAsFixed(2)}',
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 12.0,

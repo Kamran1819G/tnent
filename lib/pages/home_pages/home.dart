@@ -1,8 +1,10 @@
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/category_model.dart';
+import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/pages/catalog_pages/cart_screen.dart';
 import 'package:tnennt/screens/explore_screen.dart';
@@ -46,12 +48,29 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     };
   });
 
-  List<dynamic> featuredProducts = List.generate(5, (index) {
-    return {
-      "name": "Cannon XYZ",
-      "image": "assets/product_image.png",
-      "price": 200.00,
-    };
+  List<ProductModel> featuredProducts = List.generate(5, (index) {
+    return ProductModel(
+      id: '1',
+      storeId: '1',
+      name: 'Product Name',
+      description: 'Product Description',
+      productCategory: 'Product Category',
+      storeCategory: 'Store Category',
+      imageUrls: ['https://via.placeholder.com/150'],
+      badReviews: 0,
+      goodReviews: 0,
+      isAvailable: true,
+      variantOptions: {},
+      variants: List.generate(3, (index) {
+        return ProductVariant(
+          id: '1',
+          price: 100,
+          mrp: 120,
+          discount: 20,
+          stockQuantity: 100,
+        );
+      }), createdAt: Timestamp.now(),
+    );
   });
 
   List<dynamic> featuredStores = [
@@ -470,9 +489,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 itemCount: featuredProducts.length,
                 itemBuilder: (context, index) {
                   return ProductTile(
-                    name: featuredProducts[index]["name"],
-                    image: featuredProducts[index]["image"],
-                    price: featuredProducts[index]["price"],
+                    product: featuredProducts[index],
                   );
                 },
               ),
@@ -481,9 +498,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 itemCount: 5,
                 itemBuilder: (context, index) {
                   return ProductTile(
-                      name: "Cannon XYZ",
-                      image: "assets/product_image.png",
-                      price: 200);
+                      product: featuredProducts[index],
+                  );
                 },
               ),
               ListView.builder(
@@ -491,9 +507,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 itemCount: 5,
                 itemBuilder: (context, index) {
                   return ProductTile(
-                      name: "Cannon XYZ",
-                      image: "assets/product_image.png",
-                      price: 200);
+                      product: featuredProducts[index],
+                  );
                 },
               ),
               ListView.builder(
@@ -501,9 +516,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 itemCount: 5,
                 itemBuilder: (context, index) {
                   return ProductTile(
-                      name: "Cannon XYZ",
-                      image: "assets/product_image.png",
-                      price: 200);
+                      product: featuredProducts[index],
+                  );
                 },
               ),
               ListView.builder(
@@ -511,9 +525,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 itemCount: 5,
                 itemBuilder: (context, index) {
                   return ProductTile(
-                      name: "Cannon XYZ",
-                      image: "assets/product_image.png",
-                      price: 200);
+                      product: featuredProducts[index],
+                  );
                 },
               ),
               ListView.builder(
@@ -521,9 +534,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 itemCount: 5,
                 itemBuilder: (context, index) {
                   return ProductTile(
-                      name: "Cannon XYZ",
-                      image: "assets/product_image.png",
-                      price: 200);
+                      product: featuredProducts[index],
+                  );
                 },
               ),
             ],
@@ -759,7 +771,7 @@ class CategoryTile extends StatelessWidget {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8.0),
                   child: Image.network(
-                    category.coverImage,
+                    'https://via.placeholder.com/150',
                     fit: BoxFit.cover,
                     width: double.infinity,
                   ),
@@ -839,7 +851,7 @@ class CategoryProductsScreen extends StatelessWidget {
             ),
           ),
           SizedBox(height: 10),
-          Expanded(
+          /*Expanded(
             child: GridView.builder(
               shrinkWrap: true,
               padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -852,13 +864,11 @@ class CategoryProductsScreen extends StatelessWidget {
               itemCount: 10,
               itemBuilder: (context, index) {
                 return ProductTile(
-                  name: 'Product $index',
-                  image: 'assets/product_image.png',
-                  price: 100.0,
+                  product: products[index],
                 );
               },
             ),
-          )
+          )*/
         ]),
       ),
     );
