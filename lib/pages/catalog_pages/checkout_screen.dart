@@ -523,6 +523,19 @@ class _SummaryScreenState extends State<SummaryScreen> {
   late double middlemenCharges;
   late double discount;
   late double total;
+
+  @override
+  void initState() {
+    super.initState();
+    calculateSummary();
+  }
+
+  void calculateSummary() {
+    subtotal = widget.totalPrice;
+    middlemenCharges = 100.0; // You may want to calculate this dynamically
+    discount = subtotal * 0.1; // Assuming 10% discount
+    total = subtotal + middlemenCharges - discount;
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -638,311 +651,196 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 ],
               ),
             ),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    ProductDetails(
-                      productImage: 'assets/product_image.png',
-                      productName: 'Nikon Camera',
-                      productPrice: 200,
-                      quantity: 2,
-                      onQuantityChanged: (productName, newQuantity){},
+        Expanded(
+          child: ListView.builder(
+            itemCount: widget.cartData.length,
+            itemBuilder: (context, index) {
+              var item = widget.cartData[index];
+              return ProductDetails(
+                productImage: item['image'] ?? 'assets/product_image.png',
+                productName: item['productName'] ?? '',
+                productPrice: item['productPrice'] ?? 0.0,
+                quantity: item['quantity'] ?? 1,
+                onQuantityChanged: (_, __) {}, // Disable quantity changes in summary
+              );
+            },
+          ),
+        ),
+        // Summary section
+            SizedBox(height: 10.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => StoreCouponScreen(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    width: 200.0,
+                    padding: EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: hexToColor('#E3E3E3')),
+                      borderRadius: BorderRadius.circular(50.0),
                     ),
-                    /*SizedBox(height: 8.0),
-                    Card(
-                      margin: EdgeInsets.symmetric(horizontal: 8.0),
-                      color: Colors.white,
-                      surfaceTintColor: Colors.white,
-                      child: Container(
-                        padding: EdgeInsets.all(16.0),
-                        child: Column(
+                    child: Row(
+                      children: [
+                        CircleAvatar(
+                          backgroundColor: hexToColor('#F3F3F3'),
+                          child: Icon(
+                            Icons.discount_outlined,
+                            color: Colors.black,
+                          ),
+                        ),
+                        SizedBox(width: 10.0),
+                        Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Row(
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Provided Middlemen:',
-                                      style: TextStyle(
-                                        color: hexToColor('#2D332F'),
-                                        fontSize: 12.0,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4.0),
-                                    Text(
-                                      'Kamran Khan',
-                                      style: TextStyle(
-                                        color: hexToColor('#727272'),
-                                        fontSize: 12.0,
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Spacer(),
-                                Container(
-                                  height: 50,
-                                  width: 50,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(100.0),
-                                    image: DecorationImage(
-                                      image: AssetImage(
-                                          'assets/profile_image.png'),
-                                      fit: BoxFit.fill,
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
-                            SizedBox(height: 16.0),
-                            Row(
-                              children: [
-                                Icon(Icons.fire_truck,
-                                    color: Theme.of(context).primaryColor),
-                                SizedBox(width: 8.0),
-                                Text(
-                                  'Delivery in 45 min',
-                                  style: TextStyle(
-                                    color: hexToColor('#9B9B9B'),
-                                    fontSize: 12.0,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ),*/
-                    SizedBox(height: 20.0),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => StoreCouponScreen(),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            width: 200.0,
-                            padding: EdgeInsets.all(16.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: hexToColor('#E3E3E3')),
-                              borderRadius: BorderRadius.circular(50.0),
-                            ),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor: hexToColor('#F3F3F3'),
-                                  child: Icon(
-                                    Icons.discount_outlined,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                                SizedBox(width: 10.0),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Coupons',
-                                        style: TextStyle(
-                                          color: hexToColor('#272822'),
-                                          fontSize: 14.0,
-                                        )),
-                                    SizedBox(
-                                      width: 100,
-                                      child: Text(
-                                        'View All Coupons',
-                                        style: TextStyle(
-                                          color: hexToColor('#838383'),
-                                          fontFamily: 'Poppins',
-                                          fontSize: 10.0,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                        maxLines: 2,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                        Container(
-                          height: 75,
-                          width: 200.0,
-                          padding: EdgeInsets.all(12.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: hexToColor('#E3E3E3')),
-                            borderRadius: BorderRadius.circular(50.0),
-                          ),
-                          child: TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Enter Code:',
-                                hintStyle: TextStyle(
+                            Text('Coupons',
+                                style: TextStyle(
                                   color: hexToColor('#272822'),
-                                  fontFamily: 'Gotham',
-                                  fontSize: 16.0,
+                                  fontSize: 14.0,
+                                )),
+                            SizedBox(
+                              width: 100,
+                              child: Text(
+                                'View All Coupons',
+                                style: TextStyle(
+                                  color: hexToColor('#838383'),
+                                  fontFamily: 'Poppins',
+                                  fontSize: 10.0,
+                                  fontWeight: FontWeight.w500,
                                 ),
-                                border: InputBorder.none,
-                              )),
-                        ),
+                                maxLines: 2,
+                              ),
+                            ),
+                          ],
+                        )
                       ],
                     ),
-                    SizedBox(height: 30.0),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Summary',
-                            style: TextStyle(
-                                color: hexToColor('#343434'), fontSize: 18.0),
-                          ),
-                          SizedBox(height: 20.0),
-                          Padding(
-                            padding:
-                            const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Subtotal',
-                                      style: TextStyle(
-                                          color: hexToColor('#B9B9B9'),
-                                          fontFamily: 'Gotham',
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 14.0),
-                                    ),
-                                    Text(
-                                      '₹ 150.00',
-                                      style: TextStyle(
-                                          color: hexToColor('#606060'),
-                                          fontSize: 14.0),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8.0),
-                                Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Middlemen Charges',
-                                      style: TextStyle(
-                                          color: hexToColor('#B9B9B9'),
-                                          fontFamily: 'Gotham',
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 14.0),
-                                    ),
-                                    Text(
-                                      '₹ 100.00',
-                                      style: TextStyle(
-                                          color: hexToColor('#606060'),
-                                          fontSize: 14.0),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 8.0),
-                                Row(
-                                  mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Discount',
-                                      style: TextStyle(
-                                          color: hexToColor('#B9B9B9'),
-                                          fontFamily: 'Gotham',
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 14.0),
-                                    ),
-                                    Text(
-                                      '₹ 50.00',
-                                      style: TextStyle(
-                                          color: hexToColor('#FF0000'),
-                                          fontSize: 14.0),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            margin: EdgeInsets.symmetric(vertical: 15.0),
-                            height: 0.75,
-                            color: hexToColor('#E3E3E3'),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Total',
-                                style: TextStyle(
-                                    color: hexToColor('#343434'),
-                                    fontSize: 22.0),
-                              ),
-                              Text(
-                                '₹ 200.00',
-                                style: TextStyle(
-                                    color: hexToColor('#343434'),
-                                    fontSize: 22.0),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            Center(
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PaymentOptionScreen(),
-                    ),
-                  );
-                },
-                child: Container(
-                  height: 50,
-                  width: 300,
-                  margin: EdgeInsets.symmetric(vertical: 15.0),
+                Container(
+                  height: 75,
+                  width: 200.0,
+                  padding: EdgeInsets.all(12.0),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor,
-                    borderRadius: BorderRadius.circular(12.0),
+                    border: Border.all(color: hexToColor('#E3E3E3')),
+                    borderRadius: BorderRadius.circular(50.0),
                   ),
-                  child: Center(
-                    child: Text(
-                      'Pay ₹ 200',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18.0,
-                      ),
+                  child: TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Enter Code:',
+                        hintStyle: TextStyle(
+                          color: hexToColor('#272822'),
+                          fontFamily: 'Gotham',
+                          fontSize: 16.0,
+                        ),
+                        border: InputBorder.none,
+                      )),
+                ),
+              ],
+            ),
+        Container(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Summary',
+                style: TextStyle(
+                  color: hexToColor('#343434'),
+                  fontSize: 18.0,
+                ),
+              ),
+              SizedBox(height: 16.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Subtotal'),
+                  Text('₹${subtotal.toStringAsFixed(2)}'),
+                ],
+              ),
+              SizedBox(height: 8.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Middlemen Charges'),
+                  Text('₹${middlemenCharges.toStringAsFixed(2)}'),
+                ],
+              ),
+              SizedBox(height: 8.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Discount'),
+                  Text('₹${discount.toStringAsFixed(2)}'),
+                ],
+              ),
+              Divider(height: 24.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
                     ),
+                  ),
+                  Text(
+                    '₹${total.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18.0,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        Center(
+          child: GestureDetector(
+            onTap: () {
+              // Navigate to payment screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => PaymentOptionScreen(),
+                ),
+              );
+            },
+            child: Container(
+              height: 50,
+              width: 300,
+              margin: EdgeInsets.symmetric(vertical: 15.0),
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Center(
+                child: Text(
+                  'Pay ₹${total.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18.0,
                   ),
                 ),
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+
+    ),
+    ]
+            ),
+      )
     );
+
   }
 }
 
