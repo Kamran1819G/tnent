@@ -64,12 +64,11 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
         // Continue with the rest of the deletion process even if image deletion fails
       }
 
-      // Remove product reference from store
+      // Decrease product total from store
       await FirebaseFirestore.instance
           .collection('Stores')
           .doc(widget.storeId)
           .update({
-        'productIds': FieldValue.arrayRemove([product.productId]),
         'totalProducts': FieldValue.increment(-1)
       });
 
@@ -80,6 +79,7 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
           .collection('categories')
           .doc(product.storeCategory)
           .update({
+        'totalProducts': FieldValue.increment(-1),
         'productIds': FieldValue.arrayRemove([product.productId])
       });
 

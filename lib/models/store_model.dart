@@ -52,7 +52,7 @@ class StoreModel {
       ownerId: data['ownerId'],
       analyticsId: data['analyticsId'],
       name: data['name'],
-      logoUrl: data['logoUrl'],
+      logoUrl: data['logoUrl'] ?? 'https://via.placeholder.com/150',
       phone: data['phone'],
       email: data['email'],
       website: data['website'],

@@ -1,9 +1,10 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import '../helpers/color_utils.dart';
-import 'store_owner_screens/storeprofile_screen.dart';
+import 'users_screens/storeprofile_screen.dart';
+import '../models/store_model.dart'; // Make sure to import your StoreModel
 
 class StoresScreen extends StatefulWidget {
   const StoresScreen({super.key});
@@ -52,7 +53,7 @@ class _StoresScreenState extends State<StoresScreen> {
                         icon: Icon(Icons.arrow_back_ios_new,
                             color: Colors.black),
                         onPressed: () {
-                            Navigator.pop(context);
+                          Navigator.pop(context);
                         },
                       ),
                     ),
@@ -61,78 +62,38 @@ class _StoresScreenState extends State<StoresScreen> {
               ),
             ),
             Expanded(
-              child: GridView.count(
-                crossAxisCount: 4,
-                childAspectRatio: 0.8,
-                children: [
-                  StoreTile(
-                    storeName: 'Sanachari',
-                    storeLogo: 'assets/sahachari_image.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Jain Brothers',
-                    storeLogo: 'assets/jain_brothers.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Sanachari',
-                    storeLogo: 'assets/sahachari_image.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Jain Brothers',
-                    storeLogo: 'assets/jain_brothers.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Sanachari',
-                    storeLogo: 'assets/sahachari_image.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Jain Brothers',
-                    storeLogo: 'assets/jain_brothers.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Sanachari',
-                    storeLogo: 'assets/sahachari_image.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Jain Brothers',
-                    storeLogo: 'assets/jain_brothers.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Sanachari',
-                    storeLogo: 'assets/sahachari_image.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Jain Brothers',
-                    storeLogo: 'assets/jain_brothers.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Sanachari',
-                    storeLogo: 'assets/sahachari_image.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Jain Brothers',
-                    storeLogo: 'assets/jain_brothers.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Sanachari',
-                    storeLogo: 'assets/sahachari_image.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Jain Brothers',
-                    storeLogo: 'assets/jain_brothers.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Sanachari',
-                    storeLogo: 'assets/sahachari_image.png',
-                  ),
-                  StoreTile(
-                    storeName: 'Jain Brothers',
-                    storeLogo: 'assets/jain_brothers.png',
-                  ),StoreTile(
-                    storeName: 'Sanachari',
-                    storeLogo: 'assets/sahachari_image.png',
-                  ),
-                ],
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('Stores').snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return Center(child: Text('No stores available'));
+                  }
+
+                  List<StoreModel> stores = snapshot.data!.docs
+                      .map((doc) => StoreModel.fromFirestore(doc))
+                      .toList();
+
+                  return GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                      childAspectRatio: 0.8,
+                    ),
+                    itemCount: stores.length,
+                    itemBuilder: (context, index) {
+                      final store = stores[index];
+                      return StoreTile(
+                        storeName: store.name,
+                        storeLogo: store.logoUrl, // Ensure the logo URL is correctly used
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],
@@ -172,10 +133,12 @@ class StoreTile extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(18.0),
-              child: Image.asset(
+              child: storeLogo.isNotEmpty
+                  ? Image.network(
                 storeLogo,
                 fit: BoxFit.fill,
-              ),
+              )
+                  : Placeholder(),
             ),
             Expanded(
               child: Padding(

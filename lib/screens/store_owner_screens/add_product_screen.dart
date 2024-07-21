@@ -109,10 +109,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
       productId = FirebaseFirestore.instance.collection('products').doc().id;
       final imageUrls = await _uploadImages(productId);
       final productData = _createProductData(productId, imageUrls);
-
+      await FirebaseFirestore.instance
+          .collection('products')
+          .doc(productId)
+          .set(productData);
       await FirebaseFirestore.instance.collection('Stores').doc(widget.storeId).update({'totalProducts': FieldValue.increment(1)});
-      await _updateStoreProducts(productId);
-      await _updateCategoryProducts(productId);
+      await FirebaseFirestore.instance.collection('Stores').doc(widget.storeId).collection('categories').doc(widget.category.id).update({'totalProducts': FieldValue.increment(1), 'productIds': FieldValue.arrayUnion([productId])});
       setState(() {
         isSubmitting = false;
       });
@@ -166,29 +168,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
     }
 
     return productData.toFirestore();
-  }
-
-
-  Future<void> _updateStoreProducts(String productId) async {
-    final storeRef =
-        FirebaseFirestore.instance.collection('Stores').doc(widget.storeId);
-    await _updateArrayField(storeRef, 'productIds', productId);
-  }
-
-  Future<void> _updateCategoryProducts(String productId) async {
-    final categoryRef = FirebaseFirestore.instance
-        .collection('Stores')
-        .doc(widget.storeId)
-        .collection('categories')
-        .doc(widget.category.id);
-    await _updateArrayField(categoryRef, 'productIds', productId);
-  }
-
-  Future<void> _updateArrayField(
-      DocumentReference docRef, String field, String value) async {
-    await docRef.update({
-      field: FieldValue.arrayUnion([value])
-    });
   }
 
   void _showSnackBar(String message) {

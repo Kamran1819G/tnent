@@ -62,7 +62,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
     CategoryModel newCategory = CategoryModel(
       id: docRef.id,
       name: name,
-      totalProduct: 0,
+      totalProducts: 0,
       productIds: [],
     );
 
@@ -339,7 +339,7 @@ class CategoryTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      category.totalProduct.toString(),
+                      category.totalProducts.toString(),
                       style: TextStyle(
                         color: Colors.black,
                         fontSize: 18.0,

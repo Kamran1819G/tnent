@@ -15,7 +15,7 @@ import 'package:tnennt/services/firebase/firestore_service.dart';
 import 'package:tnennt/widgets/product_tile.dart';
 
 import '../../screens/update_screen.dart';
-import '../../screens/store_owner_screens/storeprofile_screen.dart';
+import '../../screens/users_screens/storeprofile_screen.dart';
 
 class Home extends StatefulWidget {
   final UserModel? currentUser;

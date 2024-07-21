@@ -134,7 +134,7 @@ class _ProductTileState extends State<ProductTile> {
                         Text(
                           '${discount.toStringAsFixed(0)}% OFF',
                           style: TextStyle(
-                            color: hexToColor('#4CAF50'),
+                            color: hexToColor('#FF0000'),
                             fontSize: 10.0,
                             fontWeight: FontWeight.bold,
                           ),
