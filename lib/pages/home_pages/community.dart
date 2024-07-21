@@ -160,7 +160,7 @@ class _CommunityPostState extends State<CommunityPost> {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+    final userDoc = await _firestore.collection('Users').doc(user.uid).get();
     final likedPosts = List<String>.from(userDoc.data()?['likedPosts'] ?? []);
     setState(() {
       _isLiked = likedPosts.contains(widget.post.postId);
@@ -232,24 +232,29 @@ class _CommunityPostState extends State<CommunityPost> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: _storeFuture,
+    return FutureBuilder<void>(
+      future: _checkIfLiked(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingPlaceholder();
-        }
+        return FutureBuilder<DocumentSnapshot>(
+        future: _storeFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return _buildLoadingPlaceholder();
+          }
 
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Center(child: Text('Store not found'));
-        }
+          if (!snapshot.hasData || !snapshot.data!.exists) {
+            return Center(child: Text('Store not found'));
+          }
 
-        final storeData = snapshot.data!.data() as Map<String, dynamic>;
-        final userName = storeData['name'] ?? 'Unknown User';
-        final userProfileImage =
-            storeData['profileImage'] ?? 'https://via.placeholder.com/150';
+          final storeData = snapshot.data!.data() as Map<String, dynamic>;
+          final userName = storeData['name'] ?? 'Unknown User';
+          final userProfileImage =
+              storeData['profileImage'] ?? 'https://via.placeholder.com/150';
 
-        return _buildPostContent(userName, userProfileImage);
-      },
+          return _buildPostContent(userName, userProfileImage);
+        },
+      );
+      }
     );
   }
 
@@ -432,7 +437,7 @@ class _CommunityPostState extends State<CommunityPost> {
                     children: [
                       Icon(
                         _isLiked ? Icons.favorite : Icons.favorite_border,
-                        color: Colors.red,
+                        color: _isLiked ? Colors.red : hexToColor('#BEBEBE'),
                       ),
                       const SizedBox(width: 8.0),
                       Text(

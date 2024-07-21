@@ -179,10 +179,56 @@ class _CommunityPostState extends State<CommunityPost> {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+    final userDoc = await _firestore.collection('Users').doc(user.uid).get();
     final likedPosts = List<String>.from(userDoc.data()?['likedPosts'] ?? []);
     setState(() {
       _isLiked = likedPosts.contains(widget.post.postId);
+    });
+  }
+
+  Future<void> _toggleLike() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final userRef = _firestore.collection('Users').doc(user.uid);
+    final postRef = _firestore.collection('communityPosts').doc(widget.post.postId);
+
+    return _firestore.runTransaction((transaction) async {
+      final userDoc = await transaction.get(userRef);
+      final postDoc = await transaction.get(postRef);
+
+      if (!postDoc.exists) {
+        throw Exception('Post does not exist');
+      }
+
+      final likedPosts = List<String>.from(userDoc.data()?['likedPosts'] ?? []);
+      final currentLikes = postDoc.data()?['likes'] as int? ?? 0;
+
+      if (likedPosts.contains(widget.post.postId)) {
+        // Unlike
+        transaction.update(userRef, {
+          'likedPosts': FieldValue.arrayRemove([widget.post.postId])
+        });
+        transaction.update(postRef, {
+          'likes': FieldValue.increment(-1)
+        });
+        setState(() {
+          _isLiked = false;
+          widget.post.likes--;
+        });
+      } else {
+        // Like
+        transaction.update(userRef, {
+          'likedPosts': FieldValue.arrayUnion([widget.post.postId])
+        });
+        transaction.update(postRef, {
+          'likes': FieldValue.increment(1)
+        });
+        setState(() {
+          _isLiked = true;
+          widget.post.likes++;
+        });
+      }
     });
   }
 
@@ -205,24 +251,29 @@ class _CommunityPostState extends State<CommunityPost> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DocumentSnapshot>(
-      future: _storeFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return _buildLoadingPlaceholder();
+    return FutureBuilder<void>(
+        future: _checkIfLiked(),
+        builder: (context, snapshot) {
+          return FutureBuilder<DocumentSnapshot>(
+            future: _storeFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return _buildLoadingPlaceholder();
+              }
+
+              if (!snapshot.hasData || !snapshot.data!.exists) {
+                return Center(child: Text('Store not found'));
+              }
+
+              final storeData = snapshot.data!.data() as Map<String, dynamic>;
+              final userName = storeData['name'] ?? 'Unknown User';
+              final userProfileImage =
+                  storeData['profileImage'] ?? 'https://via.placeholder.com/150';
+
+              return _buildPostContent(userName, userProfileImage);
+            },
+          );
         }
-
-        if (!snapshot.hasData || !snapshot.data!.exists) {
-          return Center(child: Text('Store not found'));
-        }
-
-        final storeData = snapshot.data!.data() as Map<String, dynamic>;
-        final userName = storeData['name'] ?? 'Unknown User';
-        final userProfileImage =
-            storeData['profileImage'] ?? 'https://via.placeholder.com/150';
-
-        return _buildPostContent(userName, userProfileImage);
-      },
     );
   }
 
@@ -392,26 +443,29 @@ class _CommunityPostState extends State<CommunityPost> {
           // Likes
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0, vertical: 6.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: hexToColor('#BEBEBE')),
-                  borderRadius: BorderRadius.circular(50.0),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      _isLiked ? Icons.favorite : Icons.favorite_border,
-                      color: Colors.red,
-                    ),
-                    const SizedBox(width: 8.0),
-                    Text(
-                      '${widget.post.likes}',
-                      style: TextStyle(
-                          color: hexToColor('#989797'), fontSize: 12.0),
-                    ),
-                  ],
+              GestureDetector(
+                onTap: _toggleLike,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 6.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: hexToColor('#BEBEBE')),
+                    borderRadius: BorderRadius.circular(50.0),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _isLiked ? Icons.favorite : Icons.favorite_border,
+                        color: _isLiked ? Colors.red : hexToColor('#BEBEBE'),
+                      ),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        '${widget.post.likes}',
+                        style: TextStyle(
+                            color: hexToColor('#989797'), fontSize: 12.0),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Spacer(),

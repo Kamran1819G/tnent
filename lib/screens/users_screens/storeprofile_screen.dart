@@ -519,7 +519,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12.0),
                     child: Text(
-                      'Updates',
+                      'Highlights',
                       style: TextStyle(
                         color: hexToColor('#343434'),
                         fontSize: 18.0,
