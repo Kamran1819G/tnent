@@ -27,7 +27,7 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   PageController imagesController = PageController(viewportFraction: 0.6);
-  Map<String, String> _selectedVariations = {};
+  String _selectedVariation = '';
   late ProductVariant _selectedVariant;
   bool _isInWishlist = false;
   late Future<StoreModel> _storeFuture;
@@ -46,7 +46,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       greenFlags: 0,
       redFlags: 0,
       variations: {
-        'size': {
           'S': ProductVariant(
             price: 24.99,
             mrp: 29.99,
@@ -68,8 +67,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             stockQuantity: 75,
             sku: 'TS-L',
           ),
-        },
       },
+      reviewsIds: [],
     );
   });
 
@@ -78,7 +77,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void initState() {
     super.initState();
     _storeFuture = _fetchStore();
-    _initializeSelectedVariations();
+    _initializeSelectedVariation();
   }
 
   Future<StoreModel> _fetchStore() async {
@@ -89,30 +88,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     return StoreModel.fromFirestore(storeDoc);
   }
 
-  void _initializeSelectedVariations() {
-    widget.product.variations.forEach((key, value) {
-      _selectedVariations[key] = value.keys.first;
-    });
-    _updateSelectedVariant();
-  }
-
-  void _updateSelectedVariant() {
-    _selectedVariant = widget.product.variations[_selectedVariations.keys.first]![_selectedVariations[_selectedVariations.keys.first]!]!;
+  void _initializeSelectedVariation() {
+    if (widget.product.variations.isNotEmpty) {
+      _selectedVariation = widget.product.variations.keys.first;
+      _selectedVariant = widget.product.variations[_selectedVariation]!;
+    }
   }
 
   void _toggleWishlist() {
     setState(() {
       _isInWishlist = !_isInWishlist;
     });
-
-    // Send wishlist request to the server
-    if (_isInWishlist) {
-      // Code to send wishlist request to the server
-      print('Adding to wishlist...');
-    } else {
-      // Code to remove from wishlist request to the server
-      print('Removing from wishlist...');
-    }
+    // Implement wishlist functionality
   }
 
   @override
@@ -362,7 +349,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ),
                             ),
                             SizedBox(height: 20),
-                            _buildVariationSelectors(),
+                            _buildVariationSelector(),
                             SizedBox(height: 20),
                             Container(
                               padding: EdgeInsets.all(16),
@@ -381,7 +368,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             CrossAxisAlignment.center,
                                         children: [
                                           Text(
-                                            '\$${_selectedVariant.price.toStringAsFixed(2)}',
+                                            '₹${_selectedVariant.price.toStringAsFixed(2)}',
                                             style: TextStyle(
                                               color: hexToColor('#343434'),
                                               fontSize: 28,
@@ -389,7 +376,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           ),
                                           SizedBox(width: 10),
                                           Text(
-                                            '${_selectedVariant.discount}% Discount',
+                                            '${_selectedVariant.discount}% Off',
                                             style: TextStyle(
                                               color: hexToColor('#FF0000'),
                                               fontSize: 16,
@@ -398,7 +385,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         ],
                                       ),
                                       Text(
-                                        'M.R.P \$${widget.product.variations[0]?[0]?.mrp}',
+                                        'M.R.P ₹${_selectedVariant.mrp.toStringAsFixed(2)}',
                                         style: TextStyle(
                                           color: hexToColor('#B9B9B9'),
                                           fontSize: 16,
@@ -690,76 +677,39 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 
-  Widget _buildVariationSelectors() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: widget.product.variations.entries.map((entry) {
-        String variationType = entry.key;
-        Map<String, ProductVariant> variants = entry.value;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-              child: Text(
-                variationType.capitalize(),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Wrap(
-                spacing: 8.0, // horizontal space between items
-                runSpacing: 8.0, // vertical space between lines
-                children: variants.keys.map((variantName) {
-                  return _buildVariationWidget(variationType, variantName);
-                }).toList(),
-              ),
-            ),
-          ],
+  Widget _buildVariationSelector() {
+    return Wrap(
+      spacing: 8.0,
+      runSpacing: 8.0,
+      children: widget.product.variations.keys.map((variation) {
+        return ChoiceChip(
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+          ),
+          label: Text(variation,
+          style: TextStyle(
+            color: _selectedVariation == variation ? Colors.white : Colors.black,
+          ),
+          ),
+          backgroundColor: Colors.white,
+          selected: _selectedVariation == variation,
+          showCheckmark: false,
+          selectedColor: Theme.of(context).primaryColor,
+          onSelected: (selected) {
+            if (selected) {
+              setState(() {
+                _selectedVariation = variation;
+                _selectedVariant = widget.product.variations[variation]!;
+              });
+            }
+          },
         );
       }).toList(),
     );
   }
 
-  Widget _buildVariationWidget(String variationType, String variantName) {
-    bool isSelected = _selectedVariations[variationType] == variantName;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedVariations[variationType] = variantName;
-          _updateSelectedVariant();
-        });
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: isSelected ? Theme.of(context).primaryColor : Colors.white,
-          borderRadius: BorderRadius.circular(2),
-          border: Border.all(
-            color: isSelected
-                ? Theme.of(context).primaryColor
-                : hexToColor('#848484'),
-            width: 1,
-          ),
-        ),
-        child: Padding(
-          padding:
-          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-          child: Text(
-            variantName,
-            style: TextStyle(
-              color: isSelected ? Colors.white : hexToColor('#222230'),
-              fontFamily: 'Gotham',
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      ),
-    );
-  }
 
   _buildMoreBottomSheet() {
     return Container(

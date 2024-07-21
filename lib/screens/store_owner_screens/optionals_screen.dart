@@ -9,8 +9,13 @@ import 'package:tnennt/models/product_model.dart';
 
 class OptionalsScreen extends StatefulWidget {
   final String productId;
+  final String productCategory;
 
-  const OptionalsScreen({Key? key, required this.productId}) : super(key: key);
+  const OptionalsScreen({
+    Key? key,
+    required this.productId,
+    required this.productCategory,
+  }) : super(key: key);
 
   @override
   _OptionalsScreenState createState() => _OptionalsScreenState();
@@ -18,49 +23,126 @@ class OptionalsScreen extends StatefulWidget {
 
 class _OptionalsScreenState extends State<OptionalsScreen>
     with TickerProviderStateMixin {
-  late TabController optionTypeTabController;
-  late TabController sizeTabController;
-  late TabController weightTabController;
-  late TabController volumeTabController;
-  late TabController bakeryTabController;
-  late TabController storageTabController;
-
-  Map<String, List<String>> selectedOptions = {
-    'Size': [],
-    'Weight': [],
-    'Volume': [],
-    'Bakery': [],
-    'Storage': [],
-  };
+  late TabController optionTabController;
+  List<String> selectedOptions = [];
 
   @override
   void initState() {
     super.initState();
-    optionTypeTabController = TabController(length: 5, vsync: this);
-    sizeTabController = TabController(length: 3, vsync: this);
-    weightTabController = TabController(length: 2, vsync: this);
-    volumeTabController = TabController(length: 2, vsync: this);
-    bakeryTabController = TabController(length: 2, vsync: this);
-    storageTabController = TabController(length: 1, vsync: this);
+    optionTabController = TabController(length: getTabLength(), vsync: this);
   }
 
   @override
   void dispose() {
-    optionTypeTabController.dispose();
-    sizeTabController.dispose();
-    weightTabController.dispose();
-    volumeTabController.dispose();
-    bakeryTabController.dispose();
-    storageTabController.dispose();
+    optionTabController.dispose();
     super.dispose();
   }
 
-  void updateSelectedOptions(String type, String option, bool isSelected) {
+  int getTabLength() {
+    switch (widget.productCategory.toLowerCase()) {
+      case 'clothing':
+        return 3; // Topwear, Bottomwear, Footwear
+      case 'bakery':
+        return 2; // Pound, Gram/KG
+      case 'electronic':
+        return 1; // Capacity
+      default:
+        return 1;
+    }
+  }
+
+  String getCategoryTitle() {
+    switch (widget.productCategory.toLowerCase()) {
+      case 'clothing':
+        return 'Add Size';
+      case 'bakery':
+        return 'Add Bakery';
+      case 'electronic':
+        return 'Add Storage';
+      default:
+        return 'Add Option';
+    }
+  }
+
+  List<Widget> getTabs() {
+    switch (widget.productCategory.toLowerCase()) {
+      case 'clothing':
+        return [
+          OptionTab('Topwear', hexToColor('#343434')),
+          OptionTab('Bottomwear', hexToColor('#343434')),
+          OptionTab('Footwear', hexToColor('#343434')),
+        ];
+      case 'bakery':
+        return [
+          OptionTab('Pound', hexToColor('#343434')),
+          OptionTab('Gram/KG', hexToColor('#343434')),
+        ];
+      case 'electronic':
+        return [OptionTab('Capacity', hexToColor('#343434'))];
+      default:
+        return [OptionTab('Option', hexToColor('#343434'))];
+    }
+  }
+
+  List<Widget> getTabViews() {
+    switch (widget.productCategory.toLowerCase()) {
+      case 'clothing':
+        return [
+          OptionListView(
+            options: ['XS', 'S', 'M', 'L', 'XL'],
+            selectedOptions: selectedOptions,
+            onOptionSelected: updateSelectedOptions,
+          ),
+          OptionListView(
+            options: ['28', '30', '32', '34', '36'],
+            selectedOptions: selectedOptions,
+            onOptionSelected: updateSelectedOptions,
+          ),
+          OptionListView(
+            options: ['US 6', 'US 7', 'US 8', 'US 9', 'US 10'],
+            selectedOptions: selectedOptions,
+            onOptionSelected: updateSelectedOptions,
+          ),
+        ];
+      case 'bakery':
+        return [
+          OptionListView(
+            options: ['1 Pound', '2 Pound', '5 Pound', '10 Pound'],
+            selectedOptions: selectedOptions,
+            onOptionSelected: updateSelectedOptions,
+          ),
+          OptionListView(
+            options: ['50g', '100g', '200g', '500g', '1kg', '2kg'],
+            selectedOptions: selectedOptions,
+            onOptionSelected: updateSelectedOptions,
+          ),
+        ];
+      case 'electronic':
+        return [
+          OptionListView(
+            options: [
+              '8GB + 64GB',
+              '8GB + 128GB',
+              '8GB + 256GB',
+              '12GB + 128GB',
+              '12GB + 256GB',
+              '12GB + 512GB'
+            ],
+            selectedOptions: selectedOptions,
+            onOptionSelected: updateSelectedOptions,
+          ),
+        ];
+      default:
+        return [Container()];
+    }
+  }
+
+  void updateSelectedOptions(String option) {
     setState(() {
-      if (isSelected) {
-        selectedOptions[type]!.add(option);
+      if (selectedOptions.contains(option)) {
+        selectedOptions.remove(option);
       } else {
-        selectedOptions[type]!.remove(option);
+        selectedOptions.add(option);
       }
     });
   }
@@ -120,15 +202,14 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Add Option Type',
+                      getCategoryTitle(),
                       style: TextStyle(
                         fontSize: 16,
                       ),
                     ),
                     SizedBox(height: 20),
                     TabBar(
-                      controller: optionTypeTabController,
-                      physics: NeverScrollableScrollPhysics(),
+                      controller: optionTabController,
                       isScrollable: true,
                       tabAlignment: TabAlignment.start,
                       unselectedLabelColor: hexToColor('#737373'),
@@ -142,58 +223,22 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                         fontSize: 14.0,
                       ),
                       indicatorSize: TabBarIndicatorSize.label,
-                      overlayColor:
-                          MaterialStateProperty.all(Colors.transparent),
+                      overlayColor: MaterialStateProperty.all(Colors.transparent),
                       dividerColor: Colors.transparent,
-                      tabs: <Widget>[
-                        OptionTab('Size', hexToColor('#343434')),
-                        OptionTab('Weight', hexToColor('#343434')),
-                        OptionTab('Volume', hexToColor('#343434')),
-                        OptionTab('Bakery', hexToColor('#343434')),
-                        OptionTab('Storage', hexToColor('#343434')),
-                      ],
+                      tabs: getTabs(),
+                    ),
+                    SizedBox(height: 20),
+                    Dash(
+                      direction: Axis.horizontal,
+                      length: MediaQuery.of(context).size.width * 0.9,
+                      dashLength: 10,
+                      dashColor: hexToColor('#848484'),
                     ),
                     SizedBox(height: 20),
                     Expanded(
                       child: TabBarView(
-                        controller: optionTypeTabController,
-                        children: [
-                          SizeTabView(
-                            sizeTabController: sizeTabController,
-                            selectedSizes: selectedOptions['Size']!,
-                            onSizeSelected: (size) {
-                              updateSelectedOptions('Size', size, !selectedOptions['Size']!.contains(size));
-                            },
-                          ),
-                          WeightTabView(
-                            weightTabController: weightTabController,
-                            selectedWeights: selectedOptions['Weight']!,
-                            onWeightSelected: (weight) {
-                              updateSelectedOptions('Weight', weight, !selectedOptions['Weight']!.contains(weight));
-                            },
-                          ),
-                          VolumeTabView(
-                            volumeTabController: volumeTabController,
-                            selectedVolumes: selectedOptions['Volume']!,
-                            onVolumeSelected: (volume) {
-                              updateSelectedOptions('Volume', volume, !selectedOptions['Volume']!.contains(volume));
-                            },
-                          ),
-                          BakeryTabView(
-                            bakeryTabController: bakeryTabController,
-                            selectedBakeries: selectedOptions['Bakery']!,
-                            onBakerySelected: (bakery) {
-                              updateSelectedOptions('Bakery', bakery, !selectedOptions['Bakery']!.contains(bakery));
-                            },
-                          ),
-                          StorageTabView(
-                            storageTabController: storageTabController,
-                            selectedStorages: selectedOptions['Storage']!,
-                            onStorageSelected: (storage) {
-                              updateSelectedOptions('Storage', storage, !selectedOptions['Storage']!.contains(storage));
-                            },
-                          ),
-                        ],
+                        controller: optionTabController,
+                        children: getTabViews(),
                       ),
                     ),
                   ],
@@ -242,656 +287,10 @@ class _OptionalsScreenState extends State<OptionalsScreen>
   }
 }
 
-class SizeTabView extends StatelessWidget {
-  final TabController sizeTabController;
-  final List<String> selectedSizes;
-  final Function(String) onSizeSelected;
-
-  SizeTabView({
-    Key? key,
-    required this.sizeTabController,
-    required this.selectedSizes,
-    required this.onSizeSelected,
-  }) : super(key: key);
-
-  final List<String> topwearSizes = [
-    'XS',
-    'S',
-    'M',
-    'L',
-    'XL',
-  ];
-
-  final List<String> bottomwearSizes = [
-    '20',
-    '22',
-    '24',
-    '26',
-    '28',
-    '30',
-    '32',
-    '34',
-    '36',
-  ];
-
-  final List<String> footwearSizes = [
-    'US 5',
-    'US 6',
-    'US 7',
-    'US 8',
-    'US 9',
-    'US 10',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Add Size',
-          style: TextStyle(
-            fontSize: 16,
-          ),
-        ),
-        SizedBox(height: 20),
-        TabBar(
-          controller: sizeTabController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          unselectedLabelColor: hexToColor('#737373'),
-          labelColor: Colors.white,
-          indicator: BoxDecoration(
-            color: hexToColor('#343434'),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
-          labelStyle: TextStyle(
-            fontSize: 14.0,
-          ),
-          indicatorSize: TabBarIndicatorSize.label,
-          overlayColor: MaterialStateProperty.all(Colors.transparent),
-          dividerColor: Colors.transparent,
-          tabs: <Widget>[
-            OptionTab('Topwear', hexToColor('#343434')),
-            OptionTab('Bottomwear', hexToColor('#343434')),
-            OptionTab('Footwear', hexToColor('#343434')),
-          ],
-        ),
-        SizedBox(height: 20),
-        Dash(
-          direction: Axis.horizontal,
-          length: MediaQuery.of(context).size.width * 0.9,
-          dashLength: 10,
-          dashColor: hexToColor('#848484'),
-        ),
-        SizedBox(height: 20),
-        Expanded(
-          child: TabBarView(
-            controller: sizeTabController,
-            children: [
-              SingleChildScrollView(
-                child: Column(
-                  children: List.generate(
-                    topwearSizes.length,
-                    (index) => CheckboxListTile(
-                      title: Text(
-                        topwearSizes[index],
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          color: Theme.of(context).primaryColor,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      checkColor: Colors.white,
-                      activeColor: Theme.of(context).primaryColor,
-                      value: selectedSizes.contains(topwearSizes[index]),
-                      onChanged: (value) {
-                        onSizeSelected(topwearSizes[index]);
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              SingleChildScrollView(
-                child: Column(
-                  children: List.generate(
-                    bottomwearSizes.length,
-                    (index) => CheckboxListTile(
-                      title: Text(
-                        bottomwearSizes[index],
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          color: Theme.of(context).primaryColor,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      checkColor: Colors.white,
-                      activeColor: Theme.of(context).primaryColor,
-                      value: selectedSizes.contains(bottomwearSizes[index]),
-                      onChanged: (value) {
-                        onSizeSelected(bottomwearSizes[index]);
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              SingleChildScrollView(
-                child: Column(
-                  children: List.generate(
-                    footwearSizes.length,
-                    (index) => CheckboxListTile(
-                      title: Text(
-                        footwearSizes[index],
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          color: Theme.of(context).primaryColor,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      checkColor: Colors.white,
-                      activeColor: Theme.of(context).primaryColor,
-                      value: selectedSizes.contains(footwearSizes[index]),
-                      onChanged: (value) {
-                        onSizeSelected(footwearSizes[index]);
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class WeightTabView extends StatelessWidget {
-  final TabController weightTabController;
-  final List<String> selectedWeights;
-  final Function(String) onWeightSelected;
-
-  WeightTabView({
-    Key? key,
-    required this.weightTabController,
-    required this.selectedWeights,
-    required this.onWeightSelected,
-  }) : super(key: key);
-
-  final List<String> gramOptions = [
-    '50g',
-    '100g',
-    '200g',
-    '500g',
-  ];
-
-  final List<String> kilogramOptions = [
-    '1kg',
-    '2kg',
-    '5kg',
-    '10kg',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Add Weight',
-          style: TextStyle(
-            fontSize: 16,
-          ),
-        ),
-        SizedBox(height: 20),
-        TabBar(
-          controller: weightTabController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          unselectedLabelColor: hexToColor('#737373'),
-          labelColor: Colors.white,
-          indicator: BoxDecoration(
-            color: hexToColor('#343434'),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
-          labelStyle: TextStyle(
-            fontSize: 14.0,
-          ),
-          indicatorSize: TabBarIndicatorSize.label,
-          overlayColor: MaterialStateProperty.all(Colors.transparent),
-          dividerColor: Colors.transparent,
-          tabs: <Widget>[
-            OptionTab('Gram', hexToColor('#343434')),
-            OptionTab('Kilogram', hexToColor('#343434')),
-          ],
-        ),
-        SizedBox(height: 20),
-        Dash(
-          direction: Axis.horizontal,
-          length: MediaQuery.of(context).size.width * 0.9,
-          dashLength: 10,
-          dashColor: hexToColor('#848484'),
-        ),
-        SizedBox(height: 20),
-        Expanded(
-          child: TabBarView(
-            controller: weightTabController,
-            children: [
-              SingleChildScrollView(
-                child: Column(
-                  children: List.generate(
-                    gramOptions.length,
-                    (index) => CheckboxListTile(
-                      title: Text(
-                        gramOptions[index],
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          color: Theme.of(context).primaryColor,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      checkColor: Colors.white,
-                      activeColor: Theme.of(context).primaryColor,
-                      value: selectedWeights.contains(gramOptions[index]),
-                      onChanged: (value) {
-                        onWeightSelected(gramOptions[index]);
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              SingleChildScrollView(
-                child: Column(
-                  children: List.generate(
-                    kilogramOptions.length,
-                    (index) => CheckboxListTile(
-                      title: Text(
-                        kilogramOptions[index],
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          color: Theme.of(context).primaryColor,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      checkColor: Colors.white,
-                      activeColor: Theme.of(context).primaryColor,
-                      value: selectedWeights.contains(kilogramOptions[index]),
-                      onChanged: (value) {
-                        onWeightSelected(kilogramOptions[index]);
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class VolumeTabView extends StatelessWidget {
-  final TabController volumeTabController;
-  final List<String> selectedVolumes;
-  final Function(String) onVolumeSelected;
-
-  VolumeTabView({
-    Key? key,
-    required this.volumeTabController,
-    required this.selectedVolumes,
-    required this.onVolumeSelected,
-  }) : super(key: key);
-
-  final List<String> literOptions = [
-    '1L',
-    '2L',
-    '5L',
-    '10L',
-  ];
-
-  final List<String> mililiterOptions = [
-    '50ml',
-    '100ml',
-    '200ml',
-    '500ml',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Add Volume',
-          style: TextStyle(
-            fontSize: 16,
-          ),
-        ),
-        SizedBox(height: 20),
-        TabBar(
-          controller: volumeTabController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          unselectedLabelColor: hexToColor('#737373'),
-          labelColor: Colors.white,
-          indicator: BoxDecoration(
-            color: hexToColor('#343434'),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
-          labelStyle: TextStyle(
-            fontSize: 14.0,
-          ),
-          indicatorSize: TabBarIndicatorSize.label,
-          overlayColor: MaterialStateProperty.all(Colors.transparent),
-          dividerColor: Colors.transparent,
-          tabs: <Widget>[
-            OptionTab('Mililiter', hexToColor('#343434')),
-            OptionTab('Liter', hexToColor('#343434')),
-          ],
-        ),
-        SizedBox(height: 20),
-        Dash(
-          direction: Axis.horizontal,
-          length: MediaQuery.of(context).size.width * 0.9,
-          dashLength: 10,
-          dashColor: hexToColor('#848484'),
-        ),
-        SizedBox(height: 20),
-        Expanded(
-          child: TabBarView(
-            controller: volumeTabController,
-            children: [
-              SingleChildScrollView(
-                child: Column(
-                  children: List.generate(
-                    mililiterOptions.length,
-                    (index) => CheckboxListTile(
-                      title: Text(
-                        mililiterOptions[index],
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          color: Theme.of(context).primaryColor,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      checkColor: Colors.white,
-                      activeColor: Theme.of(context).primaryColor,
-                      value: selectedVolumes.contains(mililiterOptions[index]),
-                      onChanged: (value) {
-                        onVolumeSelected(mililiterOptions[index]);
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              SingleChildScrollView(
-                child: Column(
-                  children: List.generate(
-                    literOptions.length,
-                    (index) => CheckboxListTile(
-                      title: Text(
-                        literOptions[index],
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          color: Theme.of(context).primaryColor,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      checkColor: Colors.white,
-                      activeColor: Theme.of(context).primaryColor,
-                      value: selectedVolumes.contains(literOptions[index]),
-                      onChanged: (value) {
-                        onVolumeSelected(literOptions[index]);
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class BakeryTabView extends StatelessWidget {
-  final TabController bakeryTabController;
-  final List<String> selectedBakeries;
-  final Function(String) onBakerySelected;
-
-  BakeryTabView({
-    Key? key,
-    required this.bakeryTabController,
-    required this.selectedBakeries,
-    required this.onBakerySelected,
-  }) : super(key: key);
-
-  final List<String> poundOptions = [
-    '1 Pound',
-    '2 Pound',
-    '5 Pound',
-    '10 Pound',
-  ];
-
-  final List<String> gramOptions = [
-    '50g',
-    '100g',
-    '200g',
-    '500g',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Add Bakery',
-          style: TextStyle(
-            fontSize: 16,
-          ),
-        ),
-        SizedBox(height: 20),
-        TabBar(
-          controller: bakeryTabController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          unselectedLabelColor: hexToColor('#737373'),
-          labelColor: Colors.white,
-          indicator: BoxDecoration(
-            color: hexToColor('#343434'),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
-          labelStyle: TextStyle(
-            fontSize: 14.0,
-          ),
-          indicatorSize: TabBarIndicatorSize.label,
-          overlayColor: MaterialStateProperty.all(Colors.transparent),
-          dividerColor: Colors.transparent,
-          tabs: <Widget>[
-            OptionTab('Pound', hexToColor('#343434')),
-            OptionTab('Gram/KG', hexToColor('#343434')),
-          ],
-        ),
-        SizedBox(height: 20),
-        Dash(
-          direction: Axis.horizontal,
-          length: MediaQuery.of(context).size.width * 0.9,
-          dashLength: 10,
-          dashColor: hexToColor('#848484'),
-        ),
-        SizedBox(height: 20),
-        Expanded(
-          child: TabBarView(
-            controller: bakeryTabController,
-            children: [
-              SingleChildScrollView(
-                child: Column(
-                  children: List.generate(
-                    poundOptions.length,
-                    (index) => CheckboxListTile(
-                      title: Text(
-                        poundOptions[index],
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          color: Theme.of(context).primaryColor,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      checkColor: Colors.white,
-                      activeColor: Theme.of(context).primaryColor,
-                      value: selectedBakeries.contains(poundOptions[index]),
-                      onChanged: (value) {
-                        onBakerySelected(poundOptions[index]);
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              SingleChildScrollView(
-                child: Column(
-                  children: List.generate(
-                    gramOptions.length,
-                    (index) => CheckboxListTile(
-                      title: Text(
-                        gramOptions[index],
-                        style: TextStyle(
-                          fontSize: 16.0,
-                          color: Theme.of(context).primaryColor,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      checkColor: Colors.white,
-                      activeColor: Theme.of(context).primaryColor,
-                      value: selectedBakeries.contains(gramOptions[index]),
-                      onChanged: (value) {
-                        onBakerySelected(gramOptions[index]);
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class StorageTabView extends StatelessWidget {
-  final TabController storageTabController;
-  final List<String> selectedStorages;
-  final Function(String) onStorageSelected;
-
-  StorageTabView({
-    Key? key,
-    required this.storageTabController,
-    required this.selectedStorages,
-    required this.onStorageSelected,
-  }) : super(key: key);
-
-  final List<String> capacityOptions = [
-    '8GB + 64GB',
-    '8GB + 128GB',
-    '8GB + 256GB',
-    '12GB + 128GB',
-    '12GB + 256GB',
-    '12GB + 512GB',
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Add Storage',
-          style: TextStyle(
-            fontSize: 16,
-          ),
-        ),
-        SizedBox(height: 20),
-        TabBar(
-          controller: storageTabController,
-          isScrollable: true,
-          tabAlignment: TabAlignment.start,
-          unselectedLabelColor: hexToColor('#737373'),
-          labelColor: Colors.white,
-          indicator: BoxDecoration(
-            color: hexToColor('#343434'),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
-          labelStyle: TextStyle(
-            fontSize: 14.0,
-          ),
-          indicatorSize: TabBarIndicatorSize.label,
-          overlayColor: MaterialStateProperty.all(Colors.transparent),
-          dividerColor: Colors.transparent,
-          tabs: <Widget>[
-            OptionTab('Capacity', hexToColor('#343434')),
-          ],
-        ),
-        SizedBox(height: 20),
-        Dash(
-          direction: Axis.horizontal,
-          length: MediaQuery.of(context).size.width * 0.9,
-          dashLength: 10,
-          dashColor: hexToColor('#848484'),
-        ),
-        SizedBox(height: 20),
-        Expanded(
-          child: TabBarView(controller: storageTabController, children: [
-            SingleChildScrollView(
-              child: Column(
-                children: List.generate(
-                  capacityOptions.length,
-                  (index) => CheckboxListTile(
-                    title: Text(
-                      capacityOptions[index],
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        color: Theme.of(context).primaryColor,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    checkColor: Colors.white,
-                    activeColor: Theme.of(context).primaryColor,
-                    value: selectedStorages.contains(capacityOptions[index]),
-                    onChanged: (value) {
-                      onStorageSelected(capacityOptions[index]);
-                    },
-                  ),
-                ),
-              ),
-            )
-          ]),
-        ),
-      ],
-    );
-  }
-}
 
 class OptionTab extends StatelessWidget {
-  String title;
-  Color color;
+  final String title;
+  final Color color;
 
   OptionTab(this.title, this.color);
 
@@ -903,8 +302,46 @@ class OptionTab extends StatelessWidget {
         border: Border.all(color: color, width: 1.0),
         borderRadius: BorderRadius.circular(12.0),
       ),
-      child: Text(
-        title,
+      child: Text(title),
+    );
+  }
+}
+
+class OptionListView extends StatelessWidget {
+  final List<String> options;
+  final List<String> selectedOptions;
+  final Function(String) onOptionSelected;
+
+  OptionListView({
+    required this.options,
+    required this.selectedOptions,
+    required this.onOptionSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Column(
+        children: List.generate(
+          options.length,
+              (index) => CheckboxListTile(
+            title: Text(
+              options[index],
+              style: TextStyle(
+                fontSize: 16.0,
+                color: Theme.of(context).primaryColor,
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            checkColor: Colors.white,
+            activeColor: Theme.of(context).primaryColor,
+            value: selectedOptions.contains(options[index]),
+            onChanged: (value) {
+              onOptionSelected(options[index]);
+            },
+          ),
+        ),
       ),
     );
   }
@@ -912,7 +349,7 @@ class OptionTab extends StatelessWidget {
 
 class OptionalsPriceScreen extends StatefulWidget {
   final String productId;
-  final Map<String, List<String>> selectedOptions;
+  final List<String> selectedOptions;
 
 
   const OptionalsPriceScreen({
@@ -926,9 +363,9 @@ class OptionalsPriceScreen extends StatefulWidget {
 }
 
 class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
-  Map<String, Map<String, GlobalKey<_OptionalPriceAndQuantityState>>> optionalPriceKeys = {};
-  Map<String, dynamic>? productData;
+  Map<String, GlobalKey<_OptionalPriceAndQuantityState>> optionalPriceKeys = {};
   bool isLoading = true;
+  Map<String, dynamic>? productData;
 
   @override
   void initState() {
@@ -938,16 +375,10 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
   }
 
   void initializeOptionalPriceKeys() {
-    widget.selectedOptions.forEach((type, options) {
-      if (options.isNotEmpty) {
-        optionalPriceKeys[type] = {};
-        for (var option in options) {
-          optionalPriceKeys[type]![option] = GlobalKey<_OptionalPriceAndQuantityState>();
-        }
-      }
-    });
+    for (var option in widget.selectedOptions) {
+      optionalPriceKeys[option] = GlobalKey<_OptionalPriceAndQuantityState>();
+    }
   }
-
 
   Future<void> fetchProductData() async {
     try {
@@ -974,29 +405,25 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
     }
   }
 
+
   Future<void> saveDataToFirebase() async {
     final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-    Map<String, Map<String, ProductVariant>> variations = {};
+    Map<String, ProductVariant> variations = {};
 
-    widget.selectedOptions.forEach((type, options) {
-      if (options.isNotEmpty) {
-        variations[type] = {};
-        for (var option in options) {
-          final state = optionalPriceKeys[type]![option]!.currentState!;
-          variations[type]![option] = ProductVariant(
-            discount: double.tryParse(state._discountController.text) ?? 0,
-            mrp: double.tryParse(state._mrpController.text) ?? 0,
-            price: double.tryParse(state._itemPriceController.text) ?? 0,
-            stockQuantity: int.tryParse(state._quantityController.text) ?? 0,
-            sku: '${widget.productId}-${type.toLowerCase()}-${option.replaceAll(' ', '-')}',
-          );
-        }
-      }
-    });
+    for (var option in widget.selectedOptions) {
+      final state = optionalPriceKeys[option]!.currentState!;
+      variations[option] = ProductVariant(
+        discount: double.tryParse(state._discountController.text) ?? 0,
+        mrp: double.tryParse(state._mrpController.text) ?? 0,
+        price: double.tryParse(state._itemPriceController.text) ?? 0,
+        stockQuantity: int.tryParse(state._quantityController.text) ?? 0,
+        sku: '${widget.productId}-${option.replaceAll(' ', '-').toLowerCase()}',
+      );
+    }
 
     Map<String, dynamic> productData = {
-      'variations': variations.map((key, value) => MapEntry(key, value.map((k, v) => MapEntry(k, v.toMap())))),
+      'variations': variations.map((key, value) => MapEntry(key, value.toMap())),
     };
 
     try {
@@ -1013,6 +440,7 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
           .showSnackBar(SnackBar(content: Text('Error saving data')));
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -1116,20 +544,16 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
               child: ListView.builder(
                 itemCount: widget.selectedOptions.length,
                 itemBuilder: (context, index) {
-                  String type = widget.selectedOptions.keys.elementAt(index);
-                  List<String> options = widget.selectedOptions[type]!;
-                  return ExpansionTile(
-                    title: Text(type),
-                    children: options.map((option) => OptionalPriceAndQuantity(
-                      key: optionalPriceKeys[type]![option],
-                      title: option,
-                      onDeletePressed: () {
-                        setState(() {
-                          widget.selectedOptions[type]!.remove(option);
-                          optionalPriceKeys[type]!.remove(option);
-                        });
-                      },
-                    )).toList(),
+                  String option = widget.selectedOptions[index];
+                  return OptionalPriceAndQuantity(
+                    key: optionalPriceKeys[option],
+                    title: option,
+                    onDeletePressed: () {
+                      setState(() {
+                        widget.selectedOptions.remove(option);
+                        optionalPriceKeys.remove(option);
+                      });
+                    },
                   );
                 },
               ),

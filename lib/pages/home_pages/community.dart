@@ -117,14 +117,9 @@ class _CommunityState extends State<Community> {
                         snapshot.data![index].data() as Map<String, dynamic>;
                     final postId = snapshot.data![index].id;
                     return CommunityPost(
-                      postId: postId,
-                      storeId: postData['storeId'] ?? '',
-                      postContent: postData['postContent'] ?? '',
-                      postImages:
-                          List<String>.from(postData['postImages'] ?? []),
-                      postLikes: postData['postLikes'] ?? 0,
-                      productLink: postData['productLink'],
-                      createdAt: postData['createdAt'] as Timestamp,
+                      post: CommunityPostModel.fromFirestore(
+                        snapshot.data![index],
+                      )
                     );
                   },
                 );
@@ -138,24 +133,11 @@ class _CommunityState extends State<Community> {
 }
 
 class CommunityPost extends StatefulWidget {
-  final String postId;
-  final String storeId;
-  final String postContent;
-  final List<String> postImages;
-  final int postLikes;
-  final String? productLink;
-  final Timestamp createdAt;
+  final CommunityPostModel post;
 
-  const CommunityPost({
-    Key? key,
-    required this.postId,
-    required this.storeId,
-    required this.postContent,
-    required this.postImages,
-    required this.postLikes,
-    this.productLink,
-    required this.createdAt,
-  }) : super(key: key);
+  CommunityPost({
+    required this.post,
+  });
 
   @override
   _CommunityPostState createState() => _CommunityPostState();
@@ -165,41 +147,72 @@ class _CommunityPostState extends State<CommunityPost> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late Future<DocumentSnapshot> _storeFuture;
+  bool _isLiked = false;
 
   @override
   void initState() {
     super.initState();
-    _storeFuture = _firestore.collection('Stores').doc(widget.storeId).get();
+    _storeFuture = _firestore.collection('Stores').doc(widget.post.storeId).get();
+    _checkIfLiked();
   }
 
-  Future<void> _likePost() async {
+  Future<void> _checkIfLiked() async {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    final postRef = _firestore.collection('communityPosts').doc(widget.postId);
+    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+    final likedPosts = List<String>.from(userDoc.data()?['likedPosts'] ?? []);
+    setState(() {
+      _isLiked = likedPosts.contains(widget.post.postId);
+    });
+  }
+
+  Future<void> _toggleLike() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    final userRef = _firestore.collection('Users').doc(user.uid);
+    final postRef = _firestore.collection('communityPosts').doc(widget.post.postId);
 
     return _firestore.runTransaction((transaction) async {
+      final userDoc = await transaction.get(userRef);
       final postDoc = await transaction.get(postRef);
+
       if (!postDoc.exists) {
         throw Exception('Post does not exist');
       }
 
-      final currentLikes = postDoc.data()?['postLikes'] as int? ?? 0;
-      final likedBy = List<String>.from(postDoc.data()?['likedBy'] ?? []);
+      final likedPosts = List<String>.from(userDoc.data()?['likedPosts'] ?? []);
+      final currentLikes = postDoc.data()?['likes'] as int? ?? 0;
 
-      if (likedBy.contains(user.uid)) {
+      if (likedPosts.contains(widget.post.postId)) {
+        // Unlike
+        transaction.update(userRef, {
+          'likedPosts': FieldValue.arrayRemove([widget.post.postId])
+        });
         transaction.update(postRef, {
-          'postLikes': currentLikes - 1,
-          'likedBy': FieldValue.arrayRemove([user.uid]),
+          'likes': FieldValue.increment(-1)
+        });
+        setState(() {
+          _isLiked = false;
+          widget.post.likes--;
         });
       } else {
+        // Like
+        transaction.update(userRef, {
+          'likedPosts': FieldValue.arrayUnion([widget.post.postId])
+        });
         transaction.update(postRef, {
-          'postLikes': currentLikes + 1,
-          'likedBy': FieldValue.arrayUnion([user.uid]),
+          'likes': FieldValue.increment(1)
+        });
+        setState(() {
+          _isLiked = true;
+          widget.post.likes++;
         });
       }
     });
   }
+
 
   String _formatTimestamp(Timestamp timestamp) {
     final now = DateTime.now();
@@ -222,69 +235,12 @@ class _CommunityPostState extends State<CommunityPost> {
     return FutureBuilder<DocumentSnapshot>(
       future: _storeFuture,
       builder: (context, snapshot) {
-        if(snapshot.connectionState == ConnectionState.waiting) {
-          return Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // User information row
-                Row(
-                  children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.grey,
-                      radius: 20.0,
-                    ),
-                    const SizedBox(width: 16.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 100.0,
-                          height: 10.0,
-                          color: Colors.grey,
-                        ),
-                        const SizedBox(height: 5.0),
-                        Container(
-                          width: 50.0,
-                          height: 10.0,
-                          color: Colors.grey,
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    Container(
-                      width: 20.0,
-                      height: 20.0,
-                      color: Colors.grey,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10.0),
-                Container(
-                  width: double.infinity,
-                  height: 200.0,
-                  color: Colors.grey,
-                ),
-                const SizedBox(height: 10.0),
-                Row(
-                  children: [
-                    Container(
-                      width: 50.0,
-                      height: 20.0,
-                      color: Colors.grey,
-                    ),
-                    const Spacer(),
-                    Container(
-                      width: 20.0,
-                      height: 20.0,
-                      color: Colors.grey,
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          );
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return _buildLoadingPlaceholder();
+        }
+
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return Center(child: Text('Store not found'));
         }
 
         final storeData = snapshot.data!.data() as Map<String, dynamic>;
@@ -292,161 +248,230 @@ class _CommunityPostState extends State<CommunityPost> {
         final userProfileImage =
             storeData['profileImage'] ?? 'https://via.placeholder.com/150';
 
-        return Container(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        return _buildPostContent(userName, userProfileImage);
+      },
+    );
+  }
+
+  Widget _buildLoadingPlaceholder() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // User information row
+          Row(
             children: [
-              // User information row
-              Row(
+              CircleAvatar(
+                backgroundColor: Colors.grey,
+                radius: 20.0,
+              ),
+              const SizedBox(width: 16.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    backgroundImage: NetworkImage(userProfileImage),
-                    radius: 20.0,
+                  Container(
+                    width: 100.0,
+                    height: 10.0,
+                    color: Colors.grey,
                   ),
-                  const SizedBox(width: 16.0),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        userName,
-                        style: const TextStyle(
-                          fontSize: 18.0,
-                        ),
-                      ),
-                      Text(
-                        _formatTimestamp(widget.createdAt),
-                        style: TextStyle(
-                          color: hexToColor('#9C9C9C'),
-                          fontSize: 10.0,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(12),
-                            topRight: Radius.circular(12),
-                          ),
-                        ),
-                        context: context,
-                        builder: (context) => _buildMoreBottomSheet(),
-                      );
-                    },
-                    child: CircleAvatar(
-                      backgroundColor: hexToColor('#F5F5F5'),
-                      child: Icon(
-                        Icons.more_horiz,
-                        color: hexToColor('#BEBEBE'),
-                        size: 20,
-                      ),
-                    ),
+                  const SizedBox(height: 5.0),
+                  Container(
+                    width: 50.0,
+                    height: 10.0,
+                    color: Colors.grey,
                   ),
                 ],
               ),
-              SizedBox(height: 16.0),
-              // Caption
-              Text(
-                widget.postContent,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: 'Gotham',
-                  fontSize: 12.0,
-                ),
-              ),
-              SizedBox(height: 10),
-              // Post images
-              if (widget.postImages.isNotEmpty)
-                Container(
-                  height: 200.0, // Adjust the height as needed
-                  child: PageView.builder(
-                    itemCount: widget.postImages.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  FullScreenImageView(imageUrl: widget.postImages[index]),
-                            ),
-                          );
-                        },
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8.0),
-                          child: Image.network(
-                            widget.postImages[index],
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              SizedBox(height: 10),
-              // Likes
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: _likePost,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 6.0),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: hexToColor('#BEBEBE')),
-                        borderRadius: BorderRadius.circular(50.0),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.favorite,
-                            color: Colors.red,
-                          ),
-                          const SizedBox(width: 8.0),
-                          Text(
-                            '${widget.postLikes}',
-                            style: TextStyle(
-                                color: hexToColor('#989797'), fontSize: 12.0),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Spacer(),
-                  if (widget.productLink?.isNotEmpty ?? false) ...[
-                    Chip(
-                      backgroundColor: hexToColor('#EDEDED'),
-                      side: BorderSide.none,
-                      label: Text(
-                        '${widget.productLink!}',
-                        style: TextStyle(
-                          color: hexToColor('#B4B4B4'),
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 12.0,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      avatar: Icon(
-                        Icons.link_outlined,
-                        color: hexToColor('#B4B4B4'),
-                      ),
-                    ),
-                    Spacer(),
-                  ],
-                  Icon(Icons.ios_share_outlined)
-                ],
+              const Spacer(),
+              Container(
+                width: 20.0,
+                height: 20.0,
+                color: Colors.grey,
               ),
             ],
           ),
-        );
-      },
+          const SizedBox(height: 10.0),
+          Container(
+            width: double.infinity,
+            height: 200.0,
+            color: Colors.grey,
+          ),
+          const SizedBox(height: 10.0),
+          Row(
+            children: [
+              Container(
+                width: 50.0,
+                height: 20.0,
+                color: Colors.grey,
+              ),
+              const Spacer(),
+              Container(
+                width: 20.0,
+                height: 20.0,
+                color: Colors.grey,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPostContent(String userName, String userProfileImage) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // User information row
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundImage: NetworkImage(userProfileImage),
+                radius: 20.0,
+              ),
+              const SizedBox(width: 16.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    userName,
+                    style: const TextStyle(
+                      fontSize: 18.0,
+                    ),
+                  ),
+                  Text(
+                    _formatTimestamp(widget.post.createdAt),
+                    style: TextStyle(
+                      color: hexToColor('#9C9C9C'),
+                      fontSize: 10.0,
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              GestureDetector(
+                onTap: () {
+                  showModalBottomSheet(
+                    backgroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(12),
+                        topRight: Radius.circular(12),
+                      ),
+                    ),
+                    context: context,
+                    builder: (context) => _buildMoreBottomSheet(),
+                  );
+                },
+                child: CircleAvatar(
+                  backgroundColor: hexToColor('#F5F5F5'),
+                  child: Icon(
+                    Icons.more_horiz,
+                    color: hexToColor('#BEBEBE'),
+                    size: 20,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.0),
+          // Caption
+          Text(
+            widget.post.content,
+            style: TextStyle(
+              color: Colors.black,
+              fontFamily: 'Gotham',
+              fontSize: 12.0,
+            ),
+          ),
+          SizedBox(height: 10),
+          // Post images
+          if (widget.post.images.isNotEmpty)
+            Container(
+              height: 200.0, // Adjust the height as needed
+              child: PageView.builder(
+                itemCount: widget.post.images.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              FullScreenImageView(imageUrl: widget.post.images[index]),
+                        ),
+                      );
+                    },
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.network(
+                        widget.post.images[index],
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          SizedBox(height: 10),
+          // Likes
+          Row(
+            children: [
+              GestureDetector(
+                onTap: _toggleLike,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16.0, vertical: 6.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: hexToColor('#BEBEBE')),
+                    borderRadius: BorderRadius.circular(50.0),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        _isLiked ? Icons.favorite : Icons.favorite_border,
+                        color: Colors.red,
+                      ),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        '${widget.post.likes}',
+                        style: TextStyle(
+                            color: hexToColor('#989797'), fontSize: 12.0),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Spacer(),
+              if (widget.post.productLink?.isNotEmpty ?? false) ...[
+                Chip(
+                  backgroundColor: hexToColor('#EDEDED'),
+                  side: BorderSide.none,
+                  label: Text(
+                    '${widget.post.productLink!}',
+                    style: TextStyle(
+                      color: hexToColor('#B4B4B4'),
+                      fontFamily: 'Gotham',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12.0,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  avatar: Icon(
+                    Icons.link_outlined,
+                    color: hexToColor('#B4B4B4'),
+                  ),
+                ),
+                Spacer(),
+              ],
+              Icon(Icons.ios_share_outlined)
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -576,21 +601,16 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
       final post = CommunityPostModel(
         postId: '',
         storeId: widget.storeId,
-        postContent: _captionController.text,
-        postImages: imageUrls,
-        postLikes: 0,
-        likedBy: [],
+        content: _captionController.text,
+        images: imageUrls,
+        likes: 0,
         createdAt: Timestamp.now(),
         productLink: _productLinkController.text.isNotEmpty
             ? _productLinkController.text
             : null,
       );
 
-      String postId = await CommunityPostModel.createPost(post);
-
-      await FirebaseFirestore.instance.collection('Stores').doc(widget.storeId).update({
-        'postIds': FieldValue.arrayUnion([postId])
-      });
+      await CommunityPostModel.createPost(post, widget.storeId);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Post created successfully!')),

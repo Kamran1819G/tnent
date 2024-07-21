@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/services/firebase/firebase_auth_service.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/services/user_service.dart';
@@ -34,23 +35,46 @@ class _UserRegistrationState extends State<UserRegistration> {
   final _otpControllers = List.generate(4, (_) => TextEditingController());
   final _focusNodes = List.generate(4, (_) => FocusNode());
 
+  UserModel? _userModel;
 
   @override
   void initState() {
     super.initState();
     _confettiController = ConfettiController(duration: Duration(seconds: 5));
+    _initializeUserModel();
   }
 
+  void _initializeUserModel() {
+    final user = Auth().currentUser;
+    if (user != null) {
+      _userModel = UserModel(
+        uid: user.uid,
+        email: user.email ?? '',
+        firstName: '',
+        lastName: '',
+      );
+    }
+  }
 
   Future<void> addUserDetails() async {
     try {
-      final user = this.user;
-      if (user != null) {
-        await FirebaseFirestore.instance.collection('Users').doc(user.uid).set({
-          'phoneNumber': _phoneController.text,
-          'firstName': _firstNameController.text,
-          'lastName': _lastNameController.text,
-          'location': _locationController.text,
+      if (_userModel != null) {
+        final updatedUser = _userModel!.copyWith(
+          phoneNumber: _phoneController.text,
+          firstName: _firstNameController.text,
+          lastName: _lastNameController.text,
+          location: _locationController.text,
+          registered: true,
+          lastUpdated: Timestamp.now(),
+        );
+
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(updatedUser.uid)
+            .set(updatedUser.toFirestore());
+
+        setState(() {
+          _userModel = updatedUser;
         });
       }
     } catch (e) {

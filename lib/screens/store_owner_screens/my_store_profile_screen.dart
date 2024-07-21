@@ -68,7 +68,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
       greenFlags: 0,
       redFlags: 0,
       variations: {
-        'size': {
           'S': ProductVariant(
             price: 24.99,
             mrp: 29.99,
@@ -90,8 +89,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
             stockQuantity: 75,
             sku: 'TS-L',
           ),
-        },
       },
+      reviewsIds: [],
     );
   });
 

@@ -103,9 +103,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         ownerId: currentUser.uid,
         analyticsId: 'analytics_${DateTime.now().millisecondsSinceEpoch}',
         name: _nameController.text,
-        logoUrl: '',
         phone: _phoneController.text,
         email: _emailController.text,
+        logoUrl: 'https://via.placeholder.com/150',
         website: '${_websiteController.text}.tnennt.com',
         upiUsername: _upiUsernameController.text,
         upiId: _upiIdController.text,
@@ -118,8 +118,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         storeEngagement: 0,
         greenFlags: 0,
         redFlags: 0,
-        postIds: [],
-        productIds: [],
         followerIds: [],
       );
 

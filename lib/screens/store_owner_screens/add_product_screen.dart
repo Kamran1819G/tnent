@@ -110,7 +110,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       final imageUrls = await _uploadImages(productId);
       final productData = _createProductData(productId, imageUrls);
 
-      await _saveProductData(productId, productData);
+      await FirebaseFirestore.instance.collection('Stores').doc(widget.storeId).update({'totalProducts': FieldValue.increment(1)});
       await _updateStoreProducts(productId);
       await _updateCategoryProducts(productId);
       setState(() {
@@ -151,31 +151,23 @@ class _AddProductScreenState extends State<AddProductScreen> {
       greenFlags: 0,
       redFlags: 0,
       variations: {},
+      reviewsIds: [],
     );
 
     if (!isMultiOptionCategory) {
       String sku = _generateSku(productData.name, {});
-      productData.variations['default'] = {
-        'default': ProductVariant(
+      productData.variations['default'] = ProductVariant(
           discount: double.tryParse(_discountController.text) ?? 0.0,
           mrp: double.tryParse(_mrpController.text) ?? 0.0,
           price: double.tryParse(_itemPriceController.text) ?? 0.0,
           stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
           sku: sku,
-        ),
-      };
+        );
     }
 
     return productData.toFirestore();
   }
 
-  Future<void> _saveProductData(
-      String productId, Map<String, dynamic> productData) async {
-    await FirebaseFirestore.instance
-        .collection('products')
-        .doc(productId)
-        .set(productData);
-  }
 
   Future<void> _updateStoreProducts(String productId) async {
     final storeRef =
@@ -208,7 +200,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => OptionalsScreen(productId: productId),
+        builder: (context) => OptionalsScreen(
+          productId: productId,
+          productCategory: selectedCategory!,
+        ),
       ),
     );
   }
@@ -219,7 +214,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
     for (int i = 0; i < _images.length; i++) {
       String fileName = 'product_${productId}_$i.jpg';
-      Reference ref = storage.ref().child('product_images/$fileName');
+      Reference ref = storage.ref().child('products/$productId/$fileName');
       UploadTask uploadTask = ref.putFile(_images[i]);
       TaskSnapshot snapshot = await uploadTask;
       String downloadUrl = await snapshot.ref.getDownloadURL();

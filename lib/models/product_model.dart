@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 
 class ProductVariant {
   final double discount;
@@ -15,13 +16,16 @@ class ProductVariant {
     this.sku,
   });
 
-  factory ProductVariant.fromMap(Map<String, dynamic> data) {
+  factory ProductVariant.fromMap(Map<String, dynamic>? data) {
+    if (data == null) {
+      throw FormatException('Null data provided for ProductVariant');
+    }
     return ProductVariant(
-      price: data['price'].toDouble(),
-      mrp: data['mrp'].toDouble(),
-      discount: data['discount']?.toDouble() ?? 0,
-      stockQuantity: data['stockQuantity'],
-      sku: data['sku'],
+      price: (data['price'] as num?)?.toDouble() ?? 0.0,
+      mrp: (data['mrp'] as num?)?.toDouble() ?? 0.0,
+      discount: (data['discount'] as num?)?.toDouble() ?? 0.0,
+      stockQuantity: (data['stockQuantity'] as int?) ?? 0,
+      sku: data['sku'] as String?,
     );
   }
 
@@ -48,7 +52,7 @@ class ProductModel {
   final Timestamp createdAt;
   final int greenFlags;
   final int redFlags;
-  final Map<String, Map<String, ProductVariant>> variations;
+  final Map<String, ProductVariant> variations;
   final List<String> reviewsIds;
 
   ProductModel({
@@ -64,41 +68,53 @@ class ProductModel {
     required this.greenFlags,
     required this.redFlags,
     required this.variations,
-    this.reviewsIds = const [],
+    required this.reviewsIds,
   });
 
-  factory ProductModel.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    Map<String, Map<String, ProductVariant>> variations = {};
+  factory ProductModel.fromFirestore(DocumentSnapshot? doc) {
+    if (doc == null || !doc.exists) {
+      throw FormatException('Null or non-existent document provided');
+    }
 
-    (data['variations'] as Map<String, dynamic>).forEach((variationType, variantData) {
-      variations[variationType] = (variantData as Map<String, dynamic>).map(
-              (key, value) => MapEntry(key, ProductVariant.fromMap(value as Map<String, dynamic>))
-      );
-    });
+    Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+
+    if (data == null) {
+      throw FormatException('Null data in document');
+    }
+
+    Map<String, ProductVariant> variations = {};
+
+    if (data['variations'] != null && data['variations'] is Map) {
+      (data['variations'] as Map<String, dynamic>).forEach((variantKey, variantData) {
+        if (variantData is Map<String, dynamic>) {
+          try {
+            variations[variantKey] = ProductVariant.fromMap(variantData);
+          } catch (e) {
+            print('Error parsing variant $variantKey: $e');
+          }
+        }
+      });
+    }
 
     return ProductModel(
       productId: doc.id,
-      storeId: data['storeId'] ?? '',
-      name: data['name'] ?? '',
-      description: data['description'] ?? '',
-      productCategory: data['productCategory'] ?? '',
-      storeCategory: data['storeCategory'] ?? '',
-      imageUrls: List<String>.from(data['imageUrls'] ?? []),
-      isAvailable: data['isAvailable'] ?? false,
-      createdAt: data['createdAt'] ?? Timestamp.now(),
-      greenFlags: data['greenFlags'] ?? 0,
-      redFlags: data['redFlags'] ?? 0,
+      storeId: data['storeId'] as String? ?? '',
+      name: data['name'] as String? ?? '',
+      description: data['description'] as String? ?? '',
+      productCategory: data['productCategory'] as String? ?? '',
+      storeCategory: data['storeCategory'] as String? ?? '',
+      imageUrls: (data['imageUrls'] as List<dynamic>?)?.cast<String>() ?? [],
+      isAvailable: data['isAvailable'] as bool? ?? false,
+      createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(),
+      greenFlags: (data['greenFlags'] as int?) ?? 0,
+      redFlags: (data['redFlags'] as int?) ?? 0,
       variations: variations,
-      reviewsIds: List<String>.from(data['reviewsIds'] ?? []),
+      reviewsIds: (data['reviewsIds'] as List<dynamic>?)?.cast<String>() ?? [],
     );
   }
 
   Map<String, dynamic> toFirestore() {
-    Map<String, dynamic> variationsMap = {};
-    variations.forEach((variationType, variantMap) {
-      variationsMap[variationType] = variantMap.map((key, value) => MapEntry(key, value.toMap()));
-    });
+    Map<String, dynamic> variationsMap = variations.map((variantKey, variant) => MapEntry(variantKey, variant.toMap()));
 
     return {
       'storeId': storeId,
@@ -116,65 +132,3 @@ class ProductModel {
     };
   }
 }
-
-/*
-ProductModel(
-  id: FirebaseFirestore.instance.collection('products').doc().id,
-  storeId: 'store123',
-  name: 'Premium Cotton T-Shirt',
-  description: 'A high-quality, comfortable cotton t-shirt',
-  productCategory: 'T-Shirts',
-  storeCategory: 'Apparel',
-  imageUrls: ['https://example.com/tshirt1.jpg', 'https://example.com/tshirt2.jpg'],
-  isAvailable: true,
-  createdAt: Timestamp.now(),
-  badReviews: 0,
-  goodReviews: 0,
-  variations: {
-      'size': {
-         'S': ProductVariant(
-          id: 'S',
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 50,
-          sku: 'TS-S',
-        ),
-        'M': ProductVariant(
-          id: 'M',
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 100,
-          sku: 'TS-M',
-      ),
-      'L': ProductVariant(
-        id: 'L',
-        price: 26.99,
-        mrp: 31.99,
-        discount: 15.63,
-        stockQuantity: 75,
-        sku: 'TS-L',
-      ),
-    },
-    'color': {
-        'Blue': ProductVariant(
-          id: 'Blue',
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 100,
-          sku: 'TS-BLU',
-        ),
-      'Red': ProductVariant(
-        id: 'Red',
-        price: 26.99,
-        mrp: 31.99,
-        discount: 15.63,
-        stockQuantity: 75,
-        sku: 'TS-RED',
-      ),
-   },
-  },
- )'
-*/

@@ -20,8 +20,6 @@ class StoreModel {
   final int storeEngagement;
   final int greenFlags;
   final int redFlags;
-  final List<String> productIds;
-  final List<String> postIds;
   final List<String> followerIds;
 
   StoreModel({
@@ -44,8 +42,6 @@ class StoreModel {
     required this.storeEngagement,
     required this.greenFlags,
     required this.redFlags,
-    required this.productIds,
-    required this.postIds,
     required this.followerIds,
   });
 
@@ -56,7 +52,7 @@ class StoreModel {
       ownerId: data['ownerId'],
       analyticsId: data['analyticsId'],
       name: data['name'],
-      logoUrl: data['logoUrl'] ?? 'https://via.placeholder.com/150',
+      logoUrl: data['logoUrl'],
       phone: data['phone'],
       email: data['email'],
       website: data['website'],
@@ -71,8 +67,6 @@ class StoreModel {
       storeEngagement: data['followerIds']?.length ?? 0,
       greenFlags: data['greenFlags'] ?? 0,
       redFlags: data['redFlags'] ?? 0,
-      productIds: List<String>.from(data['productIds'] ?? []),
-      postIds: List<String>.from(data['postIds'] ?? []),
       followerIds: List<String>.from(data['followerIds'] ?? []),
     );
   }
@@ -98,8 +92,6 @@ class StoreModel {
       'storeEngagement': storeEngagement,
       'greenFlags': greenFlags,
       'redFlags': redFlags,
-      'productIds': productIds,
-      'postIds': postIds,
       'followerIds': followerIds,
     };
   }

@@ -208,13 +208,11 @@ class _ProductTileState extends State<ProductTile> {
 
   ProductVariant? _getFirstVariation() {
     if (widget.product.variations.isNotEmpty) {
-      var firstType = widget.product.variations.keys.first;
-      if (widget.product.variations[firstType]?.isNotEmpty ?? false) {
-        return widget.product.variations[firstType]?.values.first;
-      }
+      return widget.product.variations.values.first;
     }
     return null;
   }
+
   @override
   Widget build(BuildContext context) {
     var firstVariation = _getFirstVariation();

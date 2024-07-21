@@ -9,7 +9,9 @@ class UserModel {
   final String? phoneNumber;
   final String? location;
   final String? pincode;
-  final String storeId;
+  final bool registered;
+  final String? storeId;
+  final List<String> likedPosts;
   final Timestamp createdAt;
   final Timestamp lastUpdated;
 
@@ -22,10 +24,15 @@ class UserModel {
     this.phoneNumber,
     this.location,
     this.pincode,
-    required this.storeId,
-    required this.createdAt,
-    required this.lastUpdated,
-  });
+    this.registered = false,
+    this.storeId,
+    List<String>? likedPosts,
+    Timestamp? createdAt,
+    Timestamp? lastUpdated,
+  }) :
+        this.likedPosts = likedPosts ?? [],
+        this.createdAt = createdAt ?? Timestamp.now(),
+        this.lastUpdated = lastUpdated ?? Timestamp.now();
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
@@ -39,9 +46,11 @@ class UserModel {
       phoneNumber: data['phoneNumber'],
       location: data['location'],
       pincode: data['pincode'],
-      storeId: data['storeId'] ?? '',
-      createdAt: data['createdAt'] ?? Timestamp.now(),
-      lastUpdated: data['lastUpdated'] ?? Timestamp.now(),
+      registered: data['registered'] ?? false,
+      storeId: data['storeId'],
+      likedPosts: List<String>.from(data['likedPosts'] ?? []),
+      createdAt: data['createdAt'],
+      lastUpdated: data['lastUpdated'],
     );
   }
 
@@ -54,7 +63,9 @@ class UserModel {
       'phoneNumber': phoneNumber,
       'location': location,
       'pincode': pincode,
+      'registered': registered,
       'storeId': storeId,
+      'likedPosts': likedPosts,
       'createdAt': createdAt,
       'lastUpdated': lastUpdated,
     };
@@ -68,7 +79,10 @@ class UserModel {
     String? phoneNumber,
     String? location,
     String? pincode,
+    bool? registered,
     String? storeId,
+    List<String>? likedPosts,
+    Timestamp? lastUpdated,
   }) {
     return UserModel(
       uid: this.uid,
@@ -79,55 +93,11 @@ class UserModel {
       phoneNumber: phoneNumber ?? this.phoneNumber,
       location: location ?? this.location,
       pincode: pincode ?? this.pincode,
+      registered: registered ?? this.registered,
       storeId: storeId ?? this.storeId,
+      likedPosts: likedPosts ?? this.likedPosts,
       createdAt: this.createdAt,
-      lastUpdated: Timestamp.now(),
+      lastUpdated: lastUpdated ?? Timestamp.now(),
     );
   }
 }
-
-/*
-
-// Creating a new user
-final newUser = UserModel(
-  uid: FirebaseAuth.instance.currentUser!.uid,
-  email: 'user@example.com',
-  displayName: 'John Doe',
-  firstName: 'John',
-  lastName: 'Doe',
-  createdAt: Timestamp.now(),
-  lastUpdated: Timestamp.now(),
-  roles: ['customer'],
-);
-
-// Saving to Firestore
-await FirebaseFirestore.instance.collection('users').doc(newUser.uid).set(newUser.toFirestore());
-
-// Updating a user
-Future<void> updateUser(String uid, {String? newPhoneNumber, String? newLocation}) async {
-  final docRef = FirebaseFirestore.instance.collection('users').doc(uid);
-
-  await FirebaseFirestore.instance.runTransaction((transaction) async {
-  final snapshot = await transaction.get(docRef);
-  final currentUser = UserModel.fromFirestore(snapshot);
-
-  final updatedUser = currentUser.copyWith(
-    phoneNumber: newPhoneNumber,
-    location: newLocation,
-  );
-
-  transaction.set(docRef, updatedUser.toFirestore());
-  });
-}
-
-// Querying users
-Query query = FirebaseFirestore.instance.collection('users')
-    .where('roles', arrayContains: 'customer')
-    .orderBy('lastUpdated', descending: true);
-
-query.get().then((querySnapshot) {
-  for (var doc in querySnapshot.docs) {
-    final user = UserModel.fromFirestore(doc);
-    print('${user.displayName}: ${user.email}');
-  }
-});*/

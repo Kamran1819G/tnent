@@ -1,3 +1,4 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tnennt/helpers/color_utils.dart';
@@ -15,6 +16,8 @@ class AllProductsScreen extends StatefulWidget {
 
 class _AllProductsScreenState extends State<AllProductsScreen> {
   late Future<List<ProductModel>> _productsFuture;
+  List<ProductModel> selectedProducts = [];
+  bool isSelectionMode = false;
 
   @override
   void initState() {
@@ -33,6 +36,59 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
         .toList();
   }
 
+  Future<void> _deleteProduct(ProductModel product) async {
+
+  }
+
+  Future<void> _deleteProductReferences(String productId, String storeId, String categoryId) async {
+    // Remove product from store's product list
+    await FirebaseFirestore.instance
+        .collection('stores')
+        .doc(widget.storeId)
+        .update({
+      'products': FieldValue.arrayRemove([productId])
+    });
+
+    // Remove product from categories
+    QuerySnapshot categoriesSnapshot = await FirebaseFirestore.instance
+        .collection('Stores')
+        .doc(storeId)
+        .collection('categories')
+        .where('productIds', arrayContains: productId)
+        .get();
+
+    for (QueryDocumentSnapshot categoryDoc in categoriesSnapshot.docs) {
+      await categoryDoc.reference.update({
+        'products': FieldValue.arrayRemove([productId])
+      });
+    }
+  }
+
+  void _toggleSelectionMode() {
+    setState(() {
+      isSelectionMode = !isSelectionMode;
+      if (!isSelectionMode) {
+        selectedProducts.clear();
+      }
+    });
+  }
+
+  void _toggleProductSelection(ProductModel product) {
+    setState(() {
+      if (selectedProducts.contains(product)) {
+        selectedProducts.remove(product);
+      } else {
+        selectedProducts.add(product);
+      }
+    });
+  }
+
+  Future<void> _deleteSelectedProducts() async {
+    for (ProductModel product in selectedProducts) {
+      await _deleteProduct(product);
+    }
+    _toggleSelectionMode();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +135,41 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
               ],
             ),
           ),
-          SizedBox(),
+          if (isSelectionMode)...[
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  Text(
+                    '${selectedProducts.length} selected',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Spacer(),
+                  TextButton(
+                    onPressed: _deleteSelectedProducts,
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(Colors.red),
+                      foregroundColor: WidgetStateProperty.all(Colors.white),
+                    ),
+                    child: Text('Delete'),
+                  ),
+                  SizedBox(width: 8.0),
+                  TextButton(
+                    onPressed: _toggleSelectionMode,
+                    child: Text('Cancel'),
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(Colors.grey),
+                      foregroundColor: WidgetStateProperty.all(Colors.white),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 8.0),
+          ],
+
           Expanded(
             child: FutureBuilder<List<ProductModel>>(
               future: _productsFuture,
@@ -100,8 +190,7 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                 List<ProductModel> products = snapshot.data!;
 
                 return GridView.builder(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  padding: EdgeInsets.all(8.0),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     crossAxisSpacing: 8.0,
@@ -113,13 +202,27 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                     final product = products[index];
                     return ProductTile(
                       product: product,
-                      onRemove: () {
-                        print('Removing product ${product.name}');
-                        setState(() {
-                          // Remove product from list
-                          products.removeAt(index);
-                        });
+                      isSelectionMode: isSelectionMode,
+                      isSelected: selectedProducts.contains(product),
+                      onTap: () {
+                        if (isSelectionMode) {
+                          _toggleProductSelection(product);
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ProductDetailScreen(product: product),
+                            ),
+                          );
+                        }
                       },
+                      onLongPress: () {
+                        if (!isSelectionMode) {
+                          _toggleSelectionMode();
+                          _toggleProductSelection(product);
+                        }
+                      },
+                      onRemove: () => _deleteProduct(product),
                     );
                   },
                 );
@@ -132,28 +235,26 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
   }
 }
 
-class ProductTile extends StatefulWidget {
-  ProductModel product;
-  final Function onRemove;
+class ProductTile extends StatelessWidget {
+  final ProductModel product;
+  final bool isSelectionMode;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+  final VoidCallback onRemove;
 
   ProductTile({
     required this.product,
+    required this.isSelectionMode,
+    required this.isSelected,
+    required this.onTap,
+    required this.onLongPress,
     required this.onRemove,
   });
 
-  @override
-  State<ProductTile> createState() => _ProductTileState();
-}
-
-class _ProductTileState extends State<ProductTile> {
-
-
   ProductVariant? _getFirstVariation() {
-    if (widget.product.variations.isNotEmpty) {
-      var firstType = widget.product.variations.keys.first;
-      if (widget.product.variations[firstType]?.isNotEmpty ?? false) {
-        return widget.product.variations[firstType]?.values.first;
-      }
+    if (product.variations.isNotEmpty) {
+      return product.variations.values.first;
     }
     return null;
   }
@@ -162,24 +263,15 @@ class _ProductTileState extends State<ProductTile> {
   Widget build(BuildContext context) {
     var firstVariation = _getFirstVariation();
     var price = firstVariation?.price ?? 0.0;
-    var mrp = firstVariation?.mrp ?? 0.0;
-    var discount = firstVariation?.discount ?? 0.0;
+
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(
-              product: widget.product,
-            ),
-          ),
-        );
-      },
+      onTap: onTap,
+      onLongPress: onLongPress,
       child: Container(
-        height: 200,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6.0),
           color: hexToColor('#F5F5F5'),
+          border: isSelected ? Border.all(color: Colors.blue, width: 2) : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -191,55 +283,49 @@ class _ProductTileState extends State<ProductTile> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),
                       image: DecorationImage(
-                        image: NetworkImage(widget.product.imageUrls[0]),
-                        fit: BoxFit.fill,
+                        image: NetworkImage(product.imageUrls[0]),
+                        fit: BoxFit.cover,
                       ),
                     ),
                   ),
-                  Positioned(
-                    right: 8.0,
-                    top: 8.0,
-                    child: GestureDetector(
-                      onTap: () => widget.onRemove(),
-                      child: Container(
-                        padding: EdgeInsets.all(6.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(100.0),
-                        ),
-                        child: Icon(
-                          Icons.remove,
-                          color: Colors.red,
-                          size: 12.0,
+                  if (!isSelectionMode)
+                    Positioned(
+                      right: 8.0,
+                      top: 8.0,
+                      child: GestureDetector(
+                        onTap: onRemove,
+                        child: Container(
+                          padding: EdgeInsets.all(6.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(100.0),
+                          ),
+                          child: Icon(
+                            Icons.remove,
+                            color: Colors.red,
+                            size: 12.0,
+                          ),
                         ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
-            SizedBox(height: 8.0),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.product.name,
-                    style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontSize: 10.0,
-                    ),
-                    maxLines: 1,
+                    product.name,
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4.0),
+                  SizedBox(height: 4),
                   Text(
                     '\$${price.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontSize: 10.0,
-                    ),
+                    style: TextStyle(fontSize: 10, color: Colors.grey[600]),
                   ),
                 ],
               ),

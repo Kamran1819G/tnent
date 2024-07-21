@@ -62,30 +62,29 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       greenFlags: 0,
       redFlags: 0,
       variations: {
-        'size': {
-          'S': ProductVariant(
-            price: 24.99,
-            mrp: 29.99,
-            discount: 16.67,
-            stockQuantity: 50,
-            sku: 'TS-S',
-          ),
-          'M': ProductVariant(
-            price: 24.99,
-            mrp: 29.99,
-            discount: 16.67,
-            stockQuantity: 100,
-            sku: 'TS-M',
-          ),
-          'L': ProductVariant(
-            price: 26.99,
-            mrp: 31.99,
-            discount: 15.63,
-            stockQuantity: 75,
-            sku: 'TS-L',
-          ),
-        },
+        'S': ProductVariant(
+          price: 24.99,
+          mrp: 29.99,
+          discount: 16.67,
+          stockQuantity: 50,
+          sku: 'TS-S',
+        ),
+        'M': ProductVariant(
+          price: 24.99,
+          mrp: 29.99,
+          discount: 16.67,
+          stockQuantity: 100,
+          sku: 'TS-M',
+        ),
+        'L': ProductVariant(
+          price: 26.99,
+          mrp: 31.99,
+          discount: 15.63,
+          stockQuantity: 75,
+          sku: 'TS-L',
+        ),
       },
+      reviewsIds: [],
     );
   });
 
