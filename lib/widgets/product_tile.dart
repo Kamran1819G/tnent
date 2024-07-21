@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
@@ -20,17 +22,62 @@ class ProductTile extends StatefulWidget {
 
 class _ProductTileState extends State<ProductTile> {
   bool _isInWishlist = false;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  void _toggleWishlist() {
+  @override
+  void initState() {
+    super.initState();
+    _checkWishlistStatus();
+  }
+
+  void _checkWishlistStatus() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user.uid).get();
+      if (userDoc.exists) {
+        List<dynamic> wishlist = (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
+        setState(() {
+          _isInWishlist = wishlist.contains(widget.product.productId);
+        });
+      }
+    }
+  }
+
+  Future<void> _toggleWishlist() async {
+    User? user = _auth.currentUser;
+    if (user == null) {
+      // Handle the case when the user is not logged in
+      print('User is not logged in');
+      return;
+    }
+
     setState(() {
       _isInWishlist = !_isInWishlist;
     });
 
-    // Send wishlist request to the server
-    if (_isInWishlist) {
-      print('Adding to wishlist...');
-    } else {
-      print('Removing from wishlist...');
+    try {
+      DocumentReference userDocRef = _firestore.collection('Users').doc(user.uid);
+
+      if (_isInWishlist) {
+        // Add product ID to wishlist
+        await userDocRef.update({
+          'wishlist': FieldValue.arrayUnion([widget.product.productId])
+        });
+        print('Added to wishlist: ${widget.product.productId}');
+      } else {
+        // Remove product ID from wishlist
+        await userDocRef.update({
+          'wishlist': FieldValue.arrayRemove([widget.product.productId])
+        });
+        print('Removed from wishlist: ${widget.product.productId}');
+      }
+    } catch (e) {
+      print('Error updating wishlist: $e');
+      // Revert the UI state if the operation failed
+      setState(() {
+        _isInWishlist = !_isInWishlist;
+      });
     }
   }
 

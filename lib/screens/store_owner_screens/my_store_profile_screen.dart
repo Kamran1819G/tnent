@@ -63,7 +63,11 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
       description: 'A high-quality, comfortable cotton t-shirt',
       productCategory: 'T-Shirts',
       storeCategory: 'Apparel',
-      imageUrls: ['https://example.com/tshirt1.jpg', 'https://example.com/tshirt2.jpg'],
+      imageUrls: [
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+      ],
       isAvailable: true,
       createdAt: Timestamp.now(),
       greenFlags: 0,

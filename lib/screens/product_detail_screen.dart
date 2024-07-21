@@ -31,6 +31,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   late ProductVariant _selectedVariant;
   bool _isInWishlist = false;
   late Future<StoreModel> _storeFuture;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   List<ProductModel> relatedProducts = List.generate(5, (index) {
     return ProductModel(
@@ -40,7 +42,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       description: 'A high-quality, comfortable cotton t-shirt',
       productCategory: 'T-Shirts',
       storeCategory: 'Apparel',
-      imageUrls: ['https://example.com/tshirt1.jpg', 'https://example.com/tshirt2.jpg'],
+      imageUrls: [
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+        'https://via.placeholder.com/150',
+      ],
       isAvailable: true,
       createdAt: Timestamp.now(),
       greenFlags: 0,
@@ -78,6 +84,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     super.initState();
     _storeFuture = _fetchStore();
     _initializeSelectedVariation();
+    _checkWishlistStatus();
   }
 
   Future<StoreModel> _fetchStore() async {
@@ -95,11 +102,54 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
-  void _toggleWishlist() {
+  void _checkWishlistStatus() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user.uid).get();
+      if (userDoc.exists) {
+        List<dynamic> wishlist = (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
+        setState(() {
+          _isInWishlist = wishlist.contains(widget.product.productId);
+        });
+      }
+    }
+  }
+
+  Future<void> _toggleWishlist() async {
+    User? user = _auth.currentUser;
+    if (user == null) {
+      // Handle the case when the user is not logged in
+      print('User is not logged in');
+      return;
+    }
+
     setState(() {
       _isInWishlist = !_isInWishlist;
     });
-    // Implement wishlist functionality
+
+    try {
+      DocumentReference userDocRef = _firestore.collection('Users').doc(user.uid);
+
+      if (_isInWishlist) {
+        // Add product ID to wishlist
+        await userDocRef.update({
+          'wishlist': FieldValue.arrayUnion([widget.product.productId])
+        });
+        print('Added to wishlist: ${widget.product.productId}');
+      } else {
+        // Remove product ID from wishlist
+        await userDocRef.update({
+          'wishlist': FieldValue.arrayRemove([widget.product.productId])
+        });
+        print('Removed from wishlist: ${widget.product.productId}');
+      }
+    } catch (e) {
+      print('Error updating wishlist: $e');
+      // Revert the UI state if the operation failed
+      setState(() {
+        _isInWishlist = !_isInWishlist;
+      });
+    }
   }
 
   @override
