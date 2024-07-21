@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class StoreModel {
-  final String id;
+  final String storeId;
   final String ownerId;
   final String analyticsId;
   final String name;
@@ -18,15 +18,14 @@ class StoreModel {
   final int totalProducts;
   final int totalPosts;
   final int storeEngagement;
-  final int goodReviews;
-  final int badReviews;
-  final List<String> reviewIds;
+  final int greenFlags;
+  final int redFlags;
   final List<String> productIds;
   final List<String> postIds;
   final List<String> followerIds;
 
   StoreModel({
-    required this.id,
+    required this.storeId,
     required this.ownerId,
     required this.analyticsId,
     required this.name,
@@ -43,9 +42,8 @@ class StoreModel {
     required this.totalProducts,
     required this.totalPosts,
     required this.storeEngagement,
-    required this.goodReviews,
-    required this.badReviews,
-    required this.reviewIds,
+    required this.greenFlags,
+    required this.redFlags,
     required this.productIds,
     required this.postIds,
     required this.followerIds,
@@ -54,7 +52,7 @@ class StoreModel {
   factory StoreModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return StoreModel(
-      id: doc.id,
+      storeId: doc.id,
       ownerId: data['ownerId'],
       analyticsId: data['analyticsId'],
       name: data['name'],
@@ -71,9 +69,8 @@ class StoreModel {
       totalProducts: data['productIds'].length ?? 0,
       totalPosts: data['postIds'].length ?? 0,
       storeEngagement: data['followerIds']?.length ?? 0,
-      goodReviews: data['goodReviews'] ?? 0,
-      badReviews: data['badReviews'] ?? 0,
-      reviewIds: List<String>.from(data['reviewIds'] ?? []),
+      greenFlags: data['greenFlags'] ?? 0,
+      redFlags: data['redFlags'] ?? 0,
       productIds: List<String>.from(data['productIds'] ?? []),
       postIds: List<String>.from(data['postIds'] ?? []),
       followerIds: List<String>.from(data['followerIds'] ?? []),
@@ -82,7 +79,7 @@ class StoreModel {
 
   Map<String, dynamic> toFirestore() {
     return {
-      'id': id,
+      'storeId': storeId,
       'ownerId': ownerId,
       'analyticsId': analyticsId,
       'name': name,
@@ -99,9 +96,8 @@ class StoreModel {
       'totalProduct': totalProducts,
       'totalPosts': totalPosts,
       'storeEngagement': storeEngagement,
-      'goodReviews': goodReviews,
-      'badReviews': badReviews,
-      'reviewIds': reviewIds,
+      'greenFlags': greenFlags,
+      'redFlags': redFlags,
       'productIds': productIds,
       'postIds': postIds,
       'followerIds': followerIds,

@@ -99,7 +99,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
 
       // Create a new StoreModel instance
       final newStore = StoreModel(
-        id: FirebaseFirestore.instance.collection('stores').doc().id,
+        storeId: FirebaseFirestore.instance.collection('stores').doc().id,
         ownerId: currentUser.uid,
         analyticsId: 'analytics_${DateTime.now().millisecondsSinceEpoch}',
         name: _nameController.text,
@@ -113,12 +113,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         category: selectedCategory,
         isActive: true,
         createdAt: Timestamp.now(),
-        reviewIds: [],
         totalProducts: 0,
         totalPosts: 0,
         storeEngagement: 0,
-        goodReviews: 0,
-        badReviews: 0,
+        greenFlags: 0,
+        redFlags: 0,
         postIds: [],
         productIds: [],
         followerIds: [],
@@ -127,14 +126,14 @@ class _StoreRegistrationState extends State<StoreRegistration> {
       // Add the store to Firestore
       await FirebaseFirestore.instance
           .collection('Stores')
-          .doc(newStore.id)
+          .doc(newStore.storeId)
           .set(newStore.toFirestore());
 
       // Add storeId to user's document
       await FirebaseFirestore.instance
           .collection('Users')
           .doc(currentUser.uid)
-          .update({'storeId':  newStore.id});
+          .update({'storeId':  newStore.storeId});
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(

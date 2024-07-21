@@ -4,7 +4,7 @@ import 'package:tnennt/screens/product_detail_screen.dart';
 import '../helpers/color_utils.dart';
 
 class ProductTile extends StatefulWidget {
-  ProductModel product;
+  final ProductModel product;
   final double width;
   final double height;
 
@@ -34,8 +34,23 @@ class _ProductTileState extends State<ProductTile> {
     }
   }
 
+  ProductVariant? _getFirstVariation() {
+    if (widget.product.variations.isNotEmpty) {
+      var firstType = widget.product.variations.keys.first;
+      if (widget.product.variations[firstType]?.isNotEmpty ?? false) {
+        return widget.product.variations[firstType]?.values.first;
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    var firstVariation = _getFirstVariation();
+    var price = firstVariation?.price ?? 0.0;
+    var mrp = firstVariation?.mrp ?? 0.0;
+    var discount = firstVariation?.discount ?? 0.0;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -107,12 +122,27 @@ class _ProductTileState extends State<ProductTile> {
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4.0),
-                  Text(
-                    '\$${widget.product.variants.first.price.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontSize: 12.0,
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        '\$${price.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: hexToColor('#343434'),
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(width: 4.0),
+                      if (discount > 0)
+                        Text(
+                          '${discount.toStringAsFixed(0)}% OFF',
+                          style: TextStyle(
+                            color: hexToColor('#4CAF50'),
+                            fontSize: 10.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                    ],
                   ),
                 ],
               ),

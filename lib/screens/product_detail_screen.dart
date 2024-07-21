@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/helpers/text_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
@@ -26,32 +27,49 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   PageController imagesController = PageController(viewportFraction: 0.6);
-  String _selectedProductSize = 'S';
+  Map<String, String> _selectedVariations = {};
+  late ProductVariant _selectedVariant;
   bool _isInWishlist = false;
   late Future<StoreModel> _storeFuture;
 
-  List<dynamic> relatedProducts = List.generate(5, (index) {
+  List<ProductModel> relatedProducts = List.generate(5, (index) {
     return ProductModel(
-      id: '1',
-      storeId: '1',
-      name: 'Product Name',
-      description: 'Product Description',
-      productCategory: 'Product Category',
-      storeCategory: 'Store Category',
-      imageUrls: ['https://via.placeholder.com/150'],
-      badReviews: 0,
-      goodReviews: 0,
+      productId: 'product123',
+      storeId: 'EBJgGaWsnrluCKcaOUOT',
+      name: 'Premium Cotton T-Shirt',
+      description: 'A high-quality, comfortable cotton t-shirt',
+      productCategory: 'T-Shirts',
+      storeCategory: 'Apparel',
+      imageUrls: ['https://example.com/tshirt1.jpg', 'https://example.com/tshirt2.jpg'],
       isAvailable: true,
-      variantOptions: {},
-      variants: List.generate(3, (index) {
-        return ProductVariant(
-          id: '1',
-          price: 100,
-          mrp: 120,
-          discount: 20,
-          stockQuantity: 100,
-        );
-      }), createdAt: Timestamp.now(),
+      createdAt: Timestamp.now(),
+      greenFlags: 0,
+      redFlags: 0,
+      variations: {
+        'size': {
+          'S': ProductVariant(
+            price: 24.99,
+            mrp: 29.99,
+            discount: 16.67,
+            stockQuantity: 50,
+            sku: 'TS-S',
+          ),
+          'M': ProductVariant(
+            price: 24.99,
+            mrp: 29.99,
+            discount: 16.67,
+            stockQuantity: 100,
+            sku: 'TS-M',
+          ),
+          'L': ProductVariant(
+            price: 26.99,
+            mrp: 31.99,
+            discount: 15.63,
+            stockQuantity: 75,
+            sku: 'TS-L',
+          ),
+        },
+      },
     );
   });
 
@@ -60,6 +78,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void initState() {
     super.initState();
     _storeFuture = _fetchStore();
+    _initializeSelectedVariations();
   }
 
   Future<StoreModel> _fetchStore() async {
@@ -68,6 +87,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         .doc(widget.product.storeId)
         .get();
     return StoreModel.fromFirestore(storeDoc);
+  }
+
+  void _initializeSelectedVariations() {
+    widget.product.variations.forEach((key, value) {
+      _selectedVariations[key] = value.keys.first;
+    });
+    _updateSelectedVariant();
+  }
+
+  void _updateSelectedVariant() {
+    _selectedVariant = widget.product.variations[_selectedVariations.keys.first]![_selectedVariations[_selectedVariations.keys.first]!]!;
   }
 
   void _toggleWishlist() {
@@ -332,24 +362,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ),
                             ),
                             SizedBox(height: 20),
-                            Container(
-                              child: GridView.count(
-                                physics: NeverScrollableScrollPhysics(),
-                                crossAxisCount: 4,
-                                crossAxisSpacing: 10,
-                                mainAxisSpacing: 10,
-                                childAspectRatio: 2.5 / 1.0,
-                                shrinkWrap: true,
-                                children: [
-                                  _buildSizeWidget('XS'),
-                                  _buildSizeWidget('S'),
-                                  _buildSizeWidget('M'),
-                                  _buildSizeWidget('L'),
-                                  _buildSizeWidget('XL'),
-                                  _buildSizeWidget('XXL'),
-                                ],
-                              ),
-                            ),
+                            _buildVariationSelectors(),
                             SizedBox(height: 20),
                             Container(
                               padding: EdgeInsets.all(16),
@@ -368,7 +381,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             CrossAxisAlignment.center,
                                         children: [
                                           Text(
-                                            '\$${widget.product.variants[0].price}',
+                                            '\$${_selectedVariant.price.toStringAsFixed(2)}',
                                             style: TextStyle(
                                               color: hexToColor('#343434'),
                                               fontSize: 28,
@@ -376,7 +389,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           ),
                                           SizedBox(width: 10),
                                           Text(
-                                            '${widget.product.variants[0].discount}% Discount',
+                                            '${_selectedVariant.discount}% Discount',
                                             style: TextStyle(
                                               color: hexToColor('#FF0000'),
                                               fontSize: 16,
@@ -385,7 +398,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         ],
                                       ),
                                       Text(
-                                        'M.R.P \$${widget.product.variants[0].mrp}',
+                                        'M.R.P \$${widget.product.variations[0]?[0]?.mrp}',
                                         style: TextStyle(
                                           color: hexToColor('#B9B9B9'),
                                           fontSize: 16,
@@ -406,7 +419,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     ),
                                     child: GestureDetector(
                                       onTap: () async {
-                                        // Add the product to the cart
+                                        /*// Add the product to the cart
                                         String userId = FirebaseAuth
                                                 .instance.currentUser?.uid ??
                                             '';
@@ -449,13 +462,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           } else {
                                             // If the product is not in the cart, add it with all necessary information
                                             cartList.add({
-                                              'productID': widget.product.id,
+                                              'productID': widget.product.productId,
                                               'productName':
                                                   widget.product.name,
                                               'productPrice': widget
-                                                  .product.variants[0].price,
+                                                  .product.variations[0]?[0]?.price,
                                               'discount': widget
-                                                  .product.variants[0].discount,
+                                                  .product.variations[0]?[0]?.discount,
                                               'variation': _selectedProductSize,
                                               'quantity': 1,
                                               // You might want to add the first image from the images list
@@ -467,7 +480,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           transaction.update(userRef, {
                                             'mycart': json.encode(cartList)
                                           });
-                                        });
+                                        });*/
 
                                         // Navigate to the cart screen
                                         Navigator.push(
@@ -640,7 +653,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ],
                   ),
                 ),
-                /*Positioned(
+                Positioned(
                 left: 0,
                 right: 0,
                 bottom: 0,
@@ -670,47 +683,82 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
                   ),
                 ),
-              ),*/
+              ),
               ]);
             }),
       ),
     );
   }
 
-  _buildSizeWidget(String size) {
-    bool isSelected = size == _selectedProductSize;
-    return GestureDetector(
-        onTap: () {
-          setState(() {
-            _selectedProductSize = isSelected ? '' : size;
-          });
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            color: isSelected ? Theme.of(context).primaryColor : Colors.white,
-            borderRadius: BorderRadius.circular(2),
-            border: Border.all(
-              color: isSelected
-                  ? Theme.of(context).primaryColor
-                  : hexToColor('#848484'),
-              width: 1,
-            ),
-          ),
-          child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: Text(
-              size,
-              style: TextStyle(
-                color: isSelected ? Colors.white : hexToColor('#222230'),
-                fontFamily: 'Gotham',
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+  Widget _buildVariationSelectors() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: widget.product.variations.entries.map((entry) {
+        String variationType = entry.key;
+        Map<String, ProductVariant> variants = entry.value;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Text(
+                variationType.capitalize(),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-              textAlign: TextAlign.center,
             ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Wrap(
+                spacing: 8.0, // horizontal space between items
+                runSpacing: 8.0, // vertical space between lines
+                children: variants.keys.map((variantName) {
+                  return _buildVariationWidget(variationType, variantName);
+                }).toList(),
+              ),
+            ),
+          ],
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildVariationWidget(String variationType, String variantName) {
+    bool isSelected = _selectedVariations[variationType] == variantName;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _selectedVariations[variationType] = variantName;
+          _updateSelectedVariant();
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: isSelected ? Theme.of(context).primaryColor : Colors.white,
+          borderRadius: BorderRadius.circular(2),
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).primaryColor
+                : hexToColor('#848484'),
+            width: 1,
           ),
-        ));
+        ),
+        child: Padding(
+          padding:
+          const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Text(
+            variantName,
+            style: TextStyle(
+              color: isSelected ? Colors.white : hexToColor('#222230'),
+              fontFamily: 'Gotham',
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
   }
 
   _buildMoreBottomSheet() {

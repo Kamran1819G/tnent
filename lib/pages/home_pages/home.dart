@@ -50,26 +50,42 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   List<ProductModel> featuredProducts = List.generate(5, (index) {
     return ProductModel(
-      id: '1',
-      storeId: '1',
-      name: 'Product Name',
-      description: 'Product Description',
-      productCategory: 'Product Category',
-      storeCategory: 'Store Category',
-      imageUrls: ['https://via.placeholder.com/150'],
-      badReviews: 0,
-      goodReviews: 0,
+      productId: 'product123',
+      storeId: 'EBJgGaWsnrluCKcaOUOT',
+      name: 'Premium Cotton T-Shirt',
+      description: 'A high-quality, comfortable cotton t-shirt',
+      productCategory: 'T-Shirts',
+      storeCategory: 'Apparel',
+      imageUrls: ['https://example.com/tshirt1.jpg', 'https://example.com/tshirt2.jpg'],
       isAvailable: true,
-      variantOptions: {},
-      variants: List.generate(3, (index) {
-        return ProductVariant(
-          id: '1',
-          price: 100,
-          mrp: 120,
-          discount: 20,
-          stockQuantity: 100,
-        );
-      }), createdAt: Timestamp.now(),
+      createdAt: Timestamp.now(),
+      greenFlags: 0,
+      redFlags: 0,
+      variations: {
+        'size': {
+          'S': ProductVariant(
+            price: 24.99,
+            mrp: 29.99,
+            discount: 16.67,
+            stockQuantity: 50,
+            sku: 'TS-S',
+          ),
+          'M': ProductVariant(
+            price: 24.99,
+            mrp: 29.99,
+            discount: 16.67,
+            stockQuantity: 100,
+            sku: 'TS-M',
+          ),
+          'L': ProductVariant(
+            price: 26.99,
+            mrp: 31.99,
+            discount: 15.63,
+            stockQuantity: 75,
+            sku: 'TS-L',
+          ),
+        },
+      },
     );
   });
 

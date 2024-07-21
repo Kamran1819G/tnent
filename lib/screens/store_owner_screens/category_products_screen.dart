@@ -162,13 +162,11 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                           );*/
                         },
                         child: ProductTile(
-                          name: product.name,
-                          image: product.imageUrls.first,
-                          price: product.variants.first.price,
+                          product: product,
                           onRemove: () {
                             // Remove product from category
                             setState(() {
-                              widget.category.productIds.removeWhere((element) => element == product.id);
+                              widget.category.productIds.removeWhere((element) => element == product.productId);
                             });
                           },
                         ),
@@ -186,15 +184,15 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
 }
 
 class ProductTile extends StatefulWidget {
-  final String name;
-  final String image;
-  final double price;
+  ProductModel product;
+  final double width;
+  final double height;
   final Function onRemove;
 
   ProductTile({
-    required this.name,
-    required this.image,
-    required this.price,
+    required this.product,
+    this.width = 150.0,
+    this.height = 200.0,
     required this.onRemove,
   });
 
@@ -207,8 +205,23 @@ class _ProductTileState extends State<ProductTile> {
     widget.onRemove();
   }
 
+
+  ProductVariant? _getFirstVariation() {
+    if (widget.product.variations.isNotEmpty) {
+      var firstType = widget.product.variations.keys.first;
+      if (widget.product.variations[firstType]?.isNotEmpty ?? false) {
+        return widget.product.variations[firstType]?.values.first;
+      }
+    }
+    return null;
+  }
   @override
   Widget build(BuildContext context) {
+    var firstVariation = _getFirstVariation();
+    var price = firstVariation?.price ?? 0.0;
+    var mrp = firstVariation?.mrp ?? 0.0;
+    var discount = firstVariation?.discount ?? 0.0;
+
     return Container(
       height: 200,
       decoration: BoxDecoration(
@@ -225,7 +238,7 @@ class _ProductTileState extends State<ProductTile> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8.0),
                     image: DecorationImage(
-                      image: NetworkImage(widget.image),
+                      image: NetworkImage(widget.product.imageUrls[0]),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -259,7 +272,7 @@ class _ProductTileState extends State<ProductTile> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.name,
+                  widget.product.name,
                   style: TextStyle(
                     color: hexToColor('#343434'),
                     fontSize: 10.0,
@@ -269,7 +282,7 @@ class _ProductTileState extends State<ProductTile> {
                 ),
                 SizedBox(height: 4.0),
                 Text(
-                  '\$${widget.price.toStringAsFixed(2)}',
+                  '\$${price.toStringAsFixed(2)}',
                   style: TextStyle(
                     color: hexToColor('#343434'),
                     fontSize: 10.0,

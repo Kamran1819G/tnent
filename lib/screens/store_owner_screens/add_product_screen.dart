@@ -139,7 +139,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
   Map<String, dynamic> _createProductData(
       String productId, List<String> imageUrls) {
     final productData = ProductModel(
-      id: productId,
+      productId: productId,
       storeId: widget.storeId,
       name: _nameController.text,
       description: _descriptionController.text,
@@ -148,25 +148,22 @@ class _AddProductScreenState extends State<AddProductScreen> {
       imageUrls: imageUrls,
       isAvailable: true,
       createdAt: Timestamp.now(),
-      badReviews: 0,
-      goodReviews: 0,
-      variants: [],
-      variantOptions: {},
+      greenFlags: 0,
+      redFlags: 0,
+      variations: {},
     );
 
     if (!isMultiOptionCategory) {
       String sku = _generateSku(productData.name, {});
-      productData.variants.add(
-        ProductVariant(
-          id: Uuid().v4(),
-          attributes: {},
+      productData.variations['default'] = {
+        'default': ProductVariant(
           discount: double.tryParse(_discountController.text) ?? 0.0,
           mrp: double.tryParse(_mrpController.text) ?? 0.0,
           price: double.tryParse(_itemPriceController.text) ?? 0.0,
           stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
           sku: sku,
         ),
-      );
+      };
     }
 
     return productData.toFirestore();
@@ -793,7 +790,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   hexToColor('#2B2B2B')),
                             )
                           : ElevatedButton(
-                              onPressed: _addProduct,
+                              onPressed:_addProduct,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: hexToColor('#2B2B2B'),
                                 padding: EdgeInsets.symmetric(

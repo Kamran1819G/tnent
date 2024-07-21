@@ -132,7 +132,7 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
   }
 }
 
-class ProductTile extends StatelessWidget {
+class ProductTile extends StatefulWidget {
   ProductModel product;
   final Function onRemove;
 
@@ -142,14 +142,35 @@ class ProductTile extends StatelessWidget {
   });
 
   @override
+  State<ProductTile> createState() => _ProductTileState();
+}
+
+class _ProductTileState extends State<ProductTile> {
+
+
+  ProductVariant? _getFirstVariation() {
+    if (widget.product.variations.isNotEmpty) {
+      var firstType = widget.product.variations.keys.first;
+      if (widget.product.variations[firstType]?.isNotEmpty ?? false) {
+        return widget.product.variations[firstType]?.values.first;
+      }
+    }
+    return null;
+  }
+
+  @override
   Widget build(BuildContext context) {
+    var firstVariation = _getFirstVariation();
+    var price = firstVariation?.price ?? 0.0;
+    var mrp = firstVariation?.mrp ?? 0.0;
+    var discount = firstVariation?.discount ?? 0.0;
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => ProductDetailScreen(
-              product: product,
+              product: widget.product,
             ),
           ),
         );
@@ -170,7 +191,7 @@ class ProductTile extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),
                       image: DecorationImage(
-                        image: NetworkImage(product.imageUrls[0]),
+                        image: NetworkImage(widget.product.imageUrls[0]),
                         fit: BoxFit.fill,
                       ),
                     ),
@@ -179,7 +200,7 @@ class ProductTile extends StatelessWidget {
                     right: 8.0,
                     top: 8.0,
                     child: GestureDetector(
-                      onTap: () => onRemove(),
+                      onTap: () => widget.onRemove(),
                       child: Container(
                         padding: EdgeInsets.all(6.0),
                         decoration: BoxDecoration(
@@ -204,7 +225,7 @@ class ProductTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    product.name,
+                    widget.product.name,
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 10.0,
@@ -214,7 +235,7 @@ class ProductTile extends StatelessWidget {
                   ),
                   SizedBox(height: 4.0),
                   Text(
-                    '\$${product.variants.first.price.toString()}',
+                    '\$${price.toStringAsFixed(2)}',
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 10.0,

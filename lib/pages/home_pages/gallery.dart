@@ -37,6 +37,7 @@ class _GalleryState extends State<Gallery> {
 
   Future<void> _checkStoreRegistration() async {
     final user = FirebaseAuth.instance.currentUser;
+    print(user?.uid);
     if (user != null) {
       final storeId = await FirebaseFirestore.instance
           .collection('Users')
@@ -60,7 +61,7 @@ class _GalleryState extends State<Gallery> {
   Future<void> _updateStoreStatus(bool isActive) async {
       await FirebaseFirestore.instance
           .collection('Stores')
-          .doc(store.id)
+          .doc(store.storeId)
           .update({'isActive': isActive});
   }
 
