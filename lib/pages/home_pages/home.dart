@@ -5,6 +5,7 @@ import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/category_model.dart';
 import 'package:tnennt/models/product_model.dart';
+import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/pages/catalog_pages/cart_screen.dart';
 import 'package:tnennt/screens/explore_screen.dart';
@@ -88,28 +89,30 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     );
   });
 
-  List<dynamic> featuredStores = [
-    {
-      "name": "Sahachari",
-      "image": "assets/sahachari_image.png",
-    },
-    {
-      "name": "Jain Brothers",
-      "image": "assets/jain_brothers.png",
-    },
-    {
-      "name": "Sahachari",
-      "image": "assets/sahachari_image.png",
-    },
-    {
-      "name": "Jain Brothers",
-      "image": "assets/jain_brothers.png",
-    },
-    {
-      "name": "Sahachari",
-      "image": "assets/sahachari_image.png",
-    },
-  ];
+  List<StoreModel> featuredStores = List.generate(5, (index) {
+    return StoreModel(
+      storeId: 'store$index',
+      ownerId: 'owner$index',
+      analyticsId: 'analytics$index',
+      name: 'Store Name $index',
+      logoUrl: 'https://via.placeholder.com/150',
+      phone: '123-456-789$index',
+      email: 'store$index@example.com',
+      website: 'https://example.com/store$index',
+      upiUsername: 'upiUser$index',
+      upiId: 'upiId$index',
+      location: 'Location $index',
+      category: 'Category $index',
+      isActive: index % 2 == 0,
+      createdAt: Timestamp.now(),
+      totalProducts: index * 10,
+      totalPosts: index * 5,
+      storeEngagement: index * 20,
+      greenFlags: index * 2,
+      redFlags: index,
+      followerIds: [],
+    );
+  });
 
   @override
   void initState() {
@@ -570,30 +573,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   color: hexToColor('#343434'),
                   fontSize: 22.0,
                 ),
-              ),
-              Spacer(),
-              // GestureDetector(
-              //   onTap: () {
-              //     Navigator.push(context,
-              //         MaterialPageRoute(builder: (context) => StoresScreen()));
-              //   },
-              //   child: Container(
-              //     padding:
-              //         EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              //     decoration: BoxDecoration(
-              //       color: hexToColor('#F5F5F5'),
-              //       borderRadius: BorderRadius.circular(50.0),
-              //     ),
-              //     child: Text(
-              //       'View All',
-              //       style: TextStyle(
-              //         color: hexToColor('#272822'),
-              //
-              //         fontSize: 12.0,
-              //       ),
-              //     ),
-              //   ),
-              // ),
+              )
             ],
           ),
         ),
@@ -608,8 +588,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             children: [
               ...featuredStores.map((store) {
                 return StoreTile(
-                  storeName: store["name"],
-                  storeLogo: store["image"],
+                  store: store,
                 );
               }).toList(),
               GestureDetector(
@@ -651,40 +630,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
         ),
 
-        SizedBox(height: 20.0),
-        if (categories.isNotEmpty) ...[
-          // Category Section
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              'Category',
-              style: TextStyle(
-                color: hexToColor('#343434'),
-                fontSize: 22.0,
-              ),
-            ),
-          ),
-          Container(
-            height: MediaQuery.of(context).size.height * 1.05,
-            child: GridView.builder(
-              padding: EdgeInsets.all(16.0),
-              physics: NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 4.0,
-                mainAxisSpacing: 4.0,
-                childAspectRatio: 3 / 4,
-              ),
-              itemCount: categories.length,
-              itemBuilder: (context, index) {
-                return CategoryTile(
-                  category: categories[index],
-                );
-              },
-            ),
-          ),
-        ],
+
+
+        SizedBox(height: MediaQuery.sizeOf(context).height * 0.1),
       ],
     );
   }
@@ -701,13 +649,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 }
 
 class StoreTile extends StatelessWidget {
-  final String storeName;
-  final String storeLogo;
+  final StoreModel store;
 
-  StoreTile({
-    required this.storeName,
-    required this.storeLogo,
-  });
+  StoreTile({required this.store});
 
   @override
   Widget build(BuildContext context) {
@@ -717,8 +661,7 @@ class StoreTile extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => StoreProfileScreen(
-              storeName: storeName,
-              storeLogo: storeLogo,
+              store: store,
             ),
           ),
         );
@@ -735,7 +678,7 @@ class StoreTile extends StatelessWidget {
                 border: Border.all(color: hexToColor('#B5B5B5')),
                 borderRadius: BorderRadius.circular(18.0),
                 image: DecorationImage(
-                  image: AssetImage(storeLogo),
+                  image: NetworkImage(store.logoUrl),
                   fit: BoxFit.fill,
                 ),
               ),
@@ -743,7 +686,7 @@ class StoreTile extends StatelessWidget {
             SizedBox(height: 8.0),
             Expanded(
               child: Text(
-                storeName,
+                store.name,
                 style: TextStyle(fontSize: 10.0),
               ),
             ),

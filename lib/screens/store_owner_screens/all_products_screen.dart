@@ -254,7 +254,6 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                           _toggleProductSelection(product);
                         }
                       },
-                      onRemove: () => _deleteProduct(product),
                     );
                   },
                 );
@@ -273,7 +272,6 @@ class ProductTile extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
-  final VoidCallback onRemove;
 
   ProductTile({
     required this.product,
@@ -281,7 +279,6 @@ class ProductTile extends StatelessWidget {
     required this.isSelected,
     required this.onTap,
     required this.onLongPress,
-    required this.onRemove,
   });
 
   ProductVariant? _getFirstVariation() {
@@ -309,38 +306,14 @@ class ProductTile extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.0),
-                      image: DecorationImage(
-                        image: NetworkImage(product.imageUrls[0]),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8.0),
+                  image: DecorationImage(
+                    image: NetworkImage(product.imageUrls[0]),
+                    fit: BoxFit.cover,
                   ),
-                  if (!isSelectionMode)
-                    Positioned(
-                      right: 8.0,
-                      top: 8.0,
-                      child: GestureDetector(
-                        onTap: onRemove,
-                        child: Container(
-                          padding: EdgeInsets.all(6.0),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(100.0),
-                          ),
-                          child: Icon(
-                            Icons.remove,
-                            color: Colors.red,
-                            size: 12.0,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
+                ),
               ),
             ),
             Padding(

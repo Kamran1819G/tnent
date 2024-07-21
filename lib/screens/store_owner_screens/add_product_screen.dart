@@ -757,6 +757,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           ),
                         ),
                       ),
+                    SizedBox(height: 8),
                     Center(
                       child: isSubmitting
                           ? CircularProgressIndicator(

@@ -88,8 +88,7 @@ class _StoresScreenState extends State<StoresScreen> {
                     itemBuilder: (context, index) {
                       final store = stores[index];
                       return StoreTile(
-                        storeName: store.name,
-                        storeLogo: store.logoUrl, // Ensure the logo URL is correctly used
+                        store : store,
                       );
                     },
                   );
@@ -104,13 +103,9 @@ class _StoresScreenState extends State<StoresScreen> {
 }
 
 class StoreTile extends StatelessWidget {
-  final String storeName;
-  final String storeLogo;
+  final StoreModel store;
 
-  StoreTile({
-    required this.storeName,
-    required this.storeLogo,
-  });
+  StoreTile({required this.store});
 
   @override
   Widget build(BuildContext context) {
@@ -120,8 +115,7 @@ class StoreTile extends StatelessWidget {
           context,
           MaterialPageRoute(
             builder: (context) => StoreProfileScreen(
-              storeName: storeName,
-              storeLogo: storeLogo,
+              store: store,
             ),
           ),
         );
@@ -133,18 +127,16 @@ class StoreTile extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(18.0),
-              child: storeLogo.isNotEmpty
-                  ? Image.network(
-                storeLogo,
+              child: Image.network(
+                store.logoUrl,
                 fit: BoxFit.fill,
               )
-                  : Placeholder(),
             ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
                 child: Text(
-                  storeName,
+                  store.name,
                   style: TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 12.0),

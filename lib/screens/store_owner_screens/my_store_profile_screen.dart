@@ -7,7 +7,7 @@ import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
 import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/screens/store_owner_screens/store_community.dart';
+import 'package:tnennt/screens/store_community.dart';
 import 'package:tnennt/widgets/product_tile.dart';
 import 'package:tnennt/screens/store_owner_screens/analytics_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/order_pays_screen.dart';
