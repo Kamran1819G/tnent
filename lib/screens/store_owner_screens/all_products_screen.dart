@@ -37,30 +37,62 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
   }
 
   Future<void> _deleteProduct(ProductModel product) async {
+    try {
+      // Delete product document
+      await FirebaseFirestore.instance
+          .collection('products')
+          .doc(product.productId)
+          .delete();
 
-  }
+      // Delete product images folder from storage
+      final storageRef = FirebaseStorage.instance.ref();
+      final productFolderRef = storageRef.child('products/${product.productId}');
 
-  Future<void> _deleteProductReferences(String productId, String storeId, String categoryId) async {
-    // Remove product from store's product list
-    await FirebaseFirestore.instance
-        .collection('stores')
-        .doc(widget.storeId)
-        .update({
-      'products': FieldValue.arrayRemove([productId])
-    });
+      try {
+        // List all items in the folder
+        final ListResult result = await productFolderRef.listAll();
 
-    // Remove product from categories
-    QuerySnapshot categoriesSnapshot = await FirebaseFirestore.instance
-        .collection('Stores')
-        .doc(storeId)
-        .collection('categories')
-        .where('productIds', arrayContains: productId)
-        .get();
+        // Delete each item in the folder
+        for (var item in result.items) {
+          await item.delete();
+        }
 
-    for (QueryDocumentSnapshot categoryDoc in categoriesSnapshot.docs) {
-      await categoryDoc.reference.update({
-        'products': FieldValue.arrayRemove([productId])
+        // After deleting all items, delete the folder itself
+        await productFolderRef.delete();
+      } catch (e) {
+        print('Error deleting product images: $e');
+        // Continue with the rest of the deletion process even if image deletion fails
+      }
+
+      // Remove product reference from store
+      await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(widget.storeId)
+          .update({
+        'productIds': FieldValue.arrayRemove([product.productId]),
+        'totalProducts': FieldValue.increment(-1)
       });
+
+      // Remove product reference from category
+      await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(widget.storeId)
+          .collection('categories')
+          .doc(product.storeCategory)
+          .update({
+        'productIds': FieldValue.arrayRemove([product.productId])
+      });
+
+      // Refresh the product list
+      setState(() {
+        _productsFuture = _fetchProducts();
+      });
+    } catch (e) {
+      print('Error deleting product: $e');
+      // Show error message to user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete product. Please try again.')),
+      );
     }
   }
 

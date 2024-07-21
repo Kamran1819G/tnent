@@ -166,7 +166,7 @@ class _GalleryState extends State<Gallery> {
                                     borderRadius: BorderRadius.circular(15.0),
                                     image: DecorationImage(
                                       image:
-                                          AssetImage('assets/jain_brothers.png'),
+                                          NetworkImage(store.logoUrl),
                                       fit: BoxFit.cover,
                                     ),
                                   ),
