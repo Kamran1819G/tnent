@@ -56,27 +56,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             // Fetch product details for each cart item
             await Future.forEach(cartList, (item) async {
               String productId = item['productId'];
-              String variation = item['variation']; // Get the variation
+              String variation = item['variation'];
               DocumentSnapshot productDoc = await _firestore.collection('products').doc(productId).get();
 
               if (productDoc.exists) {
                 Map<String, dynamic> productData = productDoc.data() as Map<String, dynamic>;
-                Map<String, dynamic> variationData = productData['variations'][variation] ?? {}; // Get variation-specific data
+                Map<String, dynamic> variationData = productData['variations'][variation] ?? {};
 
-                // Fetch the image URL
+                // Fetch store details
+                String storeId = productData['storeId'];
+                DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(storeId).get();
+                Map<String, dynamic> storeData = storeDoc.data() as Map<String, dynamic>;
+
                 String imageUrl = variationData['imageUrls'] != null && variationData['imageUrls'].isNotEmpty
-                    ? variationData['imageUrls'][0]  // Use the first image from variation if available
+                    ? variationData['imageUrls'][0]
                     : productData['imageUrls'] != null && productData['imageUrls'].isNotEmpty
-                    ? productData['imageUrls'][0]  // Use the first image from main product if available
-                    : ''; // Default empty string if no image is available
+                    ? productData['imageUrls'][0]
+                    : '';
 
                 cartData.add({
                   'productName': productData['name'],
-                  'productPrice': variationData['price'] ?? productData['price'], // Use variation price if available
+                  'productPrice': variationData['price'] ?? productData['price'],
                   'quantity': item['quantity'],
                   'image': imageUrl,
                   'variation': variation,
                   'productId': productId,
+                  'storeName': storeData['name'],
+                  'storeAddress': storeData['address'],
+                  'storeLogo': storeData['logo'],
                 });
               }
             });
@@ -100,7 +107,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       });
     }
   }
-
 
   void calculateTotalPrice() {
     double sum = 0.0;
