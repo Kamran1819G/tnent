@@ -456,79 +456,77 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     ),
                                     child: GestureDetector(
                                       onTap: () async {
-                                        /*// Add the product to the cart
-                                        String userId = FirebaseAuth
-                                                .instance.currentUser?.uid ??
-                                            '';
-                                        DocumentReference userRef =
-                                            FirebaseFirestore.instance
-                                                .collection('Users')
-                                                .doc(userId);
+                                        String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+                                        if (userId.isEmpty) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('Please log in to add items to cart')),
+                                          );
+                                          return;
+                                        }
 
-                                        await FirebaseFirestore.instance
-                                            .runTransaction(
-                                                (transaction) async {
-                                          DocumentSnapshot snapshot =
-                                              await transaction.get(userRef);
-                                          if (!snapshot.exists) {
-                                            throw Exception(
-                                                "User does not exist!");
-                                          }
+                                        DocumentReference userRef = FirebaseFirestore.instance
+                                            .collection('Users')
+                                            .doc(userId);
 
-                                          Map<String, dynamic> userData =
-                                              snapshot.data()
-                                                  as Map<String, dynamic>;
-                                          List<dynamic> cartList = [];
+                                        try {
+                                          await FirebaseFirestore.instance.runTransaction((transaction) async {
+                                            DocumentSnapshot snapshot = await transaction.get(userRef);
+                                            if (!snapshot.exists) {
+                                              throw Exception("User does not exist!");
+                                            }
 
-                                          if (userData.containsKey('mycart')) {
-                                            String cartJson =
-                                                userData['mycart'] ?? '[]';
-                                            cartList = json.decode(cartJson);
-                                          }
+                                            Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
+                                            List<dynamic> cartList = userData['cart'] ?? [];
 
-                                          // Check if the product is already in the cart
-                                          int existingIndex =
-                                              cartList.indexWhere((item) =>
-                                                  item['productID'] ==
-                                                  widget.product.name);
+                                            // Create a map with all necessary product information
+                                            Map<String, dynamic> cartItem = {
+                                              'productId': widget.product.productId,
+                                              'name': widget.product.name,
+                                              'storeId': widget.product.storeId,
+                                              'variation': _selectedVariation,
+                                              'price': _selectedVariant.price,
+                                              'mrp': _selectedVariant.mrp,
+                                              'discount': _selectedVariant.discount,
+                                              'quantity': 1, // Default quantity
+                                              'imageUrl': widget.product.imageUrls.isNotEmpty ? widget.product.imageUrls[0] : '',
+                                              'sku': _selectedVariant.sku,
+                                            };
 
-                                          if (existingIndex != -1) {
-                                            // If the product is already in the cart, increase the quantity
-                                            cartList[existingIndex]
-                                                ['quantity'] += 1;
-                                          } else {
-                                            // If the product is not in the cart, add it with all necessary information
-                                            cartList.add({
-                                              'productID': widget.product.productId,
-                                              'productName':
-                                                  widget.product.name,
-                                              'productPrice': widget
-                                                  .product.variations[0]?[0]?.price,
-                                              'discount': widget
-                                                  .product.variations[0]?[0]?.discount,
-                                              'variation': _selectedProductSize,
-                                              'quantity': 1,
-                                              // You might want to add the first image from the images list
-                                              'image':
-                                                  widget.product.imageUrls[0],
-                                            });
-                                          }
+                                            // Check if the product is already in the cart
+                                            bool isInCart = cartList.any((item) =>
+                                            item['productId'] == widget.product.productId &&
+                                                item['variation'] == _selectedVariation
+                                            );
 
-                                          transaction.update(userRef, {
-                                            'mycart': json.encode(cartList)
+                                            if (isInCart) {
+                                              // If the product is already in the cart, show a message
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(content: Text('Item already in cart')),
+                                              );
+                                            } else {
+                                              // If the product is not in the cart, add it
+                                              cartList.add(cartItem);
+                                              transaction.update(userRef, {'cart': cartList});
+
+                                              ScaffoldMessenger.of(context).showSnackBar(
+                                                SnackBar(content: Text('Item added to cart')),
+                                              );
+                                            }
                                           });
-                                        });*/
 
-                                        // Navigate to the cart screen
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  CartScreen()),
-                                        );
+                                          // Optionally, you can navigate to the cart screen here
+                                          // Navigator.push(
+                                          //   context,
+                                          //   MaterialPageRoute(builder: (context) => CartScreen()),
+                                          // );
+                                        } catch (e) {
+                                          print('Error updating cart: $e');
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(content: Text('Failed to update cart. Please try again.')),
+                                          );
+                                        }
                                       },
-                                      child: Icon(Icons.add_shopping_cart,
-                                          color: Colors.white, size: 25),
+                                      child: Icon(Icons.add_shopping_cart, color: Colors.white, size: 25),
                                     ),
                                   ),
                                 ],

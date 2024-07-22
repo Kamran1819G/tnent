@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:convert';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
 
@@ -12,6 +11,10 @@ class CartItem {
   String productName;
   String productImage;
   double productPrice;
+  double discount;
+  double mrp;
+  String sku;
+  String storeId;
 
   CartItem({
     required this.productID,
@@ -20,14 +23,24 @@ class CartItem {
     this.productName = '',
     this.productImage = '',
     this.productPrice = 0.0,
+    this.discount = 0.0,
+    this.mrp = 0.0,
+    this.sku = '',
+    this.storeId = '',
   });
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
     return CartItem(
-      productID: json['productID'],
-      variation: json['variation'],
-      quantity: json['quantity'],
-      productPrice: json['productPrice'],
+      productID: json['productId'] ?? '',
+      variation: json['variation'] ?? '',
+      quantity: json['quantity'] ?? 0,
+      productName: json['name'] ?? '',
+      productImage: json['imageUrl'] ?? '',
+      productPrice: (json['price'] ?? 0).toDouble(),
+      discount: (json['discount'] ?? 0).toDouble(),
+      mrp: (json['mrp'] ?? 0).toDouble(),
+      sku: json['sku'] ?? '',
+      storeId: json['storeId'] ?? '',
     );
   }
 }
@@ -61,40 +74,20 @@ class _CartScreenState extends State<CartScreen> {
         .collection('Users')
         .doc(userId)
         .snapshots()
-        .asyncMap((snapshot) async {
+        .map((snapshot) {
       print("Got snapshot: ${snapshot.data()}");
       if (!snapshot.exists) {
         print("User document does not exist");
         return [];
       }
 
-      String cartJson = snapshot.data()?['mycart'] ?? '[]';
-      print("Cart JSON: $cartJson");
-      List<dynamic> cartList = json.decode(cartJson);
+      List<dynamic> cartList = snapshot.data()?['cart'] ?? [];
+      print("Cart List: $cartList");
       List<CartItem> items = cartList.map((item) => CartItem.fromJson(item)).toList();
 
       print("Parsed ${items.length} cart items");
-
-      for (var item in items) {
-        await fetchProductDetails(item);
-      }
-
       return items;
     });
-  }
-
-  Future<void> fetchProductDetails(CartItem item) async {
-    DocumentSnapshot productDoc = await FirebaseFirestore.instance
-        .collection('Products')
-        .doc(item.productID)
-        .get();
-
-    if (productDoc.exists) {
-      Map<String, dynamic> data = productDoc.data() as Map<String, dynamic>;
-      item.productName = data['name'] ?? '';
-      item.productImage = data['image'] ?? '';
-      item.productPrice = (data['price'] ?? 0).toDouble();
-    }
   }
 
   double calculateTotalAmount(List<CartItem> items) {
@@ -111,11 +104,10 @@ class _CartScreenState extends State<CartScreen> {
         throw Exception("User does not exist!");
       }
 
-      String cartJson = snapshot.get('mycart') ?? '[]';
-      List<dynamic> cartList = json.decode(cartJson);
-      cartList.removeWhere((item) => item['productID'] == productID);
+      List<dynamic> cartList = snapshot.get('mycart') ?? [];
+      cartList.removeWhere((item) => item['productId'] == productID);
 
-      transaction.update(userRef, {'mycart': json.encode(cartList)});
+      transaction.update(userRef, {'mycart': cartList});
 
       setState(() {
         cartItems.removeWhere((item) => item.productID == productID);
@@ -134,9 +126,8 @@ class _CartScreenState extends State<CartScreen> {
         throw Exception("User does not exist!");
       }
 
-      String cartJson = snapshot.get('mycart') ?? '[]';
-      List<dynamic> cartList = json.decode(cartJson);
-      int index = cartList.indexWhere((item) => item['productID'] == productID);
+      List<dynamic> cartList = snapshot.get('mycart') ?? [];
+      int index = cartList.indexWhere((item) => item['productId'] == productID);
 
       if (index != -1) {
         if (newQuantity > 0) {
@@ -146,7 +137,7 @@ class _CartScreenState extends State<CartScreen> {
         }
       }
 
-      transaction.update(userRef, {'mycart': json.encode(cartList)});
+      transaction.update(userRef, {'mycart': cartList});
 
       setState(() {
         int itemIndex = cartItems.indexWhere((item) => item.productID == productID);
@@ -316,12 +307,7 @@ class _CartScreenState extends State<CartScreen> {
                     itemCount: cartItems.length,
                     itemBuilder: (context, index) {
                       return CartProductTile(
-                        id: cartItems[index].productID,
-                        productImage: cartItems[index].productImage,
-                        productName: cartItems[index].productName,
-                        productPrice: cartItems[index].productPrice,
-                        quantity: cartItems[index].quantity,
-                        variation: cartItems[index].variation,
+                        item: cartItems[index],
                         selectedItem: allItemsSelected,
                         onRemove: removeFromCart,
                         onUpdateQuantity: updateQuantity,
@@ -353,24 +339,14 @@ class _CartScreenState extends State<CartScreen> {
 }
 
 class CartProductTile extends StatefulWidget {
-  final String id;
-  final String productImage;
-  final String productName;
-  final double productPrice;
-  final int quantity;
-  final String variation;
+  final CartItem item;
   final bool selectedItem;
   final Function(String) onRemove;
   final Function(String, int) onUpdateQuantity;
   final Function(String, int, double) onUpdatePrice;
 
   CartProductTile({
-    required this.id,
-    required this.productImage,
-    required this.productName,
-    required this.productPrice,
-    required this.quantity,
-    required this.variation,
+    required this.item,
     required this.onRemove,
     required this.onUpdateQuantity,
     required this.onUpdatePrice,
@@ -402,7 +378,7 @@ class _CartProductTileState extends State<CartProductTile> {
       String wishlistString = userDoc.get('wishlist') ?? '';
       List<String> wishlist = wishlistString.split(',').where((item) => item.isNotEmpty).toList();
       setState(() {
-        _isInWishlist = wishlist.contains(widget.id);
+        _isInWishlist = wishlist.contains(widget.item.productID);
       });
     }
   }
@@ -424,23 +400,19 @@ class _CartProductTileState extends State<CartProductTile> {
           List<String> wishlist = wishlistString.split(',').where((item) => item.isNotEmpty).toList();
 
           if (_isInWishlist) {
-            if (!wishlist.contains(widget.id)) {
-              wishlist.add(widget.id);
+            if (!wishlist.contains(widget.item.productID)) {
+              wishlist.add(widget.item.productID);
             }
           } else {
-            wishlist.remove(widget.id);
+            wishlist.remove(widget.item.productID);
           }
 
-          // Convert the wishlist back to a comma-separated string
           String updatedWishlistString = wishlist.join(',');
-
-          // Update the user document with the new wishlist string
           transaction.update(userRef, {'wishlist': updatedWishlistString});
         }
       });
     } catch (e) {
       print('Error updating wishlist: $e');
-      // Revert the state if the transaction fails
       setState(() {
         _isInWishlist = !_isInWishlist;
       });
@@ -463,7 +435,7 @@ class _CartProductTileState extends State<CartProductTile> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(4.0),
           image: DecorationImage(
-            image: NetworkImage(widget.productImage),
+            image: NetworkImage(widget.item.productImage),
             fit: BoxFit.fill,
           ),
         ),
@@ -495,7 +467,7 @@ class _CartProductTileState extends State<CartProductTile> {
     mainAxisAlignment: MainAxisAlignment.start,
     children: [
     Text(
-    widget.productName,
+    widget.item.productName,
     style: TextStyle(
     color: hexToColor('#343434'),
     fontSize: 20.0,
@@ -503,18 +475,47 @@ class _CartProductTileState extends State<CartProductTile> {
     ),
     SizedBox(height: 8.0),
     Text(
-    'Variation: ${widget.variation}',
+    'Variation: ${widget.item.variation}',
     style: TextStyle(
     color: hexToColor('#989898'),
     fontSize: 14.0,
     ),
     ),
-    SizedBox(height: 25.0),
+    SizedBox(height: 8.0),
+    Text(
+    'SKU: ${widget.item.sku}',
+    style: TextStyle(
+    color: hexToColor('#989898'),
+    fontSize: 14.0,
+    ),
+    ),
+      SizedBox(height: 25.0),
+      Row(
+        children: [
+          Text(
+            '₹${widget.item.productPrice.toStringAsFixed(2)}',
+            style: TextStyle(
+              color: hexToColor('#343434'),
+              fontSize: 20.0,
+            ),
+          ),
+          SizedBox(width: 10),
+          Text(
+            '₹${widget.item.mrp.toStringAsFixed(2)}',
+            style: TextStyle(
+              color: hexToColor('#989898'),
+              fontSize: 16.0,
+              decoration: TextDecoration.lineThrough,
+            ),
+          ),
+        ],
+      ),
+      SizedBox(height: 8.0),
       Text(
-        '₹${widget.productPrice.toStringAsFixed(2)}',
+        'Discount: ${widget.item.discount.toStringAsFixed(2)}%',
         style: TextStyle(
-          color: hexToColor('#343434'),
-          fontSize: 20.0,
+          color: hexToColor('#4CAF50'),
+          fontSize: 14.0,
         ),
       ),
       SizedBox(height: 15.0),
@@ -523,20 +524,20 @@ class _CartProductTileState extends State<CartProductTile> {
           IconButton(
             icon: Icon(Icons.remove),
             onPressed: () {
-              int newQuantity = widget.quantity - 1;
+              int newQuantity = widget.item.quantity - 1;
               if (newQuantity >= 0) {
-                widget.onUpdateQuantity(widget.id, newQuantity);
-                widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
+                widget.onUpdateQuantity(widget.item.productID, newQuantity);
+                widget.onUpdatePrice(widget.item.productID, newQuantity, widget.item.productPrice);
               }
             },
           ),
-          Text(widget.quantity.toString()),
+          Text(widget.item.quantity.toString()),
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              int newQuantity = widget.quantity + 1;
-              widget.onUpdateQuantity(widget.id, newQuantity);
-              widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
+              int newQuantity = widget.item.quantity + 1;
+              widget.onUpdateQuantity(widget.item.productID, newQuantity);
+              widget.onUpdatePrice(widget.item.productID, newQuantity, widget.item.productPrice);
             },
           ),
         ],
@@ -546,7 +547,7 @@ class _CartProductTileState extends State<CartProductTile> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           GestureDetector(
-            onTap: () => widget.onRemove(widget.id),
+            onTap: () => widget.onRemove(widget.item.productID),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
               decoration: BoxDecoration(
