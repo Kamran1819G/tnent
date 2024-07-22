@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tnennt/widgets/removable_product_tile.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/category_model.dart';
 import 'package:tnennt/models/product_model.dart';
@@ -150,26 +151,14 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                     itemCount: products.length,
                     itemBuilder: (context, index) {
                       final product = products[index];
-                      return GestureDetector(
-                        onTap: () {
-                         /* Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProductDetailScreen(
-
-                              ),
-                            ),
-                          );*/
+                      return RemovableProductTile(
+                        product: product,
+                        onRemove: () {
+                          // Remove product from category
+                          setState(() {
+                            widget.category.productIds.removeWhere((element) => element == product.productId);
+                          });
                         },
-                        child: ProductTile(
-                          product: product,
-                          onRemove: () {
-                            // Remove product from category
-                            setState(() {
-                              widget.category.productIds.removeWhere((element) => element == product.productId);
-                            });
-                          },
-                        ),
                       );
                     },
                   );
@@ -178,118 +167,6 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
             )
           ],
         ),
-      ),
-    );
-  }
-}
-
-class ProductTile extends StatefulWidget {
-  ProductModel product;
-  final double width;
-  final double height;
-  final Function onRemove;
-
-  ProductTile({
-    required this.product,
-    this.width = 150.0,
-    this.height = 200.0,
-    required this.onRemove,
-  });
-
-  @override
-  _ProductTileState createState() => _ProductTileState();
-}
-
-class _ProductTileState extends State<ProductTile> {
-  void _removeProduct() {
-    widget.onRemove();
-  }
-
-
-  ProductVariant? _getFirstVariation() {
-    if (widget.product.variations.isNotEmpty) {
-      return widget.product.variations.values.first;
-    }
-    return null;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    var firstVariation = _getFirstVariation();
-    var price = firstVariation?.price ?? 0.0;
-    var mrp = firstVariation?.mrp ?? 0.0;
-    var discount = firstVariation?.discount ?? 0.0;
-
-    return Container(
-      height: 200,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(6.0),
-        color: hexToColor('#F5F5F5'),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Stack(
-              children: [
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8.0),
-                    image: DecorationImage(
-                      image: NetworkImage(widget.product.imageUrls[0]),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                Positioned(
-                  right: 8.0,
-                  top: 8.0,
-                  child: GestureDetector(
-                    onTap: _removeProduct,
-                    child: Container(
-                      padding: EdgeInsets.all(6.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(100.0),
-                      ),
-                      child: Icon(
-                        Icons.remove,
-                        color: Colors.red,
-                        size: 16.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 8.0),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.product.name,
-                  style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontSize: 10.0,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                SizedBox(height: 4.0),
-                Text(
-                  '\$${price.toStringAsFixed(2)}',
-                  style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontSize: 10.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

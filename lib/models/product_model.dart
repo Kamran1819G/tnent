@@ -53,7 +53,6 @@ class ProductModel {
   final int greenFlags;
   final int redFlags;
   final Map<String, ProductVariant> variations;
-  final List<String> reviewsIds;
 
   ProductModel({
     required this.productId,
@@ -68,7 +67,6 @@ class ProductModel {
     required this.greenFlags,
     required this.redFlags,
     required this.variations,
-    required this.reviewsIds,
   });
 
   factory ProductModel.fromFirestore(DocumentSnapshot? doc) {
@@ -109,7 +107,6 @@ class ProductModel {
       greenFlags: (data['greenFlags'] as int?) ?? 0,
       redFlags: (data['redFlags'] as int?) ?? 0,
       variations: variations,
-      reviewsIds: (data['reviewsIds'] as List<dynamic>?)?.cast<String>() ?? [],
     );
   }
 
@@ -128,7 +125,6 @@ class ProductModel {
       'greenFlags': greenFlags,
       'redFlags': redFlags,
       'variations': variationsMap,
-      'reviewsIds': reviewsIds,
     };
   }
 }

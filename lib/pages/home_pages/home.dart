@@ -13,7 +13,7 @@ import 'package:tnennt/screens/notification_screen.dart';
 import 'package:tnennt/screens/stores_screen.dart';
 import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
 import 'package:tnennt/services/firebase/firestore_service.dart';
-import 'package:tnennt/widgets/product_tile.dart';
+import 'package:tnennt/widgets/wishlist_product_tile.dart';
 
 import '../../screens/update_screen.dart';
 import '../../screens/users_screens/storeprofile_screen.dart';
@@ -89,7 +89,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           sku: 'TS-L',
         ),
       },
-      reviewsIds: [],
     );
   });
 
@@ -510,7 +509,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 scrollDirection: Axis.horizontal,
                 itemCount: featuredProducts.length,
                 itemBuilder: (context, index) {
-                  return ProductTile(
+                  return WishlistProductTile(
                     product: featuredProducts[index],
                   );
                 },
@@ -519,7 +518,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
-                  return ProductTile(
+                  return WishlistProductTile(
                       product: featuredProducts[index],
                   );
                 },
@@ -528,7 +527,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
-                  return ProductTile(
+                  return WishlistProductTile(
                       product: featuredProducts[index],
                   );
                 },
@@ -537,7 +536,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
-                  return ProductTile(
+                  return WishlistProductTile(
                       product: featuredProducts[index],
                   );
                 },
@@ -546,7 +545,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
-                  return ProductTile(
+                  return WishlistProductTile(
                       product: featuredProducts[index],
                   );
                 },
@@ -555,7 +554,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
-                  return ProductTile(
+                  return WishlistProductTile(
                       product: featuredProducts[index],
                   );
                 },

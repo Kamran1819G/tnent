@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/screens/product_detail_screen.dart';
-import 'notification_screen.dart';
+import 'package:tnennt/models/product_model.dart';
+import 'package:tnennt/screens/notification_screen.dart';
+import 'package:tnennt/widgets/wishlist_product_tile.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -13,82 +15,92 @@ class ExploreScreen extends StatefulWidget {
 class _ExploreScreenState extends State<ExploreScreen> {
   int? _selectedFilterOption;
   String searchQuery = '';
-  List<dynamic> products = [
-    {
-      'name': 'Product 1 Product 1 Product 1',
-      'image': 'assets/product_image.png',
-      'price': 100.0,
-    },
-    {
-      'name': 'Product 2',
-      'image': 'assets/product_image.png',
-      'price': 200.0,
-    },
-    {
-      'name': 'Product 3',
-      'image': 'assets/product_image.png',
-      'price': 300.0,
-    },
-    {
-      'name': 'Product 4',
-      'image': 'assets/product_image.png',
-      'price': 400.0,
-    },
-    {
-      'name': 'Product 1 Product 1 Product 1',
-      'image': 'assets/product_image.png',
-      'price': 100.0,
-    },
-    {
-      'name': 'Product 2',
-      'image': 'assets/product_image.png',
-      'price': 200.0,
-    },
-    {
-      'name': 'Product 3',
-      'image': 'assets/product_image.png',
-      'price': 300.0,
-    },
-    {
-      'name': 'Product 4',
-      'image': 'assets/product_image.png',
-      'price': 400.0,
-    },
-    {
-      'name': 'Product 1 Product 1 Product 1',
-      'image': 'assets/product_image.png',
-      'price': 100.0,
-    },
-    {
-      'name': 'Product 2',
-      'image': 'assets/product_image.png',
-      'price': 200.0,
-    },
-    {
-      'name': 'Product 3',
-      'image': 'assets/product_image.png',
-      'price': 300.0,
-    },
-    {
-      'name': 'Product 4',
-      'image': 'assets/product_image.png',
-      'price': 400.0,
-    }
-  ];
+  List<ProductModel> products = [];
+  bool isLoading = false;
 
-  List<dynamic> filteredProducts = [];
+  @override
+  void initState() {
+    super.initState();
+    // Initially load all products
+    _fetchProducts();
+  }
+
+  Future<void> _fetchProducts() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      QuerySnapshot querySnapshot;
+      if (searchQuery.isEmpty) {
+        querySnapshot = await FirebaseFirestore.instance.collection('products').get();
+      } else {
+        querySnapshot = await FirebaseFirestore.instance
+            .collection('products')
+            .where('name', isGreaterThanOrEqualTo: searchQuery)
+            .where('name', isLessThanOrEqualTo: '$searchQuery\uf8ff')
+            .get();
+      }
+
+      products = querySnapshot.docs.map((doc) {
+        return ProductModel.fromFirestore(doc);
+      }).toList();
+
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error fetching products: $e');
+    }
+  }
 
   void _filterProducts(String query) {
     setState(() {
-      if (query.isEmpty) {
-        filteredProducts =
-            products; // Show all products if the search query is empty
-      } else {
-        filteredProducts = products
-            .where((product) =>
-                product['name'].toLowerCase().contains(query.toLowerCase()))
-            .toList();
+      searchQuery = query;
+    });
+    _fetchProducts();
+  }
+
+  void _applyFilter() {
+    List<ProductModel> tempProducts = products;
+    if (_selectedFilterOption != null) {
+      switch (_selectedFilterOption) {
+        case 0:
+        // Add logic for 'Featured'
+          break;
+        case 1:
+        // High to Low
+          tempProducts.sort((a, b) {
+            double aPrice = a.variations.values.first.price;
+            double bPrice = b.variations.values.first.price;
+            return bPrice.compareTo(aPrice);
+          });
+          break;
+        case 2:
+        // Low to High
+          tempProducts.sort((a, b) {
+            double aPrice = a.variations.values.first.price;
+            double bPrice = b.variations.values.first.price;
+            return aPrice.compareTo(bPrice);
+          });
+          break;
+        case 3:
+        // Discount
+          tempProducts.sort((a, b) {
+            double aDiscount = a.variations.values.first.discount;
+            double bDiscount = b.variations.values.first.discount;
+            return bDiscount.compareTo(aDiscount);
+          });
+          break;
+        default:
+          break;
       }
+    }
+    setState(() {
+      products = tempProducts;
     });
   }
 
@@ -198,7 +210,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         border: InputBorder.none,
                       ),
                       onSubmitted: (value) {
-                        searchQuery = value;
                         _filterProducts(value);
                       },
                     ),
@@ -206,7 +217,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 ],
               ),
             ),
-            if (filteredProducts.isNotEmpty && searchQuery.isNotEmpty)
+            if (products.isNotEmpty && searchQuery.isNotEmpty)
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -214,7 +225,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.7,
                       child: Text(
-                        'Showing ${filteredProducts.length} results for "$searchQuery"',
+                        'Showing ${products.length} results for "$searchQuery"',
                         style: TextStyle(
                           color: hexToColor('#6D6D6D'),
                           fontSize: 14.0,
@@ -226,8 +237,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     GestureDetector(
                       onTap: () {
                         showModalBottomSheet(
-                            context: context,
-                            builder: (context) => _buildBottomSheet());
+                          context: context,
+                          builder: (context) => _buildBottomSheet(),
+                        );
                       },
                       child: Container(
                         padding: EdgeInsets.all(10),
@@ -247,34 +259,32 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 ),
               ),
             SizedBox(height: 20),
-            filteredProducts.isNotEmpty && searchQuery.isNotEmpty
+            isLoading
+                ? Center(child: CircularProgressIndicator())
+                : products.isNotEmpty && searchQuery.isNotEmpty
                 ? Expanded(
-                    child: GridView.count(
-                      crossAxisCount: 2,
-                      padding: EdgeInsets.all(20),
-                      crossAxisSpacing: 20,
-                      mainAxisSpacing: 20,
-                      childAspectRatio: 0.7,
-                      children: [
-                        ...filteredProducts.map((product) {
-                          return ResultTile(
-                            name: product['name'],
-                            image: product['image'],
-                            price: product['price'],
-                          );
-                        }).toList(),
-                      ],
-                    ),
-                  )
-                : filteredProducts.isEmpty && searchQuery.isNotEmpty
-                    ? ClipRRect(
-                        child: Image.asset(
-                          'assets/no_results.png',
-                          height: MediaQuery.of(context).size.height * 0.5,
-                          width: MediaQuery.of(context).size.width * 0.7,
-                        ),
-                      )
-                    : Container()
+              child: GridView.count(
+                crossAxisCount: 2,
+                padding: EdgeInsets.all(20),
+                crossAxisSpacing: 20,
+                mainAxisSpacing: 20,
+                childAspectRatio: 0.7,
+                children: [
+                  ...products.map((product) {
+                    return WishlistProductTile(product: product);
+                  }).toList(),
+                ],
+              ),
+            )
+                : products.isEmpty && searchQuery.isNotEmpty
+                ? ClipRRect(
+              child: Image.asset(
+                'assets/no_results.png',
+                height: MediaQuery.of(context).size.height * 0.5,
+                width: MediaQuery.of(context).size.width * 0.7,
+              ),
+            )
+                : Container(),
           ],
         ),
       ),
@@ -283,214 +293,64 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   Widget _buildBottomSheet() {
     return Container(
-      height: 300,
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      padding: EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Center(
-            child: Container(
-              width: 100,
-              height: 4,
-              margin: const EdgeInsets.symmetric(vertical: 15),
-              decoration: BoxDecoration(
-                color: hexToColor('#CACACA'),
-                borderRadius: BorderRadius.circular(5),
+          Row(
+            children: [
+              Text(
+                'Sort & Filter',
+                style: TextStyle(
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w900,
+                ),
               ),
-            ),
+              Spacer(),
+              IconButton(
+                icon: Icon(Icons.close),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
           ),
-          SizedBox(height: 10),
-          Text(
-            'Add Filter',
-            style: TextStyle(
-                color: hexToColor('#343434'),
-                fontSize: 16.0),
-          ),
-          SizedBox(height: 25),
-          StatefulBuilder(
-            builder: (context, setState) => Column(
-              children: [
-                RadioListTile(
-                  title: Text('Featured',
-                      style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16.0)),
-                  controlAffinity: ListTileControlAffinity.trailing,
-                  dense: true,
-                  value: 0,
-                  groupValue: _selectedFilterOption,
-                  activeColor: Theme.of(context).primaryColor,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedFilterOption = value as int?;
-                    });
-                  },
-                ),
-                RadioListTile(
-                  title: Text('High To Low',
-                      style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16.0)),
-                  controlAffinity: ListTileControlAffinity.trailing,
-                  value: 1,
-                  groupValue: _selectedFilterOption,
-                  activeColor: Theme.of(context).primaryColor,
-                  dense: true,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedFilterOption = value as int?;
-                    });
-                  },
-                ),
-                RadioListTile(
-                  title: Text('Low To High',
-                      style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16.0)),
-                  controlAffinity: ListTileControlAffinity.trailing,
-                  value: 2,
-                  groupValue: _selectedFilterOption,
-                  activeColor: Theme.of(context).primaryColor,
-                  dense: true,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedFilterOption = value as int?;
-                    });
-                  },
-                ),
-                RadioListTile(
-                  title: Text('Discount',
-                      style: TextStyle(
-                          color: Theme.of(context).primaryColor,
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16.0)),
-                  controlAffinity: ListTileControlAffinity.trailing,
-                  value: 3,
-                  groupValue: _selectedFilterOption,
-                  activeColor: Theme.of(context).primaryColor,
-                  dense: true,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedFilterOption = value as int?;
-                    });
-                  },
-                ),
-              ],
-            ),
+          SizedBox(height: 20),
+          Column(
+            children: [
+              _buildFilterOption(0, 'Featured'),
+              _buildFilterOption(1, 'Price: High to Low'),
+              _buildFilterOption(2, 'Price: Low to High'),
+              _buildFilterOption(3, 'Discount'),
+            ],
           ),
         ],
       ),
     );
   }
-}
 
-class ResultTile extends StatefulWidget {
-  final String name;
-  final String image;
-  final double price;
-
-  ResultTile({
-    required this.name,
-    required this.image,
-    required this.price,
-  });
-
-  @override
-  _ResultTileState createState() => _ResultTileState();
-}
-
-class _ResultTileState extends State<ResultTile> {
-  bool _isInWishlist = false;
-
-  void _toggleWishlist() {
-    setState(() {
-      _isInWishlist = !_isInWishlist;
-    });
-
-// Send wishlist request to the server
-    if (_isInWishlist) {
-// Code to send wishlist request to the server
-      print('Adding to wishlist...');
-    } else {
-// Code to remove from wishlist request to the server
-      print('Removing from wishlist...');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-
+  Widget _buildFilterOption(int index, String title) {
+    return RadioListTile<int>(
+      value: index,
+      groupValue: _selectedFilterOption,
+      onChanged: (int? value) {
+        setState(() {
+          _selectedFilterOption = value;
+        });
+        _applyFilter();
+        Navigator.pop(context);
       },
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8.0),
-          color: hexToColor('#F5F5F5'),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                Container(
-                  child: Image.asset(widget.image, fit: BoxFit.fill),
-                ),
-                Positioned(
-                  right: 8.0,
-                  top: 8.0,
-                  child: GestureDetector(
-                    onTap: _toggleWishlist,
-                    child: Container(
-                      padding: EdgeInsets.all(8.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(100.0),
-                      ),
-                      child: Icon(
-                        _isInWishlist ? Icons.favorite : Icons.favorite_border,
-                        color: _isInWishlist ? Colors.red : Colors.grey,
-                        size: 14.0,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 8.0),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.name,
-                    style: TextStyle(
-                        color: hexToColor('#222230'),
-                        fontSize: 12.0),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 4.0),
-                  Text(
-                    '\$${widget.price.toString()}',
-                    style: TextStyle(
-                        color: hexToColor('#343434'),
-                        fontSize: 12.0),
-                  ),
-                ],
-              ),
-            ),
-          ],
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 16.0,
         ),
       ),
+      activeColor: Theme.of(context).primaryColor,
     );
   }
 }

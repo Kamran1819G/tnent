@@ -8,7 +8,7 @@ import 'package:tnennt/helpers/text_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
-import 'package:tnennt/widgets/product_tile.dart';
+import 'package:tnennt/widgets/wishlist_product_tile.dart';
 import 'package:tnennt/pages/catalog_pages/cart_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -74,7 +74,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             sku: 'TS-L',
           ),
       },
-      reviewsIds: [],
     );
   });
 
@@ -604,7 +603,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               scrollDirection: Axis.horizontal,
                               itemCount: relatedProducts.length,
                               itemBuilder: (context, index) {
-                                return ProductTile(
+                                return WishlistProductTile(
                                   product: relatedProducts[index],
                                 );
                               },

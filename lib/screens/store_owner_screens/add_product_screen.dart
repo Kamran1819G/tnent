@@ -153,7 +153,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
       greenFlags: 0,
       redFlags: 0,
       variations: {},
-      reviewsIds: [],
     );
 
     if (!isMultiOptionCategory) {

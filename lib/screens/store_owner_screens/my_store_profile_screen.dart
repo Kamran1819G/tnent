@@ -1,19 +1,18 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tnennt/models/category_model.dart';
-import 'package:tnennt/models/community_post_model.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/screens/product_detail_screen.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/store_community.dart';
-import 'package:tnennt/widgets/product_tile.dart';
 import 'package:tnennt/screens/store_owner_screens/analytics_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/order_pays_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/product_categories_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/store_settings_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tnennt/widgets/removable_product_tile.dart';
 
 class MyStoreProfileScreen extends StatefulWidget {
   StoreModel store;
@@ -95,7 +94,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
             sku: 'TS-L',
           ),
       },
-      reviewsIds: [],
     );
   });
 
@@ -1013,8 +1011,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                           scrollDirection: Axis.horizontal,
                           itemCount: featuredProducts.length,
                           itemBuilder: (context, index) {
-                            return ProductTile(
-                              product: featuredProducts[index],
+                            return RemovableProductTile(
+                              product: featuredProducts[index], onRemove: () {  },
                             );
                           },
                         ),
@@ -1106,8 +1104,8 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
                   scrollDirection: Axis.horizontal,
                   itemCount: products.length,
                   itemBuilder: (context, index) {
-                    return ProductTile(
-                      product: products[index],
+                    return RemovableProductTile(
+                      product: products[index], onRemove: () {  },
                     );
                   },
                 );
@@ -1119,7 +1117,6 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
     );
   }
 }
-
 
 class UpdateTile extends StatelessWidget {
   final String name;

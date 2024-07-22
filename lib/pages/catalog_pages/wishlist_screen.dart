@@ -13,9 +13,10 @@ class WishlistScreen extends StatefulWidget {
 }
 
 class _WishlistScreenState extends State<WishlistScreen> {
-  bool selectedItems = false;
+  bool selectAllItems = false;
   bool isLoading = true;
   List<String> wishlistItems = [];
+  double totalPrice = 0.0;
 
   @override
   void initState() {
@@ -50,6 +51,45 @@ class _WishlistScreenState extends State<WishlistScreen> {
         isLoading = false;
       });
     }
+  }
+
+  void updateTotalPrice() {
+    double newTotal = 0.0;
+    for (var item in wishlistItems) {
+      if (selectedItems.contains(item)) {
+        newTotal += itemPrices[item] ?? 0.0;
+      }
+    }
+    setState(() {
+      totalPrice = newTotal;
+    });
+  }
+
+  Set<String> selectedItems = {};
+  Map<String, double> itemPrices = {};
+
+  void toggleSelectAll(bool? value) {
+    setState(() {
+      selectAllItems = value ?? false;
+      if (selectAllItems) {
+        selectedItems = Set.from(wishlistItems);
+      } else {
+        selectedItems.clear();
+      }
+      updateTotalPrice();
+    });
+  }
+
+  void toggleItemSelection(String itemId, bool isSelected, double price) {
+    setState(() {
+      if (isSelected) {
+        selectedItems.add(itemId);
+      } else {
+        selectedItems.remove(itemId);
+      }
+      itemPrices[itemId] = price;
+      updateTotalPrice();
+    });
   }
 
   @override
@@ -107,7 +147,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         ),
                       ),
                       Text(
-                        '₹ 0.00',
+                        '₹ ${totalPrice.toStringAsFixed(2)}',
                         style: TextStyle(
                           color: hexToColor('#A9A9A9'),
                           fontSize: 18.0,
@@ -122,7 +162,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            'Select Items',
+                            'Select All Items',
                             style: TextStyle(
                               color: hexToColor('#343434'),
                               fontSize: 16.0,
@@ -141,12 +181,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       ),
                       Checkbox(
                         activeColor: Theme.of(context).primaryColor,
-                        value: selectedItems,
-                        onChanged: (value) {
-                          setState(() {
-                            selectedItems = value!;
-                          });
-                        },
+                        value: selectAllItems,
+                        onChanged: toggleSelectAll,
                       ),
                     ],
                   ),
@@ -161,12 +197,17 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 padding: EdgeInsets.symmetric(horizontal: 8.0),
                 itemCount: wishlistItems.length,
                 itemBuilder: (context, index) {
-                  return WishlistProductTile(
+                  return WishlistItemTile(
                     productId: wishlistItems[index],
-                    selectedItem: selectedItems,
+                    isSelected: selectedItems.contains(wishlistItems[index]),
+                    onSelectionChanged: (isSelected, price) {
+                      toggleItemSelection(wishlistItems[index], isSelected, price);
+                    },
                     onRemove: () {
                       setState(() {
                         wishlistItems.removeAt(index);
+                        selectedItems.remove(wishlistItems[index]);
+                        updateTotalPrice();
                       });
                       // Update the user's wishlist in Firestore
                       updateUserWishlist();
@@ -196,23 +237,24 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 }
 
-class WishlistProductTile extends StatefulWidget {
+class WishlistItemTile extends StatefulWidget {
   final String productId;
-  final bool selectedItem;
+  final bool isSelected;
+  final Function(bool, double) onSelectionChanged;
   final VoidCallback onRemove;
 
-  WishlistProductTile({
+  WishlistItemTile({
     required this.productId,
+    required this.isSelected,
+    required this.onSelectionChanged,
     required this.onRemove,
-    this.selectedItem = false,
   });
 
   @override
-  _WishlistProductTileState createState() => _WishlistProductTileState();
+  _WishlistItemTileState createState() => _WishlistItemTileState();
 }
 
-class _WishlistProductTileState extends State<WishlistProductTile> {
-  bool _isSelected = false;
+class _WishlistItemTileState extends State<WishlistItemTile> {
   late ProductModel product;
   bool isLoading = true;
 
@@ -245,16 +287,21 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading || product == null) {
+    if (isLoading) {
       return Center(child: CircularProgressIndicator());
     }
 
-    ProductVariant? firstVariant = product!.variations.isNotEmpty
-        ? product!.variations.values.first
+    ProductVariant? firstVariant = product.variations.isNotEmpty
+        ? product.variations.values.first
+        : null;
+    double price = firstVariant?.price ?? 0.0;
+
+    String? firstVariationKey = product.variations.isNotEmpty
+        ? product.variations.keys.first
         : null;
 
     return GestureDetector(
-      onTap: (){
+      onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -273,7 +320,7 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4.0),
                 image: DecorationImage(
-                  image: NetworkImage(product!.imageUrls.first),
+                  image: NetworkImage(product.imageUrls.first),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -284,13 +331,22 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    product!.name,
+                    product.name,
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 20.0,
                     ),
                   ),
-                  SizedBox(height: 65.0),
+                  SizedBox(height: 8.0),
+                  if (firstVariationKey != null)
+                    Text(
+                      'Variation: $firstVariationKey',
+                      style: TextStyle(
+                        color: hexToColor('#737373'),
+                        fontSize: 14.0,
+                      ),
+                    ),
+                  SizedBox(height: 55.0),
                   Text(
                     firstVariant != null
                         ? '₹${firstVariant.price.toStringAsFixed(2)}'
@@ -340,21 +396,18 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                           ),
                         ),
                       ),
-                      if (widget.selectedItem)
-                        Checkbox(
-                          checkColor: Colors.black,
-                          activeColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            side: BorderSide(color: Colors.black),
-                            borderRadius: BorderRadius.circular(4.0),
-                          ),
-                          value: _isSelected,
-                          onChanged: (value) {
-                            setState(() {
-                              _isSelected = value!;
-                            });
-                          },
+                      Checkbox(
+                        checkColor: Colors.black,
+                        activeColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(color: Colors.black),
+                          borderRadius: BorderRadius.circular(4.0),
                         ),
+                        value: widget.isSelected,
+                        onChanged: (value) {
+                          widget.onSelectionChanged(value ?? false, price);
+                        },
+                      ),
                     ],
                   )
                 ],
