@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -12,7 +11,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  const CheckoutScreen({Key? key}) : super(key: key);
+  final List<Map<String, String>> selectedItems;
+
+  const CheckoutScreen({Key? key, required this.selectedItems}) : super(key: key);
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
@@ -36,10 +37,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _fetchUserData() async {
-    setState(() {
-      isLoading = true;
-    });
-
     try {
       User? user = _auth.currentUser;
       if (user != null) {
@@ -48,17 +45,44 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         if (userData.exists) {
           Map<String, dynamic> userDataMap = userData.data() as Map<String, dynamic>;
 
+          userName = '${userDataMap['firstName'] ?? ''} ${userDataMap['lastName'] ?? ''}';
+          userAddress = userDataMap['address'] ?? '';
+          userMobile = userDataMap['phoneNumber'] ?? '';
+
+          if (userDataMap['cart'] != null) {
+            List<dynamic> cartList = userDataMap['cart'];
+            cartData = [];
+
+            // Fetch product details for each cart item
+            await Future.forEach(cartList, (item) async {
+              String productId = item['productId'];
+              String variation = item['variation']; // Get the variation
+              DocumentSnapshot productDoc = await _firestore.collection('products').doc(productId).get();
+
+              if (productDoc.exists) {
+                Map<String, dynamic> productData = productDoc.data() as Map<String, dynamic>;
+                Map<String, dynamic> variationData = productData['variations'][variation] ?? {}; // Get variation-specific data
+
+                // Fetch the image URL
+                String imageUrl = variationData['imageUrls'] != null && variationData['imageUrls'].isNotEmpty
+                    ? variationData['imageUrls'][0]  // Use the first image from variation if available
+                    : productData['imageUrls'] != null && productData['imageUrls'].isNotEmpty
+                    ? productData['imageUrls'][0]  // Use the first image from main product if available
+                    : ''; // Default empty string if no image is available
+
+                cartData.add({
+                  'productName': productData['name'],
+                  'productPrice': variationData['price'] ?? productData['price'], // Use variation price if available
+                  'quantity': item['quantity'],
+                  'image': imageUrl,
+                  'variation': variation,
+                  'productId': productId,
+                });
+              }
+            });
+          }
+
           setState(() {
-            userName = '${userDataMap['firstName'] ?? ''} ${userDataMap['lastName'] ?? ''}';
-            userAddress = userDataMap['address'] ?? '';
-            userMobile = userDataMap['phoneNumber'] ?? '';
-
-            if (userDataMap['mycart'] != null) {
-              String cartJson = userDataMap['mycart'];
-              List<dynamic> cartList = json.decode(cartJson);
-              cartData = cartList.map((item) => item as Map<String, dynamic>).toList();
-            }
-
             isLoading = false;
           });
 
@@ -77,7 +101,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-  Coupon? selectedCoupon = Coupon(code: 'SUMMER10', value: 50.0);
+
   void calculateTotalPrice() {
     double sum = 0.0;
     for (var item in cartData) {
@@ -85,17 +109,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
     setState(() {
       totalPrice = sum;
-      discountedTotal = sum - (selectedCoupon?.value ?? 0.0);
+
     });
   }
 
-  Future<void> updateQuantity(String productName, int newQuantity) async {
+  Future<void> updateQuantity(String productId, int newQuantity) async {
     try {
       User? user = _auth.currentUser;
       if (user != null) {
         setState(() {
           for (var item in cartData) {
-            if (item['productName'] == productName) {
+            if (item['productId'] == productId) {
               item['quantity'] = newQuantity;
               break;
             }
@@ -104,9 +128,19 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
         calculateTotalPrice();
 
-        await _firestore.collection('Users').doc(user.uid).update({
-          'mycart': json.encode(cartData),
-        });
+        // Update the cart in Firestore
+        DocumentReference userRef = _firestore.collection('Users').doc(user.uid);
+        DocumentSnapshot userDoc = await userRef.get();
+        List<dynamic> currentCart = (userDoc.data() as Map<String, dynamic>)['cart'] ?? [];
+
+        for (var item in currentCart) {
+          if (item['productId'] == productId) {
+            item['quantity'] = newQuantity;
+            break;
+          }
+        }
+
+        await userRef.update({'cart': currentCart});
       }
     } catch (e) {
       print('Error updating quantity: $e');
@@ -273,8 +307,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     productName: item['productName'] ?? '',
                     productPrice: item['productPrice'] ?? 0.0,
                     quantity: item['quantity'] ?? 1,
-                    onQuantityChanged: (productName, newQuantity) {
-                      updateQuantity(productName, newQuantity);
+                    variation: item['variation'] ?? '',
+                    onQuantityChanged: (productId, newQuantity) {
+                      updateQuantity(productId, newQuantity);
                     },
                   );
                 },
@@ -293,7 +328,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     ),
                   ),
                   Text(
-                    '₹${discountedTotal.toStringAsFixed(2)}',
+                    '₹${totalPrice.toStringAsFixed(2)}',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -303,29 +338,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ],
               ),
             ),
-            if (selectedCoupon != null)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Coupon Applied:',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.green,
-                      ),
-                    ),
-                    Text(
-                      '- ₹${selectedCoupon!.value.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.green,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
             Center(
               child: GestureDetector(
                 onTap: () {
@@ -338,7 +350,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         userName: userName,
                         userAddress: userAddress,
                         userMobile: userMobile,
-                        selectedCoupon: selectedCoupon,
                       ),
                     ),
                   );
@@ -367,18 +378,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 }
 
+/// Products page
 class ProductDetails extends StatefulWidget {
   final String productImage;
   final String productName;
   final double productPrice;
   final int quantity;
+  final String variation;
   final Function(String, int) onQuantityChanged;
 
   ProductDetails({
     required this.productImage,
+
     required this.productName,
     required this.productPrice,
     required this.quantity,
+    required this.variation,
     required this.onQuantityChanged,
   });
 
@@ -430,8 +445,8 @@ class _ProductDetailsState extends State<ProductDetails> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4.0),
                 image: DecorationImage(
-                  image: AssetImage(widget.productImage),
-                  fit: BoxFit.fill,
+                  image: NetworkImage(widget.productImage),
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
@@ -454,7 +469,7 @@ class _ProductDetailsState extends State<ProductDetails> {
                     borderRadius: BorderRadius.circular(4.0),
                   ),
                   child: Text(
-                    'XS',
+                    widget.variation,
                     style: TextStyle(
                         color: hexToColor('#222230'),
                         fontFamily: 'Gotham',
@@ -466,33 +481,11 @@ class _ProductDetailsState extends State<ProductDetails> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          '₹${totalItemPrice.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            color: hexToColor('#343434'),
-                            fontSize: 22,
-                          ),
-                        ),
-                        SizedBox(width: 8.0),
-                        Text(
-                          '10% Discount',
-                          style: TextStyle(
-                            color: hexToColor('#FF0000'),
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
-                    ),
                     Text(
-                      'M.R.P ₹${(totalItemPrice * 1.1).toStringAsFixed(2)}',
+                      '₹${totalItemPrice.toStringAsFixed(2)}',
                       style: TextStyle(
-                        color: hexToColor('#B9B9B9'),
-                        fontSize: 10,
-                        decoration: TextDecoration.lineThrough,
-                        decorationColor: hexToColor('#B9B9B9'),
+                        color: hexToColor('#343434'),
+                        fontSize: 22,
                       ),
                     ),
                   ],
@@ -539,7 +532,6 @@ class _ProductDetailsState extends State<ProductDetails> {
                         iconSize: 12,
                         onPressed: incrementQuantity,
                       ),
-
                     ],
                   ),
                 ),
@@ -552,13 +544,15 @@ class _ProductDetailsState extends State<ProductDetails> {
   }
 }
 
+
+///summary page
+
 class SummaryScreen extends StatefulWidget {
   final List<Map<String, dynamic>> cartData;
   final double totalPrice;
   final String userName;
   final String userAddress;
   final String userMobile;
-  final Coupon? selectedCoupon;
 
   const SummaryScreen({
     Key? key,
@@ -567,7 +561,6 @@ class SummaryScreen extends StatefulWidget {
     required this.userName,
     required this.userAddress,
     required this.userMobile,
-    this.selectedCoupon,
   }) : super(key: key);
 
   @override
@@ -716,6 +709,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 productImage: item['image'] ?? 'assets/product_image.png',
                 productName: item['productName'] ?? '',
                 productPrice: item['productPrice'] ?? 0.0,
+                variation: item['variation']??'',
                 quantity: item['quantity'] ?? 1,
                 onQuantityChanged: (_, __) {}, // Disable quantity changes in summary
               );
@@ -900,6 +894,8 @@ class _SummaryScreenState extends State<SummaryScreen> {
   }
 }
 
+
+///payment page
 enum ExpandedTile { none, upi, otherUpi, card }
 
 class PaymentOptionScreen extends StatefulWidget {
@@ -2018,11 +2014,4 @@ class _TransactionScreenState extends State<TransactionScreen> {
       ),
     );
   }
-}
-
-class Coupon {
-  final String code;
-  final double value;
-
-  Coupon({required this.code, required this.value});
 }

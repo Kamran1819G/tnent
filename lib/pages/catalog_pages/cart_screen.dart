@@ -12,6 +12,7 @@ class CartItem {
   String productName;
   String productImage;
   double productPrice;
+  bool isSelected;
 
   CartItem({
     required this.productID,
@@ -21,6 +22,7 @@ class CartItem {
     this.productName = '',
     this.productImage = '',
     this.productPrice = 0.0,
+    this.isSelected = false,
   });
 
   factory CartItem.fromJson(Map<String, dynamic> json) {
@@ -97,17 +99,17 @@ class _CartScreenState extends State<CartScreen> {
           Map<String, dynamic> variationData = variations[item.variation];
 
           item.productName = data['name'] ?? '';
-          item.productImage = variationData['image'] ?? data['image'] ?? '';
+          item.productImage = variationData['imageUrls'] ?? data['imageUrls'][0] ?? '';
           item.productPrice = (variationData['price'] ?? data['price'] ?? 0).toDouble();
           item.sku = variationData['sku'] ?? '';
         } else {
           item.productName = data['name'] ?? '';
-          item.productImage = data['image'] ?? '';
+          item.productImage = data['imageUrls'][0] ?? '';
           item.productPrice = (data['price'] ?? 0).toDouble();
         }
       } else {
         item.productName = data['name'] ?? '';
-        item.productImage = data['image'] ?? '';
+        item.productImage = data['imageUrls'][0] ?? '';
         item.productPrice = (data['price'] ?? 0).toDouble();
       }
     }
@@ -186,13 +188,36 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
+  void handleItemSelection(String productId, bool isSelected) {
+    setState(() {
+      int index = cartItems.indexWhere((item) => item.productID == productId);
+      if (index != -1) {
+        cartItems[index].isSelected = isSelected;
+      }
+    });
+  }
+
   void navigateToCheckout() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CheckoutScreen(),
-      ),
-    );
+    List<Map<String, String>> selectedItems = cartItems
+        .where((item) => item.isSelected)
+        .map((item) => {
+      'productId': item.productID,
+      'variation': item.variation,
+    })
+        .toList();
+
+    if (selectedItems.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CheckoutScreen(selectedItems: selectedItems),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please select items to checkout')),
+      );
+    }
   }
 
   @override
@@ -285,41 +310,45 @@ class _CartScreenState extends State<CartScreen> {
                           ],
                         ),
                       ),
-                      Row(
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                'Select All Items',
-                                style: TextStyle(
-                                  color: hexToColor('#343434'),
-                                  fontSize: 16.0,
+                      if (cartItems.length > 1)
+                        Row(
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Select All Items',
+                                  style: TextStyle(
+                                    color: hexToColor('#343434'),
+                                    fontSize: 16.0,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                'Buy All The Selected Products Together',
-                                style: TextStyle(
-                                  color: hexToColor('#989898'),
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 9.0,
+                                Text(
+                                  'Buy All The Selected Products Together',
+                                  style: TextStyle(
+                                    color: hexToColor('#989898'),
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 9.0,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          Checkbox(
-                            activeColor: Theme.of(context).primaryColor,
-                            value: allItemsSelected,
-                            onChanged: (value) {
-                              setState(() {
-                                allItemsSelected = value!;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
+                              ],
+                            ),
+                            Checkbox(
+                              activeColor: Theme.of(context).primaryColor,
+                              value: allItemsSelected,
+                              onChanged: (value) {
+                                setState(() {
+                                  allItemsSelected = value!;
+                                  for (var item in cartItems) {
+                                    item.isSelected = allItemsSelected;
+                                  }
+                                });
+                              },
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 ),
@@ -336,19 +365,34 @@ class _CartScreenState extends State<CartScreen> {
                         productPrice: cartItems[index].productPrice,
                         quantity: cartItems[index].quantity,
                         variation: cartItems[index].variation,
-                        selectedItem: allItemsSelected,
+                        selectedItem: cartItems[index].isSelected,
                         onRemove: removeFromCart,
                         onUpdateQuantity: updateQuantity,
                         onUpdatePrice: updatePrice,
+                        onSelectItem: handleItemSelection,
+                        showCheckbox: cartItems.length > 1,
+                        onBuyNow: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CheckoutScreen(
+                                selectedItems: [{
+                                  'productId': cartItems[index].productID,
+                                  'variation': cartItems[index].variation,
+                                }],
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
                   ),
                 ),
-                if (allItemsSelected)
+                if (cartItems.length > 1)
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: ElevatedButton(
-                      child: Text('Buy All Selected Items'),
+                      child: Text('Buy Selected Items'),
                       onPressed: navigateToCheckout,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: hexToColor('#343434'),
@@ -377,6 +421,9 @@ class CartProductTile extends StatefulWidget {
   final Function(String) onRemove;
   final Function(String, int) onUpdateQuantity;
   final Function(String, int, double) onUpdatePrice;
+  final Function(String, bool) onSelectItem;
+  final bool showCheckbox;
+  final Function() onBuyNow;
 
   CartProductTile({
     required this.id,
@@ -388,6 +435,9 @@ class CartProductTile extends StatefulWidget {
     required this.onRemove,
     required this.onUpdateQuantity,
     required this.onUpdatePrice,
+    required this.onSelectItem,
+    required this.showCheckbox,
+    required this.onBuyNow,
     this.selectedItem = false,
   });
 
@@ -397,7 +447,6 @@ class CartProductTile extends StatefulWidget {
 
 class _CartProductTileState extends State<CartProductTile> {
   bool _isInWishlist = false;
-  bool _isSelected = false;
 
   @override
   void initState() {
@@ -460,168 +509,160 @@ class _CartProductTileState extends State<CartProductTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 14.0),
-    child: Row(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    mainAxisAlignment: MainAxisAlignment.start,
-    children: [
-    Stack(
-    children: [
-    Container(
-    height: 190,
-    width: 150,
-    decoration: BoxDecoration(
-    borderRadius: BorderRadius.circular(4.0),
-    image: DecorationImage(
-    image: NetworkImage(widget.productImage),
-    fit: BoxFit.fill,
-    ),
-    ),
-    ),
-    Positioned(
-    right: 8.0,
-    top: 8.0,
-    child: GestureDetector(
-    onTap: _toggleWishlist,
-    child: Container(
-    padding: EdgeInsets.all(8.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(100.0),
-      ),
-      child: Icon(
-        _isInWishlist ? Icons.favorite : Icons.favorite_border,
-        color: _isInWishlist ? Colors.red : Colors.grey,
-        size: 14.0,
-      ),
-    ),
-    ),
-    ),
-    ],
-    ),
-      SizedBox(width: 12.0),
-      Expanded(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Text(
-              widget.productName,
-              style: TextStyle(
-                color: hexToColor('#343434'),
-                fontSize: 20.0,
-              ),
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              'Variation: ${widget.variation}',
-              style: TextStyle(
-                color: hexToColor('#989898'),
-                fontSize: 14.0,
-              ),
-            ),
-            SizedBox(height: 25.0),
-            Text(
-              '₹${widget.productPrice.toStringAsFixed(2)}',
-              style: TextStyle(
-                color: hexToColor('#343434'),
-                fontSize: 20.0,
-              ),
-            ),
-            SizedBox(height: 15.0),
-            Row(
-              children: [
-                IconButton(
-                  icon: Icon(Icons.remove),
-                  onPressed: () {
-                    int newQuantity = widget.quantity - 1;
-                    if (newQuantity >= 0) {
-                      widget.onUpdateQuantity(widget.id, newQuantity);
-                      widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
-                    }
-                  },
+      padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 14.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Stack(
+            children: [
+              Container(
+                height: 190,
+                width: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4.0),
+                  image: DecorationImage(
+                    image: NetworkImage(widget.productImage),
+                    fit: BoxFit.fill,
+                  ),
                 ),
-                Text(widget.quantity.toString()),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () {
-                    int newQuantity = widget.quantity + 1;
-                    widget.onUpdateQuantity(widget.id, newQuantity);
-                    widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 15.0),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: () => widget.onRemove(widget.id),
+              ),
+              Positioned(
+                right: 8.0,
+                top: 8.0,
+                child: GestureDetector(
+                  onTap: _toggleWishlist,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    padding: EdgeInsets.all(8.0),
                     decoration: BoxDecoration(
-                      border: Border.all(color: hexToColor('#343434')),
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(100.0),
                     ),
-                    child: Text(
-                      'Remove',
-                      style: TextStyle(
-                        color: hexToColor('#737373'),
-                        fontSize: 12.0,
-                      ),
+                    child: Icon(
+                      _isInWishlist ? Icons.favorite : Icons.favorite_border,
+                      color: _isInWishlist ? Colors.red : Colors.grey,
+                      size: 14.0,
                     ),
                   ),
                 ),
-                SizedBox(width: 8.0),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CheckoutScreen(),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                    decoration: BoxDecoration(
-                      color: hexToColor('#343434'),
-                      borderRadius: BorderRadius.circular(100.0),
-                    ),
-                    child: Text(
-                      'Buy Now',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12.0,
-                      ),
-                    ),
+              ),
+            ],
+          ),
+          SizedBox(width: 12.0),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  widget.productName,
+                  style: TextStyle(
+                    color: hexToColor('#343434'),
+                    fontSize: 20.0,
                   ),
                 ),
-                SizedBox(width: 8.0),
-                if (widget.selectedItem)
-                  Checkbox(
-                    checkColor: Colors.black,
-                    activeColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      side: BorderSide(color: Colors.black),
-                      borderRadius: BorderRadius.circular(4.0),
-                    ),
-                    overlayColor: MaterialStateProperty.all(Colors.black),
-                    value: _isSelected,
-                    onChanged: (value) {
-                      setState(() {
-                        _isSelected = value!;
-                      });
-                    },
+                SizedBox(height: 8.0),
+                Text(
+                  'Variation: ${widget.variation}',
+                  style: TextStyle(
+                    color: hexToColor('#989898'),
+                    fontSize: 14.0,
                   ),
+                ),
+                SizedBox(height: 25.0),
+                Text(
+                  '₹${widget.productPrice.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    color: hexToColor('#343434'),
+                    fontSize: 20.0,
+                  ),
+                ),
+                SizedBox(height: 15.0),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.remove),
+                      onPressed: () {
+                        int newQuantity = widget.quantity - 1;
+                        if (newQuantity >= 0) {
+                          widget.onUpdateQuantity(widget.id, newQuantity);
+                          widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
+                        }
+                      },
+                    ),
+                    Text(widget.quantity.toString()),
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      onPressed: () {
+                        int newQuantity = widget.quantity + 1;
+                        widget.onUpdateQuantity(widget.id, newQuantity);
+                        widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(height: 15.0),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () => widget.onRemove(widget.id),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: hexToColor('#343434')),
+                          borderRadius: BorderRadius.circular(100.0),
+                        ),
+                        child: Text(
+                          'Remove',
+                          style: TextStyle(
+                            color: hexToColor('#737373'),
+                            fontSize: 12.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8.0),
+                    GestureDetector(
+                      onTap: widget.onBuyNow,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                        decoration: BoxDecoration(
+                          color: hexToColor('#343434'),
+                          borderRadius: BorderRadius.circular(100.0),
+                        ),
+                        child: Text(
+                          'Buy Now',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.0,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (widget.showCheckbox) ...[
+                      SizedBox(width: 8.0),
+                      Checkbox(
+                        checkColor: Colors.black,
+                        activeColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(color: Colors.black),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                        overlayColor: MaterialStateProperty.all(Colors.black),
+                        value: widget.selectedItem,
+                        onChanged: (value) {
+                          widget.onSelectItem(widget.id, value ?? false);
+                        },
+                      ),
+                    ],
+                  ],
+                )
               ],
-            )
-          ],
-        ),
+            ),
+          ),
+        ],
       ),
-    ],
-    ),
     );
   }
 }

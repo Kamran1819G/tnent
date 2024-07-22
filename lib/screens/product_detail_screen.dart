@@ -101,6 +101,29 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
+  void navigateToCheckout() {
+    List<Map<String, String>> selectedItems = [];
+
+    // Since this is a product detail page, we're only adding the current product
+    selectedItems.add({
+      'productId': widget.product.productId,
+      'variation': _selectedVariation,
+    });
+
+    if (selectedItems.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CheckoutScreen(selectedItems: selectedItems),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to proceed to checkout')),
+      );
+    }
+  }
+
   void _checkWishlistStatus() async {
     User? user = _auth.currentUser;
     if (user != null) {
@@ -493,9 +516,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             if (existingIndex != -1)
                                             {
                                               // If the product is already in the cart, update the quantity
-                                              cartList[existingIndex]['quantity'] += 1;
                                               ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text('Item quantity updated in cart')),
+                                                SnackBar(content: Text('Item already in cart')),
                                               );
                                             }
                                             else
@@ -685,36 +707,31 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ),
                 Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  color: Colors.white,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CheckoutScreen(),
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    color: Colors.white,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        navigateToCheckout();
+                      },
+                      child: Text(
+                        'Buy Now',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: hexToColor('#343434'),
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 15,),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
                         ),
-                      );
-                    },
-                    child: Text(
-                      'Buy Now',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: hexToColor('#343434'),
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 15,),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                   ),
                 ),
-              ),
               ]);
             }),
       ),
