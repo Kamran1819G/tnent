@@ -104,10 +104,10 @@ class _CartScreenState extends State<CartScreen> {
         throw Exception("User does not exist!");
       }
 
-      List<dynamic> cartList = snapshot.get('mycart') ?? [];
+      List<dynamic> cartList = snapshot.get('cart') ?? [];
       cartList.removeWhere((item) => item['productId'] == productID);
 
-      transaction.update(userRef, {'mycart': cartList});
+      transaction.update(userRef, {'cart': cartList});
 
       setState(() {
         cartItems.removeWhere((item) => item.productID == productID);
@@ -126,7 +126,7 @@ class _CartScreenState extends State<CartScreen> {
         throw Exception("User does not exist!");
       }
 
-      List<dynamic> cartList = snapshot.get('mycart') ?? [];
+      List<dynamic> cartList = snapshot.get('cart') ?? [];
       int index = cartList.indexWhere((item) => item['productId'] == productID);
 
       if (index != -1) {
@@ -137,7 +137,7 @@ class _CartScreenState extends State<CartScreen> {
         }
       }
 
-      transaction.update(userRef, {'mycart': cartList});
+      transaction.update(userRef, {'cart': cartList});
 
       setState(() {
         int itemIndex = cartItems.indexWhere((item) => item.productID == productID);
