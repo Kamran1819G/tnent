@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -85,15 +84,32 @@ class _CartScreenState extends State<CartScreen> {
 
   Future<void> fetchProductDetails(CartItem item) async {
     DocumentSnapshot productDoc = await FirebaseFirestore.instance
-        .collection('Products')
+        .collection('products')
         .doc(item.productID)
         .get();
 
     if (productDoc.exists) {
       Map<String, dynamic> data = productDoc.data() as Map<String, dynamic>;
-      item.productName = data['name'] ?? '';
-      item.productImage = data['image'] ?? '';
-      item.productPrice = (data['price'] ?? 0).toDouble();
+
+      if (data.containsKey('variations') && data['variations'] is Map) {
+        Map<String, dynamic> variations = data['variations'];
+        if (variations.containsKey(item.variation)) {
+          Map<String, dynamic> variationData = variations[item.variation];
+
+          item.productName = data['name'] ?? '';
+          item.productImage = variationData['image'] ?? data['image'] ?? '';
+          item.productPrice = (variationData['price'] ?? data['price'] ?? 0).toDouble();
+          item.sku = variationData['sku'] ?? '';
+        } else {
+          item.productName = data['name'] ?? '';
+          item.productImage = data['image'] ?? '';
+          item.productPrice = (data['price'] ?? 0).toDouble();
+        }
+      } else {
+        item.productName = data['name'] ?? '';
+        item.productImage = data['image'] ?? '';
+        item.productPrice = (data['price'] ?? 0).toDouble();
+      }
     }
   }
 
@@ -429,16 +445,12 @@ class _CartProductTileState extends State<CartProductTile> {
             wishlist.remove(widget.id);
           }
 
-          // Convert the wishlist back to a comma-separated string
           String updatedWishlistString = wishlist.join(',');
-
-          // Update the user document with the new wishlist string
           transaction.update(userRef, {'wishlist': updatedWishlistString});
         }
       });
     } catch (e) {
       print('Error updating wishlist: $e');
-      // Revert the state if the transaction fails
       setState(() {
         _isInWishlist = !_isInWishlist;
       });
@@ -448,166 +460,168 @@ class _CartProductTileState extends State<CartProductTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 14.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-      Stack(
-      children: [
-      Container(
-      height: 190,
-        width: 150,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4.0),
-          image: DecorationImage(
-            image: NetworkImage(widget.productImage),
-            fit: BoxFit.fill,
-          ),
-        ),
-      ),
-      Positioned(
-        right: 8.0,
-        top: 8.0,
-        child: GestureDetector(
-          onTap: _toggleWishlist,
-          child: Container(
-            padding: EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(100.0),
-            ),
-            child: Icon(
-              _isInWishlist ? Icons.favorite : Icons.favorite_border,
-              color: _isInWishlist ? Colors.red : Colors.grey,
-              size: 14.0,
-            ),
-          ),
-        ),
-      ),
-      ],
-    ),
-    SizedBox(width: 12.0),
-    Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
+        padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 14.0),
+    child: Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
     mainAxisAlignment: MainAxisAlignment.start,
     children: [
-    Text(
-widget.productName,
-style: TextStyle(
-color: hexToColor('#343434'),
-fontSize: 20.0,
-),
-),
-SizedBox(height: 8.0),
-Text(
-'Variation: ${widget.variation}',
-style: TextStyle(
-color: hexToColor('#989898'),
-fontSize: 14.0,
-),
-),
-SizedBox(height: 25.0),
-Text(
-'₹${widget.productPrice.toStringAsFixed(2)}',
-style: TextStyle(
-color: hexToColor('#343434'),
-fontSize: 20.0,
-),
-),
-SizedBox(height: 15.0),
-Row(
-children: [
-IconButton(
-icon: Icon(Icons.remove),
-onPressed: () {
-int newQuantity = widget.quantity - 1;
-if (newQuantity >= 0) {
-widget.onUpdateQuantity(widget.id, newQuantity);
-widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
-}
-},
-),
-Text(widget.quantity.toString()),
-IconButton(
-icon: Icon(Icons.add),
-onPressed: () {
-int newQuantity = widget.quantity + 1;
-widget.onUpdateQuantity(widget.id, newQuantity);
-widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
-},
-),
-],
-),
-SizedBox(height: 15.0),
-Row(
-crossAxisAlignment: CrossAxisAlignment.center,
-children: [
-GestureDetector(
-onTap: () => widget.onRemove(widget.id),
-child: Container(
-padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-decoration: BoxDecoration(
-border: Border.all(color: hexToColor('#343434')),
-borderRadius: BorderRadius.circular(100.0),
-),
-child: Text(
-'Remove',
-style: TextStyle(
-color: hexToColor('#737373'),
-fontSize: 12.0,
-),
-),
-),
-),
-SizedBox(width: 8.0),
-GestureDetector(
-onTap: () {
-Navigator.push(
-context,
-MaterialPageRoute(
-builder: (context) => CheckoutScreen(),
-),
-);
-},
-child: Container(
-padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-decoration: BoxDecoration(
-color: hexToColor('#343434'),
-borderRadius: BorderRadius.circular(100.0),
-),
-child: Text(
-'Buy Now',
-style: TextStyle(
-color: Colors.white,
-fontSize: 12.0,
-),
-),
-),
-),
-SizedBox(width: 8.0),
-if (widget.selectedItem)
-Checkbox(
-checkColor: Colors.black,
-activeColor: Colors.white,
-shape: RoundedRectangleBorder(
-side: BorderSide(color: Colors.black),
-borderRadius: BorderRadius.circular(4.0),
-),
-overlayColor: MaterialStateProperty.all(Colors.black),
-value: _isSelected,
-onChanged: (value) {
-setState(() {
-_isSelected = value!;
-});
-},
-),
-],
-)
-],
-),
-],
-),
-);
-}
+    Stack(
+    children: [
+    Container(
+    height: 190,
+    width: 150,
+    decoration: BoxDecoration(
+    borderRadius: BorderRadius.circular(4.0),
+    image: DecorationImage(
+    image: NetworkImage(widget.productImage),
+    fit: BoxFit.fill,
+    ),
+    ),
+    ),
+    Positioned(
+    right: 8.0,
+    top: 8.0,
+    child: GestureDetector(
+    onTap: _toggleWishlist,
+    child: Container(
+    padding: EdgeInsets.all(8.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(100.0),
+      ),
+      child: Icon(
+        _isInWishlist ? Icons.favorite : Icons.favorite_border,
+        color: _isInWishlist ? Colors.red : Colors.grey,
+        size: 14.0,
+      ),
+    ),
+    ),
+    ),
+    ],
+    ),
+      SizedBox(width: 12.0),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text(
+              widget.productName,
+              style: TextStyle(
+                color: hexToColor('#343434'),
+                fontSize: 20.0,
+              ),
+            ),
+            SizedBox(height: 8.0),
+            Text(
+              'Variation: ${widget.variation}',
+              style: TextStyle(
+                color: hexToColor('#989898'),
+                fontSize: 14.0,
+              ),
+            ),
+            SizedBox(height: 25.0),
+            Text(
+              '₹${widget.productPrice.toStringAsFixed(2)}',
+              style: TextStyle(
+                color: hexToColor('#343434'),
+                fontSize: 20.0,
+              ),
+            ),
+            SizedBox(height: 15.0),
+            Row(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.remove),
+                  onPressed: () {
+                    int newQuantity = widget.quantity - 1;
+                    if (newQuantity >= 0) {
+                      widget.onUpdateQuantity(widget.id, newQuantity);
+                      widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
+                    }
+                  },
+                ),
+                Text(widget.quantity.toString()),
+                IconButton(
+                  icon: Icon(Icons.add),
+                  onPressed: () {
+                    int newQuantity = widget.quantity + 1;
+                    widget.onUpdateQuantity(widget.id, newQuantity);
+                    widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
+                  },
+                ),
+              ],
+            ),
+            SizedBox(height: 15.0),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () => widget.onRemove(widget.id),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: hexToColor('#343434')),
+                      borderRadius: BorderRadius.circular(100.0),
+                    ),
+                    child: Text(
+                      'Remove',
+                      style: TextStyle(
+                        color: hexToColor('#737373'),
+                        fontSize: 12.0,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8.0),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => CheckoutScreen(),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                    decoration: BoxDecoration(
+                      color: hexToColor('#343434'),
+                      borderRadius: BorderRadius.circular(100.0),
+                    ),
+                    child: Text(
+                      'Buy Now',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12.0,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 8.0),
+                if (widget.selectedItem)
+                  Checkbox(
+                    checkColor: Colors.black,
+                    activeColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Colors.black),
+                      borderRadius: BorderRadius.circular(4.0),
+                    ),
+                    overlayColor: MaterialStateProperty.all(Colors.black),
+                    value: _isSelected,
+                    onChanged: (value) {
+                      setState(() {
+                        _isSelected = value!;
+                      });
+                    },
+                  ),
+              ],
+            )
+          ],
+        ),
+      ),
+    ],
+    ),
+    );
+  }
 }
