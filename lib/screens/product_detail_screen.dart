@@ -481,37 +481,34 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             // Create a map with all necessary product information
                                             Map<String, dynamic> cartItem = {
                                               'productId': widget.product.productId,
-                                              'name': widget.product.name,
-                                              'storeId': widget.product.storeId,
                                               'variation': _selectedVariation,
-                                              'price': _selectedVariant.price,
-                                              'mrp': _selectedVariant.mrp,
-                                              'discount': _selectedVariant.discount,
                                               'quantity': 1, // Default quantity
-                                              'imageUrl': widget.product.imageUrls.isNotEmpty ? widget.product.imageUrls[0] : '',
-                                              'sku': _selectedVariant.sku,
                                             };
 
                                             // Check if the product is already in the cart
-                                            bool isInCart = cartList.any((item) =>
+                                            int existingIndex = cartList.indexWhere((item) =>
                                             item['productId'] == widget.product.productId &&
                                                 item['variation'] == _selectedVariation
                                             );
 
-                                            if (isInCart) {
-                                              // If the product is already in the cart, show a message
+                                            if (existingIndex != -1)
+                                            {
+                                              // If the product is already in the cart, update the quantity
+                                              cartList[existingIndex]['quantity'] += 1;
                                               ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text('Item already in cart')),
+                                                SnackBar(content: Text('Item quantity updated in cart')),
                                               );
-                                            } else {
+                                            }
+                                            else
+                                            {
                                               // If the product is not in the cart, add it
                                               cartList.add(cartItem);
-                                              transaction.update(userRef, {'cart': cartList});
-
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 SnackBar(content: Text('Item added to cart')),
                                               );
                                             }
+
+                                            transaction.update(userRef, {'cart': cartList});
                                           });
 
                                           // Optionally, you can navigate to the cart screen here
