@@ -1,89 +1,24 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
-import '../helpers/color_utils.dart';
 
-class ProductTile extends StatefulWidget {
+class RemovableProductTile extends StatelessWidget {
   final ProductModel product;
   final double width;
   final double height;
+  final VoidCallback onRemove;
 
-  ProductTile({
+  RemovableProductTile({
     required this.product,
     this.width = 150.0,
     this.height = 200.0,
+    required this.onRemove,
   });
 
-  @override
-  _ProductTileState createState() => _ProductTileState();
-}
-
-class _ProductTileState extends State<ProductTile> {
-  bool _isInWishlist = false;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkWishlistStatus();
-  }
-
-  void _checkWishlistStatus() async {
-    User? user = _auth.currentUser;
-    if (user != null) {
-      DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user.uid).get();
-      if (userDoc.exists) {
-        List<dynamic> wishlist = (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
-        setState(() {
-          _isInWishlist = wishlist.contains(widget.product.productId);
-        });
-      }
-    }
-  }
-
-  Future<void> _toggleWishlist() async {
-    User? user = _auth.currentUser;
-    if (user == null) {
-      // Handle the case when the user is not logged in
-      print('User is not logged in');
-      return;
-    }
-
-    setState(() {
-      _isInWishlist = !_isInWishlist;
-    });
-
-    try {
-      DocumentReference userDocRef = _firestore.collection('Users').doc(user.uid);
-
-      if (_isInWishlist) {
-        // Add product ID to wishlist
-        await userDocRef.update({
-          'wishlist': FieldValue.arrayUnion([widget.product.productId])
-        });
-        print('Added to wishlist: ${widget.product.productId}');
-      } else {
-        // Remove product ID from wishlist
-        await userDocRef.update({
-          'wishlist': FieldValue.arrayRemove([widget.product.productId])
-        });
-        print('Removed from wishlist: ${widget.product.productId}');
-      }
-    } catch (e) {
-      print('Error updating wishlist: $e');
-      // Revert the UI state if the operation failed
-      setState(() {
-        _isInWishlist = !_isInWishlist;
-      });
-    }
-  }
-
   ProductVariant? _getFirstVariation() {
-    if (widget.product.variations.isNotEmpty) {
-      return widget.product.variations.values.first;
+    if (product.variations.isNotEmpty) {
+      return product.variations.values.first;
     }
     return null;
   }
@@ -92,7 +27,6 @@ class _ProductTileState extends State<ProductTile> {
   Widget build(BuildContext context) {
     var firstVariation = _getFirstVariation();
     var price = firstVariation?.price ?? 0.0;
-    var mrp = firstVariation?.mrp ?? 0.0;
     var discount = firstVariation?.discount ?? 0.0;
 
     return GestureDetector(
@@ -101,14 +35,14 @@ class _ProductTileState extends State<ProductTile> {
           context,
           MaterialPageRoute(
             builder: (context) => ProductDetailScreen(
-              product: widget.product,
+              product: product,
             ),
           ),
         );
       },
       child: Container(
-        width: widget.width,
-        height: widget.height,
+        width: width,
+        height: height,
         margin: EdgeInsets.all(8.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6.0),
@@ -124,7 +58,7 @@ class _ProductTileState extends State<ProductTile> {
                   ClipRRect(
                     borderRadius: BorderRadius.vertical(top: Radius.circular(6.0)),
                     child: Image.network(
-                      widget.product.imageUrls.first,
+                      product.imageUrls.first,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -132,7 +66,7 @@ class _ProductTileState extends State<ProductTile> {
                     right: 8.0,
                     top: 8.0,
                     child: GestureDetector(
-                      onTap: _toggleWishlist,
+                      onTap: onRemove,
                       child: Container(
                         padding: EdgeInsets.all(6.0),
                         decoration: BoxDecoration(
@@ -140,8 +74,8 @@ class _ProductTileState extends State<ProductTile> {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          _isInWishlist ? Icons.favorite : Icons.favorite_border,
-                          color: _isInWishlist ? Colors.red : Colors.grey,
+                          Icons.remove,
+                          color: Colors.red,
                           size: 18.0,
                         ),
                       ),
@@ -157,7 +91,7 @@ class _ProductTileState extends State<ProductTile> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    widget.product.name,
+                    product.name,
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 12.0,
@@ -173,7 +107,6 @@ class _ProductTileState extends State<ProductTile> {
                         style: TextStyle(
                           color: hexToColor('#343434'),
                           fontSize: 12.0,
-                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       SizedBox(width: 4.0),
@@ -183,7 +116,6 @@ class _ProductTileState extends State<ProductTile> {
                           style: TextStyle(
                             color: hexToColor('#FF0000'),
                             fontSize: 10.0,
-                            fontWeight: FontWeight.bold,
                           ),
                         ),
                     ],
