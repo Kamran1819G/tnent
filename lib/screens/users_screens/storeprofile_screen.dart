@@ -24,11 +24,15 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
   int storeEngagement = 0;
   bool isExpanded = false;
   bool isGreenFlag = true;
+  String userVote = 'none'; // 'none', 'green', or 'red'
   late int greenFlags;
   late int redFlags;
 
+
   late AnimationController _controller;
   late Animation<double> _animation;
+
+  String userId = FirebaseAuth.instance.currentUser!.uid;
 
   Future<List<StoreCategoryModel>> fetchCategories() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -42,7 +46,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
         .toList();
   }
 
-  String? userId = FirebaseAuth.instance.currentUser?.uid;
 
   @override
   void initState() {
@@ -50,6 +53,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
     greenFlags = widget.store.greenFlags;
     redFlags = widget.store.redFlags;
     checkConnectionStatus();
+    checkUserVote();
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -58,6 +62,108 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
       parent: _controller,
       curve: Curves.easeInOut,
     );
+    listenToFlagChanges();
+  }
+
+  Future<void> checkUserVote() async {
+      DocumentSnapshot voteDoc = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userId)
+          .collection('storeVotes')
+          .doc(widget.store.storeId)
+          .get();
+
+      if (voteDoc.exists) {
+        Map<String, dynamic> data = voteDoc.data() as Map<String, dynamic>;
+        setState(() {
+          userVote = data['greenFlag'] ? 'green' : 'red';
+        });
+      }
+  }
+
+  void listenToFlagChanges() {
+    FirebaseFirestore.instance
+        .collection('Stores')
+        .doc(widget.store.storeId)
+        .snapshots()
+        .listen((snapshot) {
+      if (snapshot.exists) {
+        setState(() {
+          greenFlags = snapshot.data()?['greenFlags'] ?? 0;
+          redFlags = snapshot.data()?['redFlags'] ?? 0;
+        });
+      }
+    });
+  }
+
+  Future<void> handleVote(String voteType) async {
+
+    await handleStoreVote(userId, widget.store.storeId, voteType);
+
+    setState(() {
+      if (userVote == voteType) {
+        userVote = 'none';
+      } else {
+        userVote = voteType;
+      }
+      _controller.reverse();
+      isExpanded = false;
+    });
+  }
+
+  Future<void> handleStoreVote(String userId, String storeId, String voteType) async {
+    final userVoteRef = FirebaseFirestore.instance
+        .collection("Users")
+        .doc(userId)
+        .collection("storeVotes")
+        .doc(storeId);
+    final storeRef = FirebaseFirestore.instance.collection("Stores").doc(storeId);
+
+    try {
+      return await FirebaseFirestore.instance.runTransaction((transaction) async {
+        final voteDoc = await transaction.get(userVoteRef);
+        final storeDoc = await transaction.get(storeRef);
+
+        if (!storeDoc.exists) {
+          throw Exception('Store does not exist');
+        }
+
+        if (voteDoc.exists) {
+          final previousVote = voteDoc.data() as Map<String, dynamic>;
+          // If the previous vote is the same as the new vote, remove the vote
+          if (previousVote['greenFlag'] == true && voteType == 'greenFlag') {
+            transaction.update(storeRef, {'greenFlags': FieldValue.increment(-1)});
+            transaction.delete(userVoteRef);
+            return;
+          } else if (previousVote['redFlag'] == true && voteType == 'redFlag') {
+            transaction.update(storeRef, {'redFlags': FieldValue.increment(-1)});
+            transaction.delete(userVoteRef);
+            return;
+          }
+          // If changing the vote type, decrement the old vote
+          if (previousVote['greenFlag'] == true && voteType != 'greenFlag') {
+            transaction.update(storeRef, {'greenFlags': FieldValue.increment(-1)});
+          } else if (previousVote['redFlag'] == true && voteType != 'redFlag') {
+            transaction.update(storeRef, {'redFlags': FieldValue.increment(-1)});
+          }
+        }
+
+        // Add the new vote
+        if (voteType == 'greenFlag') {
+          transaction.update(storeRef, {'greenFlags': FieldValue.increment(1)});
+        } else if (voteType == 'redFlag') {
+          transaction.update(storeRef, {'redFlags': FieldValue.increment(1)});
+        }
+
+        transaction.set(userVoteRef, {
+          'greenFlag': voteType == 'greenFlag',
+          'redFlag': voteType == 'redFlag'
+        }, SetOptions(merge: true));
+      });
+    } catch (error) {
+      print('Error recording vote: $error');
+      rethrow;
+    }
   }
 
   Future<void> checkConnectionStatus() async {
@@ -114,13 +220,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
     });
   }
 
-  void _selectFlag(bool isGood) {
-    setState(() {
-      isGreenFlag = isGood;
-      isExpanded = false;
-      _controller.reverse();
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -368,7 +467,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                   children: [
                                     if (!isExpanded)
                                       Text(
-                                        ' ${greenFlags} / ${greenFlags + redFlags}',
+                                        ' ${userVote == 'red' ? redFlags : greenFlags} / ${greenFlags + redFlags}',
                                         style: TextStyle(
                                           color: hexToColor('#676767'),
                                           fontFamily: 'Gotham',
@@ -377,75 +476,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                         ),
                                       ),
                                     SizedBox(width: 5.0),
-                                    AnimatedBuilder(
-                                      animation: _animation,
-                                      builder: (context, child) {
-                                        return GestureDetector(
-                                          onTap: _toggleExpansion,
-                                          child: isExpanded
-                                              ? Container(
-                                                  width: isExpanded
-                                                      ? (_animation.value * 60 +
-                                                          40)
-                                                      : 40,
-                                                  height: 40.0,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            50.0),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      GestureDetector(
-                                                        onTap: () =>
-                                                            _selectFlag(true),
-                                                        child: Image.asset(
-                                                            'assets/green-flag.png',
-                                                            height: 18.0,
-                                                            width: 18.0),
-                                                      ),
-                                                      if (isExpanded)
-                                                        SizedBox(
-                                                            width: _animation
-                                                                    .value *
-                                                                25),
-                                                      if (isExpanded)
-                                                        GestureDetector(
-                                                          onTap: () =>
-                                                              _selectFlag(
-                                                                  false),
-                                                          child: Image.asset(
-                                                              'assets/red-flag.png',
-                                                              height: 18.0,
-                                                              width: 18.0),
-                                                        ),
-                                                    ],
-                                                  ),
-                                                )
-                                              : Container(
-                                                  width: 40,
-                                                  height: 35.0,
-                                                  padding: EdgeInsets.all(8.0),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            50.0),
-                                                  ),
-                                                  child: Image.asset(
-                                                      isGreenFlag
-                                                          ? 'assets/green-flag.png'
-                                                          : 'assets/red-flag.png',
-                                                      height: 18.0,
-                                                      width: 18.0),
-                                                ),
-                                        );
-                                      },
-                                    ),
+                                    buildFlagButton(),
                                   ],
                                 ),
                               ],
@@ -715,6 +746,63 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
       ),
     );
   }
+
+  Widget buildFlagButton() {
+    String flagImage;
+    if (userVote == 'green') {
+      flagImage = 'assets/green-flag.png';
+    } else if (userVote == 'red') {
+      flagImage = 'assets/red-flag.png';
+    } else {
+      flagImage = 'assets/grey-flag.png';
+    }
+
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return GestureDetector(
+          onTap: _toggleExpansion,
+          child: isExpanded
+              ? Container(
+            width: isExpanded ? (_animation.value * 60 + 40) : 40,
+            height: 40.0,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(50.0),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () => handleVote('greenFlag'),
+                  child: Image.asset('assets/green-flag.png',
+                      height: 18.0, width: 18.0),
+                ),
+                if (isExpanded) SizedBox(width: _animation.value * 25),
+                if (isExpanded)
+                  GestureDetector(
+                    onTap: () => handleVote('redFlag'),
+                    child: Image.asset('assets/red-flag.png',
+                        height: 18.0, width: 18.0),
+                  ),
+              ],
+            ),
+          )
+              : Container(
+            width: 40,
+            height: 35.0,
+            padding: EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(50.0),
+            ),
+            child: Image.asset(flagImage, height: 18.0, width: 18.0),
+          ),
+        );
+      },
+    );
+  }
+
 }
 
 class FeatureProductsListView extends StatefulWidget {
