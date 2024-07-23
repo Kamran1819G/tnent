@@ -11,6 +11,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 
+
+
 class CheckoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>> selectedItems;
 
@@ -77,14 +79,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
                 cartData.add({
                   'productName': productData['name'],
+                  'productDescription': productData['description'],
                   'productPrice': variationData['price'] ?? productData['price'],
                   'quantity': item['quantity'],
                   'image': imageUrl,
                   'variation': variation,
                   'productId': productId,
-                  'storeName': storeData['name'], // Add store name
-                  'storeAddress': storeData['address'], // Add store address if needed
-                  'storeLogo': storeData['logo'], // Add store logo if needed
+                  'storeName': storeData['name'],
+                  'storeAddress': storeData['address'],
+                  'storeLogo': storeData['logo'],
+                  'orderId': generateRandomString(7),
+                  'code': generateRandomString(5),
                 });
               }
             });
@@ -120,7 +125,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               break;
             }
           }
-          calculateTotalPrice(); // Recalculate total price after updating quantity
+          calculateTotalPrice();
         });
 
         // Update the cart in Firestore
@@ -151,8 +156,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       totalPrice = sum;
     });
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -312,9 +315,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   return ProductDetails(
                     productImage: item['image'] ?? '',
                     productName: item['productName'] ?? '',
+                    productDescription: item['productDescription'] ?? '',
                     productPrice: item['productPrice'] ?? 0.0,
                     quantity: item['quantity'] ?? 1,
                     variation: item['variation'] ?? '',
+                    storeName: item['storeName'] ?? '',
+                    storeAddress: item['storeAddress'] ?? '',
+                    storeLogo: item['storeLogo'] ?? '',
+                    orderId: item['orderId'],
+                    code: item['code'],
                     onQuantityChanged: (productId, newQuantity) {
                       updateQuantity(productId, newQuantity);
                     },
@@ -389,18 +398,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 class ProductDetails extends StatefulWidget {
   final String productImage;
   final String productName;
+  final String productDescription;
   final double productPrice;
   final int quantity;
   final String variation;
+  final String storeName;
+  final String storeAddress;
+  final String storeLogo;
+  final String orderId;
+  final String code;
   final Function(String, int) onQuantityChanged;
 
   ProductDetails({
     required this.productImage,
-
     required this.productName,
+    required this.productDescription,
     required this.productPrice,
     required this.quantity,
     required this.variation,
+    required this.storeName,
+    required this.storeAddress,
+    required this.storeLogo,
+    required this.orderId,
+    required this.code,
     required this.onQuantityChanged,
   });
 
@@ -443,48 +463,72 @@ class _ProductDetailsState extends State<ProductDetails> {
       surfaceTintColor: Colors.white,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 100,
-              width: 100,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4.0),
-                image: DecorationImage(
-                  image: NetworkImage(widget.productImage),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            SizedBox(width: 16.0),
-            Column(
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.productName,
-                  style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w400),
-                ),
-                SizedBox(height: 8.0),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                  height: 100,
+                  width: 100,
                   decoration: BoxDecoration(
-                    border: Border.all(color: hexToColor('#D0D0D0')),
                     borderRadius: BorderRadius.circular(4.0),
-                  ),
-                  child: Text(
-                    widget.variation,
-                    style: TextStyle(
-                        color: hexToColor('#222230'),
-                        fontFamily: 'Gotham',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 10.0),
+                    image: DecorationImage(
+                      image: NetworkImage(widget.productImage),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-                SizedBox(height: 16.0),
+                SizedBox(width: 16.0),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.productName,
+                        style: TextStyle(
+                          color: hexToColor('#343434'),
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 4.0),
+                      Text(
+                        widget.productDescription,
+                        style: TextStyle(
+                          color: hexToColor('#6F6F6F'),
+                          fontSize: 12.0,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 8.0),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: hexToColor('#D0D0D0')),
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                        child: Text(
+                          widget.variation,
+                          style: TextStyle(
+                            color: hexToColor('#222230'),
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 10.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16.0),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -492,53 +536,122 @@ class _ProductDetailsState extends State<ProductDetails> {
                       '₹${totalItemPrice.toStringAsFixed(2)}',
                       style: TextStyle(
                         color: hexToColor('#343434'),
-                        fontSize: 22,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 4.0),
+                    Text(
+                      '₹${widget.productPrice.toStringAsFixed(2)} per item',
+                      style: TextStyle(
+                        color: hexToColor('#6F6F6F'),
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Quantity'.toUpperCase(),
+                      style: TextStyle(
+                        color: hexToColor('#222230'),
+                        fontSize: 10.0,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                    SizedBox(height: 4.0),
+                    Container(
+                      height: 30,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: hexToColor('#D0D0D0')),
+                        borderRadius: BorderRadius.circular(4.0),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.remove),
+                            iconSize: 12,
+                            onPressed: decrementQuantity,
+                          ),
+                          Text(
+                            '$quantity',
+                            style: TextStyle(
+                              fontSize: 10.0,
+                              fontFamily: 'Gotham',
+                              fontWeight: FontWeight.w500,
+                              color: hexToColor('#222230'),
+                            ),
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.add),
+                            iconSize: 12,
+                            onPressed: incrementQuantity,
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            Spacer(),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.start,
+            SizedBox(height: 16.0),
+            Row(
               children: [
-                Text(
-                  'Quantity'.toUpperCase(),
-                  style: TextStyle(
-                      color: hexToColor('#222230'),
-                      fontSize: 10.0,
-                      fontWeight: FontWeight.w400),
-                ),
-                SizedBox(height: 4.0),
                 Container(
-                  height: 30,
+                  height: 40,
+                  width: 40,
                   decoration: BoxDecoration(
-                    border: Border.all(color: hexToColor('#D0D0D0')),
-                    borderRadius: BorderRadius.circular(4.0),
+                    shape: BoxShape.circle,
+                    image: DecorationImage(
+                      image: NetworkImage(widget.storeLogo),
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                ),
+                SizedBox(width: 8.0),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      IconButton(
-                        icon: Icon(Icons.remove),
-                        iconSize: 12,
-                        onPressed: decrementQuantity,
-                      ),
                       Text(
-                        '$quantity',
+                        widget.storeName,
                         style: TextStyle(
-                          fontSize: 10.0,
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          color: hexToColor('#222230'),
+                          color: hexToColor('#343434'),
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      IconButton(
-                        icon: Icon(Icons.add),
-                        iconSize: 12,
-                        onPressed: incrementQuantity,
+                      Text(
+                        widget.storeAddress,
+                        style: TextStyle(
+                          color: hexToColor('#6F6F6F'),
+                          fontSize: 12.0,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
+                      Text(
+                        widget.orderId,
+                        style: TextStyle(
+                          color: hexToColor('#6F6F6F'),
+                          fontSize: 12.0,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        widget.code,
+                        style: TextStyle(
+                          color: hexToColor('#6F6F6F'),
+                          fontSize: 12.0,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+
                     ],
                   ),
                 ),
@@ -554,6 +667,7 @@ class _ProductDetailsState extends State<ProductDetails> {
 
 ///orderid and code for shop owner
 ///
+
 String generateRandomString(int length, {bool includeLetters = true}) {
   const String _chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   const String _digits = '0123456789';
@@ -564,9 +678,6 @@ String generateRandomString(int length, {bool includeLetters = true}) {
       length, (_) => chars.codeUnitAt(_rnd.nextInt(chars.length))));
 }
 
-String orderId = generateRandomString(7);
-String code = generateRandomString(5);
-
 ///summary page
 
 class SummaryScreen extends StatefulWidget {
@@ -575,6 +686,7 @@ class SummaryScreen extends StatefulWidget {
   final String userName;
   final String userAddress;
   final String userMobile;
+
 
   const SummaryScreen({
     Key? key,
@@ -654,104 +766,26 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 ],
               ),
             ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: [
-                  Container(
-                    height: 75,
-                    width: 75,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(4.0),
-                      image: DecorationImage(
-                        image: AssetImage('assets/jain_brothers.png'),
-                        fit: BoxFit.fill,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 8.0),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Jain Brothers',
-                        style: TextStyle(
-                          color: hexToColor('#343434'),
-                          fontSize: 18.0,
-                        ),
-                      ),
-                      SizedBox(height: 4.0),
-                      Row(children: [
-                        Image.asset(
-                          'assets/icons/blue_globe.png',
-                          width: 8,
-                        ),
-                        SizedBox(width: 4.0),
-                        Text(
-                          'jainbrothers.tnennt.store',
-                          style: TextStyle(
-                            color: hexToColor('#A9A9A9'),
-                            fontSize: 10.0,
-                          ),
-                        ),
-                      ])
-                    ],
-                  ),
-                  Spacer(),
-                  Row(
-                    children: [
-                      Text(
-                        'Order ID:',
-                        style: TextStyle(
-                          color: hexToColor('#2D332F'),
-                          fontSize: 12.0,
-                        ),
-                      ),
-                      SizedBox(width: 4.0),
-                      Text(
-                        orderId,
-                        style: TextStyle(
-                          color: hexToColor('#A9A9A9'),
-                          fontSize: 12.0,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      SizedBox(width: 8.0),
-                      Text(
-                        'Code:',
-                        style: TextStyle(
-                          color: hexToColor('#2D332F'),
-                          fontSize: 12.0,
-                        ),
-                      ),
-                      SizedBox(width: 4.0),
-                      Text(
-                        code,
-                        style: TextStyle(
-                          color: hexToColor('#A9A9A9'),
-                          fontSize: 12.0,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
         Expanded(
           child: ListView.builder(
             itemCount: widget.cartData.length,
             itemBuilder: (context, index) {
               var item = widget.cartData[index];
               return ProductDetails(
-                productImage: item['image'] ?? 'assets/product_image.png',
+                productImage: item['image'] ?? '',
                 productName: item['productName'] ?? '',
+                productDescription: item['productDescription'] ?? '',
                 productPrice: item['productPrice'] ?? 0.0,
-                variation: item['variation']??'',
                 quantity: item['quantity'] ?? 1,
-                onQuantityChanged: (_, __) {}, // Disable quantity changes in summary
+                variation: item['variation'] ?? '',
+                storeName: item['storeName'] ?? '',
+                storeAddress: item['storeAddress'] ?? '',
+                storeLogo: item['storeLogo'] ?? '',
+                orderId: item['orderId'],
+                code: item['code'],
+                onQuantityChanged: (productId, newQuantity) {
+                  ///updateQuantity(productId, newQuantity);
+                },
               );
             },
           ),
