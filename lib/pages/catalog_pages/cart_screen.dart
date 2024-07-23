@@ -193,9 +193,11 @@ class _CartScreenState extends State<CartScreen> {
       int index = cartItems.indexWhere((item) => item.productID == productId);
       if (index != -1) {
         cartItems[index].isSelected = isSelected;
+        allItemsSelected = cartItems.every((item) => item.isSelected);
       }
     });
   }
+
 
   void navigateToCheckout() {
     List<Map<String, String>> selectedItems = cartItems
@@ -345,6 +347,7 @@ class _CartScreenState extends State<CartScreen> {
                                     item.isSelected = allItemsSelected;
                                   }
                                 });
+                                print("All items selected: $allItemsSelected"); // Add this line for debugging
                               },
                             ),
                           ],
@@ -643,13 +646,12 @@ class _CartProductTileState extends State<CartProductTile> {
                     if (widget.showCheckbox) ...[
                       SizedBox(width: 8.0),
                       Checkbox(
-                        checkColor: Colors.black,
-                        activeColor: Colors.white,
+                        checkColor: Colors.white,
+                        activeColor: Colors.black,
                         shape: RoundedRectangleBorder(
                           side: BorderSide(color: Colors.black),
                           borderRadius: BorderRadius.circular(4.0),
                         ),
-                        overlayColor: MaterialStateProperty.all(Colors.black),
                         value: widget.selectedItem,
                         onChanged: (value) {
                           widget.onSelectItem(widget.id, value ?? false);
