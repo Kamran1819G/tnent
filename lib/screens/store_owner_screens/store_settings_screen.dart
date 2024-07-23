@@ -307,21 +307,23 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                                     });
                                   },
                                   items: <String>[
-                                    'Clothing',
-                                    'Grocery',
-                                    'Electronics',
-                                    'Restaurant',
-                                    'Book Store',
-                                    'Bakery',
-                                    'Beauty Apparel',
-                                    'Cafe',
-                                    'Florist',
-                                    'Footwear',
-                                    'Accessories',
-                                    'Stationary',
-                                    'Eyewear',
-                                    'Watch',
-                                    'Sports'
+                                    "Clothings",
+                                    "Accessories",
+                                    "Electronics",
+                                    "Foods",
+                                    "Florists",
+                                    "Sports",
+                                    "Book Stores",
+                                    "Stationeries",
+                                    "Beauty Apparels",
+                                    "Musical Instruments",
+                                    "Eyewares",
+                                    "Furnitures",
+                                    "Home Decors",
+                                    "Jewelries",
+                                    "Shoes",
+                                    "Toys",
+                                    "Watches"
                                   ].map<DropdownMenuItem<String>>((String value) {
                                     return DropdownMenuItem<String>(
                                       value: value,

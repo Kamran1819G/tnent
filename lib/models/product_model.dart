@@ -127,4 +127,34 @@ class ProductModel {
       'variations': variationsMap,
     };
   }
+
+  ProductModel copyWith({
+    String? productId,
+    String? storeId,
+    String? name,
+    String? description,
+    String? productCategory,
+    String? storeCategory,
+    List<String>? imageUrls,
+    bool? isAvailable,
+    Timestamp? createdAt,
+    int? greenFlags,
+    int? redFlags,
+    Map<String, ProductVariant>? variations,
+  }) {
+    return ProductModel(
+      productId: productId ?? this.productId,
+      storeId: storeId ?? this.storeId,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      productCategory: productCategory ?? this.productCategory,
+      storeCategory: storeCategory ?? this.storeCategory,
+      imageUrls: imageUrls ?? this.imageUrls,
+      isAvailable: isAvailable ?? this.isAvailable,
+      createdAt: createdAt ?? this.createdAt,
+      greenFlags: greenFlags ?? this.greenFlags,
+      redFlags: redFlags ?? this.redFlags,
+      variations: variations ?? this.variations,
+    );
+  }
 }

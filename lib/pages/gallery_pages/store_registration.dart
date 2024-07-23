@@ -29,21 +29,22 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   bool value = false;
 
   List<String> categories = [
-    'Clothing',
-    'Grocery',
-    'Electronics',
-    'Restaurant',
-    'Book Store',
-    'Bakery',
-    'Beauty Apparel',
-    'Cafe',
-    'Florist',
-    'Footwear',
-    'Accessories',
-    'Stationary',
-    'Eyewear',
-    'Watch',
-    'Sports'
+    "Clothings",
+    "Accessories",
+    "Electronics",
+    "Foods",
+    "Florists",
+    "Sports",
+    "Book Stores",
+    "Stationeries",
+    "Beauty Apparels",
+    "Eyewares",
+    "Furnitures",
+    "Home Decors",
+    "Jewelries",
+    "Shoes",
+    "Toys",
+    "Watches"
   ];
   String selectedCategory= '';
 

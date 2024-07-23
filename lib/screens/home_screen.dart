@@ -72,14 +72,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: TextStyle(
                           color: hexToColor('#2D332F'),
                           fontFamily: 'Gotham Black',
-                          fontSize: 38,
+                          fontSize: 30,
                         ),
                       ),
                       TextSpan(
                         text: ' •',
                         style: TextStyle(
                           fontFamily: 'Gotham Black',
-                          fontSize: 38.0,
+                          fontSize: 30.0,
                           color: hexToColor('#42FF00'),
                         ),
                       ),

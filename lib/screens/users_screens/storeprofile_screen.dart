@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:tnennt/models/category_model.dart';
+import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/screens/store_community.dart';
@@ -67,7 +67,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
     );
   });
 
-  Future<List<CategoryModel>> fetchCategories() async {
+  Future<List<StoreCategoryModel>> fetchCategories() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('Stores')
         .doc(widget.store.storeId)
@@ -75,7 +75,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
         .get();
 
     return querySnapshot.docs
-        .map((doc) => CategoryModel.fromFirestore(doc))
+        .map((doc) => StoreCategoryModel.fromFirestore(doc))
         .toList();
   }
 
@@ -640,7 +640,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                     ],
                   ),
                   SizedBox(height: 20.0),
-                  FutureBuilder<List<CategoryModel>>(
+                  FutureBuilder<List<StoreCategoryModel>>(
                     future: fetchCategories(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -648,7 +648,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                       } else if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else {
-                        List<CategoryModel> categories = snapshot.data!;
+                        List<StoreCategoryModel> categories = snapshot.data!;
                         return Column(
                           children: categories
                               .map((category) =>
@@ -730,7 +730,7 @@ class _FeatureProductsListViewState extends State<FeatureProductsListView> {
 
 
 class CategoryProductsListView extends StatefulWidget {
-  final CategoryModel category;
+  final StoreCategoryModel category;
 
   const CategoryProductsListView({Key? key, required this.category}) : super(key: key);
 
