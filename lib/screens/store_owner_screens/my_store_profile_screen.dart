@@ -251,63 +251,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     );
   }
 
-  /*Future<void> _pickAndUploadMedia(String type) async {
-    final ImagePicker _picker = ImagePicker();
-    List<XFile>? pickedFiles;
 
-    if (type == 'image') {
-      pickedFiles = await _picker.pickMultiImage();
-    } else if (type == 'video') {
-      final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
-      if (video != null) pickedFiles = [video];
-    }
-
-    if (pickedFiles != null && pickedFiles.isNotEmpty) {
-      List<String> mediaUrls = [];
-      for (var file in pickedFiles) {
-        String url = await uploadFile(file);
-        mediaUrls.add(url);
-      }
-
-      // Show a dialog to get text input
-      String? text = await showDialog<String>(
-        context: context,
-        builder: (BuildContext context) {
-          String inputText = '';
-          return AlertDialog(
-            title: Text('Add a caption'),
-            content: TextField(
-              onChanged: (value) {
-                inputText = value;
-              },
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop(inputText);
-                },
-              ),
-            ],
-          );
-        },
-      );
-
-      if (text != null) {
-        await addUpdate(type, mediaUrls, text);
-        Navigator.of(context).pop();
-
-        if (!hasUpdates) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Congratulations on adding your first update!'),
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-      }
-    }
-  }*/
   Future<void> _pickAndUploadMedia(String type) async {
     final ImagePicker _picker = ImagePicker();
     List<XFile>? pickedFiles;
@@ -320,7 +264,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     }
 
     if (pickedFiles != null && pickedFiles.isNotEmpty) {
-      // Show loading circle
+      // Show loading indicator
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -335,7 +279,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
         mediaUrls.add(url);
       }
 
-      // Hide loading circle
+      // Hide loading indicator
       Navigator.of(context).pop();
 
       // Show a dialog to get text input
@@ -366,6 +310,29 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
         await addUpdate(type, mediaUrls, text);
         Navigator.of(context).pop();
 
+        // Show the uploaded images
+        if (mediaUrls.isNotEmpty) {
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: ImageGallery(imageUrls: mediaUrls),
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text('Close'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            },
+          );
+        }
+
         if (!hasUpdates) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -377,6 +344,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
       }
     }
   }
+
 
   Future<String> uploadFile(XFile file) async {
     File fileToUpload = File(file.path);
@@ -1675,6 +1643,25 @@ class _FullUpdateViewState extends State<FullUpdateView> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class ImageGallery extends StatelessWidget {
+  final List<String> imageUrls;
+
+  const ImageGallery({Key? key, required this.imageUrls}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView.builder(
+      itemCount: imageUrls.length,
+      itemBuilder: (context, index) {
+        return Image.network(
+          imageUrls[index],
+          fit: BoxFit.contain,
+        );
+      },
     );
   }
 }
