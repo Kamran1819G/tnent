@@ -98,7 +98,9 @@ class _NotificationScreenState extends State<NotificationScreen>
                     label: Text(_getTabLabel(index)),
                     labelStyle: TextStyle(
                       fontSize: 12.0,
-                      color: _selectedIndex == index ? Colors.white : hexToColor("#343434"),
+                      color: _selectedIndex == index
+                          ? Colors.white
+                          : hexToColor("#343434"),
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8.0),
@@ -108,7 +110,7 @@ class _NotificationScreenState extends State<NotificationScreen>
                     ),
                     showCheckmark: false,
                     selected: _selectedIndex == index,
-                    selectedColor:  Theme.of(context).primaryColor,
+                    selectedColor: Theme.of(context).primaryColor,
                     backgroundColor: Colors.white,
                     onSelected: (selected) {
                       setState(() {
@@ -123,49 +125,52 @@ class _NotificationScreenState extends State<NotificationScreen>
           ),
           SizedBox(height: 20.0),
           Expanded(
-            child: TabBarView(controller: _tabController, children: [
-              ListView(
+            child: TabBarView(
+                controller: _tabController,
+                physics: NeverScrollableScrollPhysics(),
                 children: [
-                  OrderUpdateNotification(
-                    type: NotificationType.orderplaced,
-                    productImage: 'assets/sahachari_image.png',
-                    productName: 'Nikon Camera',
-                    price: 12000,
-                    orderID: '123456',
-                    time: '2024-04-24 10:00 AM',
+                  ListView(
+                    children: [
+                      OrderUpdateNotification(
+                        type: NotificationType.orderplaced,
+                        productImage: 'assets/sahachari_image.png',
+                        productName: 'Nikon Camera',
+                        price: 12000,
+                        orderID: '123456',
+                        time: '2024-04-24 10:00 AM',
+                      ),
+                      SizedBox(height: 20.0),
+                      OrderUpdateNotification(
+                        type: NotificationType.cancelled,
+                        orderID: '123456',
+                        time: '2024-04-24 10:00 AM',
+                      ),
+                      SizedBox(height: 20.0),
+                      OrderUpdateNotification(
+                        type: NotificationType.delivered,
+                        name: 'Kamran Khan',
+                        orderID: '789012',
+                        time: '2024-04-23 3:00 PM',
+                      ),
+                      SizedBox(height: 20.0),
+                      OrderUpdateNotification(
+                        type: NotificationType.refunded, // or delivered
+                        orderID: '345678',
+                        time: '2024-04-22 12:00 PM',
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 20.0),
-                  OrderUpdateNotification(
-                    type: NotificationType.cancelled,
-                    orderID: '123456',
-                    time: '2024-04-24 10:00 AM',
-                  ),
-                  SizedBox(height: 20.0),
-                  OrderUpdateNotification(
-                    type: NotificationType.delivered,
-                    name: 'Kamran Khan',
-                    orderID: '789012',
-                    time: '2024-04-23 3:00 PM',
-                  ),
-                  SizedBox(height: 20.0),
-                  OrderUpdateNotification(
-                    type: NotificationType.refunded, // or delivered
-                    orderID: '345678',
-                    time: '2024-04-22 12:00 PM',
-                  ),
-                ],
-              ),
-              if (isStoreOwner)
-                ListView.separated(
-                    itemBuilder: (context, index) =>
-                        StoreConnectionNotification(
-                            name: 'Kamran Khan',
-                            image: 'assets/profile_image.png',
-                            time: 'April 20, 2024, 12:45pm'),
-                    separatorBuilder: (context, index) =>
-                        SizedBox(height: 16.0),
-                    itemCount: 5)
-            ]),
+                  if (isStoreOwner)
+                    ListView.separated(
+                        itemBuilder: (context, index) =>
+                            StoreConnectionNotification(
+                                name: 'Kamran Khan',
+                                image: 'assets/profile_image.png',
+                                time: 'April 20, 2024, 12:45pm'),
+                        separatorBuilder: (context, index) =>
+                            SizedBox(height: 16.0),
+                        itemCount: 5)
+                ]),
           )
         ],
       ),

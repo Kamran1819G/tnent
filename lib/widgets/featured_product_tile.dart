@@ -32,7 +32,7 @@ class _FeaturedProductTileState extends State<FeaturedProductTile> {
   void _checkFeaturedStatus() async {
     DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(widget.product.storeId).get();
     if (storeDoc.exists) {
-      List<dynamic> featuredProducts = (storeDoc.data() as Map<String, dynamic>)['featuredProducts'] ?? [];
+      List<dynamic> featuredProducts = (storeDoc.data() as Map<String, dynamic>)['featuredProductIds'] ?? [];
       setState(() {
         _isFeatured = featuredProducts.contains(widget.product.productId);
       });
@@ -40,12 +40,25 @@ class _FeaturedProductTileState extends State<FeaturedProductTile> {
   }
 
   Future<void> _toggleFeatured() async {
-    setState(() {
-      _isFeatured = !_isFeatured;
-    });
+    DocumentReference storeDocRef = _firestore.collection('Stores').doc(widget.product.storeId);
 
     try {
-      DocumentReference storeDocRef = _firestore.collection('Stores').doc(widget.product.storeId);
+      if (!_isFeatured) {
+        // Check the current number of featured products
+        DocumentSnapshot storeDoc = await storeDocRef.get();
+        List<dynamic> featuredProducts = (storeDoc.data() as Map<String, dynamic>)['featuredProductIds'] ?? [];
+
+        if (featuredProducts.length >= 5) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Maximum 5 featured products allowed')),
+          );
+          return;
+        }
+      }
+
+      setState(() {
+        _isFeatured = !_isFeatured;
+      });
 
       if (_isFeatured) {
         // Add product to featured list
@@ -66,6 +79,9 @@ class _FeaturedProductTileState extends State<FeaturedProductTile> {
       setState(() {
         _isFeatured = !_isFeatured;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update featured products')),
+      );
     }
   }
 

@@ -39,7 +39,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     "Foods",
     "Florists",
     "Sports",
-    "Book Stores",
+    "Books",
     "Stationeries",
     "Beauty Apparels",
     "Eyewares",

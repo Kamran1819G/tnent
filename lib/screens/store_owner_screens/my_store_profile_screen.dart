@@ -1,17 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:tnennt/models/store_category_model.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/models/product_model.dart';
+import 'package:tnennt/models/store_category_model.dart';
+import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/screens/store_community.dart';
 import 'package:tnennt/screens/store_owner_screens/analytics_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/order_pays_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/product_categories_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/store_settings_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tnennt/widgets/featured_product_tile.dart';
 import 'package:tnennt/widgets/removable_product_tile.dart';
 
@@ -39,26 +36,17 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   late int greenFlags = store.greenFlags;
   late int totalFlags = store.greenFlags + store.redFlags;
   late int redFlags = store.redFlags;
-  bool isGoodReview = true;
+  bool isGreenFlag = true;
   bool isExpanded = false;
 
   List<StoreCategoryModel> categories = [];
-  late Future<List<ProductModel>> _productsFuture;
+  List<ProductModel> allProducts = [];
+  List<ProductModel> filteredProducts = [];
+  TextEditingController searchController = TextEditingController();
 
 
   late AnimationController _controller;
   late Animation<double> _animation;
-
-  Future<List<ProductModel>> _fetchProducts() async {
-    final querySnapshot = await FirebaseFirestore.instance
-        .collection('products')
-        .where('storeId', isEqualTo: widget.store.storeId)
-        .get();
-
-    return querySnapshot.docs
-        .map((doc) => ProductModel.fromFirestore(doc))
-        .toList();
-  }
 
 
   List<dynamic> updates = List.generate(10, (index) {
@@ -117,7 +105,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     super.initState();
     store = widget.store;
     fetchStore();
-    _productsFuture = _fetchProducts();
+    _loadProducts();
     _controller = AnimationController
       (
       duration: const Duration(milliseconds: 300),
@@ -136,6 +124,31 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadProducts() async {
+    allProducts = await _fetchProducts();
+    filteredProducts = List.from(allProducts);
+  }
+
+  void _filterProducts(String query) {
+    setState(() {
+      filteredProducts = allProducts
+          .where((product) =>
+          product.name.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
+  Future<List<ProductModel>> _fetchProducts() async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('products')
+        .where('storeId', isEqualTo: widget.store.storeId)
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => ProductModel.fromFirestore(doc))
+        .toList();
   }
 
   Future<void> fetchStore() async {
@@ -189,7 +202,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
 
   void _selectFlag(bool isGood) {
     setState(() {
-      isGoodReview = isGood;
+      isGreenFlag = isGood;
       isExpanded = false;
       _controller.reverse();
     });
@@ -785,7 +798,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                                             50.0),
                                                   ),
                                                   child: Image.asset(
-                                                      isGoodReview
+                                                      isGreenFlag
                                                           ? 'assets/green-flag.png'
                                                           : 'assets/red-flag.png',
                                                       height: 20.0,
@@ -800,7 +813,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            isGoodReview
+                                            isGreenFlag
                                                 ? 'Good Reviews'
                                                 : 'Bad Reviews',
                                             style: TextStyle(
@@ -811,7 +824,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                             ),
                                           ),
                                           Text(
-                                            isGoodReview
+                                            isGreenFlag
                                                 ? '$greenFlags/$totalFlags'
                                                 : '$redFlags/$totalFlags',
                                             style: TextStyle(
@@ -1104,6 +1117,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
           ),
           SizedBox(height: 20.0),
           TextField(
+            controller: searchController,
             decoration: InputDecoration(
               hintText: 'Search for a product',
               prefixIcon: Icon(Icons.search),
@@ -1111,40 +1125,21 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                 borderRadius: BorderRadius.circular(8.0),
               ),
             ),
+            onChanged: _filterProducts,
           ),
           SizedBox(height: 20.0),
           Expanded(
-            child: FutureBuilder<List<ProductModel>>(
-              future: _productsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  print(snapshot.error);
-                  return Center(child: Text('Something went wrong'));
-                }
-
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-
-                if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('No products found'));
-                }
-
-                List<ProductModel> products = snapshot.data!;
-
-                return GridView.builder(
-                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                  ),
-                  itemCount: products.length,
-                  itemBuilder: (context, index) {
-                    final product = products[index];
-                    return FeaturedProductTile(product: product);
-                  },
-                );
+            child: GridView.builder(
+              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: filteredProducts.length,
+              itemBuilder: (context, index) {
+                final product = filteredProducts[index];
+                return FeaturedProductTile(product: product);
               },
             ),
           )

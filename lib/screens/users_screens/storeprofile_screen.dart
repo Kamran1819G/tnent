@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
@@ -20,52 +18,17 @@ class StoreProfileScreen extends StatefulWidget {
   State<StoreProfileScreen> createState() => _StoreProfileScreenState();
 }
 
-class _StoreProfileScreenState extends State<StoreProfileScreen> {
+class _StoreProfileScreenState extends State<StoreProfileScreen>
+    with SingleTickerProviderStateMixin {
   bool isConnected = false;
   int storeEngagement = 0;
+  bool isExpanded = false;
+  bool isGreenFlag = true;
+  late int greenFlags;
+  late int redFlags;
 
-  List<ProductModel> featuredProducts = List.generate(5, (index) {
-    return ProductModel(
-      productId: 'product123',
-      storeId: 'EBJgGaWsnrluCKcaOUOT',
-      name: 'Premium Cotton T-Shirt',
-      description: 'A high-quality, comfortable cotton t-shirt',
-      productCategory: 'T-Shirts',
-      storeCategory: 'Apparel',
-      imageUrls: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-      isAvailable: true,
-      createdAt: Timestamp.now(),
-      greenFlags: 0,
-      redFlags: 0,
-      variations: {
-        'S': ProductVariant(
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 50,
-          sku: 'TS-S',
-        ),
-        'M': ProductVariant(
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 100,
-          sku: 'TS-M',
-        ),
-        'L': ProductVariant(
-          price: 26.99,
-          mrp: 31.99,
-          discount: 15.63,
-          stockQuantity: 75,
-          sku: 'TS-L',
-        ),
-      },
-    );
-  });
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
   Future<List<StoreCategoryModel>> fetchCategories() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -84,7 +47,17 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
   @override
   void initState() {
     super.initState();
+    greenFlags = widget.store.greenFlags;
+    redFlags = widget.store.redFlags;
     checkConnectionStatus();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
   }
 
   Future<void> checkConnectionStatus() async {
@@ -128,6 +101,25 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
         storeEngagement--;
       });
     }
+  }
+
+  void _toggleExpansion() {
+    setState(() {
+      isExpanded = !isExpanded;
+      if (isExpanded) {
+        _controller.forward();
+      } else {
+        _controller.reverse();
+      }
+    });
+  }
+
+  void _selectFlag(bool isGood) {
+    setState(() {
+      isGreenFlag = isGood;
+      isExpanded = false;
+      _controller.reverse();
+    });
   }
 
   @override
@@ -372,11 +364,11 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                 ),
                                 Spacer(),
                                 Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    if (!isExpanded)
                                       Text(
-                                        '800/900',
+                                        ' ${greenFlags} / ${greenFlags + redFlags}',
                                         style: TextStyle(
                                           color: hexToColor('#676767'),
                                           fontFamily: 'Gotham',
@@ -384,22 +376,78 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                      SizedBox(width: 5.0),
-                                      Container(
-                                        padding: EdgeInsets.all(8.0),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border: Border.all(
-                                              color: hexToColor('#CECECE')),
-                                          borderRadius:
-                                              BorderRadius.circular(50.0),
-                                        ),
-                                        child: Image.asset(
-                                            'assets/green-flag.png',
-                                            height: 10,
-                                            width: 10),
-                                      ),
-                                    ])
+                                    SizedBox(width: 5.0),
+                                    AnimatedBuilder(
+                                      animation: _animation,
+                                      builder: (context, child) {
+                                        return GestureDetector(
+                                          onTap: _toggleExpansion,
+                                          child: isExpanded
+                                              ? Container(
+                                                  width: isExpanded
+                                                      ? (_animation.value * 60 +
+                                                          40)
+                                                      : 40,
+                                                  height: 40.0,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            50.0),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      GestureDetector(
+                                                        onTap: () =>
+                                                            _selectFlag(true),
+                                                        child: Image.asset(
+                                                            'assets/green-flag.png',
+                                                            height: 18.0,
+                                                            width: 18.0),
+                                                      ),
+                                                      if (isExpanded)
+                                                        SizedBox(
+                                                            width: _animation
+                                                                    .value *
+                                                                25),
+                                                      if (isExpanded)
+                                                        GestureDetector(
+                                                          onTap: () =>
+                                                              _selectFlag(
+                                                                  false),
+                                                          child: Image.asset(
+                                                              'assets/red-flag.png',
+                                                              height: 18.0,
+                                                              width: 18.0),
+                                                        ),
+                                                    ],
+                                                  ),
+                                                )
+                                              : Container(
+                                                  width: 40,
+                                                  height: 35.0,
+                                                  padding: EdgeInsets.all(8.0),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            50.0),
+                                                  ),
+                                                  child: Image.asset(
+                                                      isGreenFlag
+                                                          ? 'assets/green-flag.png'
+                                                          : 'assets/red-flag.png',
+                                                      height: 18.0,
+                                                      width: 18.0),
+                                                ),
+                                        );
+                                      },
+                                    ),
+                                  ],
+                                ),
                               ],
                             ),
                             Row(
@@ -636,7 +684,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                         ),
                       ),
                       SizedBox(height: 20.0),
-                      FeatureProductsListView(featuredProductIds: widget.store.featuredProductIds),
+                      FeatureProductsListView(
+                          featuredProductIds: widget.store.featuredProductIds),
                     ],
                   ),
                   SizedBox(height: 20.0),
@@ -671,10 +720,12 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
 class FeatureProductsListView extends StatefulWidget {
   final List<String> featuredProductIds;
 
-  const FeatureProductsListView({Key? key, required this.featuredProductIds}) : super(key: key);
+  const FeatureProductsListView({Key? key, required this.featuredProductIds})
+      : super(key: key);
 
   @override
-  State<FeatureProductsListView> createState() => _FeatureProductsListViewState();
+  State<FeatureProductsListView> createState() =>
+      _FeatureProductsListViewState();
 }
 
 class _FeatureProductsListViewState extends State<FeatureProductsListView> {
@@ -728,14 +779,15 @@ class _FeatureProductsListViewState extends State<FeatureProductsListView> {
   }
 }
 
-
 class CategoryProductsListView extends StatefulWidget {
   final StoreCategoryModel category;
 
-  const CategoryProductsListView({Key? key, required this.category}) : super(key: key);
+  const CategoryProductsListView({Key? key, required this.category})
+      : super(key: key);
 
   @override
-  State<CategoryProductsListView> createState() => _CategoryProductsListViewState();
+  State<CategoryProductsListView> createState() =>
+      _CategoryProductsListViewState();
 }
 
 class _CategoryProductsListViewState extends State<CategoryProductsListView> {
