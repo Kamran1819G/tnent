@@ -1,157 +1,54 @@
+import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/pages/catalog_pages/store_coupon_screen.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'dart:math';
 
 
 class CheckoutScreen extends StatefulWidget {
-  final List<Map<String, dynamic>> selectedItems;
-  const CheckoutScreen({Key? key, required this.selectedItems}) : super(key: key);
+  List<Map<String, dynamic>> selectedItems;
+
+  CheckoutScreen({required this.selectedItems});
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  double discountedTotal = 0.0;
-  String userName = '';
-  String userAddress = '';
-  String userMobile = '';
-  List<Map<String, dynamic>> cartData = [];
-  bool isLoading = true;
-  double totalPrice = 0.0;
+  late List<Map<String, dynamic>> _items;
+  double _totalAmount = 0.0;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserData();
+    _items = List.from(widget.selectedItems);
+    _calculateTotalAmount();
   }
 
-  Future<void> _fetchUserData() async {
-    try {
-      User? user = _auth.currentUser;
-      if (user != null) {
-        DocumentSnapshot userData = await _firestore.collection('Users').doc(user.uid).get();
-
-        if (userData.exists) {
-          Map<String, dynamic> userDataMap = userData.data() as Map<String, dynamic>;
-
-          userName = '${userDataMap['firstName'] ?? ''} ${userDataMap['lastName'] ?? ''}';
-          userAddress = userDataMap['address'] ?? '';
-          userMobile = userDataMap['phoneNumber'] ?? '';
-
-          if (userDataMap['cart'] != null) {
-            List<dynamic> cartList = userDataMap['cart'];
-            cartData = [];
-
-            // Fetch product details for each cart item
-            await Future.forEach(cartList, (item) async {
-              String productId = item['productId'];
-              String variation = item['variation'];
-              DocumentSnapshot productDoc = await _firestore.collection('products').doc(productId).get();
-
-              if (productDoc.exists) {
-                Map<String, dynamic> productData = productDoc.data() as Map<String, dynamic>;
-                Map<String, dynamic> variationData = productData['variations'][variation] ?? {};
-
-                // Fetch store details
-                String storeId = productData['storeId'];
-                DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(storeId).get();
-                Map<String, dynamic> storeData = storeDoc.data() as Map<String, dynamic>;
-
-                String imageUrl = variationData['imageUrls'] != null && variationData['imageUrls'].isNotEmpty
-                    ? variationData['imageUrls'][0]
-                    : productData['imageUrls'] != null && productData['imageUrls'].isNotEmpty
-                    ? productData['imageUrls'][0]
-                    : '';
-
-                cartData.add({
-                  'productName': productData['name'],
-                  'productDescription': productData['description'],
-                  'productPrice': variationData['price'] ?? productData['price'],
-                  'quantity': item['quantity'],
-                  'image': imageUrl,
-                  'variation': variation,
-                  'productId': productId,
-                  'storeName': storeData['name'],
-                  'storeAddress': storeData['address'],
-                  'storeLogo': storeData['logo'],
-                  'orderId': generateRandomString(7),
-                  'code': generateRandomString(5),
-                });
-              }
-            });
-          }
-
-          setState(() {
-            isLoading = false;
-          });
-
-          calculateTotalPrice();
-        }
-      } else {
-        setState(() {
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      print('Error fetching user data: $e');
-      setState(() {
-        isLoading = false;
-      });
-    }
+  void _calculateTotalAmount() {
+    _totalAmount = _items.fold(
+        0,
+        (sum, item) =>
+            sum + (item['variationDetails'].price * item['quantity']));
   }
 
-  Future<void> updateQuantity(String productId, int newQuantity) async {
-    try {
-      User? user = _auth.currentUser;
-      if (user != null) {
-        setState(() {
-          for (var item in cartData) {
-            if (item['productId'] == productId) {
-              item['quantity'] = newQuantity;
-              break;
-            }
-          }
-          calculateTotalPrice();
-        });
-
-        // Update the cart in Firestore
-        DocumentReference userRef = _firestore.collection('Users').doc(user.uid);
-        DocumentSnapshot userDoc = await userRef.get();
-        List<dynamic> currentCart = (userDoc.data() as Map<String, dynamic>)['cart'] ?? [];
-
-        for (var item in currentCart) {
-          if (item['productId'] == productId) {
-            item['quantity'] = newQuantity;
-            break;
-          }
-        }
-
-        await userRef.update({'cart': currentCart});
-      }
-    } catch (e) {
-      print('Error updating quantity: $e');
-    }
-  }
-
-  void calculateTotalPrice() {
-    double sum = 0.0;
-    for (var item in cartData) {
-      sum += (item['productPrice'] ?? 0.0) * (item['quantity'] ?? 1);
-    }
+  void _updateQuantity(int index, int newQuantity) {
     setState(() {
-      totalPrice = sum;
+      if (newQuantity > 0) {
+        _items[index]['quantity'] = newQuantity;
+      } else {
+        _items.removeAt(index);
+      }
+      _calculateTotalAmount();
     });
   }
 
@@ -159,29 +56,31 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: isLoading
-            ? Center(child: CircularProgressIndicator())
-            : Column(
+        child: Column(
           children: [
             Container(
               height: 100,
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 children: [
-                  Text(
-                    'Checkout'.toUpperCase(),
-                    style: TextStyle(
-                      color: hexToColor('#1E1E1E'),
-                      fontSize: 24.0,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  Text(
-                    ' •',
-                    style: TextStyle(
-                      fontSize: 28.0,
-                      color: hexToColor('#FF0000'),
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        'Checkout'.toUpperCase(),
+                        style: TextStyle(
+                          color: hexToColor('#1E1E1E'),
+                          fontSize: 24.0,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      Text(
+                        ' •',
+                        style: TextStyle(
+                          fontSize: 28.0,
+                          color: hexToColor('#FF0000'),
+                        ),
+                      ),
+                    ],
                   ),
                   Spacer(),
                   Container(
@@ -189,7 +88,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     child: CircleAvatar(
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
-                        icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        icon:
+                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -212,14 +112,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          userName,
+                          'Kamran Khan',
                           style: TextStyle(
                             color: hexToColor('#2D332F'),
                             fontSize: 22.0,
                           ),
                         ),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12.0, vertical: 6.0),
                           decoration: BoxDecoration(
                             border: Border.all(
                               color: Theme.of(context).primaryColor,
@@ -239,14 +140,39 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     SizedBox(height: 16.0),
                     Container(
                       width: 250,
-                      child: Text(
-                        userAddress,
-                        style: TextStyle(
-                          color: hexToColor('#727272'),
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 12.0,
-                        ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Flat No. 505 Ammar Residency,',
+                            style: TextStyle(
+                              color: hexToColor('#727272'),
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12.0,
+                            ),
+                          ),
+                          SizedBox(height: 4.0),
+                          Text(
+                            'Plot No 21 Sector 9 Taloja Phase 1',
+                            style: TextStyle(
+                              color: hexToColor('#727272'),
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12.0,
+                            ),
+                          ),
+                          SizedBox(height: 4.0),
+                          Text(
+                            'Navi Mumbai, Maharashtra 410208',
+                            style: TextStyle(
+                              color: hexToColor('#727272'),
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12.0,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     SizedBox(height: 16.0),
@@ -263,7 +189,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ),
                         SizedBox(width: 4.0),
                         Text(
-                          userMobile,
+                          '1234567890',
                           style: TextStyle(
                             color: hexToColor('#2D332F'),
                             fontSize: 12.0,
@@ -294,8 +220,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             child: Text(
                               'Change Your Address',
                               style: TextStyle(
-                                  color: hexToColor('#343434'),
-                                  fontSize: 12.0),
+                                  color: hexToColor('#343434'), fontSize: 12.0),
                             ),
                           ),
                         ),
@@ -305,49 +230,35 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
               ),
             ),
+            SizedBox(height: 16.0),
+
             Expanded(
               child: ListView.builder(
-                itemCount: cartData.length,
+                itemCount: _items.length,
                 itemBuilder: (context, index) {
-                  var item = cartData[index];
-                  return ProductDetails(
-                    productImage: item['image'] ?? '',
-                    productName: item['productName'] ?? '',
-                    productDescription: item['productDescription'] ?? '',
-                    productPrice: item['productPrice'] ?? 0.0,
-                    quantity: item['quantity'] ?? 1,
-                    variation: item['variation'] ?? '',
-                    storeName: item['storeName'] ?? '',
-                    storeAddress: item['storeAddress'] ?? '',
-                    storeLogo: item['storeLogo'] ?? '',
-                    orderId: item['orderId'],
-                    code: item['code'],
-                    onQuantityChanged: (productId, newQuantity) {
-                      updateQuantity(productId, newQuantity);
-                    },
+                  return CheckoutItemTile(
+                    item: _items[index],
+                    onUpdateQuantity: (newQuantity) =>
+                        _updateQuantity(index, newQuantity),
                   );
                 },
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Total:',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'Total Amount:',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   Text(
-                    '₹${totalPrice.toStringAsFixed(2)}',
+                    '₹${_totalAmount.toStringAsFixed(2)}',
                     style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).primaryColor,
-                    ),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).primaryColor),
                   ),
                 ],
               ),
@@ -358,13 +269,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => SummaryScreen(
-                        cartData: cartData,
-                        totalPrice: discountedTotal,
-                        userName: userName,
-                        userAddress: userAddress,
-                        userMobile: userMobile,
-                      ),
+                      builder: (context) => SummaryScreen(items: _items),
                     ),
                   );
                 },
@@ -382,1075 +287,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       style: TextStyle(color: Colors.white, fontSize: 16.0),
                     ),
                   ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Products page
-class ProductDetails extends StatefulWidget {
-  final String productImage;
-  final String productName;
-  final String productDescription;
-  final double productPrice;
-  final int quantity;
-  final String variation;
-  final String storeName;
-  final String storeAddress;
-  final String storeLogo;
-  final String orderId;
-  final String code;
-  final Function(String, int) onQuantityChanged;
-
-  ProductDetails({
-    required this.productImage,
-    required this.productName,
-    required this.productDescription,
-    required this.productPrice,
-    required this.quantity,
-    required this.variation,
-    required this.storeName,
-    required this.storeAddress,
-    required this.storeLogo,
-    required this.orderId,
-    required this.code,
-    required this.onQuantityChanged,
-  });
-
-  @override
-  _ProductDetailsState createState() => _ProductDetailsState();
-}
-
-class _ProductDetailsState extends State<ProductDetails> {
-  late int quantity;
-
-  @override
-  void initState() {
-    super.initState();
-    quantity = widget.quantity;
-  }
-
-  void incrementQuantity() {
-    setState(() {
-      quantity++;
-    });
-    widget.onQuantityChanged(widget.productName, quantity);
-  }
-
-  void decrementQuantity() {
-    setState(() {
-      if (quantity > 1) {
-        quantity--;
-        widget.onQuantityChanged(widget.productName, quantity);
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    double totalItemPrice = widget.productPrice * quantity;
-
-    return Card(
-      margin: EdgeInsets.all(8.0),
-      color: Colors.white,
-      surfaceTintColor: Colors.white,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 100,
-                  width: 100,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(4.0),
-                    image: DecorationImage(
-                      image: NetworkImage(widget.productImage),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 16.0),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.productName,
-                        style: TextStyle(
-                          color: hexToColor('#343434'),
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 4.0),
-                      Text(
-                        widget.productDescription,
-                        style: TextStyle(
-                          color: hexToColor('#6F6F6F'),
-                          fontSize: 12.0,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      SizedBox(height: 8.0),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: hexToColor('#D0D0D0')),
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        child: Text(
-                          widget.variation,
-                          style: TextStyle(
-                            color: hexToColor('#222230'),
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 10.0,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 16.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '₹${totalItemPrice.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        color: hexToColor('#343434'),
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 4.0),
-                    Text(
-                      '₹${widget.productPrice.toStringAsFixed(2)} per item',
-                      style: TextStyle(
-                        color: hexToColor('#6F6F6F'),
-                        fontSize: 12,
-                      ),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text(
-                      'Quantity'.toUpperCase(),
-                      style: TextStyle(
-                        color: hexToColor('#222230'),
-                        fontSize: 10.0,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    SizedBox(height: 4.0),
-                    Container(
-                      height: 30,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: hexToColor('#D0D0D0')),
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          IconButton(
-                            icon: Icon(Icons.remove),
-                            iconSize: 12,
-                            onPressed: decrementQuantity,
-                          ),
-                          Text(
-                            '$quantity',
-                            style: TextStyle(
-                              fontSize: 10.0,
-                              fontFamily: 'Gotham',
-                              fontWeight: FontWeight.w500,
-                              color: hexToColor('#222230'),
-                            ),
-                          ),
-                          IconButton(
-                            icon: Icon(Icons.add),
-                            iconSize: 12,
-                            onPressed: incrementQuantity,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: 16.0),
-            Row(
-              children: [
-                Container(
-                  height: 40,
-                  width: 40,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: NetworkImage(widget.storeLogo),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                SizedBox(width: 8.0),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        widget.storeName,
-                        style: TextStyle(
-                          color: hexToColor('#343434'),
-                          fontSize: 14.0,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Text(
-                        widget.storeAddress,
-                        style: TextStyle(
-                          color: hexToColor('#6F6F6F'),
-                          fontSize: 12.0,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        widget.orderId,
-                        style: TextStyle(
-                          color: hexToColor('#6F6F6F'),
-                          fontSize: 12.0,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Text(
-                        widget.code,
-                        style: TextStyle(
-                          color: hexToColor('#6F6F6F'),
-                          fontSize: 12.0,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-
-///orderid and code for shop owner
-///
-
-String generateRandomString(int length, {bool includeLetters = true}) {
-  const String _chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const String _digits = '0123456789';
-  Random _rnd = Random();
-
-  String chars = includeLetters ? _chars : _digits;
-  return String.fromCharCodes(Iterable.generate(
-      length, (_) => chars.codeUnitAt(_rnd.nextInt(chars.length))));
-}
-
-///summary page
-
-class SummaryScreen extends StatefulWidget {
-  final List<Map<String, dynamic>> cartData;
-  final double totalPrice;
-  final String userName;
-  final String userAddress;
-  final String userMobile;
-
-
-  const SummaryScreen({
-    Key? key,
-    required this.cartData,
-    required this.totalPrice,
-    required this.userName,
-    required this.userAddress,
-    required this.userMobile,
-  }) : super(key: key);
-
-  @override
-  State<SummaryScreen> createState() => _SummaryScreenState();
-}
-
-class _SummaryScreenState extends State<SummaryScreen> {
-  late double subtotal;
-  late double middlemenCharges;
-  late double discount;
-  late double total;
-
-  @override
-  void initState() {
-    super.initState();
-    calculateSummary();
-  }
-
-  void calculateSummary() {
-    subtotal = widget.totalPrice;
-    middlemenCharges = 100.0; // You may want to calculate this dynamically
-    discount = subtotal * 0.1; // Assuming 10% discount
-    total = subtotal + middlemenCharges - discount;
-  }
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Checkout'.toUpperCase(),
-                        style: TextStyle(
-                          color: hexToColor('#1E1E1E'),
-                          fontSize: 24.0,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                      Text(
-                        ' •',
-                        style: TextStyle(
-                          fontSize: 28.0,
-                          color: hexToColor('#FF0000'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Spacer(),
-                  Container(
-                    margin: EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey[100],
-                      child: IconButton(
-                        icon:
-                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: widget.cartData.length,
-            itemBuilder: (context, index) {
-              var item = widget.cartData[index];
-              return ProductDetails(
-                productImage: item['image'] ?? '',
-                productName: item['productName'] ?? '',
-                productDescription: item['productDescription'] ?? '',
-                productPrice: item['productPrice'] ?? 0.0,
-                quantity: item['quantity'] ?? 1,
-                variation: item['variation'] ?? '',
-                storeName: item['storeName'] ?? '',
-                storeAddress: item['storeAddress'] ?? '',
-                storeLogo: item['storeLogo'] ?? '',
-                orderId: item['orderId'],
-                code: item['code'],
-                onQuantityChanged: (productId, newQuantity) {
-                  ///updateQuantity(productId, newQuantity);
-                },
-              );
-            },
-          ),
-        ),
-        // Summary section
-            SizedBox(height: 10.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                GestureDetector(
-                  onTap: () { Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => StoreCouponScreen(),
-                      ),
-                    );
-
-                  },
-                  child: Container(
-                    width: 200.0,
-                    padding: EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: hexToColor('#E3E3E3')),
-                      borderRadius: BorderRadius.circular(50.0),
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          backgroundColor: hexToColor('#F3F3F3'),
-                          child: Icon(
-                            Icons.discount_outlined,
-                            color: Colors.black,
-                          ),
-                        ),
-                        SizedBox(width: 10.0),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Coupons',
-                                style: TextStyle(
-                                  color: hexToColor('#272822'),
-                                  fontSize: 14.0,
-                                )),
-                            SizedBox(
-                              width: 100,
-                              child: Text(
-                                'View All Coupons',
-                                style: TextStyle(
-                                  color: hexToColor('#838383'),
-                                  fontFamily: 'Poppins',
-                                  fontSize: 10.0,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                maxLines: 2,
-                              ),
-                            ),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  height: 75,
-                  width: 200.0,
-                  padding: EdgeInsets.all(12.0),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: hexToColor('#E3E3E3')),
-                    borderRadius: BorderRadius.circular(50.0),
-                  ),
-                  child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Enter Code:',
-                        hintStyle: TextStyle(
-                          color: hexToColor('#272822'),
-                          fontFamily: 'Gotham',
-                          fontSize: 16.0,
-                        ),
-                        border: InputBorder.none,
-                      )),
-                ),
-              ],
-            ),
-        Container(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Summary',
-                style: TextStyle(
-                  color: hexToColor('#343434'),
-                  fontSize: 18.0,
-                ),
-              ),
-              SizedBox(height: 16.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Subtotal'),
-                  Text('₹${subtotal.toStringAsFixed(2)}'),
-                ],
-              ),
-              SizedBox(height: 8.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Middlemen Charges'),
-                  Text('₹${middlemenCharges.toStringAsFixed(2)}'),
-                ],
-              ),
-              SizedBox(height: 8.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Discount'),
-                  Text('₹${discount.toStringAsFixed(2)}'),
-                ],
-              ),
-              Divider(height: 24.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Total',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18.0,
-                    ),
-                  ),
-                  Text(
-                    '₹${total.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18.0,
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        Center(
-          child: GestureDetector(
-            onTap: () {
-              // Navigate to payment screen
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PaymentOptionScreen(),
-                ),
-              );
-            },
-            child: Container(
-              height: 50,
-              width: 300,
-              margin: EdgeInsets.symmetric(vertical: 15.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              child: Center(
-                child: Text(
-                  'Pay ₹${total.toStringAsFixed(2)}',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.0,
-                  ),
-                ),
-              ),
-            ),
-          ),
-
-    ),
-    ]
-        ),
-      )
-    );
-  }
-}
-
-
-///payment page
-enum ExpandedTile { none, upi, otherUpi, card }
-
-class PaymentOptionScreen extends StatefulWidget {
-  const PaymentOptionScreen({super.key});
-
-  @override
-  State<PaymentOptionScreen> createState() => _PaymentOptionScreenState();
-}
-
-class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
-  ExpandedTile expandedTile = ExpandedTile.none;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Checkout'.toUpperCase(),
-                        style: TextStyle(
-                          color: hexToColor('#1E1E1E'),
-                          fontSize: 24.0,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                      Text(
-                        ' •',
-                        style: TextStyle(
-                          fontSize: 28.0,
-                          color: hexToColor('#FF0000'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Spacer(),
-                  Container(
-                    margin: EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey[100],
-                      child: IconButton(
-                        icon:
-                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25.0),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 50),
-                    Text(
-                      'Select Payment Option',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'Gotham',
-                        fontWeight: FontWeight.w800,
-                        fontSize: 18.0,
-                      ),
-                    ),
-                    SizedBox(height: 30.0),
-                    ExpansionTile(
-                      key: Key('upi'),
-                      initiallyExpanded: expandedTile == ExpandedTile.upi,
-                      onExpansionChanged: (expanded) {
-                        setState(() {
-                          expandedTile =
-                          expanded ? ExpandedTile.upi : ExpandedTile.none;
-                        });
-                      },
-                      collapsedShape: RoundedRectangleBorder(
-                        side: BorderSide(color: hexToColor('#E0E0E0')),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(color: hexToColor('#E0E0E0')),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      leading: Icon(
-                        Icons.phone_android,
-                        size: 20,
-                      ),
-                      title: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'UPI',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'Gotham',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16.0,
-                            ),
-                          ),
-                          Text(
-                            'Pay by an UPI app',
-                            style: TextStyle(
-                              color: hexToColor('#6F6F6F'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12.0,
-                            ),
-                          )
-                        ],
-                      ),
-                      children: [
-                        ListTile(
-                          leading: Container(
-                            width: 50,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 8.0, vertical: 4.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: hexToColor('#E0E0E0')),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: Image.asset(
-                              'assets/Google_Pay_Logo.png',
-                              fit: BoxFit.fill,
-                            ),
-                          ),
-                          title: Text(
-                            'Google Pay',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontFamily: 'Poppins',
-                              fontSize: 12.0,
-                            ),
-                          ),
-                          onTap: () {},
-                        ),
-                        ListTile(
-                          leading: Container(
-                            width: 50,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 8.0, vertical: 4.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: hexToColor('#E0E0E0')),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: Image.asset(
-                              'assets/Apple_Pay_Logo.png',
-                              fit: BoxFit.fill,
-                            ),
-                          ),
-                          title: Text(
-                            'Apple Pay',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontFamily: 'Poppins',
-                              fontSize: 12.0,
-                            ),
-                          ),
-                          onTap: () {},
-                        ),
-                        ExpansionTile(
-                          key: Key('other_upi'),
-                          initiallyExpanded:
-                          expandedTile == ExpandedTile.otherUpi,
-                          onExpansionChanged: (expanded) {
-                            setState(() {
-                              expandedTile = expanded
-                                  ? ExpandedTile.otherUpi
-                                  : ExpandedTile.upi;
-                            });
-                          },
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          leading: Container(
-                            width: 50,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 8.0, vertical: 4.0),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: hexToColor('#E0E0E0')),
-                              borderRadius: BorderRadius.circular(8.0),
-                            ),
-                            child: Image.asset(
-                              'assets/BHIM_Logo.png',
-                              fit: BoxFit.fill,
-                            ),
-                          ),
-                          title: Text(
-                            'Other UPI ID',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontFamily: 'Poppins',
-                              fontSize: 12.0,
-                            ),
-                          ),
-                          trailing: Text('ADD',
-                              style: TextStyle(
-                                color: hexToColor('#4B8284'),
-                                fontFamily: 'Poppins',
-                                fontSize: 12.0,
-                              )),
-                          children: [
-                            Container(
-                              margin: EdgeInsets.symmetric(
-                                  horizontal: 16.0, vertical: 15.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.65,
-                                    height: 65,
-                                    child: TextField(
-                                      style: TextStyle(
-                                        color: hexToColor('#2A2A2A'),
-                                        fontFamily: 'Gotham',
-                                        fontSize: 14,
-                                      ),
-                                      decoration: InputDecoration(
-                                        helperText:
-                                        'Your UPI ID will be encrypted and in 100% safe with us',
-                                        helperStyle: TextStyle(
-                                          color: hexToColor('#6F6F6F'),
-                                          fontFamily: 'Poppins',
-                                          fontSize: 8.0,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          gapPadding: 0.0,
-                                          borderRadius:
-                                          BorderRadius.circular(8.0),
-                                          borderSide: BorderSide(
-                                            color: hexToColor('#E0E0E0'),
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 8.0),
-                                  Container(
-                                    height: 45,
-                                    width: 45,
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).primaryColor,
-                                      borderRadius:
-                                      BorderRadius.circular(100.0),
-                                    ),
-                                    child: Center(
-                                      child: Icon(
-                                        Icons.check,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16.0),
-                    ExpansionTile(
-                      key: Key('card'),
-                      initiallyExpanded: expandedTile == ExpandedTile.card,
-                      onExpansionChanged: (expanded) {
-                        setState(() {
-                          expandedTile =
-                          expanded ? ExpandedTile.card : ExpandedTile.none;
-                        });
-                      },
-                      collapsedShape: RoundedRectangleBorder(
-                        side: BorderSide(color: hexToColor('#E0E0E0')),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(color: hexToColor('#E0E0E0')),
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
-                      leading: Icon(
-                        Icons.credit_card,
-                        size: 20,
-                      ),
-                      title: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Credit/Debit Card',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'Gotham',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 16.0,
-                            ),
-                          ),
-                          Text(
-                            'Visa, Mastercard, Rupay & more',
-                            style: TextStyle(
-                              color: hexToColor('#6F6F6F'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12.0,
-                            ),
-                          )
-                        ],
-                      ),
-                      children: [
-                        Container(
-                          margin: EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 15.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.75,
-                                height: 50,
-                                child: TextField(
-                                  style: TextStyle(
-                                    color: hexToColor('#2A2A2A'),
-                                    fontFamily: 'Gotham',
-                                    fontSize: 14,
-                                  ),
-                                  decoration: InputDecoration(
-                                    hintText: 'Card Number',
-                                    hintStyle: TextStyle(
-                                      color: hexToColor('#6F6F6F'),
-                                      fontFamily: 'Poppins',
-                                      fontSize: 14.0,
-                                    ),
-                                    border: OutlineInputBorder(
-                                      gapPadding: 0.0,
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      borderSide: BorderSide(
-                                        color: hexToColor('#E0E0E0'),
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: 8.0),
-                              Row(
-                                children: [
-                                  SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.35,
-                                    height: 50,
-                                    child: TextField(
-                                      style: TextStyle(
-                                        color: hexToColor('#2A2A2A'),
-                                        fontFamily: 'Gotham',
-                                        fontSize: 14,
-                                      ),
-                                      decoration: InputDecoration(
-                                        hintText: 'Expiry(MM/YY)',
-                                        hintStyle: TextStyle(
-                                          color: hexToColor('#6F6F6F'),
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          gapPadding: 0.0,
-                                          borderRadius:
-                                          BorderRadius.circular(8.0),
-                                          borderSide: BorderSide(
-                                            color: hexToColor('#E0E0E0'),
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 8.0),
-                                  SizedBox(
-                                    width: MediaQuery.of(context).size.width *
-                                        0.35,
-                                    height: 50,
-                                    child: TextField(
-                                      style: TextStyle(
-                                        color: hexToColor('#2A2A2A'),
-                                        fontFamily: 'Gotham',
-                                        fontSize: 14,
-                                      ),
-                                      decoration: InputDecoration(
-                                        hintText: 'CVV',
-                                        hintStyle: TextStyle(
-                                          color: hexToColor('#6F6F6F'),
-                                          fontFamily: 'Poppins',
-                                          fontSize: 14.0,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          gapPadding: 0.0,
-                                          borderRadius:
-                                          BorderRadius.circular(8.0),
-                                          borderSide: BorderSide(
-                                            color: hexToColor('#E0E0E0'),
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Center(
-                                child: Container(
-                                  height: 50,
-                                  width: 300,
-                                  margin: EdgeInsets.symmetric(vertical: 15.0),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).primaryColor,
-                                    borderRadius: BorderRadius.circular(12.0),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Pay ₹ 200',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16.0,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 16.0),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TransactionScreen(),
-                          ),
-                        );
-                      },
-                      child: ListTile(
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(color: hexToColor('#E0E0E0')),
-                          borderRadius: BorderRadius.circular(8.0),
-                        ),
-                        leading: Icon(
-                          Icons.money,
-                          size: 20,
-                        ),
-                        title: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Cash on Delivery',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w800,
-                                fontSize: 16.0,
-                              ),
-                            ),
-                            Text(
-                              'Pay at your doorstep',
-                              style: TextStyle(
-                                color: hexToColor('#6F6F6F'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 12.0,
-                              ),
-                            )
-                          ],
-                        ),
-                        trailing: SizedBox(),
-                      ),
-                    ),
-                  ],
                 ),
               ),
             ),
@@ -1528,7 +364,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
                         icon:
-                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -1664,8 +500,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
     );
   }
 
-  Widget _buildAddressType(String type)
-  {
+  Widget _buildAddressType(String type) {
     bool isSelected = AddressType == type;
     return GestureDetector(
       onTap: () {
@@ -1726,8 +561,1075 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
   }
 }
 
+class CheckoutItemTile extends StatelessWidget {
+  final Map<String, dynamic> item;
+  final Function(int) onUpdateQuantity;
+
+  const CheckoutItemTile({
+    Key? key,
+    required this.item,
+    required this.onUpdateQuantity,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.all(8.0),
+      color: Colors.white,
+      surfaceTintColor: Colors.white,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              height: 100,
+              width: 100,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4.0),
+                image: DecorationImage(
+                  image: NetworkImage(item['productImage']),
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ),
+            SizedBox(width: 16.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item['productName'],
+                  style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w400),
+                ),
+                SizedBox(height: 8.0),
+                Container(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: hexToColor('#D0D0D0')),
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                  child: Text(
+                    item['variation'],
+                    style: TextStyle(
+                        color: hexToColor('#222230'),
+                        fontFamily: 'Gotham',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 10.0),
+                  ),
+                ),
+                SizedBox(height: 16.0),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '₹${item['variationDetails'].price}',
+                      style: TextStyle(
+                        color: hexToColor('#343434'),
+                        fontSize: 22,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          'M.R.P ₹${item['variationDetails'].mrp}',
+                          style: TextStyle(
+                            color: hexToColor('#B9B9B9'),
+                            fontSize: 10,
+                            decoration: TextDecoration.lineThrough,
+                            decorationColor: hexToColor('#B9B9B9'),
+                          ),
+                        ),
+                        SizedBox(width: 8.0),
+                        Text(
+                          '${item['variationDetails'].discount}% OFF',
+                          style: TextStyle(
+                            color: hexToColor('#FF0000'),
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Spacer(),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Text(
+                  'Quantity'.toUpperCase(),
+                  style: TextStyle(
+                      color: hexToColor('#222230'),
+                      fontSize: 10.0,
+                      fontWeight: FontWeight.w400),
+                ),
+                SizedBox(height: 4.0),
+                Container(
+                  height: 30,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: hexToColor('#D0D0D0')),
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.remove),
+                        iconSize: 12,
+                        onPressed: () => onUpdateQuantity(item['quantity'] - 1),
+                      ),
+                      Text(
+                        '${item['quantity']}',
+                        style: TextStyle(
+                          fontSize: 10.0,
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          color: hexToColor('#222230'),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.add),
+                        iconSize: 12,
+                        onPressed: () => onUpdateQuantity(item['quantity'] + 1),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SummaryItemTile extends StatelessWidget {
+  final Map<String, dynamic> item;
+
+  const SummaryItemTile({
+    Key? key,
+    required this.item,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 1,
+      color: Colors.white,
+      surfaceTintColor: Colors.white,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              height: 100,
+              width: 100,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4.0),
+                image: DecorationImage(
+                  image: NetworkImage(item['productImage']),
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ),
+            SizedBox(width: 16.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item['productName'],
+                  style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w400),
+                ),
+                SizedBox(height: 8.0),
+                Container(
+                  padding:
+                  EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: hexToColor('#D0D0D0')),
+                    borderRadius: BorderRadius.circular(4.0),
+                  ),
+                  child: Text(
+                    item['variation'],
+                    style: TextStyle(
+                        color: hexToColor('#222230'),
+                        fontFamily: 'Gotham',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 10.0),
+                  ),
+                ),
+                SizedBox(height: 16.0),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '₹${item['variationDetails'].price}',
+                      style: TextStyle(
+                        color: hexToColor('#343434'),
+                        fontSize: 22,
+                      ),
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          'M.R.P ₹${item['variationDetails'].mrp}',
+                          style: TextStyle(
+                            color: hexToColor('#B9B9B9'),
+                            fontSize: 10,
+                            decoration: TextDecoration.lineThrough,
+                            decorationColor: hexToColor('#B9B9B9'),
+                          ),
+                        ),
+                        SizedBox(width: 8.0),
+                        Text(
+                          '${item['variationDetails'].discount}% OFF',
+                          style: TextStyle(
+                            color: hexToColor('#FF0000'),
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class SummaryScreen extends StatefulWidget {
+  final List<Map<String, dynamic>> items;
+
+  SummaryScreen({required this.items});
+
+  @override
+  State<SummaryScreen> createState() => _SummaryScreenState();
+}
+
+class _SummaryScreenState extends State<SummaryScreen> {
+  late Map<String, StoreModel> _storeDetails = {};
+  late Map<String, String> _orderIds = {};
+  double _totalAmount = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStoreDetails();
+    _generateOrderIds();
+    _calculateTotalAmount();
+  }
+
+  Future<void> _fetchStoreDetails() async {
+    for (var item in widget.items) {
+      String storeId = item['storeId'];
+      if (!_storeDetails.containsKey(storeId)) {
+        DocumentSnapshot doc = await FirebaseFirestore.instance.collection('Stores').doc(storeId).get();
+        _storeDetails[storeId] = StoreModel.fromFirestore(doc);
+      }
+    }
+    setState(() {});
+  }
+
+  void _generateOrderIds() {
+    for (var item in widget.items) {
+      String storeId = item['storeId'];
+      if (!_orderIds.containsKey(storeId)) {
+        _orderIds[storeId] = 'ORD${Random().nextInt(900000) + 100000}';
+      }
+    }
+  }
+
+  void _calculateTotalAmount() {
+    _totalAmount = widget.items.fold(0, (sum, item) => sum + (item['variationDetails'].price * item['quantity']));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _buildStoreSection(),
+                    SizedBox(height: 20),
+                    _buildProductSection(),
+                    SizedBox(height: 20),
+                    _buildSummarySection(),
+                  ],
+                ),
+              ),
+            ),
+            _buildPayButton(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      height: 100,
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        children: [
+          Row(
+            children: [
+              Text(
+                'Summary'.toUpperCase(),
+                style: TextStyle(
+                  color: hexToColor('#1E1E1E'),
+                  fontSize: 24.0,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              Text(
+                ' •',
+                style: TextStyle(
+                  fontSize: 28.0,
+                  color: hexToColor('#FF0000'),
+                ),
+              ),
+            ],
+          ),
+          Spacer(),
+          Container(
+            margin: EdgeInsets.all(8.0),
+            child: CircleAvatar(
+              backgroundColor: Colors.grey[100],
+              child: IconButton(
+                icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStoreSection() {
+    return Column(
+      children: _storeDetails.entries.map((entry) {
+        String storeId = entry.key;
+        StoreModel store = entry.value;
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          child: Row(
+            children: [
+              Container(
+                height: 75,
+                width: 75,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4.0),
+                  image: DecorationImage(
+                    image: NetworkImage(store.logoUrl),
+                    fit: BoxFit.fill,
+                  ),
+                ),
+              ),
+              SizedBox(width: 8.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    store.name,
+                    style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontSize: 18.0,
+                    ),
+                  ),
+                  SizedBox(height: 4.0),
+                  Row(children: [
+                    Image.asset(
+                      'assets/icons/globe.png',
+                      width: 8,
+                    ),
+                    SizedBox(width: 4.0),
+                    Text(
+                      store.website,
+                      style: TextStyle(
+                        color: hexToColor('#A9A9A9'),
+                        fontSize: 10.0,
+                      ),
+                    ),
+                  ])
+                ],
+              ),
+              Spacer(),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'Order ID:',
+                    style: TextStyle(
+                      color: hexToColor('#2D332F'),
+                      fontSize: 12.0,
+                    ),
+                  ),
+                  SizedBox(width: 4.0),
+                  Text(
+                    _orderIds[storeId]!,
+                    style: TextStyle(
+                      color: hexToColor('#A9A9A9'),
+                      fontSize: 12.0,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildProductSection() {
+    return Column(
+      children: widget.items.map((item) => SummaryItemTile(item: item)).toList(),
+    );
+  }
+
+  Widget _buildSummarySection() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Summary',
+            style: TextStyle(color: hexToColor('#343434'), fontSize: 18.0),
+          ),
+          SizedBox(height: 20.0),
+          ...widget.items.map((item) => _buildItemSummary(item)),
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 15.0),
+            height: 0.75,
+            color: hexToColor('#E3E3E3'),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Total',
+                style: TextStyle(color: hexToColor('#343434'), fontSize: 22.0),
+              ),
+              Text(
+                '₹ ${_totalAmount.toStringAsFixed(2)}',
+                style: TextStyle(color: hexToColor('#343434'), fontSize: 22.0),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildItemSummary(Map<String, dynamic> item) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            item['productName'],
+            style: TextStyle(
+              color: hexToColor('#B9B9B9'),
+              fontFamily: 'Gotham',
+              fontWeight: FontWeight.w500,
+              fontSize: 14.0,
+            ),
+          ),
+          Text(
+            '₹ ${(item['variationDetails'].price * item['quantity']).toStringAsFixed(2)}',
+            style: TextStyle(color: hexToColor('#606060'), fontSize: 14.0),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPayButton() {
+    return Center(
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PaymentOptionScreen(
+                items: widget.items,
+                storeDetails: _storeDetails,
+                orderIds: _orderIds,
+                totalAmount: _totalAmount,
+              ),
+            ),
+          );
+        },
+        child: Container(
+          height: 50,
+          width: 300,
+          margin: EdgeInsets.symmetric(vertical: 15.0),
+          decoration: BoxDecoration(
+            color: Theme.of(context).primaryColor,
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: Center(
+            child: Text(
+              'Pay ₹ ${_totalAmount.toStringAsFixed(2)}',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18.0,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+enum ExpandedTile { none, upi, otherUpi, card }
+
+class PaymentOptionScreen extends StatefulWidget {
+  List<Map<String, dynamic>> items;
+  Map<String, StoreModel> storeDetails;
+  Map<String, String> orderIds;
+  double totalAmount;
+
+  PaymentOptionScreen({
+    required this.items,
+    required this.storeDetails,
+    required this.orderIds,
+    required this.totalAmount,
+  });
+
+  @override
+  State<PaymentOptionScreen> createState() => _PaymentOptionScreenState();
+}
+
+class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
+  ExpandedTile expandedTile = ExpandedTile.none;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              height: 100,
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'Checkout'.toUpperCase(),
+                        style: TextStyle(
+                          color: hexToColor('#1E1E1E'),
+                          fontSize: 24.0,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      Text(
+                        ' •',
+                        style: TextStyle(
+                          fontSize: 28.0,
+                          color: hexToColor('#FF0000'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Spacer(),
+                  Container(
+                    margin: EdgeInsets.all(8.0),
+                    child: CircleAvatar(
+                      backgroundColor: Colors.grey[100],
+                      child: IconButton(
+                        icon:
+                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            /*ProductDetails(
+              productImage: 'assets/product_image.png',
+              productName: 'Nikon Camera',
+              productPrice: '200',
+            ),
+            SizedBox(height: 50.0),*/
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25.0),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 50),
+                    Text(
+                      'Select Payment Option',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontFamily: 'Gotham',
+                        fontWeight: FontWeight.w800,
+                        fontSize: 18.0,
+                      ),
+                    ),
+                    SizedBox(height: 30.0),
+                    ExpansionTile(
+                      key: Key('upi'),
+                      initiallyExpanded: expandedTile == ExpandedTile.upi,
+                      onExpansionChanged: (expanded) {
+                        setState(() {
+                          expandedTile =
+                              expanded ? ExpandedTile.upi : ExpandedTile.none;
+                        });
+                      },
+                      collapsedShape: RoundedRectangleBorder(
+                        side: BorderSide(color: hexToColor('#E0E0E0')),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: hexToColor('#E0E0E0')),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      leading: Icon(
+                        Icons.phone_android,
+                        size: 20,
+                      ),
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'UPI',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'Gotham',
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16.0,
+                            ),
+                          ),
+                          Text(
+                            'Pay by an UPI app',
+                            style: TextStyle(
+                              color: hexToColor('#6F6F6F'),
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12.0,
+                            ),
+                          )
+                        ],
+                      ),
+                      children: [
+                        ListTile(
+                          leading: Container(
+                            width: 50,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8.0, vertical: 4.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: hexToColor('#E0E0E0')),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Image.asset(
+                              'assets/Google_Pay_Logo.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          title: Text(
+                            'Google Pay',
+                            style: TextStyle(
+                              color: hexToColor('#343434'),
+                              fontFamily: 'Poppins',
+                              fontSize: 12.0,
+                            ),
+                          ),
+                          onTap: () {},
+                        ),
+                        ListTile(
+                          leading: Container(
+                            width: 50,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8.0, vertical: 4.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: hexToColor('#E0E0E0')),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Image.asset(
+                              'assets/Apple_Pay_Logo.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          title: Text(
+                            'Apple Pay',
+                            style: TextStyle(
+                              color: hexToColor('#343434'),
+                              fontFamily: 'Poppins',
+                              fontSize: 12.0,
+                            ),
+                          ),
+                          onTap: () {},
+                        ),
+                        ExpansionTile(
+                          key: Key('other_upi'),
+                          initiallyExpanded:
+                              expandedTile == ExpandedTile.otherUpi,
+                          onExpansionChanged: (expanded) {
+                            setState(() {
+                              expandedTile = expanded
+                                  ? ExpandedTile.otherUpi
+                                  : ExpandedTile.upi;
+                            });
+                          },
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          leading: Container(
+                            width: 50,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 8.0, vertical: 4.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: hexToColor('#E0E0E0')),
+                              borderRadius: BorderRadius.circular(8.0),
+                            ),
+                            child: Image.asset(
+                              'assets/BHIM_Logo.png',
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                          title: Text(
+                            'Other UPI ID',
+                            style: TextStyle(
+                              color: hexToColor('#343434'),
+                              fontFamily: 'Poppins',
+                              fontSize: 12.0,
+                            ),
+                          ),
+                          trailing: Text('ADD',
+                              style: TextStyle(
+                                color: hexToColor('#4B8284'),
+                                fontFamily: 'Poppins',
+                                fontSize: 12.0,
+                              )),
+                          children: [
+                            Container(
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: 16.0, vertical: 15.0),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.65,
+                                    height: 65,
+                                    child: TextField(
+                                      style: TextStyle(
+                                        color: hexToColor('#2A2A2A'),
+                                        fontFamily: 'Gotham',
+                                        fontSize: 14,
+                                      ),
+                                      decoration: InputDecoration(
+                                        helperText:
+                                            'Your UPI ID will be encrypted and in 100% safe with us',
+                                        helperStyle: TextStyle(
+                                          color: hexToColor('#6F6F6F'),
+                                          fontFamily: 'Poppins',
+                                          fontSize: 8.0,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          gapPadding: 0.0,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          borderSide: BorderSide(
+                                            color: hexToColor('#E0E0E0'),
+                                            width: 1.0,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8.0),
+                                  Container(
+                                    height: 45,
+                                    width: 45,
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(context).primaryColor,
+                                      borderRadius:
+                                          BorderRadius.circular(100.0),
+                                    ),
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.check,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.0),
+                    ExpansionTile(
+                      key: Key('card'),
+                      initiallyExpanded: expandedTile == ExpandedTile.card,
+                      onExpansionChanged: (expanded) {
+                        setState(() {
+                          expandedTile =
+                              expanded ? ExpandedTile.card : ExpandedTile.none;
+                        });
+                      },
+                      collapsedShape: RoundedRectangleBorder(
+                        side: BorderSide(color: hexToColor('#E0E0E0')),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: hexToColor('#E0E0E0')),
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                      leading: Icon(
+                        Icons.credit_card,
+                        size: 20,
+                      ),
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Credit/Debit Card',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontFamily: 'Gotham',
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16.0,
+                            ),
+                          ),
+                          Text(
+                            'Visa, Mastercard, Rupay & more',
+                            style: TextStyle(
+                              color: hexToColor('#6F6F6F'),
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 12.0,
+                            ),
+                          )
+                        ],
+                      ),
+                      children: [
+                        Container(
+                          margin: EdgeInsets.symmetric(
+                              horizontal: 16.0, vertical: 15.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.75,
+                                height: 50,
+                                child: TextField(
+                                  style: TextStyle(
+                                    color: hexToColor('#2A2A2A'),
+                                    fontFamily: 'Gotham',
+                                    fontSize: 14,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: 'Card Number',
+                                    hintStyle: TextStyle(
+                                      color: hexToColor('#6F6F6F'),
+                                      fontFamily: 'Poppins',
+                                      fontSize: 14.0,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      gapPadding: 0.0,
+                                      borderRadius: BorderRadius.circular(8.0),
+                                      borderSide: BorderSide(
+                                        color: hexToColor('#E0E0E0'),
+                                        width: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 8.0),
+                              Row(
+                                children: [
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.35,
+                                    height: 50,
+                                    child: TextField(
+                                      style: TextStyle(
+                                        color: hexToColor('#2A2A2A'),
+                                        fontFamily: 'Gotham',
+                                        fontSize: 14,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: 'Expiry(MM/YY)',
+                                        hintStyle: TextStyle(
+                                          color: hexToColor('#6F6F6F'),
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14.0,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          gapPadding: 0.0,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          borderSide: BorderSide(
+                                            color: hexToColor('#E0E0E0'),
+                                            width: 1.0,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 8.0),
+                                  SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.35,
+                                    height: 50,
+                                    child: TextField(
+                                      style: TextStyle(
+                                        color: hexToColor('#2A2A2A'),
+                                        fontFamily: 'Gotham',
+                                        fontSize: 14,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: 'CVV',
+                                        hintStyle: TextStyle(
+                                          color: hexToColor('#6F6F6F'),
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14.0,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          gapPadding: 0.0,
+                                          borderRadius:
+                                              BorderRadius.circular(8.0),
+                                          borderSide: BorderSide(
+                                            color: hexToColor('#E0E0E0'),
+                                            width: 1.0,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Center(
+                                child: Container(
+                                  height: 50,
+                                  width: 300,
+                                  margin: EdgeInsets.symmetric(vertical: 15.0),
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).primaryColor,
+                                    borderRadius: BorderRadius.circular(12.0),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Pay ₹ ${widget.totalAmount}',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16.0),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TransactionScreen(
+                              storeDetails: widget.storeDetails,
+                              orderIds: widget.orderIds,
+                              totalAmount: widget.totalAmount,
+                            ),
+                          ),
+                        );
+                      },
+                      child: ListTile(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(color: hexToColor('#E0E0E0')),
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        leading: Icon(
+                          Icons.money,
+                          size: 20,
+                        ),
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Cash on Delivery',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w800,
+                                fontSize: 16.0,
+                              ),
+                            ),
+                            Text(
+                              'Pay at your doorstep',
+                              style: TextStyle(
+                                color: hexToColor('#6F6F6F'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12.0,
+                              ),
+                            )
+                          ],
+                        ),
+                        trailing: SizedBox(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class TransactionScreen extends StatefulWidget {
-  const TransactionScreen({super.key});
+  Map<String, StoreModel> storeDetails;
+  Map<String, String> orderIds;
+  double totalAmount;
+
+  TransactionScreen({
+    required this.storeDetails,
+    required this.orderIds,
+    required this.totalAmount,
+  });
 
   @override
   State<TransactionScreen> createState() => _TransactionScreenState();
@@ -1742,45 +1644,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
           .findRenderObject() as RenderRepaintBoundary;
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       ByteData? byteData =
-      await image.toByteData(format: ui.ImageByteFormat.png);
+          await image.toByteData(format: ui.ImageByteFormat.png);
       return byteData?.buffer.asUint8List();
     } catch (e) {
       print(e);
       return null;
-    }
-  }
-
-  Future<void> _sendOrderToMiddleman() async {
-    Map<String, dynamic> order = {
-      "DropOfAddress": "Don Bosco High School & Junior College, Group No 1, Tagore Nagar, Vikhroli, Mumbai, Maharashtra 400083",
-      "OrderTotal": 120,
-      "PickUpAddress": "Shop No 27, Ground Floor, Galleria Shopping Mall, Hiranandani Gardens, Panchkutir Ganesh Nagar, Powai, Mumbai, Maharashtra 400076",
-      "StoreLogo": "https://lh3.googleusercontent.com/a/ACg8ocKMIbNOP57m7mErNOaiWawBVce1mPRqA1mkImhO7FIpgL-ujg=s96-c",
-      "StoreName": "sample store",
-      "deliveryId": "1234",
-      "items": [
-        {
-          "name": "camera",
-          "price": 1200,
-          "quantity": 21,
-        }
-      ],
-      "paymentMethod": "Cash on Delivery"
-    };
-
-    try {
-      // Send the order to the "middleman_orders" collection in Firestore
-      await FirebaseFirestore.instance.collection('middleman_orders').add(order);
-
-      // Show a success message to the user
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Order sent to middleman_orders successfully')),
-      );
-    } catch (e) {
-      // If there's an error, show an error message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error sending order: $e')),
-      );
     }
   }
 
@@ -1819,7 +1687,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
                         icon:
-                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -1882,14 +1750,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           ),
                           SizedBox(
                               height:
-                              MediaQuery.of(context).size.height * 0.05),
+                                  MediaQuery.of(context).size.height * 0.05),
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.8,
                             child: Column(
                               children: [
                                 Row(
                                   mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Date:',
@@ -1915,7 +1783,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 SizedBox(height: 12.0),
                                 Row(
                                   mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Time:',
@@ -1941,7 +1809,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 SizedBox(height: 12.0),
                                 Row(
                                   mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'To:',
@@ -1974,7 +1842,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 ),
                                 Row(
                                   mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Total',
@@ -1985,7 +1853,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                     ),
                                     SizedBox(width: 8.0),
                                     Text(
-                                      '₹ 200.00',
+                                      '₹ ${widget.totalAmount}',
                                       style: TextStyle(
                                         color: hexToColor('#343434'),
                                         fontSize: 20.0,
@@ -1994,11 +1862,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                   ],
                                 ),
                                 SizedBox(height: 16.0),
-                                GestureDetector(
-                                  onTap: _sendOrderToMiddleman,
-                                child:Container(
+                                Container(
                                   height:
-                                  MediaQuery.of(context).size.height * 0.1,
+                                      MediaQuery.of(context).size.height * 0.1,
                                   decoration: BoxDecoration(
                                     color: hexToColor('#FFFFFF'),
                                     borderRadius: BorderRadius.circular(12.0),
@@ -2007,7 +1873,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        'Click to assign Middle Man',
+                                        'Cash on Delivery',
                                         style: TextStyle(
                                           color: Colors.black,
                                           fontSize: 18.0,
@@ -2017,7 +1883,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                       ),
                                     ],
                                   ),
-                                )
                                 ),
                                 SizedBox(height: 25.0),
                                 SizedBox(
@@ -2050,7 +1915,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                           border: Border.all(
                                               color: hexToColor('#094446')),
                                           borderRadius:
-                                          BorderRadius.circular(12.0),
+                                              BorderRadius.circular(12.0),
                                         ),
                                         child: Center(
                                           child: Text(

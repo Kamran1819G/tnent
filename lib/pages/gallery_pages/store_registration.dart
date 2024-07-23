@@ -30,21 +30,20 @@ class _StoreRegistrationState extends State<StoreRegistration> {
 
   List<String> categories = [
     "Clothings",
-    "Accessories",
     "Electronics",
-    "Foods",
-    "Florists",
-    "Sports",
-    "Book Stores",
-    "Stationeries",
+    "Restaurants",
+    "Books",
+    "Bakeries",
     "Beauty Apparels",
-    "Eyewares",
-    "Furnitures",
-    "Home Decors",
-    "Jewelries",
-    "Shoes",
-    "Toys",
-    "Watches"
+    "Cafes",
+    "Florists",
+    "Footwears",
+    "Accessories",
+    "Stationeries",
+    "Eyewears",
+    "Watches",
+    "Musicals",
+    "Sports"
   ];
   String selectedCategory= '';
 
