@@ -18,7 +18,6 @@ class _WishlistScreenState extends State<WishlistScreen> {
   List<Map<String, dynamic>> wishlistItems = [];
   double totalPrice = 0.0;
   Set<String> selectedItems = {};
-  Map<String, double> itemPrices = {};
 
   @override
   void initState() {
@@ -41,8 +40,20 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
         if (userDoc.exists) {
           List<dynamic> wishlist = (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
+          List<Map<String, dynamic>> updatedWishlistItems = [];
+
+          for (var item in wishlist) {
+            Map<String, dynamic> productDetails = await _fetchProductDetails(item['productId']);
+            updatedWishlistItems.add({
+              ...item,
+              ...productDetails,
+              'variationDetails': productDetails['variations'][item['variationKey']],
+              'isSelected': false,
+            });
+          }
+
           setState(() {
-            wishlistItems = wishlist.cast<Map<String, dynamic>>();
+            wishlistItems = updatedWishlistItems;
             isLoading = false;
           });
         }
@@ -55,10 +66,30 @@ class _WishlistScreenState extends State<WishlistScreen> {
     }
   }
 
+  Future<Map<String, dynamic>> _fetchProductDetails(String productId) async {
+    DocumentSnapshot productDoc = await FirebaseFirestore.instance
+        .collection('products')
+        .doc(productId)
+        .get();
+
+    if (!productDoc.exists) {
+      return {};
+    }
+
+    ProductModel product = ProductModel.fromFirestore(productDoc);
+    return {
+      'productName': product.name,
+      'productImage': product.imageUrls.isNotEmpty ? product.imageUrls[0] : '',
+      'variations': product.variations,
+    };
+  }
+
   void updateTotalPrice() {
     double newTotal = 0.0;
-    for (var item in selectedItems) {
-      newTotal += itemPrices[item] ?? 0.0;
+    for (var item in wishlistItems) {
+      if (selectedItems.contains('${item['productId']}_${item['variationKey']}')) {
+        newTotal += item['variationDetails'].price;
+      }
     }
     setState(() {
       totalPrice = newTotal;
@@ -77,14 +108,13 @@ class _WishlistScreenState extends State<WishlistScreen> {
     });
   }
 
-  void toggleItemSelection(String itemId, bool isSelected, double price) {
+  void toggleItemSelection(String itemId, bool isSelected) {
     setState(() {
       if (isSelected) {
         selectedItems.add(itemId);
       } else {
         selectedItems.remove(itemId);
       }
-      itemPrices[itemId] = price;
       updateTotalPrice();
     });
   }
@@ -195,10 +225,10 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 itemCount: wishlistItems.length,
                 itemBuilder: (context, index) {
                   return WishlistItemTile(
-                    wishlistItem: wishlistItems[index],
+                    item: wishlistItems[index],
                     isSelected: selectedItems.contains('${wishlistItems[index]['productId']}_${wishlistItems[index]['variationKey']}'),
-                    onSelectionChanged: (isSelected, price) {
-                      toggleItemSelection('${wishlistItems[index]['productId']}_${wishlistItems[index]['variationKey']}', isSelected, price);
+                    onSelectionChanged: (isSelected) {
+                      toggleItemSelection('${wishlistItems[index]['productId']}_${wishlistItems[index]['variationKey']}', isSelected);
                     },
                     onRemove: () {
                       setState(() {
@@ -222,10 +252,15 @@ class _WishlistScreenState extends State<WishlistScreen> {
     try {
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
+        List<Map<String, dynamic>> wishlistData = wishlistItems.map((item) => {
+          'productId': item['productId'],
+          'variation': item['variation'],
+        }).toList();
+
         await FirebaseFirestore.instance
             .collection('Users')
             .doc(user.uid)
-            .update({'wishlist': wishlistItems});
+            .update({'wishlist': wishlistData});
       }
     } catch (e) {
       print('Error updating wishlist: $e');
@@ -233,71 +268,28 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 }
 
-class WishlistItemTile extends StatefulWidget {
-  final Map<String, dynamic> wishlistItem;
+class WishlistItemTile extends StatelessWidget {
+  final Map<String, dynamic> item;
   final bool isSelected;
-  final Function(bool, double) onSelectionChanged;
+  final Function(bool) onSelectionChanged;
   final VoidCallback onRemove;
 
   const WishlistItemTile({
     Key? key,
-    required this.wishlistItem,
+    required this.item,
     required this.isSelected,
     required this.onSelectionChanged,
     required this.onRemove,
   }) : super(key: key);
 
   @override
-  _WishlistItemTileState createState() => _WishlistItemTileState();
-}
-
-class _WishlistItemTileState extends State<WishlistItemTile> {
-  late ProductModel product;
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchProductDetails();
-  }
-
-  Future<void> fetchProductDetails() async {
-    try {
-      DocumentSnapshot productDoc = await FirebaseFirestore.instance
-          .collection('products')
-          .doc(widget.wishlistItem['productId'])
-          .get();
-
-      if (productDoc.exists) {
-        setState(() {
-          product = ProductModel.fromFirestore(productDoc);
-          isLoading = false;
-        });
-      }
-    } catch (e) {
-      print('Error fetching product details: $e');
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-
-    String variationKey = widget.wishlistItem['variationKey'];
-    ProductVariant? selectedVariant = product.variations[variationKey];
-    double price = selectedVariant?.price ?? 0.0;
-
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(product: product),
+            builder: (context) => ProductDetailScreen(product: ProductModel.fromFirestore(item as DocumentSnapshot<Object?>?)),
           ),
         );
       },
@@ -312,7 +304,7 @@ class _WishlistItemTileState extends State<WishlistItemTile> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(4.0),
                 image: DecorationImage(
-                  image: NetworkImage(product.imageUrls.first),
+                  image: NetworkImage(item['productImage']),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -323,7 +315,7 @@ class _WishlistItemTileState extends State<WishlistItemTile> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    product.name,
+                    item['productName'],
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 20.0,
@@ -331,7 +323,7 @@ class _WishlistItemTileState extends State<WishlistItemTile> {
                   ),
                   SizedBox(height: 8.0),
                   Text(
-                    'Variation: $variationKey',
+                    'Variation: ${item['variationKey']}',
                     style: TextStyle(
                       color: hexToColor('#737373'),
                       fontSize: 14.0,
@@ -339,7 +331,7 @@ class _WishlistItemTileState extends State<WishlistItemTile> {
                   ),
                   SizedBox(height: 55.0),
                   Text(
-                    '₹${price.toStringAsFixed(2)}',
+                    '₹${item['variationDetails'].price.toStringAsFixed(2)}',
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 20.0,
@@ -349,7 +341,7 @@ class _WishlistItemTileState extends State<WishlistItemTile> {
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: widget.onRemove,
+                        onTap: onRemove,
                         child: Container(
                           padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                           decoration: BoxDecoration(
@@ -392,9 +384,9 @@ class _WishlistItemTileState extends State<WishlistItemTile> {
                           side: BorderSide(color: Colors.black),
                           borderRadius: BorderRadius.circular(4.0),
                         ),
-                        value: widget.isSelected,
+                        value: isSelected,
                         onChanged: (value) {
-                          widget.onSelectionChanged(value ?? false, price);
+                          onSelectionChanged(value ?? false);
                         },
                       ),
                     ],

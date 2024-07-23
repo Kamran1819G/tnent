@@ -8,6 +8,7 @@ import 'package:tnennt/helpers/text_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
+import 'package:tnennt/screens/users_screens/storeprofile_screen.dart';
 import 'package:tnennt/widgets/wishlist_product_tile.dart';
 import 'package:tnennt/pages/catalog_pages/cart_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -322,7 +323,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               if (!snapshot.hasData) {
                 return Center(child: Text('No store data available'));
               }
-
               final store = snapshot.data!;
               return Stack(children: [
                 SingleChildScrollView(
@@ -422,30 +422,40 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 16.0),
-                            child: Row(
-                              children: [
-                                Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Image.network(
-                                      store.logoUrl,
-                                      width: 30,
-                                      height: 30,
-                                    )),
-                                SizedBox(width: 8),
-                                Text(
-                                  store.name,
-                                  style: TextStyle(
-                                    color: hexToColor('#9C9C9C'),
-                                    fontSize: 14,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                          GestureDetector(
+                            onTap: (){
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => StoreProfileScreen(store: store),
                                 ),
-                              ],
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(left: 16.0),
+                              child: Row(
+                                children: [
+                                  Container(
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Image.network(
+                                        store.logoUrl,
+                                        width: 30,
+                                        height: 30,
+                                      )),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    store.name,
+                                    style: TextStyle(
+                                      color: hexToColor('#9C9C9C'),
+                                      fontSize: 14,
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                           Padding(
