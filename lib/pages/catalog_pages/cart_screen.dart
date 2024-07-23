@@ -102,15 +102,13 @@ class _CartScreenState extends State<CartScreen> {
 
       List<dynamic> cartList = snapshot.get('cart') ?? [];
       cartList.removeWhere((item) =>
-          item['productId'] == productId &&
-          item['variation'] == variation);
+          item['productId'] == productId && item['variation'] == variation);
 
       transaction.update(userRef, {'cart': cartList});
 
       setState(() {
         cartItems.removeWhere((item) =>
-            item['productId'] == productId &&
-            item['variation'] == variation);
+            item['productId'] == productId && item['variation'] == variation);
         totalAmount = calculateTotalAmount(cartItems);
       });
     });
@@ -130,8 +128,7 @@ class _CartScreenState extends State<CartScreen> {
 
       List<dynamic> cartList = snapshot.get('cart') ?? [];
       int index = cartList.indexWhere((item) =>
-          item['productId'] == productId &&
-          item['variation'] == variation);
+          item['productId'] == productId && item['variation'] == variation);
 
       if (index != -1) {
         if (newQuantity > 0) {
@@ -145,8 +142,7 @@ class _CartScreenState extends State<CartScreen> {
 
       setState(() {
         int itemIndex = cartItems.indexWhere((item) =>
-            item['productId'] == productId &&
-            item['variation'] == variation);
+            item['productId'] == productId && item['variation'] == variation);
         if (itemIndex != -1) {
           if (newQuantity > 0) {
             cartItems[itemIndex]['quantity'] = newQuantity;
@@ -161,7 +157,7 @@ class _CartScreenState extends State<CartScreen> {
 
   void navigateToCheckout() {
     List<Map<String, dynamic>> selectedItems =
-    cartItems.where((item) => item['isSelected']).toList();
+        cartItems.where((item) => item['isSelected']).toList();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -174,8 +170,7 @@ class _CartScreenState extends State<CartScreen> {
       String productId, String variation, bool isSelected) {
     setState(() {
       int index = cartItems.indexWhere((item) =>
-      item['productId'] == productId &&
-          item['variation'] == variation);
+          item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
         cartItems[index]['isSelected'] = isSelected;
         totalAmount = calculateTotalAmount(cartItems);
@@ -308,15 +303,15 @@ class _CartScreenState extends State<CartScreen> {
                                     fontSize: 9.0,
                                   ),
                                 ),
-                            ],
-                          ),
-                          Checkbox(
-                            activeColor: Theme.of(context).primaryColor,
-                            value: allItemsSelected,
-                            onChanged: toggleAllItemsSelection,
-                          ),
-                        ],
-                      ),
+                              ],
+                            ),
+                            Checkbox(
+                              activeColor: Theme.of(context).primaryColor,
+                              value: allItemsSelected,
+                              onChanged: toggleAllItemsSelection,
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 ),
@@ -422,19 +417,19 @@ class _CartProductTileState extends State<CartProductTile> {
   void _checkWishlistStatus() async {
     User? user = _auth.currentUser;
     if (user != null) {
-      DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user.uid).get();
+      DocumentSnapshot userDoc =
+          await _firestore.collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
-        List<dynamic> wishlist = (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
+        List<dynamic> wishlist =
+            (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
         setState(() {
           _isInWishlist = wishlist.any((item) =>
-          item['productId'] == widget.productId &&
-              item['variation'] == widget.variation
-          );
+              item['productId'] == widget.productId &&
+              item['variation'] == widget.variation);
         });
       }
     }
   }
-
 
   Future<void> _toggleWishlist() async {
     User? user = _auth.currentUser;
@@ -448,7 +443,8 @@ class _CartProductTileState extends State<CartProductTile> {
     });
 
     try {
-      DocumentReference userDocRef = _firestore.collection('Users').doc(user.uid);
+      DocumentReference userDocRef =
+          _firestore.collection('Users').doc(user.uid);
       Map<String, dynamic> wishlistItem = {
         'productId': widget.productId,
         'variation': widget.variation,
@@ -552,8 +548,8 @@ class _CartProductTileState extends State<CartProductTile> {
                       onPressed: () {
                         int newQuantity = widget.quantity - 1;
                         if (newQuantity >= 0) {
-                          widget.onUpdateQuantity(widget.productId,
-                              widget.variation, newQuantity);
+                          widget.onUpdateQuantity(
+                              widget.productId, widget.variation, newQuantity);
                         }
                       },
                     ),
@@ -573,8 +569,8 @@ class _CartProductTileState extends State<CartProductTile> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     GestureDetector(
-                      onTap: () => widget.onRemove(
-                          widget.productId, widget.variation),
+                      onTap: () =>
+                          widget.onRemove(widget.productId, widget.variation),
                       child: Container(
                         padding: EdgeInsets.symmetric(
                             horizontal: 12.0, vertical: 8.0),
@@ -595,19 +591,20 @@ class _CartProductTileState extends State<CartProductTile> {
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CheckoutScreen(selectedItems: [
-                          {
-                            'productId': widget.productId,
-                            'productName': widget.productName,
-                            'productPrice': widget.productPrice,
-                            'quantity': widget.quantity,
-                            'variation': widget.variation,
-                          }
-                        ]),
-                      ),
-                    );
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CheckoutScreen(selectedItems: [
+                              {
+                                'productId': widget.productId,
+                                'productName': widget.productName,
+                                'productPrice': widget.productPrice,
+                                'quantity': widget.quantity,
+                                'variation': widget.variation,
+                              }
+                            ]),
+                          ),
+                        );
                       },
                       child: Container(
                         padding: EdgeInsets.symmetric(
@@ -638,7 +635,8 @@ class _CartProductTileState extends State<CartProductTile> {
                         setState(() {
                           _isSelected = value ?? false;
                         });
-                        widget.onUpdateSelection(widget.productId, widget.variation, _isSelected);
+                        widget.onUpdateSelection(
+                            widget.productId, widget.variation, _isSelected);
                       },
                     ),
                   ],

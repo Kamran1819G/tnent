@@ -9,6 +9,7 @@ import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/pages/catalog_pages/store_coupon_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:math';
 
 class CheckoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>> selectedItems;
@@ -81,9 +82,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   'image': imageUrl,
                   'variation': variation,
                   'productId': productId,
-                  'storeName': storeData['name'],
-                  'storeAddress': storeData['address'],
-                  'storeLogo': storeData['logo'],
+                  'storeName': storeData['name'], // Add store name
+                  'storeAddress': storeData['address'], // Add store address if needed
+                  'storeLogo': storeData['logo'], // Add store logo if needed
                 });
               }
             });
@@ -108,17 +109,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-  void calculateTotalPrice() {
-    double sum = 0.0;
-    for (var item in cartData) {
-      sum += (item['productPrice'] ?? 0.0) * (item['quantity'] ?? 1);
-    }
-    setState(() {
-      totalPrice = sum;
-
-    });
-  }
-
   Future<void> updateQuantity(String productId, int newQuantity) async {
     try {
       User? user = _auth.currentUser;
@@ -130,9 +120,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               break;
             }
           }
+          calculateTotalPrice(); // Recalculate total price after updating quantity
         });
-
-        calculateTotalPrice();
 
         // Update the cart in Firestore
         DocumentReference userRef = _firestore.collection('Users').doc(user.uid);
@@ -152,6 +141,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       print('Error updating quantity: $e');
     }
   }
+
+  void calculateTotalPrice() {
+    double sum = 0.0;
+    for (var item in cartData) {
+      sum += (item['productPrice'] ?? 0.0) * (item['quantity'] ?? 1);
+    }
+    setState(() {
+      totalPrice = sum;
+    });
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -309,7 +310,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 itemBuilder: (context, index) {
                   var item = cartData[index];
                   return ProductDetails(
-                    productImage: item['image'] ?? 'assets/product_image.png',
+                    productImage: item['image'] ?? '',
                     productName: item['productName'] ?? '',
                     productPrice: item['productPrice'] ?? 0.0,
                     quantity: item['quantity'] ?? 1,
@@ -551,6 +552,21 @@ class _ProductDetailsState extends State<ProductDetails> {
 }
 
 
+///orderid and code for shop owner
+///
+String generateRandomString(int length, {bool includeLetters = true}) {
+  const String _chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const String _digits = '0123456789';
+  Random _rnd = Random();
+
+  String chars = includeLetters ? _chars : _digits;
+  return String.fromCharCodes(Iterable.generate(
+      length, (_) => chars.codeUnitAt(_rnd.nextInt(chars.length))));
+}
+
+String orderId = generateRandomString(7);
+String code = generateRandomString(5);
+
 ///summary page
 
 class SummaryScreen extends StatefulWidget {
@@ -693,7 +709,25 @@ class _SummaryScreenState extends State<SummaryScreen> {
                       ),
                       SizedBox(width: 4.0),
                       Text(
-                        '123456',
+                        orderId,
+                        style: TextStyle(
+                          color: hexToColor('#A9A9A9'),
+                          fontSize: 12.0,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(width: 8.0),
+                      Text(
+                        'Code:',
+                        style: TextStyle(
+                          color: hexToColor('#2D332F'),
+                          fontSize: 12.0,
+                        ),
+                      ),
+                      SizedBox(width: 4.0),
+                      Text(
+                        code,
                         style: TextStyle(
                           color: hexToColor('#A9A9A9'),
                           fontSize: 12.0,
@@ -893,10 +927,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
     ),
     ]
-            ),
+        ),
       )
     );
-
   }
 }
 
@@ -961,12 +994,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                 ],
               ),
             ),
-            /*ProductDetails(
-              productImage: 'assets/product_image.png',
-              productName: 'Nikon Camera',
-              productPrice: '200',
-            ),
-            SizedBox(height: 50.0),*/
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 25.0),
               child: SingleChildScrollView(
@@ -1605,7 +1632,8 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
     );
   }
 
-  Widget _buildAddressType(String type) {
+  Widget _buildAddressType(String type)
+  {
     bool isSelected = AddressType == type;
     return GestureDetector(
       onTap: () {
