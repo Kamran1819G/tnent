@@ -1,5 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_category_model.dart';
@@ -20,6 +24,41 @@ class MyStoreProfileScreen extends StatefulWidget {
   @override
   State<MyStoreProfileScreen> createState() => _MyStoreProfileScreenState();
 }
+class Update {
+  String id;
+  String type;
+  List<String> mediaUrls;
+  String text;
+  DateTime timestamp;
+
+  Update({
+    required this.id,
+    required this.type,
+    required this.mediaUrls,
+    required this.text,
+    required this.timestamp,
+  });
+
+  factory Update.fromMap(Map<String, dynamic> map) {
+    return Update(
+      id: map['id'] as String,
+      type: map['type'] as String,
+      mediaUrls: List<String>.from(map['mediaUrls']),
+      text: map['text'] as String,
+      timestamp: (map['timestamp'] as Timestamp).toDate(),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'type': type,
+      'mediaUrls': mediaUrls,
+      'text': text,
+      'timestamp': Timestamp.fromDate(timestamp),
+    };
+  }
+}
 
 class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     with SingleTickerProviderStateMixin {
@@ -36,10 +75,13 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   late int greenFlags = store.greenFlags;
   late int totalFlags = store.greenFlags + store.redFlags;
   late int redFlags = store.redFlags;
+
+  bool hasUpdates = false;
   bool isGreenFlag = true;
   bool isExpanded = false;
 
   List<StoreCategoryModel> categories = [];
+  List<Update> updates = [];
   List<ProductModel> allProducts = [];
   List<ProductModel> filteredProducts = [];
   TextEditingController searchController = TextEditingController();
@@ -47,14 +89,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
 
   late AnimationController _controller;
   late Animation<double> _animation;
-
-
-  List<dynamic> updates = List.generate(10, (index) {
-    return {
-      "name": "Sahachari",
-      "coverImage": "assets/sahachari_image.png",
-    };
-  });
 
   List<ProductModel> featuredProducts = List.generate(5, (index) {
     return ProductModel(
@@ -118,6 +152,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     );
     super.initState();
     fetchCategories();
+    fetchUpdates();
   }
 
   @override
@@ -138,6 +173,219 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
           product.name.toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
+  }
+
+  Future<void> fetchUpdates() async {
+    try {
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(store.storeId)
+          .get();
+
+      if (doc.exists && (doc.data() as Map<String, dynamic>).containsKey('updates')) {
+        List<dynamic> updatesList = (doc.data() as Map<String, dynamic>)['updates'];
+        setState(() {
+          updates = updatesList.map((update) => Update.fromMap(update as Map<String, dynamic>)).toList();
+          hasUpdates = updates.isNotEmpty;
+        });
+      } else {
+        setState(() {
+          hasUpdates = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching updates: $e');
+    }
+  }
+
+  Future<void> addUpdate(String type, List<String> mediaUrls, String text) async {
+    final newUpdate = Update(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      type: type,
+      mediaUrls: mediaUrls,
+      text: text,
+      timestamp: DateTime.now(),
+    );
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(store.storeId)
+          .update({
+        'updates': FieldValue.arrayUnion([newUpdate.toMap()])
+      });
+
+      setState(() {
+        updates.insert(0, newUpdate);
+        hasUpdates = true;
+      });
+    } catch (e) {
+      print('Error adding update: $e');
+    }
+  }
+
+
+
+  void _showAddUpdateDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(hasUpdates ? 'Add Update' : 'Add Your First Update'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                onPressed: () => _pickAndUploadMedia('image'),
+                child: Text('Add Image'),
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () => _pickAndUploadMedia('video'),
+                child: Text('Add Video'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /*Future<void> _pickAndUploadMedia(String type) async {
+    final ImagePicker _picker = ImagePicker();
+    List<XFile>? pickedFiles;
+
+    if (type == 'image') {
+      pickedFiles = await _picker.pickMultiImage();
+    } else if (type == 'video') {
+      final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
+      if (video != null) pickedFiles = [video];
+    }
+
+    if (pickedFiles != null && pickedFiles.isNotEmpty) {
+      List<String> mediaUrls = [];
+      for (var file in pickedFiles) {
+        String url = await uploadFile(file);
+        mediaUrls.add(url);
+      }
+
+      // Show a dialog to get text input
+      String? text = await showDialog<String>(
+        context: context,
+        builder: (BuildContext context) {
+          String inputText = '';
+          return AlertDialog(
+            title: Text('Add a caption'),
+            content: TextField(
+              onChanged: (value) {
+                inputText = value;
+              },
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop(inputText);
+                },
+              ),
+            ],
+          );
+        },
+      );
+
+      if (text != null) {
+        await addUpdate(type, mediaUrls, text);
+        Navigator.of(context).pop();
+
+        if (!hasUpdates) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Congratulations on adding your first update!'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    }
+  }*/
+  Future<void> _pickAndUploadMedia(String type) async {
+    final ImagePicker _picker = ImagePicker();
+    List<XFile>? pickedFiles;
+
+    if (type == 'image') {
+      pickedFiles = await _picker.pickMultiImage();
+    } else if (type == 'video') {
+      final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
+      if (video != null) pickedFiles = [video];
+    }
+
+    if (pickedFiles != null && pickedFiles.isNotEmpty) {
+      // Show loading circle
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(child: CircularProgressIndicator());
+        },
+      );
+
+      List<String> mediaUrls = [];
+      for (var file in pickedFiles) {
+        String url = await uploadFile(file);
+        mediaUrls.add(url);
+      }
+
+      // Hide loading circle
+      Navigator.of(context).pop();
+
+      // Show a dialog to get text input
+      String? text = await showDialog<String>(
+        context: context,
+        builder: (BuildContext context) {
+          String inputText = '';
+          return AlertDialog(
+            title: Text('Add a caption'),
+            content: TextField(
+              onChanged: (value) {
+                inputText = value;
+              },
+            ),
+            actions: <Widget>[
+              TextButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop(inputText);
+                },
+              ),
+            ],
+          );
+        },
+      );
+
+      if (text != null) {
+        await addUpdate(type, mediaUrls, text);
+        Navigator.of(context).pop();
+
+        if (!hasUpdates) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Congratulations on adding your first update!'),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<String> uploadFile(XFile file) async {
+    File fileToUpload = File(file.path);
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    Reference firebaseStorageRef = FirebaseStorage.instance.ref().child('updates/$fileName');
+    UploadTask uploadTask = firebaseStorageRef.putFile(fileToUpload);
+    TaskSnapshot taskSnapshot = await uploadTask;
+    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
+    return downloadUrl;
   }
 
   Future<List<ProductModel>> _fetchProducts() async {
@@ -979,42 +1227,68 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                       Container(
                         margin: EdgeInsets.symmetric(horizontal: 4.0),
                         height: 150.0,
-                        child: ListView(
+                        child: hasUpdates
+                            ? ListView(
                           scrollDirection: Axis.horizontal,
                           children: [
                             Container(
                               padding: EdgeInsets.all(8.0),
                               child: Column(
                                 children: [
-                                  Container(
-                                    height: 100,
-                                    width: 100,
-                                    decoration: BoxDecoration(
-                                      color: hexToColor('#F3F3F3'),
-                                      borderRadius:
-                                      BorderRadius.circular(12.0),
-                                    ),
+                                  GestureDetector(
+                                    onTap: () => _showAddUpdateDialog(),
                                     child: Container(
+                                      height: 100,
+                                      width: 100,
+                                      decoration: BoxDecoration(
+                                        color: hexToColor('#F3F3F3'),
+                                        borderRadius: BorderRadius.circular(12.0),
+                                      ),
+                                      child: Container(
                                         margin: EdgeInsets.all(16.0),
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: Colors.white,
                                         ),
-                                        child: Icon(Icons.add,
-                                            size: 34.0,
-                                            color:
-                                            hexToColor('#B5B5B5'))),
+                                        child: Icon(Icons.add, size: 34.0, color: hexToColor('#B5B5B5')),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Add Update',
+                                    style: TextStyle(fontSize: 12),
                                   ),
                                 ],
                               ),
                             ),
-                            ...updates.map((update) {
-                              return UpdateTile(
-                                name: update['name'],
-                                image: update['coverImage'],
-                              );
-                            }).toList(),
+                            ...updates.map((update) => UpdateTile(update: update)).toList(),
                           ],
+                        )
+                            : GestureDetector(
+                          onTap: () => _showAddUpdateDialog(),
+                          child: Container(
+                            padding: EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: hexToColor('#F3F3F3'),
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_circle_outline, size: 24, color: Theme.of(context).primaryColor),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Add Your First Update',
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -1301,30 +1575,113 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
 }
 
 class UpdateTile extends StatelessWidget {
-  final String name;
-  final String image;
+  final Update update;
 
-  UpdateTile({
-    required this.name,
-    required this.image,
-  });
+  UpdateTile({required this.update});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          Container(
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => FullUpdateView(update: update),
+          ),
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Container(
               height: 100,
               width: 100,
               decoration: BoxDecoration(
                 border: Border.all(color: hexToColor('#B5B5B5'), width: 1.0),
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              child: Image.asset(image, height: 48.0)),
-        ],
+              child: update.type == 'image'
+                  ? Image.network(update.mediaUrls.first, fit: BoxFit.cover)
+                  : Icon(Icons.video_library, size: 48.0),
+            ),
+            SizedBox(height: 8),
+            Text(
+              update.text,
+              style: TextStyle(fontSize: 12),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
+  }
+}
+
+class FullUpdateView extends StatefulWidget {
+  final Update update;
+
+  FullUpdateView({required this.update});
+
+  @override
+  _FullUpdateViewState createState() => _FullUpdateViewState();
+}
+
+class _FullUpdateViewState extends State<FullUpdateView> {
+  late Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(Duration(seconds: 10), () {
+      Navigator.of(context).pop();
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: GestureDetector(
+        onTap: () {
+          Navigator.of(context).pop();
+        },
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              if (widget.update.type == 'image')
+                Image.network(
+                  widget.update.mediaUrls.first,
+                  fit: BoxFit.contain,
+                  height: MediaQuery.of(context).size.height * 0.8,
+                )
+              else if (widget.update.type == 'video')
+              // You'd need to implement video player here
+                Icon(Icons.video_library, size: 100, color: Colors.white),
+              SizedBox(height: 20),
+              Text(
+                widget.update.text,
+                style: TextStyle(color: Colors.white, fontSize: 18),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// You might need to add this extension method somewhere in your code
+extension StringExtension on String {
+  String capitalize() {
+    return "${this[0].toUpperCase()}${this.substring(1)}";
   }
 }

@@ -12,10 +12,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:math';
 
 
-
 class CheckoutScreen extends StatefulWidget {
   final List<Map<String, dynamic>> selectedItems;
-
   const CheckoutScreen({Key? key, required this.selectedItems}) : super(key: key);
 
   @override
