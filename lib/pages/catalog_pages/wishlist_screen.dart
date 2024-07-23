@@ -39,15 +39,18 @@ class _WishlistScreenState extends State<WishlistScreen> {
             .get();
 
         if (userDoc.exists) {
-          List<dynamic> wishlist = (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
+          List<dynamic> wishlist =
+              (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
           List<Map<String, dynamic>> updatedWishlistItems = [];
 
           for (var item in wishlist) {
-            Map<String, dynamic> productDetails = await _fetchProductDetails(item['productId']);
+            Map<String, dynamic> productDetails =
+                await _fetchProductDetails(item['productId']);
             updatedWishlistItems.add({
               ...item,
               ...productDetails,
-              'variationDetails': productDetails['variations'][item['variationKey']],
+              'variationDetails': productDetails['variations']
+                  [item['variationKey']],
               'isSelected': false,
             });
           }
@@ -87,7 +90,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
   void updateTotalPrice() {
     double newTotal = 0.0;
     for (var item in wishlistItems) {
-      if (selectedItems.contains('${item['productId']}_${item['variationKey']}')) {
+      if (selectedItems
+          .contains('${item['productId']}_${item['variationKey']}')) {
         newTotal += item['variationDetails'].price;
       }
     }
@@ -100,7 +104,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
     setState(() {
       selectAllItems = value ?? false;
       if (selectAllItems) {
-        selectedItems = Set.from(wishlistItems.map((item) => '${item['productId']}_${item['variationKey']}'));
+        selectedItems = Set.from(wishlistItems
+            .map((item) => '${item['productId']}_${item['variationKey']}'));
       } else {
         selectedItems.clear();
       }
@@ -182,37 +187,38 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       ),
                     ],
                   ),
-                  Row(
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Select All Items',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontSize: 16.0,
+                  if (wishlistItems.length > 1)
+                    Row(
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Select All Items',
+                              style: TextStyle(
+                                color: hexToColor('#343434'),
+                                fontSize: 16.0,
+                              ),
                             ),
-                          ),
-                          Text(
-                            'Buy All The Selected Products Together',
-                            style: TextStyle(
-                              color: hexToColor('#989898'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 9.0,
+                            Text(
+                              'Buy All The Selected Products Together',
+                              style: TextStyle(
+                                color: hexToColor('#989898'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 9.0,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      Checkbox(
-                        activeColor: Theme.of(context).primaryColor,
-                        value: selectAllItems,
-                        onChanged: toggleSelectAll,
-                      ),
-                    ],
-                  ),
+                          ],
+                        ),
+                        Checkbox(
+                          activeColor: Theme.of(context).primaryColor,
+                          value: selectAllItems,
+                          onChanged: toggleSelectAll,
+                        ),
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -221,26 +227,30 @@ class _WishlistScreenState extends State<WishlistScreen> {
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
                   : ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                itemCount: wishlistItems.length,
-                itemBuilder: (context, index) {
-                  return WishlistItemTile(
-                    item: wishlistItems[index],
-                    isSelected: selectedItems.contains('${wishlistItems[index]['productId']}_${wishlistItems[index]['variationKey']}'),
-                    onSelectionChanged: (isSelected) {
-                      toggleItemSelection('${wishlistItems[index]['productId']}_${wishlistItems[index]['variationKey']}', isSelected);
-                    },
-                    onRemove: () {
-                      setState(() {
-                        wishlistItems.removeAt(index);
-                        selectedItems.remove('${wishlistItems[index]['productId']}_${wishlistItems[index]['variationKey']}');
-                        updateTotalPrice();
-                      });
-                      updateUserWishlist();
-                    },
-                  );
-                },
-              ),
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      itemCount: wishlistItems.length,
+                      itemBuilder: (context, index) {
+                        return WishlistItemTile(
+                          item: wishlistItems[index],
+                          isSelected: selectedItems.contains(
+                              '${wishlistItems[index]['productId']}_${wishlistItems[index]['variationKey']}'),
+                          onSelectionChanged: (isSelected) {
+                            toggleItemSelection(
+                                '${wishlistItems[index]['productId']}_${wishlistItems[index]['variationKey']}',
+                                isSelected);
+                          },
+                          onRemove: () {
+                            setState(() {
+                              wishlistItems.removeAt(index);
+                              selectedItems.remove(
+                                  '${wishlistItems[index]['productId']}_${wishlistItems[index]['variationKey']}');
+                              updateTotalPrice();
+                            });
+                            updateUserWishlist();
+                          },
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -252,10 +262,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
     try {
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        List<Map<String, dynamic>> wishlistData = wishlistItems.map((item) => {
-          'productId': item['productId'],
-          'variation': item['variation'],
-        }).toList();
+        List<Map<String, dynamic>> wishlistData = wishlistItems
+            .map((item) => {
+                  'productId': item['productId'],
+                  'variation': item['variation'],
+                })
+            .toList();
 
         await FirebaseFirestore.instance
             .collection('Users')
@@ -289,7 +301,9 @@ class WishlistItemTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(product: ProductModel.fromFirestore(item as DocumentSnapshot<Object?>?)),
+            builder: (context) => ProductDetailScreen(
+                product: ProductModel.fromFirestore(
+                    item as DocumentSnapshot<Object?>?)),
           ),
         );
       },
@@ -313,6 +327,7 @@ class WishlistItemTile extends StatelessWidget {
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
                     item['productName'],
@@ -321,7 +336,6 @@ class WishlistItemTile extends StatelessWidget {
                       fontSize: 20.0,
                     ),
                   ),
-                  SizedBox(height: 8.0),
                   Text(
                     'Variation: ${item['variationKey']}',
                     style: TextStyle(
@@ -329,7 +343,7 @@ class WishlistItemTile extends StatelessWidget {
                       fontSize: 14.0,
                     ),
                   ),
-                  SizedBox(height: 55.0),
+                  SizedBox(height: 45.0),
                   Text(
                     '₹${item['variationDetails'].price.toStringAsFixed(2)}',
                     style: TextStyle(
@@ -343,7 +357,8 @@ class WishlistItemTile extends StatelessWidget {
                       GestureDetector(
                         onTap: onRemove,
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12.0, vertical: 8.0),
                           decoration: BoxDecoration(
                             border: Border.all(color: hexToColor('#343434')),
                             borderRadius: BorderRadius.circular(100.0),
@@ -363,7 +378,8 @@ class WishlistItemTile extends StatelessWidget {
                           // Navigate to checkout screen
                         },
                         child: Container(
-                          padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12.0, vertical: 8.0),
                           decoration: BoxDecoration(
                             color: hexToColor('#343434'),
                             borderRadius: BorderRadius.circular(100.0),

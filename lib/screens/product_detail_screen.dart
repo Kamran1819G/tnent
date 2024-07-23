@@ -611,68 +611,68 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     ],
                                   ),
                                   Spacer(),
-                                  Container(
-                                    padding: EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(context).primaryColor,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: GestureDetector(
-                                      onTap: () async {
-                                        String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-                                        if (userId.isEmpty) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text('Please log in to add items to cart')),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+                                      if (userId.isEmpty) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Please log in to add items to cart')),
+                                        );
+                                        return;
+                                      }
+
+                                      DocumentReference userRef = FirebaseFirestore.instance
+                                          .collection('Users')
+                                          .doc(userId);
+
+                                      try {
+                                        await FirebaseFirestore.instance.runTransaction((transaction) async {
+                                          DocumentSnapshot snapshot = await transaction.get(userRef);
+                                          if (!snapshot.exists) {
+                                            throw Exception("User does not exist!");
+                                          }
+
+                                          Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
+                                          List<dynamic> cartList = userData['cart'] ?? [];
+
+                                          Map<String, dynamic> cartItem = {
+                                            'productId': widget.product.productId,
+                                            'variation': _selectedVariation,
+                                            'quantity': 1, // Default quantity
+                                          };
+
+                                          int existingIndex = cartList.indexWhere((item) =>
+                                          item['productId'] == widget.product.productId &&
+                                              item['variation'] == _selectedVariation
                                           );
-                                          return;
-                                        }
 
-                                        DocumentReference userRef = FirebaseFirestore.instance
-                                            .collection('Users')
-                                            .doc(userId);
-
-                                        try {
-                                          await FirebaseFirestore.instance.runTransaction((transaction) async {
-                                            DocumentSnapshot snapshot = await transaction.get(userRef);
-                                            if (!snapshot.exists) {
-                                              throw Exception("User does not exist!");
-                                            }
-
-                                            Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
-                                            List<dynamic> cartList = userData['cart'] ?? [];
-
-                                            Map<String, dynamic> cartItem = {
-                                              'productId': widget.product.productId,
-                                              'variation': _selectedVariation,
-                                              'quantity': 1, // Default quantity
-                                            };
-
-                                            int existingIndex = cartList.indexWhere((item) =>
-                                            item['productId'] == widget.product.productId &&
-                                                item['variation'] == _selectedVariation
+                                          if (existingIndex != -1) {
+                                            cartList[existingIndex]['quantity'] += 1;
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Item already in cart')),
                                             );
+                                          } else {
+                                            cartList.add(cartItem);
+                                            ScaffoldMessenger.of(context).showSnackBar(
+                                              SnackBar(content: Text('Item added to cart')),
+                                            );
+                                          }
 
-                                            if (existingIndex != -1) {
-                                              cartList[existingIndex]['quantity'] += 1;
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text('Item already in cart')),
-                                              );
-                                            } else {
-                                              cartList.add(cartItem);
-                                              ScaffoldMessenger.of(context).showSnackBar(
-                                                SnackBar(content: Text('Item added to cart')),
-                                              );
-                                            }
-
-                                            transaction.update(userRef, {'cart': cartList});
-                                          });
-                                        } catch (e) {
-                                          print('Error updating cart: $e');
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(content: Text('Failed to update cart. Please try again.')),
-                                          );
-                                        }
-                                      },
+                                          transaction.update(userRef, {'cart': cartList});
+                                        });
+                                      } catch (e) {
+                                        print('Error updating cart: $e');
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text('Failed to update cart. Please try again.')),
+                                        );
+                                      }
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context).primaryColor,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
                                       child: Icon(Icons.add_shopping_cart, color: Colors.white, size: 25),
                                     ),
                                   ),

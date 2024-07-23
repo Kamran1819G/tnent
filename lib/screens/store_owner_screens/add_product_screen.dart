@@ -34,28 +34,27 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   List<String> categories = [
     "Clothings",
-    "Accessories",
     "Electronics",
-    "Foods",
-    "Florists",
-    "Sports",
+    "Restaurants",
     "Books",
-    "Stationeries",
+    "Bakeries",
     "Beauty Apparels",
-    "Eyewares",
-    "Furnitures",
-    "Home Decors",
-    "Jewelries",
-    "Shoes",
-    "Toys",
-    "Watches"
+    "Cafes",
+    "Florists",
+    "Footwears",
+    "Accessories",
+    "Stationeries",
+    "Eyewears",
+    "Watches",
+    "Musicals",
+    "Sports"
   ];
 
   List<String> multiOptionCategories = [
-    'Clothing',
+    'Clothings',
     'Electronics',
-    'Bakery',
-    'Shoes'
+    'Bakeries',
+    'Footwears'
   ];
 
   bool get isMultiOptionCategory =>
