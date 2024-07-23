@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/pages/catalog_pages/purchase_screen.dart';
 import 'package:tnennt/pages/catalog_pages/wishlist_screen.dart';
 import 'package:tnennt/screens/notification_screen.dart';
@@ -8,13 +11,17 @@ import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
 import '../../helpers/color_utils.dart';
 
 class Catalog extends StatefulWidget {
-  const Catalog({super.key});
+  final UserModel currentUser;
+
+  const Catalog({Key? key, required this.currentUser}) : super(key: key);
 
   @override
   State<Catalog> createState() => _CatalogState();
 }
 
 class _CatalogState extends State<Catalog> {
+  bool isNewNotification = true;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -54,13 +61,22 @@ class _CatalogState extends State<Catalog> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => NotificationScreen()));
+                        setState(() {
+                          isNewNotification = false;
+                        });
                       },
-                      child: Image.asset(
+                      child: isNewNotification
+                          ? Image.asset(
                         'assets/icons/new_notification_box.png',
                         height: 24,
                         width: 24,
                         fit: BoxFit.cover,
-                        colorBlendMode: BlendMode.overlay,
+                      )
+                          : Image.asset(
+                        'assets/icons/no_new_notification_box.png',
+                        height: 24,
+                        width: 24,
+                        fit: BoxFit.cover,
                       )),
                   SizedBox(width: 20),
                   GestureDetector(
@@ -70,7 +86,13 @@ class _CatalogState extends State<Catalog> {
                           MaterialPageRoute(
                               builder: (context) => MyProfileScreen()));
                     },
-                    child: CircleAvatar(
+                    child: widget.currentUser.photoURL != null
+                        ? CircleAvatar(
+                      radius: 30.0,
+                      backgroundImage:
+                      NetworkImage(widget.currentUser.photoURL ?? ''),
+                    )
+                        : CircleAvatar(
                       radius: 30.0,
                       backgroundColor: Theme.of(context).primaryColor,
                       child:

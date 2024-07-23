@@ -7,8 +7,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/models/user_model.dart';
-import 'package:tnennt/screens/users_screens/reset_password_screen.dart';
-import 'package:tnennt/services/user_service.dart';
 
 import '../../services/firebase/firebase_auth_service.dart';
 import '../../helpers/color_utils.dart';
@@ -31,16 +29,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   }
 
   Future<UserModel> fetchUserData() async {
-    final User? currentUser = Auth().currentUser;
-    if (currentUser != null) {
+    final currentUser = FirebaseAuth.instance.currentUser!;
       final doc = await FirebaseFirestore.instance
           .collection('Users')
           .doc(currentUser.uid)
           .get();
       return UserModel.fromFirestore(doc);
-    } else {
-      throw Exception('No user found');
-    }
   }
 
   @override

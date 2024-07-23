@@ -636,19 +636,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                         ),
                       ),
                       SizedBox(height: 20.0),
-                      Container(
-                        height: 200.0,
-                        padding: EdgeInsets.only(left: 8.0),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: featuredProducts.length,
-                          itemBuilder: (context, index) {
-                            return WishlistProductTile(
-                              product: featuredProducts[index],
-                            );
-                          },
-                        ),
-                      ),
+                      FeatureProductsListView(featuredProductIds: widget.store.featuredProductIds),
                     ],
                   ),
                   SizedBox(height: 20.0),
@@ -680,19 +668,81 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
   }
 }
 
+class FeatureProductsListView extends StatefulWidget {
+  final List<String> featuredProductIds;
+
+  const FeatureProductsListView({Key? key, required this.featuredProductIds}) : super(key: key);
+
+  @override
+  State<FeatureProductsListView> createState() => _FeatureProductsListViewState();
+}
+
+class _FeatureProductsListViewState extends State<FeatureProductsListView> {
+  Future<List<ProductModel>> fetchProducts() async {
+    if (widget.featuredProductIds.isEmpty) {
+      return [];
+    }
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('products')
+        .where(FieldPath.documentId, whereIn: widget.featuredProductIds)
+        .get();
+
+    print('Fetched ${querySnapshot.docs.length} products');
+    return querySnapshot.docs
+        .map((doc) => ProductModel.fromFirestore(doc))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 200.0,
+      child: FutureBuilder<List<ProductModel>>(
+        future: fetchProducts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            List<ProductModel> featuredProducts = snapshot.data!;
+            if (featuredProducts.isEmpty) {
+              return Center(
+                child: Text(
+                  'No Products in Featured',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              );
+            }
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: featuredProducts.length,
+              itemBuilder: (context, index) {
+                return WishlistProductTile(product: featuredProducts[index]);
+              },
+            );
+          }
+        },
+      ),
+    );
+  }
+}
+
+
 class CategoryProductsListView extends StatefulWidget {
   final CategoryModel category;
 
-  const CategoryProductsListView({Key? key, required this.category})
-      : super(key: key);
+  const CategoryProductsListView({Key? key, required this.category}) : super(key: key);
 
   @override
-  State<CategoryProductsListView> createState() =>
-      _CategoryProductsListViewState();
+  State<CategoryProductsListView> createState() => _CategoryProductsListViewState();
 }
 
 class _CategoryProductsListViewState extends State<CategoryProductsListView> {
   Future<List<ProductModel>> fetchProducts() async {
+    if (widget.category.productIds.isEmpty) {
+      return [];
+    }
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('products')
         .where(FieldPath.documentId, whereIn: widget.category.productIds)
@@ -706,48 +756,51 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Text(
-              widget.category.name,
-              style: TextStyle(
-                color: hexToColor('#343434'),
-                fontSize: 18.0,
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            widget.category.name,
+            style: TextStyle(
+              color: hexToColor('#343434'),
+              fontSize: 18.0,
             ),
           ),
-          SizedBox(height: 10.0),
-          Container(
-            height: 200.0,
-            child: FutureBuilder<List<ProductModel>>(
-              future: fetchProducts(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else {
-                  List<ProductModel> products = snapshot.data!;
-                  return ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      return WishlistProductTile(
-                        product: products[index],
-                      );
-                    },
+        ),
+        SizedBox(height: 10.0),
+        Container(
+          height: 200.0,
+          child: FutureBuilder<List<ProductModel>>(
+            future: fetchProducts(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else {
+                List<ProductModel> products = snapshot.data!;
+                if (products.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No Products in ${widget.category.name}',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
                   );
                 }
-              },
-            ),
+                return ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    return WishlistProductTile(product: products[index]);
+                  },
+                );
+              }
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

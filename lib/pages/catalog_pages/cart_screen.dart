@@ -322,7 +322,7 @@ class _CartScreenState extends State<CartScreen> {
                     itemCount: cartItems.length,
                     itemBuilder: (context, index) {
                       final item = cartItems[index];
-                      return CartProductTile(
+                      return CartItemTile(
                         productId: item['productId'],
                         productImage: item['productImage'],
                         productName: item['productName'],
@@ -360,7 +360,7 @@ class _CartScreenState extends State<CartScreen> {
   }
 }
 
-class CartProductTile extends StatefulWidget {
+class CartItemTile extends StatefulWidget {
   final String productId;
   final String productImage;
   final String productName;
@@ -372,7 +372,7 @@ class CartProductTile extends StatefulWidget {
   final Function(String, String, int) onUpdateQuantity;
   final Function(String, String, bool) onUpdateSelection;
 
-  CartProductTile({
+  CartItemTile({
     required this.productId,
     required this.productImage,
     required this.productName,
@@ -386,10 +386,10 @@ class CartProductTile extends StatefulWidget {
   });
 
   @override
-  State<CartProductTile> createState() => _CartProductTileState();
+  State<CartItemTile> createState() => _CartItemTileState();
 }
 
-class _CartProductTileState extends State<CartProductTile> {
+class _CartItemTileState extends State<CartItemTile> {
   bool _isInWishlist = false;
   late bool _isSelected;
   late Map<String, dynamic> _wishlistItem;
@@ -405,7 +405,7 @@ class _CartProductTileState extends State<CartProductTile> {
   }
 
   @override
-  void didUpdateWidget(CartProductTile oldWidget) {
+  void didUpdateWidget(CartItemTile oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isSelected != widget.isSelected) {
       setState(() {

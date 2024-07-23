@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/category_model.dart';
@@ -11,7 +15,6 @@ import 'package:tnennt/screens/explore_screen.dart';
 import 'package:tnennt/screens/notification_screen.dart';
 import 'package:tnennt/screens/stores_screen.dart';
 import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
-import 'package:tnennt/services/firebase/firestore_service.dart';
 import 'package:tnennt/widgets/wishlist_product_tile.dart';
 
 import '../../screens/update_screen.dart';
@@ -20,7 +23,7 @@ import '../../screens/users_screens/storeprofile_screen.dart';
 class Home extends StatefulWidget {
   final UserModel currentUser;
 
-  Home({required this.currentUser});
+  const Home({Key? key, required this.currentUser}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -31,8 +34,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   late TabController _tabController;
   int _selectedIndex = 0;
   bool isNewNotification = true;
-
-  final FirestoreService _firestoreService = FirestoreService();
 
   final List<String> carouselImgList = [
     'assets/carousel1.png',
@@ -165,6 +166,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     _tabController.dispose();
     super.dispose();
   }
+
+
 
   String _getTabLabel(int index) {
     switch (index) {

@@ -16,11 +16,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  PageController _pageController = PageController();
-  late UserModel currentUser;
+  final PageController _pageController = PageController();
+  UserModel? currentUser;
   int _selectedIndex = 0;
+  bool _isLoading = true;
 
-  User user = FirebaseAuth.instance.currentUser!;
+  User? user = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
@@ -29,68 +30,103 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _fetchUserDetails() async {
+    if (user == null) {
+      setState(() => _isLoading = false);
+      return;
+    }
+
     try {
       DocumentSnapshot doc = await FirebaseFirestore.instance
           .collection('Users')
-          .doc(user.uid)
+          .doc(user!.uid)
           .get();
-      setState(() {
-        currentUser = UserModel.fromFirestore(doc);
-      });
+
+      if (mounted) {
+        setState(() {
+          currentUser = UserModel.fromFirestore(doc);
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString()),
-        ),
-      );
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Error fetching user details: ${e.toString()}')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _widgetOptions = <Widget>[
-      SingleChildScrollView(child: Home(currentUser: currentUser)),
-      SingleChildScrollView(child: Community()),
-      SingleChildScrollView(child: Gallery()),
-      SingleChildScrollView(child: Catalog()),
-    ];
-
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: [
-            PageView(
-              physics: NeverScrollableScrollPhysics(),
-              controller: _pageController,
-              children: _widgetOptions,
-            ),
-            // Custom Bottom Navigation Bar
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                margin: EdgeInsets.only(
-                  bottom: 20,
-                  left: 40,
-                  right: 40,
+        child: _isLoading
+            ? Center(
+                child: RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Tnennt',
+                        style: TextStyle(
+                          color: hexToColor('#2D332F'),
+                          fontFamily: 'Gotham Black',
+                          fontSize: 38,
+                        ),
+                      ),
+                      TextSpan(
+                        text: ' •',
+                        style: TextStyle(
+                          fontFamily: 'Gotham Black',
+                          fontSize: 38.0,
+                          color: hexToColor('#42FF00'),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                padding: EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: hexToColor('#2D332F'),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildNavItem(0, 'assets/home.png'),
-                    _buildNavItem(1, 'assets/community.png'),
-                    _buildNavItem(2, 'assets/gallery.png'),
-                    _buildNavItem(3, 'assets/catalog.png'),
-                  ],
-                ),
+              )
+            : Stack(
+                children: [
+                  PageView(
+                    physics: NeverScrollableScrollPhysics(),
+                    controller: _pageController,
+                    children: [
+                      SingleChildScrollView(
+                          child: Home(currentUser: currentUser!)),
+                      SingleChildScrollView(child: Community()),
+                      SingleChildScrollView(child: Gallery()),
+                      SingleChildScrollView(
+                          child: Catalog(currentUser: currentUser!)),
+                    ],
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: _buildBottomNavigationBar(),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
+      ),
+    );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    return Container(
+      margin: EdgeInsets.only(bottom: 20, left: 40, right: 40),
+      padding: EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        color: hexToColor('#2D332F'),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildNavItem(0, 'assets/home.png'),
+          _buildNavItem(1, 'assets/community.png'),
+          _buildNavItem(2, 'assets/gallery.png'),
+          _buildNavItem(3, 'assets/catalog.png'),
+        ],
       ),
     );
   }

@@ -10,7 +10,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/services/firebase/firebase_auth_service.dart';
 import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/services/user_service.dart';
 import 'package:tnennt/widget_tree.dart';
 
 class UserRegistration extends StatefulWidget {
@@ -26,7 +25,7 @@ class _UserRegistrationState extends State<UserRegistration> {
   int currentPage = 0;
   bool value = false;
   bool isButtonEnabled = false;
-  User? user = Auth().currentUser;
+  late UserModel _userModel;
 
   TextEditingController _phoneController = TextEditingController();
   TextEditingController _firstNameController = TextEditingController();
@@ -36,7 +35,7 @@ class _UserRegistrationState extends State<UserRegistration> {
   final _otpControllers = List.generate(4, (_) => TextEditingController());
   final _focusNodes = List.generate(4, (_) => FocusNode());
 
-  UserModel? _userModel;
+  final user = FirebaseAuth.instance.currentUser!;
 
   @override
   void initState() {
@@ -46,39 +45,34 @@ class _UserRegistrationState extends State<UserRegistration> {
   }
 
   void _initializeUserModel() {
-    final user = Auth().currentUser;
-    if (user != null) {
-      _userModel = UserModel(
-        uid: user.uid,
-        email: user.email ?? '',
-        firstName: '',
-        lastName: '',
-      );
-    }
+    _userModel = UserModel(
+      uid: user.uid,
+      email: user.email ?? '',
+      firstName: '',
+      lastName: '',
+    );
   }
 
   Future<void> addUserDetails() async {
     try {
-      if (_userModel != null) {
-        final updatedUser = _userModel!.copyWith(
-          phoneNumber: _phoneController.text,
-          firstName: _firstNameController.text,
-          lastName: _lastNameController.text,
-          location: _locationController.text,
-          registered: true,
-          lastUpdated: Timestamp.now(),
-        );
+      final updatedUser = _userModel.copyWith(
+        phoneNumber: _phoneController.text,
+        firstName: _firstNameController.text,
+        lastName: _lastNameController.text,
+        location: _locationController.text,
+        registered: true,
+        lastUpdated: Timestamp.now(),
+      );
 
-        await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(updatedUser.uid)
-            .set(updatedUser.toFirestore());
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(updatedUser.uid)
+          .set(updatedUser.toFirestore());
 
-        setState(() {
-          _userModel = updatedUser;
-        });
-      }
-    } catch (e) {
+      setState(() {
+        _userModel = updatedUser;
+      });
+        } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
           'Error: $e',
@@ -116,7 +110,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                 setState(() {
                   currentPage = page;
                 });
-                if(page == 3) {
+                if (page == 3) {
                   _confettiController.play();
                 }
               },
@@ -124,7 +118,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                 // Page 1: Registration
                 Column(
                   children: [
-                    _buildUserRegistrationPageHeader(context, _pageController, currentPage),
+                    _buildUserRegistrationPageHeader(
+                        context, _pageController, currentPage),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -205,7 +200,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                                         ),
                                       ),
                                       contentPadding:
-                                      EdgeInsets.only(bottom: -15)),
+                                          EdgeInsets.only(bottom: -15)),
                                   maxLength: 10,
                                   keyboardType: TextInputType.phone,
                                 ),
@@ -237,7 +232,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                 // Page 2: Verification
                 Column(
                   children: [
-                    _buildUserRegistrationPageHeader(context, _pageController, currentPage),
+                    _buildUserRegistrationPageHeader(
+                        context, _pageController, currentPage),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -286,7 +282,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                               spacing: 10,
                               children: List.generate(
                                 _otpControllers.length,
-                                    (index) {
+                                (index) {
                                   return Container(
                                     height: 50.0,
                                     width: 50.0,
@@ -297,7 +293,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                                       keyboardType: TextInputType.number,
                                       maxLength: 1,
                                       cursorColor:
-                                      Theme.of(context).primaryColor,
+                                          Theme.of(context).primaryColor,
                                       decoration: InputDecoration(
                                         counterText: '',
                                         border: UnderlineInputBorder(
@@ -339,8 +335,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                           child: ElevatedButton(
                             onPressed: isButtonEnabled
                                 ? () {
-                              _pageController.jumpToPage(currentPage + 1);
-                            }
+                                    _pageController.jumpToPage(currentPage + 1);
+                                  }
                                 : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: isButtonEnabled
@@ -363,7 +359,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildUserRegistrationPageHeader(context, _pageController, currentPage),
+                    _buildUserRegistrationPageHeader(
+                        context, _pageController, currentPage),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -400,11 +397,11 @@ class _UserRegistrationState extends State<UserRegistration> {
                           fontSize: 16,
                         ),
                         decoration: InputDecoration(
-                            label: Text('First Name'),
-                            labelStyle: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 16,
-                            ),
+                          label: Text('First Name'),
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 16,
+                          ),
                           filled: true,
                           fillColor: hexToColor('#F5F5F5'),
                           border: OutlineInputBorder(
@@ -430,11 +427,11 @@ class _UserRegistrationState extends State<UserRegistration> {
                           fontSize: 16,
                         ),
                         decoration: InputDecoration(
-                            label: Text('Last Name'),
-                            labelStyle: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 16,
-                            ),
+                          label: Text('Last Name'),
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 16,
+                          ),
                           filled: true,
                           fillColor: hexToColor('#F5F5F5'),
                           border: OutlineInputBorder(
@@ -444,7 +441,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                               strokeAlign: BorderSide.strokeAlignInside,
                               style: BorderStyle.solid,
                             ),
-                          ),),
+                          ),
+                        ),
                         keyboardType: TextInputType.name,
                       ),
                     ),
@@ -486,7 +484,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildUserRegistrationPageHeader(context, _pageController, currentPage),
+                    _buildUserRegistrationPageHeader(
+                        context, _pageController, currentPage),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -523,19 +522,19 @@ class _UserRegistrationState extends State<UserRegistration> {
                           fontSize: 16,
                         ),
                         decoration: InputDecoration(
-                            label: Text('Location'),
-                            labelStyle: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 16,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.location_on,
-                              size: 20,
-                            ),
-                            prefixIconConstraints: BoxConstraints(
-                              minWidth: 40,
-                            ),
-                            prefixIconColor: Theme.of(context).primaryColor,
+                          label: Text('Location'),
+                          labelStyle: TextStyle(
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 16,
+                          ),
+                          prefixIcon: Icon(
+                            Icons.location_on,
+                            size: 20,
+                          ),
+                          prefixIconConstraints: BoxConstraints(
+                            minWidth: 40,
+                          ),
+                          prefixIconColor: Theme.of(context).primaryColor,
                           filled: true,
                           fillColor: hexToColor('#F5F5F5'),
                           border: OutlineInputBorder(
@@ -545,7 +544,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                               strokeAlign: BorderSide.strokeAlignInside,
                               style: BorderStyle.solid,
                             ),
-                          ),),
+                          ),
+                        ),
                         keyboardType: TextInputType.name,
                       ),
                     ),
@@ -588,7 +588,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    _buildUserRegistrationPageHeader(context, _pageController, currentPage),
+                    _buildUserRegistrationPageHeader(
+                        context, _pageController, currentPage),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.1),
                     Stack(
                       alignment: Alignment.center,
@@ -673,7 +674,8 @@ class _UserRegistrationState extends State<UserRegistration> {
     );
   }
 
-  Widget _buildUserRegistrationPageHeader(BuildContext context, PageController controller, int currentPage) {
+  Widget _buildUserRegistrationPageHeader(
+      BuildContext context, PageController controller, int currentPage) {
     return Container(
       height: 100,
       padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -687,11 +689,13 @@ class _UserRegistrationState extends State<UserRegistration> {
             ),
             child: Row(
               children: [
-                Image.asset('assets/white_tnennt_logo.png', width: 20, height: 20),
+                Image.asset('assets/white_tnennt_logo.png',
+                    width: 20, height: 20),
                 SizedBox(width: 10),
                 Text(
                   'Tnennt inc.',
-                  style: TextStyle(color: hexToColor('#E6E6E6'), fontSize: 14.0),
+                  style:
+                      TextStyle(color: hexToColor('#E6E6E6'), fontSize: 14.0),
                 ),
               ],
             ),
@@ -707,9 +711,9 @@ class _UserRegistrationState extends State<UserRegistration> {
                   if (currentPage == 0) {
                     Navigator.pop(context);
                   } else if (currentPage == 4) {
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => WidgetTree()));
-                  }
-                  else {
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (context) => WidgetTree()));
+                  } else {
                     controller.jumpToPage(currentPage - 1);
                   }
                 },
@@ -720,5 +724,4 @@ class _UserRegistrationState extends State<UserRegistration> {
       ),
     );
   }
-
 }
