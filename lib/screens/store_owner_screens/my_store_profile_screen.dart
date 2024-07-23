@@ -12,6 +12,7 @@ import 'package:tnennt/screens/store_owner_screens/order_pays_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/product_categories_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/store_settings_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tnennt/widgets/featured_product_tile.dart';
 import 'package:tnennt/widgets/removable_product_tile.dart';
 
 class MyStoreProfileScreen extends StatefulWidget {
@@ -42,10 +43,23 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   bool isExpanded = false;
 
   List<CategoryModel> categories = [];
+  late Future<List<ProductModel>> _productsFuture;
 
 
   late AnimationController _controller;
   late Animation<double> _animation;
+
+  Future<List<ProductModel>> _fetchProducts() async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('products')
+        .where('storeId', isEqualTo: widget.store.storeId)
+        .get();
+
+    return querySnapshot.docs
+        .map((doc) => ProductModel.fromFirestore(doc))
+        .toList();
+  }
+
 
   List<dynamic> updates = List.generate(10, (index) {
     return {
@@ -102,6 +116,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   {
     super.initState();
     store = widget.store;
+    fetchStore();
+    _productsFuture = _fetchProducts();
     _controller = AnimationController
       (
       duration: const Duration(milliseconds: 300),
@@ -120,6 +136,32 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> fetchStore() async {
+    try{
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(store.storeId)
+          .get();
+      setState(() {
+        store = StoreModel.fromFirestore(doc);
+        logoUrl = store.logoUrl;
+        storeName = store.name;
+        storeCategory = store.category;
+        storeLocation = store.location;
+        storeWebsite = store.website;
+        isActive = store.isActive;
+        totalProducts = store.totalProducts;
+        totalPosts = store.totalPosts;
+        storeEngagement = store.storeEngagement;
+        greenFlags = store.greenFlags;
+        totalFlags = store.greenFlags + store.redFlags;
+        redFlags = store.redFlags;
+      });
+    } catch (e) {
+      print('Error fetching store: $e');
+    }
   }
 
   Future<List<CategoryModel>> fetchCategories() async {
@@ -335,7 +377,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                 ),
               ),
               SizedBox(height: 30.0),
-
               Expanded(
                 flex: 0,
                 child: GridView.count(
@@ -853,7 +894,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            StoreSettingsScreen(),
+                                            StoreSettingsScreen(store: store),
                                       ),
                                     );
                                   },
@@ -985,7 +1026,18 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                             Spacer(),
                             GestureDetector(
                               onTap: () {
-
+                                showModalBottomSheet(
+                                  backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(12),
+                                      topRight: Radius.circular(12),
+                                    ),
+                                  ),
+                                  context: context,
+                                  builder: (context) =>
+                                      _addFeaturedProductBottomSheet(),
+                                );
                               },
                               child: Container(
                                 padding: EdgeInsets.all(6.0),
@@ -1004,19 +1056,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                         ),
                       ),
                       SizedBox(height: 20.0),
-                      Container(
-                        height: 200.0,
-                        padding: EdgeInsets.only(left: 8.0),
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: featuredProducts.length,
-                          itemBuilder: (context, index) {
-                            return RemovableProductTile(
-                              product: featuredProducts[index], onRemove: () {  },
-                            );
-                          },
-                        ),
-                      ),
+                      FeatureProductsListView(featuredProductIds: store.featuredProductIds),
                     ],
                   ),
                   SizedBox(height: 20.0),
@@ -1048,7 +1088,139 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
       ),
     );
   }
+
+  Widget _addFeaturedProductBottomSheet() {
+    return Container(
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Add Featured Product',
+            style: TextStyle(
+              color: hexToColor('#343434'),
+              fontSize: 18.0,
+            ),
+          ),
+          SizedBox(height: 20.0),
+          TextField(
+            decoration: InputDecoration(
+              hintText: 'Search for a product',
+              prefixIcon: Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+            ),
+          ),
+          SizedBox(height: 20.0),
+          Expanded(
+            child: FutureBuilder<List<ProductModel>>(
+              future: _productsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  print(snapshot.error);
+                  return Center(child: Text('Something went wrong'));
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return Center(child: Text('No products found'));
+                }
+
+                List<ProductModel> products = snapshot.data!;
+
+                return GridView.builder(
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                  ),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    return FeaturedProductTile(product: product);
+                  },
+                );
+              },
+            ),
+          )
+        ],
+      ),
+    );
+  }
 }
+
+class FeatureProductsListView extends StatefulWidget {
+  final List<String> featuredProductIds;
+
+  const FeatureProductsListView({Key? key, required this.featuredProductIds}) : super(key: key);
+
+  @override
+  State<FeatureProductsListView> createState() => _FeatureProductsListViewState();
+}
+
+class _FeatureProductsListViewState extends State<FeatureProductsListView> {
+  Future<List<ProductModel>> fetchProducts() async {
+    if (widget.featuredProductIds.isEmpty) {
+      return [];
+    }
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('products')
+        .where(FieldPath.documentId, whereIn: widget.featuredProductIds)
+        .get();
+
+    print('Fetched ${querySnapshot.docs.length} products');
+    return querySnapshot.docs
+        .map((doc) => ProductModel.fromFirestore(doc))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 200.0,
+      child: FutureBuilder<List<ProductModel>>(
+        future: fetchProducts(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else {
+            List<ProductModel> featuredProducts = snapshot.data!;
+            if (featuredProducts.isEmpty) {
+              return Center(
+                child: Text(
+                  'No Products in Featured',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              );
+            }
+            return ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: featuredProducts.length,
+              itemBuilder: (context, index) {
+                return RemovableProductTile(
+                  product: featuredProducts[index],
+                  onRemove: () {
+                    setState(() {
+                      widget.featuredProductIds.remove(featuredProducts[index].productId);
+                    });
+                  },
+                );
+              },
+            );
+          }
+        },
+      ),
+    );
+  }
+}
+
 
 class CategoryProductsListView extends StatefulWidget {
   final CategoryModel category;
@@ -1060,8 +1232,10 @@ class CategoryProductsListView extends StatefulWidget {
 }
 
 class _CategoryProductsListViewState extends State<CategoryProductsListView> {
-
   Future<List<ProductModel>> fetchProducts() async {
+    if (widget.category.productIds.isEmpty) {
+      return [];
+    }
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('products')
         .where(FieldPath.documentId, whereIn: widget.category.productIds)
@@ -1100,12 +1274,25 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else {
                 List<ProductModel> products = snapshot.data!;
+                if (products.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No Products in ${widget.category.name}',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  );
+                }
                 return ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: products.length,
                   itemBuilder: (context, index) {
                     return RemovableProductTile(
-                      product: products[index], onRemove: () {  },
+                      product: products[index],
+                      onRemove: () {
+                        setState(() {
+                          widget.category.productIds.remove(products[index].productId);
+                        });
+                      },
                     );
                   },
                 );

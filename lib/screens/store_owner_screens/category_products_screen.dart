@@ -143,10 +143,9 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                     shrinkWrap: true,
                     padding: EdgeInsets.symmetric(horizontal: 8.0),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 8.0,
-                      mainAxisSpacing: 16.0,
-                      childAspectRatio: 0.7,
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
                     ),
                     itemCount: products.length,
                     itemBuilder: (context, index) {

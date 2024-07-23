@@ -50,8 +50,8 @@ class _StoresScreenState extends State<StoresScreen> {
                     child: CircleAvatar(
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
-                        icon: Icon(Icons.arrow_back_ios_new,
-                            color: Colors.black),
+                        icon:
+                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -63,7 +63,8 @@ class _StoresScreenState extends State<StoresScreen> {
             ),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance.collection('Stores').snapshots(),
+                stream:
+                    FirebaseFirestore.instance.collection('Stores').snapshots(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Center(child: CircularProgressIndicator());
@@ -88,7 +89,7 @@ class _StoresScreenState extends State<StoresScreen> {
                     itemBuilder: (context, index) {
                       final store = stores[index];
                       return StoreTile(
-                        store : store,
+                        store: store,
                       );
                     },
                   );
@@ -126,20 +127,19 @@ class StoreTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(18.0),
-              child: Image.network(
-                store.logoUrl,
-                fit: BoxFit.fill,
-              )
-            ),
+                borderRadius: BorderRadius.circular(18.0),
+                child: Image.network(
+                  store.logoUrl,
+                  fit: BoxFit.fill,
+                  height: 75.0,
+                  width: 75.0,
+                )),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4.0),
                 child: Text(
                   store.name,
-                  style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12.0),
+                  style: TextStyle(fontSize: 12.0),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

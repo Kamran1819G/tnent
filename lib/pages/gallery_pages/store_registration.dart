@@ -43,7 +43,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     'Stationary',
     'Eyewear',
     'Watch',
-    'Musical Instrument',
     'Sports'
   ];
   String selectedCategory= '';
@@ -118,6 +117,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         storeEngagement: 0,
         greenFlags: 0,
         redFlags: 0,
+        featuredProductIds: [],
         followerIds: [],
       );
 

@@ -1,28 +1,19 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tnennt/models/store_model.dart';
 
 import '../../helpers/color_utils.dart';
 
 class StoreSettingsScreen extends StatefulWidget {
-  String? storeName;
-  String? storeCategory;
-  String? storePhoneNumber;
-  String? storeEmail;
-  String? storeLocation;
-  String? storeUPI;
+  final StoreModel store;
 
-  StoreSettingsScreen({
-    this.storeName,
-    this.storeCategory,
-    this.storePhoneNumber,
-    this.storeEmail,
-    this.storeLocation,
-    this.storeUPI,
-  });
+  StoreSettingsScreen({required this.store});
 
   @override
   State<StoreSettingsScreen> createState() => _StoreSettingsScreenState();
@@ -30,17 +21,60 @@ class StoreSettingsScreen extends StatefulWidget {
 
 class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
   File? storeImage;
-  String storeCategory = "Grocery";
-  TextEditingController storeNameController =
-      TextEditingController(text: "Jain Brothers");
-  TextEditingController storePhoneNumberController =
-      TextEditingController(text: "9876543210");
-  TextEditingController storeEmailController =
-      TextEditingController(text: "jainbrother@tnennt.com");
-  TextEditingController storeLocationController =
-      TextEditingController(text: "Bengaluru");
-  TextEditingController storeUPIController =
-      TextEditingController(text: "worldsxtreme2910@upi");
+  late TextEditingController storeNameController;
+  late TextEditingController storePhoneNumberController;
+  late TextEditingController storeEmailController;
+  late TextEditingController storeLocationController;
+  late TextEditingController storeUPIController;
+  late String selectedCategory;
+
+  late String initialStoreName;
+  late String initialStorePhone;
+  late String initialStoreEmail;
+  late String initialStoreLocation;
+  late String initialStoreUPI;
+  late String initialSelectedCategory;
+  String uploadedImageUrl = '';
+
+  bool isChanged = false;
+  bool isSaving = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    initialStoreName = widget.store.name;
+    initialStorePhone = widget.store.phone;
+    initialStoreEmail = widget.store.email;
+    initialStoreLocation = widget.store.location;
+    initialStoreUPI = widget.store.upiId;
+    initialSelectedCategory = widget.store.category;
+
+    storeNameController = TextEditingController(text: initialStoreName);
+    storePhoneNumberController = TextEditingController(text: initialStorePhone);
+    storeEmailController = TextEditingController(text: initialStoreEmail);
+    storeLocationController = TextEditingController(text: initialStoreLocation);
+    storeUPIController = TextEditingController(text: initialStoreUPI);
+    selectedCategory = initialSelectedCategory;
+
+    storeNameController.addListener(_checkForChanges);
+    storePhoneNumberController.addListener(_checkForChanges);
+    storeEmailController.addListener(_checkForChanges);
+    storeLocationController.addListener(_checkForChanges);
+    storeUPIController.addListener(_checkForChanges);
+  }
+
+  void _checkForChanges() {
+    setState(() {
+      isChanged = storeNameController.text != initialStoreName ||
+          storePhoneNumberController.text != initialStorePhone ||
+          storeEmailController.text != initialStoreEmail ||
+          storeLocationController.text != initialStoreLocation ||
+          storeUPIController.text != initialStoreUPI ||
+          selectedCategory != initialSelectedCategory ||
+          storeImage != null;
+    });
+  }
 
   Future<void> pickImage() async {
     final ImagePicker _picker = ImagePicker();
@@ -48,8 +82,44 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     if (image != null) {
       setState(() {
         storeImage = File(image.path);
+        _checkForChanges();
       });
     }
+  }
+
+  Future<void> uploadImage() async {
+    FirebaseStorage storage = FirebaseStorage.instance;
+    Reference ref = storage.ref().child('store_logos/${widget.store.storeId}.jpg');
+    UploadTask uploadTask = ref.putFile(storeImage!);
+    TaskSnapshot taskSnapshot = await uploadTask;
+    uploadedImageUrl = await taskSnapshot.ref.getDownloadURL();
+  }
+
+  Future<void> updateStoreDetails() async {
+    setState(() {
+      isSaving = true;
+    });
+    final storeDoc = FirebaseFirestore.instance.collection('Stores').doc(widget.store.storeId);
+    if (storeImage != null) {
+      await uploadImage();
+    }
+    await storeDoc.update({
+      'name': storeNameController.text,
+      'phone': storePhoneNumberController.text,
+      'email': storeEmailController.text,
+      'location': storeLocationController.text,
+      'upiId': storeUPIController.text,
+      'category': selectedCategory,
+      'logoUrl': uploadedImageUrl.isNotEmpty ? uploadedImageUrl : widget.store.logoUrl,
+    });
+    setState(() {
+      isSaving = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Store details updated successfully'),
+      ),
+    );
   }
 
   @override
@@ -103,8 +173,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                     child: CircleAvatar(
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
-                        icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -122,13 +191,13 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
               ),
               child: (storeImage != null)
                   ? Image.file(
-                      storeImage!,
-                      fit: BoxFit.fill,
-                    )
-                  : Image.asset(
-                      'assets/jain_brothers.png',
-                      fit: BoxFit.fill,
-                    ),
+                storeImage!,
+                fit: BoxFit.fill,
+              )
+                  : Image.network(
+                widget.store.logoUrl,
+                fit: BoxFit.fill,
+              ),
             ),
             SizedBox(height: 10),
             GestureDetector(
@@ -149,13 +218,14 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Image.asset('assets/icons/globe.png',
-                width: 12,
+                Image.asset(
+                  'assets/icons/globe.png',
+                  width: 12,
                   height: 12,
                 ),
                 SizedBox(width: 5),
                 Text(
-                  "jainbrother.tnennt.store",
+                  widget.store.website,
                   style: TextStyle(
                     color: Theme.of(context).primaryColor,
                     fontSize: 12,
@@ -229,21 +299,30 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                                       ),
                                     ),
                                   ),
-                                  value: widget.storeCategory,
+                                  value: selectedCategory,
                                   onChanged: (String? newValue) {
                                     setState(() {
-                                      widget.storeCategory = newValue;
+                                      selectedCategory = newValue!;
+                                      _checkForChanges();
                                     });
                                   },
                                   items: <String>[
+                                    'Clothing',
                                     'Grocery',
                                     'Electronics',
-                                    'Clothing',
+                                    'Restaurant',
+                                    'Book Store',
+                                    'Bakery',
+                                    'Beauty Apparel',
+                                    'Cafe',
+                                    'Florist',
                                     'Footwear',
+                                    'Accessories',
                                     'Stationary',
-                                    'Others'
-                                  ].map<DropdownMenuItem<String>>(
-                                      (String value) {
+                                    'Eyewear',
+                                    'Watch',
+                                    'Sports'
+                                  ].map<DropdownMenuItem<String>>((String value) {
                                     return DropdownMenuItem<String>(
                                       value: value,
                                       child: Text(
@@ -271,7 +350,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                               ),
                               SizedBox(height: 10),
                               SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.45,
+                                width: MediaQuery.of(context).size.width * 0.40,
                                 child: TextField(
                                   controller: storePhoneNumberController,
                                   style: TextStyle(
@@ -296,7 +375,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                       ),
                       SizedBox(height: 20),
                       Text(
-                        "E Mail",
+                        "Email Address",
                         style: TextStyle(
                           fontSize: 14,
                         ),
@@ -319,12 +398,12 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                               ),
                             ),
                           ),
-                          keyboardType: TextInputType.text,
+                          keyboardType: TextInputType.emailAddress,
                         ),
                       ),
                       SizedBox(height: 20),
                       Text(
-                        "Location",
+                        "Store Location",
                         style: TextStyle(
                           fontSize: 14,
                         ),
@@ -340,14 +419,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                             fontWeight: FontWeight.w500,
                           ),
                           decoration: InputDecoration(
-                            prefixIcon: Image.asset(
-                              'assets/icons/globe.png',
-                            ),
-                            prefixIconColor: Theme.of(context).primaryColor,
-                            suffixIcon: Icon(
-                              Icons.arrow_forward_ios,
-                            ),
-                            suffixIconColor: Theme.of(context).primaryColor,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(
@@ -360,7 +431,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                       ),
                       SizedBox(height: 20),
                       Text(
-                        "UPI",
+                        "Store UPI",
                         style: TextStyle(
                           fontSize: 14,
                         ),
@@ -376,11 +447,6 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                             fontWeight: FontWeight.w500,
                           ),
                           decoration: InputDecoration(
-                            prefixIcon: Icon(
-                              Icons.credit_card,
-                              size: 28,
-                            ),
-                            prefixIconColor: Theme.of(context).primaryColor,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide(
@@ -396,30 +462,26 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: hexToColor('#2D332F'),
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 100, vertical: 18),
-                textStyle: TextStyle(
-                  fontSize: 16,
-                  fontFamily: 'Gotham',
-                  fontWeight: FontWeight.w500,
+            Container(
+              width: double.infinity,
+              margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+              child: CupertinoButton(
+                color: Theme.of(context).primaryColor,
+                disabledColor: Colors.grey,
+                onPressed: isChanged ? () {
+                  updateStoreDetails();
+                } : null,
+                child: Text(
+                  'Done',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(100),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Done', style: TextStyle(fontSize: 16)),
-                ],
               ),
             ),
-            SizedBox(height: 10),
           ],
         ),
       ),

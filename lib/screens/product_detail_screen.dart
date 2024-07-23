@@ -27,9 +27,10 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   PageController imagesController = PageController(viewportFraction: 0.6);
-  String _selectedVariation = '';
+  late String _selectedVariation;
   late ProductVariant _selectedVariant;
   bool _isInWishlist = false;
+  late Map<String, dynamic> _wishlistItem;
   late Future<StoreModel> _storeFuture;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -86,6 +87,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _checkWishlistStatus();
   }
 
+
   Future<StoreModel> _fetchStore() async {
     DocumentSnapshot storeDoc = await FirebaseFirestore.instance
         .collection('Stores')
@@ -98,6 +100,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     if (widget.product.variations.isNotEmpty) {
       _selectedVariation = widget.product.variations.keys.first;
       _selectedVariant = widget.product.variations[_selectedVariation]!;
+      _wishlistItem = {
+        'productId': widget.product.productId,
+        'variation': _selectedVariation,
+      };
     }
   }
 
@@ -131,7 +137,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       if (userDoc.exists) {
         List<dynamic> wishlist = (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
         setState(() {
-          _isInWishlist = wishlist.contains(widget.product.productId);
+          _isInWishlist = wishlist.any((item) =>
+          item['productId'] == _wishlistItem['productId'] &&
+              item['variation'] == _wishlistItem['variation']);
         });
       }
     }
@@ -153,17 +161,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       DocumentReference userDocRef = _firestore.collection('Users').doc(user.uid);
 
       if (_isInWishlist) {
-        // Add product ID to wishlist
+        // Add product to wishlist
         await userDocRef.update({
-          'wishlist': FieldValue.arrayUnion([widget.product.productId])
+          'wishlist': FieldValue.arrayUnion([_wishlistItem])
         });
-        print('Added to wishlist: ${widget.product.productId}');
+        print('Added to wishlist: $_wishlistItem');
       } else {
-        // Remove product ID from wishlist
+        // Remove product from wishlist
         await userDocRef.update({
-          'wishlist': FieldValue.arrayRemove([widget.product.productId])
+          'wishlist': FieldValue.arrayRemove([_wishlistItem])
         });
-        print('Removed from wishlist: ${widget.product.productId}');
+        print('Removed from wishlist: $_wishlistItem');
       }
     } catch (e) {
       print('Error updating wishlist: $e');
@@ -173,6 +181,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -250,12 +259,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               itemBuilder: (context, index) {
                                 return Container(
                                   margin: EdgeInsets.symmetric(horizontal: 8),
+                                  width: 300,
+                                  height: 300,
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
                                     child: Image.network(
                                       widget.product.imageUrls[index],
-                                      width: 200,
-                                      height: 300,
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -500,29 +509,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
                                             List<dynamic> cartList = userData['cart'] ?? [];
 
-                                            // Create a map with all necessary product information
                                             Map<String, dynamic> cartItem = {
                                               'productId': widget.product.productId,
                                               'variation': _selectedVariation,
                                               'quantity': 1, // Default quantity
                                             };
 
-                                            // Check if the product is already in the cart
                                             int existingIndex = cartList.indexWhere((item) =>
                                             item['productId'] == widget.product.productId &&
                                                 item['variation'] == _selectedVariation
                                             );
 
-                                            if (existingIndex != -1)
-                                            {
-                                              // If the product is already in the cart, update the quantity
+                                            if (existingIndex != -1) {
+                                              cartList[existingIndex]['quantity'] += 1;
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 SnackBar(content: Text('Item already in cart')),
                                               );
-                                            }
-                                            else
-                                            {
-                                              // If the product is not in the cart, add it
+                                            } else {
                                               cartList.add(cartItem);
                                               ScaffoldMessenger.of(context).showSnackBar(
                                                 SnackBar(content: Text('Item added to cart')),
@@ -531,12 +534,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
                                             transaction.update(userRef, {'cart': cartList});
                                           });
-
-                                          // Optionally, you can navigate to the cart screen here
-                                          // Navigator.push(
-                                          //   context,
-                                          //   MaterialPageRoute(builder: (context) => CartScreen()),
-                                          // );
                                         } catch (e) {
                                           print('Error updating cart: $e');
                                           ScaffoldMessenger.of(context).showSnackBar(
@@ -763,6 +760,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               setState(() {
                 _selectedVariation = variation;
                 _selectedVariant = widget.product.variations[variation]!;
+                _wishlistItem = {
+                  'productId': widget.product.productId,
+                  'variation': variation,
+                };
+                _checkWishlistStatus(); // Check wishlist status when variation changes
               });
             }
           },

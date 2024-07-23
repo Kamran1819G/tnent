@@ -1,89 +1,70 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
 import '../helpers/color_utils.dart';
 
-class WishlistProductTile extends StatefulWidget {
+class FeaturedProductTile extends StatefulWidget {
   final ProductModel product;
   final double width;
   final double height;
 
-  WishlistProductTile({
+  FeaturedProductTile({
     required this.product,
     this.width = 150.0,
     this.height = 200.0,
   });
 
   @override
-  _WishlistProductTileState createState() => _WishlistProductTileState();
+  _FeaturedProductTileState createState() => _FeaturedProductTileState();
 }
 
-class _WishlistProductTileState extends State<WishlistProductTile> {
-  bool _isInWishlist = false;
+class _FeaturedProductTileState extends State<FeaturedProductTile> {
+  bool _isFeatured = false;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  late Map<String, dynamic> _wishlistItem;
 
   @override
   void initState() {
     super.initState();
-    _wishlistItem = {
-      'productId': widget.product.productId,
-      'variation': widget.product.variations.keys.first,
-    };
-    _checkWishlistStatus();
+    _checkFeaturedStatus();
   }
 
-  void _checkWishlistStatus() async {
-    User? user = _auth.currentUser;
-    if (user != null) {
-      DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user.uid).get();
-      if (userDoc.exists) {
-        List<dynamic> wishlist = (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
-        setState(() {
-          _isInWishlist = wishlist.any((item) =>
-          item['productId'] == _wishlistItem['productId'] &&
-              item['variation'] == _wishlistItem['variation']);
-        });
-      }
+  void _checkFeaturedStatus() async {
+    DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(widget.product.storeId).get();
+    if (storeDoc.exists) {
+      List<dynamic> featuredProducts = (storeDoc.data() as Map<String, dynamic>)['featuredProducts'] ?? [];
+      setState(() {
+        _isFeatured = featuredProducts.contains(widget.product.productId);
+      });
     }
   }
 
-  Future<void> _toggleWishlist() async {
-    User? user = _auth.currentUser;
-    if (user == null) {
-      // Handle the case when the user is not logged in
-      print('User is not logged in');
-      return;
-    }
-
+  Future<void> _toggleFeatured() async {
     setState(() {
-      _isInWishlist = !_isInWishlist;
+      _isFeatured = !_isFeatured;
     });
 
     try {
-      DocumentReference userDocRef = _firestore.collection('Users').doc(user.uid);
+      DocumentReference storeDocRef = _firestore.collection('Stores').doc(widget.product.storeId);
 
-      if (_isInWishlist) {
-        // Add product to wishlist
-        await userDocRef.update({
-          'wishlist': FieldValue.arrayUnion([_wishlistItem])
+      if (_isFeatured) {
+        // Add product to featured list
+        await storeDocRef.update({
+          'featuredProductIds': FieldValue.arrayUnion([widget.product.productId])
         });
-        print('Added to wishlist: $_wishlistItem');
+        print('Added to featured products: ${widget.product.productId}');
       } else {
-        // Remove product from wishlist
-        await userDocRef.update({
-          'wishlist': FieldValue.arrayRemove([_wishlistItem])
+        // Remove product from featured list
+        await storeDocRef.update({
+          'featuredProductIds': FieldValue.arrayRemove([widget.product.productId])
         });
-        print('Removed from wishlist: $_wishlistItem');
+        print('Removed from featured products: ${widget.product.productId}');
       }
     } catch (e) {
-      print('Error updating wishlist: $e');
+      print('Error updating featured products: $e');
       // Revert the UI state if the operation failed
       setState(() {
-        _isInWishlist = !_isInWishlist;
+        _isFeatured = !_isFeatured;
       });
     }
   }
@@ -101,7 +82,6 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
     var price = firstVariation?.price ?? 0.0;
     var mrp = firstVariation?.mrp ?? 0.0;
     var discount = firstVariation?.discount ?? 0.0;
-
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -139,7 +119,7 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                     right: 8.0,
                     top: 8.0,
                     child: GestureDetector(
-                      onTap: _toggleWishlist,
+                      onTap: _toggleFeatured,
                       child: Container(
                         padding: EdgeInsets.all(6.0),
                         decoration: BoxDecoration(
@@ -147,8 +127,8 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          _isInWishlist ? Icons.favorite : Icons.favorite_border,
-                          color: _isInWishlist ? Colors.red : Colors.grey,
+                          _isFeatured ? Icons.check : Icons.add,
+                          color: _isFeatured ? Colors.green : Colors.grey,
                           size: 18.0,
                         ),
                       ),

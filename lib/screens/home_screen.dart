@@ -1,12 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/pages/home_pages/catalog.dart';
 import 'package:tnennt/pages/home_pages/community.dart';
 import 'package:tnennt/pages/home_pages/gallery.dart';
 import 'package:tnennt/pages/home_pages/home.dart';
-import 'package:tnennt/services/user_service.dart';
-
-import '../models/user_model.dart';
+import 'package:tnennt/models/user_model.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,9 +17,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   PageController _pageController = PageController();
-  UserModel? currentUser;
-  List<Widget> _widgetOptions = [];
+  late UserModel currentUser;
   int _selectedIndex = 0;
+
+  User user = FirebaseAuth.instance.currentUser!;
 
   @override
   void initState() {
@@ -29,15 +30,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _fetchUserDetails() async {
     try {
-      UserModel user = await UserService().fetchUserDetails();
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .get();
       setState(() {
-        currentUser = user;
-        _widgetOptions = <Widget>[
-          SingleChildScrollView(child: Home(currentUser: currentUser)),
-          SingleChildScrollView(child: Community()),
-          SingleChildScrollView(child: Gallery()),
-          SingleChildScrollView(child: Catalog()),
-        ];
+        currentUser = UserModel.fromFirestore(doc);
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -50,40 +48,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _widgetOptions = <Widget>[
+      SingleChildScrollView(child: Home(currentUser: currentUser)),
+      SingleChildScrollView(child: Community()),
+      SingleChildScrollView(child: Gallery()),
+      SingleChildScrollView(child: Catalog()),
+    ];
+
     return Scaffold(
       body: SafeArea(
-        child: currentUser == null
-            ? Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Tnennt',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 32.0,
-                      ),
-                    ),
-                    TextSpan(
-                      text: ' •',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w900,
-                        fontSize: 32.0,
-                        color: hexToColor('#42FF00'),
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            ],
-          ),
-        )
-            : Stack(
+        child: Stack(
           children: [
             PageView(
               physics: NeverScrollableScrollPhysics(),

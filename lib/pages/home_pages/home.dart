@@ -1,7 +1,6 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/category_model.dart';
 import 'package:tnennt/models/product_model.dart';
@@ -19,7 +18,7 @@ import '../../screens/update_screen.dart';
 import '../../screens/users_screens/storeprofile_screen.dart';
 
 class Home extends StatefulWidget {
-  final UserModel? currentUser;
+  final UserModel currentUser;
 
   Home({required this.currentUser});
 
@@ -28,11 +27,10 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
-  String firstName = 'User';
+  late String firstName;
   late TabController _tabController;
   int _selectedIndex = 0;
   bool isNewNotification = true;
-  List<dynamic> categories = [];
 
   final FirestoreService _firestoreService = FirestoreService();
 
@@ -40,6 +38,33 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     'assets/carousel1.png',
     'assets/carousel2.png',
     'assets/carousel3.png',
+  ];
+
+  List<Map<String, dynamic>> categories = [
+    {
+      'name': 'Clothings',
+      'image': 'assets/categories/clothings.png',
+    },
+    {
+      'name': 'Electronics',
+      'image': 'assets/categories/electronics.png',
+    },
+    {
+      'name': 'Grocery',
+      'image': 'assets/categories/grocery.png',
+    },
+    {
+      'name': 'Accessories',
+      'image': 'assets/categories/accessories.png',
+    },
+    {
+      'name': 'Books',
+      'image': 'assets/categories/books.png',
+    },
+    {
+      'name': 'More',
+      'image': 'assets/categories/more.png',
+    },
   ];
 
   List<dynamic> updates = List.generate(5, (index) {
@@ -114,16 +139,16 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       greenFlags: index * 2,
       redFlags: index,
       followerIds: [],
+      featuredProductIds: [],
     );
   });
 
   @override
   void initState() {
     super.initState();
-    initialize();
-    if (widget.currentUser!.firstName.isNotEmpty) {
-      firstName = widget.currentUser!.firstName;
-    }
+    setState(() {
+      firstName = widget.currentUser.firstName;
+    });
     _tabController = TabController(
       length: 6,
       vsync: this,
@@ -139,21 +164,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  void initialize() async {
-    await _fetchCategories();
-  }
-
-  Future<void> _fetchCategories() async {
-    await _firestoreService
-        .getCollection(collection: 'categories')
-        .then((value) {
-      setState(() {
-        categories =
-            value.docs.map((e) => CategoryModel.fromFirestore(e)).toList();
-      });
-    });
   }
 
   String _getTabLabel(int index) {
@@ -276,12 +286,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       MaterialPageRoute(
                           builder: (context) => MyProfileScreen()));
                 },
-                child: widget.currentUser != null &&
-                        widget.currentUser!.photoURL != null
+                child: widget.currentUser.photoURL != null
                     ? CircleAvatar(
                         radius: 30.0,
                         backgroundImage:
-                            NetworkImage(widget.currentUser!.photoURL ?? ''),
+                            NetworkImage(widget.currentUser.photoURL ?? ''),
                       )
                     : CircleAvatar(
                         radius: 30.0,
@@ -447,6 +456,22 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
         ),
         SizedBox(height: 20.0),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 3,
+            crossAxisSpacing: 8.0,
+            mainAxisSpacing: 8.0,
+            childAspectRatio: 3 / 4,
+          ),
+          itemCount: categories.length,
+          itemBuilder: (context, index) {
+            return CategoryTile(category: categories[index]);
+          },
+        ),
+        SizedBox(height: 20.0),
         // Featured Section
         Padding(
           padding: const EdgeInsets.only(left: 12.0),
@@ -600,7 +625,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       MaterialPageRoute(builder: (context) => StoresScreen()));
                 },
                 child: Container(
-                  margin: EdgeInsets.only(right: 16.0),
+                  padding: EdgeInsets.all(8.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -622,7 +647,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       Expanded(
                         child: Text(
                           'View All',
-                          style: TextStyle(fontSize: 10.0),
+                          style: TextStyle(fontSize: 12.0),
                         ),
                       ),
                     ],
@@ -670,27 +695,26 @@ class StoreTile extends StatelessWidget {
         );
       },
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 8.0),
+        padding: EdgeInsets.all(12.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              height: 75,
-              width: 75,
-              decoration: BoxDecoration(
-                border: Border.all(color: hexToColor('#B5B5B5')),
+            ClipRRect(
                 borderRadius: BorderRadius.circular(18.0),
-                image: DecorationImage(
-                  image: NetworkImage(store.logoUrl),
+                child: Image.network(
+                  store.logoUrl,
                   fit: BoxFit.fill,
-                ),
-              ),
-            ),
-            SizedBox(height: 8.0),
+                  height: 75.0,
+                  width: 75.0,
+                )),
             Expanded(
-              child: Text(
-                store.name,
-                style: TextStyle(fontSize: 10.0),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4.0),
+                child: Text(
+                  store.name,
+                  style: TextStyle(fontSize: 12.0),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           ],
@@ -701,7 +725,7 @@ class StoreTile extends StatelessWidget {
 }
 
 class CategoryTile extends StatelessWidget {
-  CategoryModel category;
+  Map<String, dynamic> category;
 
   CategoryTile({required this.category});
 
@@ -709,50 +733,33 @@ class CategoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CategoryProductsScreen(
-              category: category,
-            ),
-          ),
-        );
+
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8.0),
-            color: hexToColor('#F5F5F5'),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.network(
-                    'https://via.placeholder.com/150',
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                  ),
-                ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(12.0),
+              child: Image.asset(
+                category['image'],
+                fit: BoxFit.cover,
               ),
-              const SizedBox(height: 6.0),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Text(
-                  category.name,
-                  style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontSize: 14.0,
-                  ),
-                  textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 6.0),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Text(
+                category['name'],
+                style: TextStyle(
+                  color: hexToColor('#343434'),
+                  fontSize: 14.0,
                 ),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 6.0),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

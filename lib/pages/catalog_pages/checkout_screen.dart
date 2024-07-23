@@ -11,7 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  final List<Map<String, String>> selectedItems;
+  final List<Map<String, dynamic>> selectedItems;
 
   const CheckoutScreen({Key? key, required this.selectedItems}) : super(key: key);
 

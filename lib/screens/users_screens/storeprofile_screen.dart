@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -20,7 +21,8 @@ class StoreProfileScreen extends StatefulWidget {
 }
 
 class _StoreProfileScreenState extends State<StoreProfileScreen> {
-
+  bool isConnected = false;
+  int storeEngagement = 0;
 
   List<ProductModel> featuredProducts = List.generate(5, (index) {
     return ProductModel(
@@ -40,31 +42,30 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
       greenFlags: 0,
       redFlags: 0,
       variations: {
-          'S': ProductVariant(
-            price: 24.99,
-            mrp: 29.99,
-            discount: 16.67,
-            stockQuantity: 50,
-            sku: 'TS-S',
-          ),
-          'M': ProductVariant(
-            price: 24.99,
-            mrp: 29.99,
-            discount: 16.67,
-            stockQuantity: 100,
-            sku: 'TS-M',
-          ),
-          'L': ProductVariant(
-            price: 26.99,
-            mrp: 31.99,
-            discount: 15.63,
-            stockQuantity: 75,
-            sku: 'TS-L',
-          ),
+        'S': ProductVariant(
+          price: 24.99,
+          mrp: 29.99,
+          discount: 16.67,
+          stockQuantity: 50,
+          sku: 'TS-S',
+        ),
+        'M': ProductVariant(
+          price: 24.99,
+          mrp: 29.99,
+          discount: 16.67,
+          stockQuantity: 100,
+          sku: 'TS-M',
+        ),
+        'L': ProductVariant(
+          price: 26.99,
+          mrp: 31.99,
+          discount: 15.63,
+          stockQuantity: 75,
+          sku: 'TS-L',
+        ),
       },
     );
   });
-
 
   Future<List<CategoryModel>> fetchCategories() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -76,6 +77,57 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
     return querySnapshot.docs
         .map((doc) => CategoryModel.fromFirestore(doc))
         .toList();
+  }
+
+  String? userId = FirebaseAuth.instance.currentUser?.uid;
+
+  @override
+  void initState() {
+    super.initState();
+    checkConnectionStatus();
+  }
+
+  Future<void> checkConnectionStatus() async {
+    setState(() {
+      storeEngagement = widget.store.storeEngagement;
+      isConnected = widget.store.followerIds.contains(userId);
+    });
+  }
+
+  Future<void> toggleConnection() async {
+    DocumentReference storeRef = FirebaseFirestore.instance
+        .collection('Stores')
+        .doc(widget.store.storeId);
+
+    // Fetch the store document to check current state
+    DocumentSnapshot storeDoc = await storeRef.get();
+    List<dynamic> followerIds = storeDoc.get('followerIds') ?? [];
+    bool isCurrentlyConnected = followerIds.contains(userId);
+
+    // Update follower IDs and engagement count based on current state
+    if (!isCurrentlyConnected) {
+      // Connect to store
+      await storeRef.update({
+        'followerIds': FieldValue.arrayUnion([userId]),
+        'storeEngagement': FieldValue.increment(1),
+      });
+
+      setState(() {
+        isConnected = true;
+        storeEngagement++;
+      });
+    } else {
+      // Disconnect from store
+      await storeRef.update({
+        'followerIds': FieldValue.arrayRemove([userId]),
+        'storeEngagement': FieldValue.increment(-1),
+      });
+
+      setState(() {
+        isConnected = false;
+        storeEngagement--;
+      });
+    }
   }
 
   @override
@@ -124,7 +176,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                         children: [
                           Container(
                             margin: EdgeInsets.only(top: 8),
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12.0),
                               child: Image.network(
@@ -234,7 +287,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                             padding: EdgeInsets.symmetric(
                                 horizontal: 12.0, vertical: 6.0),
                             decoration: BoxDecoration(
-                              border: Border.all(color: Colors.white, width: 0.5),
+                              border:
+                                  Border.all(color: Colors.white, width: 0.5),
                               borderRadius: BorderRadius.circular(12.0),
                             ),
                             child: Column(
@@ -263,7 +317,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                 ),
               ),
               SizedBox(height: 30.0),
-          
+
               Container(
                 height: 125,
                 padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -318,7 +372,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                 ),
                                 Spacer(),
                                 Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
                                     children: [
                                       Text(
                                         '800/900',
@@ -350,37 +405,61 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                             Row(
                               children: [
                                 // connect button with left + button and connect text at right
-                                Container(
-                                  padding: EdgeInsets.all(8.0),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(50.0),
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Container(
-                                        padding: EdgeInsets.all(4.0),
-                                        decoration: BoxDecoration(
-                                          color: hexToColor('#F3F3F3'),
-                                          borderRadius:
-                                              BorderRadius.circular(50.0),
-                                        ),
-                                        child: Icon(
-                                          Icons.add,
-                                          color: hexToColor('#272822'),
-                                          size: 16.0,
-                                        ),
+                                GestureDetector(
+                                  onTap: toggleConnection,
+                                  child: AnimatedSwitcher(
+                                    duration: Duration(milliseconds: 300),
+                                    // Adjust the duration as needed
+                                    child: Container(
+                                      key: ValueKey<bool>(isConnected),
+                                      // Key helps AnimatedSwitcher identify the widget
+                                      padding: EdgeInsets.all(8.0),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius:
+                                            BorderRadius.circular(50.0),
                                       ),
-                                      SizedBox(width: 5.0),
-                                      Text(
-                                        'Connect'.toUpperCase(),
-                                        style: TextStyle(
-                                          color: hexToColor("#272822"),
-                                          fontSize: 10.0,
-                                        ),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          AnimatedContainer(
+                                            duration:
+                                                Duration(milliseconds: 300),
+                                            padding: EdgeInsets.all(4.0),
+                                            decoration: BoxDecoration(
+                                              color: isConnected
+                                                  ? hexToColor('#D4EDDA')
+                                                  : hexToColor('#F3F3F3'),
+                                              borderRadius:
+                                                  BorderRadius.circular(50.0),
+                                            ),
+                                            child: Icon(
+                                              isConnected
+                                                  ? Icons.check
+                                                  : Icons.add,
+                                              color: hexToColor('#272822'),
+                                              size: 16.0,
+                                            ),
+                                          ),
+                                          SizedBox(width: 5.0),
+                                          AnimatedSwitcher(
+                                            duration:
+                                                Duration(milliseconds: 300),
+                                            child: Text(
+                                              isConnected
+                                                  ? 'Connected'.toUpperCase()
+                                                  : 'Connect'.toUpperCase(),
+                                              key: ValueKey<bool>(isConnected),
+                                              style: TextStyle(
+                                                color: hexToColor("#272822"),
+                                                fontSize: 10.0,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ],
+                                    ),
                                   ),
                                 ),
                                 Spacer(),
@@ -388,7 +467,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text(
-                                      widget.store.storeEngagement.toString(),
+                                      storeEngagement.toString(),
                                       style: TextStyle(
                                         color: Colors.black,
                                         fontSize: 18.0,
@@ -514,7 +593,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                 ),
               ),
               SizedBox(height: 20.0),
-          
+
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -585,7 +664,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
                         return Column(
                           children: categories
                               .map((category) =>
-                              CategoryProductsListView(category: category))
+                                  CategoryProductsListView(category: category))
                               .toList(),
                         );
                       }
@@ -604,14 +683,15 @@ class _StoreProfileScreenState extends State<StoreProfileScreen> {
 class CategoryProductsListView extends StatefulWidget {
   final CategoryModel category;
 
-  const CategoryProductsListView({Key? key, required this.category}) : super(key: key);
+  const CategoryProductsListView({Key? key, required this.category})
+      : super(key: key);
 
   @override
-  State<CategoryProductsListView> createState() => _CategoryProductsListViewState();
+  State<CategoryProductsListView> createState() =>
+      _CategoryProductsListViewState();
 }
 
 class _CategoryProductsListViewState extends State<CategoryProductsListView> {
-
   Future<List<ProductModel>> fetchProducts() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('products')

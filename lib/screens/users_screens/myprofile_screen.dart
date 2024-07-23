@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,25 +22,24 @@ class MyProfileScreen extends StatefulWidget {
 }
 
 class _MyProfileScreenState extends State<MyProfileScreen> {
-  User? currentUser = Auth().currentUser;
-  UserModel? userData;
-  final UserService _userService = UserService();
+  late Future<UserModel> _userFuture;
 
   @override
   void initState() {
     super.initState();
-    fetchUserData();
+    _userFuture = fetchUserData();
   }
 
-  Future<void> fetchUserData() async {
-    try {
-      UserModel user = await _userService.fetchUserDetails();
-      setState(() {
-        userData = user;
-      });
-    } catch (e) {
-      print('Error fetching user data: $e');
-      // You might want to show an error message to the user here
+  Future<UserModel> fetchUserData() async {
+    final User? currentUser = Auth().currentUser;
+    if (currentUser != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(currentUser.uid)
+          .get();
+      return UserModel.fromFirestore(doc);
+    } else {
+      throw Exception('No user found');
     }
   }
 
@@ -46,214 +47,230 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(height: 20.0),
-              // Profile Card
-              Container(
-                height: 125,
-                width: double.infinity,
-                margin: EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  color: hexToColor('#2D332F'),
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      right: 16.0,
-                      top: 25.0,
-                      child: CircleAvatar(
-                        backgroundColor: hexToColor('#F5F5F5'),
-                        radius: 16,
-                        child: IconButton(
-                          icon: Icon(
-                            Icons.arrow_back_ios_new,
-                            color: Colors.black,
-                            size: 16,
-                          ),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ),
+        child: FutureBuilder<UserModel>(
+          future: _userFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData) {
+              return Center(child: Text('No user data available'));
+            }
+
+            final user = snapshot.data!;
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(height: 20.0),
+                  // Profile Card
+                  Container(
+                    height: 125,
+                    width: double.infinity,
+                    margin: EdgeInsets.symmetric(horizontal: 10),
+                    decoration: BoxDecoration(
+                      color: hexToColor('#2D332F'),
+                      borderRadius: BorderRadius.circular(20.0),
                     ),
-                    Align(
-                      alignment: const Alignment(-0.9, 0.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 10),
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AddProfileImageScreen(),
-                                  ),
-                                ).then((_) => fetchUserData());
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          right: 16.0,
+                          top: 25.0,
+                          child: CircleAvatar(
+                            backgroundColor: hexToColor('#F5F5F5'),
+                            radius: 16,
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.arrow_back_ios_new,
+                                color: Colors.black,
+                                size: 16,
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
                               },
-                              child: Stack(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 40,
-                                    backgroundColor: Theme.of(context).primaryColor,
-                                    backgroundImage: userData?.photoURL != null
-                                        ? NetworkImage(userData!.photoURL!)
-                                        : null,
-                                    child: userData?.photoURL == null
-                                        ? Icon(
-                                      Icons.person,
-                                      color: Colors.white,
-                                      size: 40,
-                                    )
-                                        : null,
+                            ),
+                          ),
+                        ),
+                        Align(
+                          alignment: const Alignment(-0.9, 0.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => AddProfileImageScreen(),
+                                      ),
+                                    ).then((_) => setState(() {
+                                      _userFuture = fetchUserData();
+                                    }));
+                                  },
+                                  child: Stack(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 40,
+                                        backgroundColor: Theme.of(context).primaryColor,
+                                        backgroundImage: user.photoURL != null
+                                            ? NetworkImage(user.photoURL!)
+                                            : null,
+                                        child: user.photoURL == null
+                                            ? Icon(
+                                          Icons.person,
+                                          color: Colors.white,
+                                          size: 40,
+                                        )
+                                            : null,
+                                      ),
+                                      Positioned(
+                                        bottom: 8,
+                                        right: 0,
+                                        child: Icon(
+                                          Icons.edit,
+                                          color: Colors.white,
+                                          size: 24.0,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  Positioned(
-                                    bottom: 8,
-                                    right: 0,
-                                    child: Icon(
-                                      Icons.edit,
+                                ),
+                              ),
+                              SizedBox(width: 10.0),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    '${user.firstName} ${user.lastName}',
+                                    style: TextStyle(
                                       color: Colors.white,
-                                      size: 24.0,
+                                      fontSize: 26.0,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  SizedBox(width: 10.0),
+                                  Container(
+                                    width: 8,
+                                    height: 8,
+                                    margin: EdgeInsets.symmetric(vertical: 25),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.circular(5),
                                     ),
                                   ),
                                 ],
                               ),
-                            ),
-                          ),
-                          SizedBox(width: 10.0),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                '${userData?.firstName} ${userData?.lastName}' ?? 'Loading...',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 26.0,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              SizedBox(width: 10.0),
-                              Container(
-                                width: 8,
-                                height: 8,
-                                margin: EdgeInsets.symmetric(vertical: 25),
-                                decoration: BoxDecoration(
-                                  color: Colors.green,
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                              ),
                             ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
 
-              SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: ListTile(
-                  contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
-                  tileColor: hexToColor('#EDEDED'),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  leading: Container(
-                    padding: EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
-                      borderRadius: BorderRadius.circular(10.0),
-                    ),
-                    child: Icon(CupertinoIcons.location_fill, color: Colors.white),
-                  ),
-                  title: Text(
-                    userData?.location ?? 'Address not set',
-                    style: TextStyle(
-                      color: hexToColor('#4A4F4C'),
-                      fontSize: 16.0,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: RichText(
-                    text: TextSpan(children: [
-                      TextSpan(
-                        text: 'Pincode: ',
-                        style: TextStyle(
+                  SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: ListTile(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
+                      tileColor: hexToColor('#EDEDED'),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
+                      leading: Container(
+                        padding: EdgeInsets.all(10.0),
+                        decoration: BoxDecoration(
                           color: Theme.of(context).primaryColor,
-                          fontFamily: 'Poppins',
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.w600,
+                          borderRadius: BorderRadius.circular(10.0),
                         ),
+                        child: Icon(CupertinoIcons.location_fill, color: Colors.white),
                       ),
-                      TextSpan(
-                        text: userData?.pincode ?? 'Not set',
+                      title: Text(
+                        user.location ?? 'Address not set',
                         style: TextStyle(
-                          color: hexToColor('#787878'),
-                          fontFamily: 'Poppins',
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.w600,
+                          color: hexToColor('#4A4F4C'),
+                          fontSize: 16.0,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      subtitle: RichText(
+                        text: TextSpan(children: [
+                          TextSpan(
+                            text: 'Pincode: ',
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontFamily: 'Poppins',
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          TextSpan(
+                            text: user.pincode ?? 'Not set',
+                            style: TextStyle(
+                              color: hexToColor('#787878'),
+                              fontFamily: 'Poppins',
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ]),
+                      ),
+                      trailing: Container(
+                        padding: EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(100.0),
+                        ),
+                        child: Icon(Icons.arrow_forward_ios, size: 18, color: Theme.of(context).primaryColor),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Column(
+                      children: [
+                        _buildMenuItem(Icons.person, 'About'),
+                        _buildMenuItem(Icons.delete, 'Delete Account'),
+                        _buildMenuItem(Icons.help, 'Help'),
+                        _buildMenuItem(Icons.gavel, 'Legal'),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 50),
+                  Container(
+                    alignment: Alignment.center,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Auth().signOut();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => SignInScreen()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                        textStyle: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(50),
                         ),
                       ),
-                    ]),
-                  ),
-                  trailing: Container(
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(100.0),
-                    ),
-                    child: Icon(Icons.arrow_forward_ios, size: 18, color: Theme.of(context).primaryColor),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
-                child: Column(
-                  children: [
-                    _buildMenuItem(Icons.person, 'About'),
-                    _buildMenuItem(Icons.delete, 'Delete Account'),
-                    _buildMenuItem(Icons.help, 'Help'),
-                    _buildMenuItem(Icons.gavel, 'Legal'),
-                  ],
-                ),
-              ),
-              SizedBox(height: 50),
-              Container(
-                alignment: Alignment.center,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Auth().signOut();
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => SignInScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                    textStyle: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50),
+                      child: Text('Sign Out', style: TextStyle(fontSize: 14)),
                     ),
                   ),
-                  child: Text('Sign Out', style: TextStyle(fontSize: 14)),
-                ),
+                  SizedBox(height: 20.0)
+                ],
               ),
-              SizedBox(height: 20.0)
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -295,10 +312,12 @@ class AddProfileImageScreen extends StatefulWidget {
 }
 
 class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
   File? profileImage;
   String? photoURL;
-  User? user = Auth().currentUser;
+
+  final User user = Auth().currentUser!;
 
   Future<void> pickImage() async {
     final ImagePicker _picker = ImagePicker();
@@ -311,37 +330,20 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
   }
 
   Future<void> uploadImage() async {
-    try {
-      final user = this.user;
-      if (user != null && profileImage != null) {
-        photoURL = await UserService().uploadProfilePicture(uid: user.uid, file: profileImage!);
-
-        // Update user data in Firebase
-        await UserService().updateUser(uid: user.uid, data: {'profilePicture': photoURL});
+    if (profileImage != null) {
+      try {
+        final String fileName = 'profile_images/${user.uid}';
+        final Reference reference = FirebaseStorage.instance.ref().child(fileName);
+        final UploadTask uploadTask = reference.putFile(profileImage!);
+        final TaskSnapshot taskSnapshot = await uploadTask;
+        final String url = await taskSnapshot.ref.getDownloadURL();
+        setState(() {
+          photoURL = url;
+        });
+        await FirebaseFirestore.instance.collection('Users').doc(user.uid).update({'photoURL': photoURL});
+      } catch (e) {
+        print('Error uploading image: $e');
       }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Image uploaded successfully!',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-            ),
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-          'Error: $e',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
-        ),
-        backgroundColor: Colors.red,
-      ));
     }
   }
 
@@ -350,8 +352,14 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
     return Scaffold(
       body: SafeArea(
         child: PageView(
+          controller: _pageController,
+          physics: NeverScrollableScrollPhysics(),
+          onPageChanged: (int page) {
+            setState(() {
+              _currentPage = page;
+            });
+          },
           children: [
-            // Page 3: Add Profile Picture
             Column(
               children: [
                 Container(
@@ -435,9 +443,7 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                     onPressed: () async {
                       await pickImage();
                       if (profileImage != null) {
-                        _pageController.nextPage(
-                            duration: Duration(milliseconds: 500),
-                            curve: Curves.easeInOut);
+                        _pageController.jumpToPage(_currentPage + 1);
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -500,22 +506,6 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                             ]),
                       ),
                       Spacer(),
-                      Container(
-                        margin: EdgeInsets.all(8.0),
-                        child: CircleAvatar(
-                          backgroundColor: Colors.grey[100],
-                          child: IconButton(
-                            icon: Icon(Icons.arrow_back_ios_new,
-                                color: Colors.black),
-                            onPressed: () {
-                              _pageController.previousPage(
-                                duration: Duration(milliseconds: 500),
-                                curve: Curves.easeInOut,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -590,9 +580,7 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                   child: ElevatedButton(
                     onPressed: () async {
                       await uploadImage();
-                      _pageController.nextPage(
-                          duration: Duration(milliseconds: 500),
-                          curve: Curves.easeInOut);
+                      Navigator.pop(context);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,

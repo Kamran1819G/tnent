@@ -6,7 +6,6 @@ import 'package:tnennt/screens/users_screens/reset_password_screen.dart';
 import 'package:tnennt/widget_tree.dart';
 
 import '../helpers/color_utils.dart';
-import 'home_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
