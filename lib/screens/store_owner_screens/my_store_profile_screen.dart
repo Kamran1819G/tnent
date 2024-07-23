@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:tnennt/models/category_model.dart';
+import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/helpers/color_utils.dart';
@@ -42,7 +42,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   bool isGoodReview = true;
   bool isExpanded = false;
 
-  List<CategoryModel> categories = [];
+  List<StoreCategoryModel> categories = [];
   late Future<List<ProductModel>> _productsFuture;
 
 
@@ -164,7 +164,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     }
   }
 
-  Future<List<CategoryModel>> fetchCategories() async {
+  Future<List<StoreCategoryModel>> fetchCategories() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('Stores')
         .doc(store.storeId)
@@ -172,7 +172,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
         .get();
 
     return querySnapshot.docs
-        .map((doc) => CategoryModel.fromFirestore(doc))
+        .map((doc) => StoreCategoryModel.fromFirestore(doc))
         .toList();
   }
 
@@ -1061,7 +1061,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                   ),
                   SizedBox(height: 20.0),
 
-                  FutureBuilder<List<CategoryModel>>(
+                  FutureBuilder<List<StoreCategoryModel>>(
                     future: fetchCategories(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
@@ -1069,7 +1069,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                       } else if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else {
-                        List<CategoryModel> categories = snapshot.data!;
+                        List<StoreCategoryModel> categories = snapshot.data!;
                         return Column(
                           children: categories
                               .map((category) =>
@@ -1223,7 +1223,7 @@ class _FeatureProductsListViewState extends State<FeatureProductsListView> {
 
 
 class CategoryProductsListView extends StatefulWidget {
-  final CategoryModel category;
+  final StoreCategoryModel category;
 
   const CategoryProductsListView({Key? key, required this.category}) : super(key: key);
 

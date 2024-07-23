@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/category_model.dart';
+import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/screens/store_owner_screens/add_product_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/all_products_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/category_products_screen.dart';
@@ -19,7 +19,7 @@ class ProductCategoriesScreen extends StatefulWidget {
 
 class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
   TextEditingController _newCategoryController = TextEditingController();
-  List<CategoryModel> categories = [];
+  List<StoreCategoryModel> categories = [];
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
@@ -35,8 +35,8 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
         .collection('categories')
         .get();
 
-    List<CategoryModel> loadedCategories = querySnapshot.docs
-        .map((doc) => CategoryModel.fromFirestore(doc))
+    List<StoreCategoryModel> loadedCategories = querySnapshot.docs
+        .map((doc) => StoreCategoryModel.fromFirestore(doc))
         .toList();
 
     setState(() {
@@ -59,7 +59,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
       'createdAt': FieldValue.serverTimestamp(),
     });
 
-    CategoryModel newCategory = CategoryModel(
+    StoreCategoryModel newCategory = StoreCategoryModel(
       id: docRef.id,
       name: name,
       totalProducts: 0,
@@ -280,7 +280,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
 }
 
 class CategoryTile extends StatelessWidget {
-  final CategoryModel category;
+  final StoreCategoryModel category;
   final String storeId;
   final Color color;
 

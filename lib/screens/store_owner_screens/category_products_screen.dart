@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tnennt/widgets/removable_product_tile.dart';
 import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/category_model.dart';
+import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/helpers/text_utils.dart';
 
 class CategoryProductsScreen extends StatefulWidget {
-  final CategoryModel category;
+  final StoreCategoryModel category;
   final String storeId;
 
   CategoryProductsScreen({required this.category, required this.storeId});

@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/category_model.dart';
+import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/models/user_model.dart';
@@ -11,7 +15,6 @@ import 'package:tnennt/screens/explore_screen.dart';
 import 'package:tnennt/screens/notification_screen.dart';
 import 'package:tnennt/screens/stores_screen.dart';
 import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
-import 'package:tnennt/services/firebase/firestore_service.dart';
 import 'package:tnennt/widgets/wishlist_product_tile.dart';
 
 import '../../screens/update_screen.dart';
@@ -20,7 +23,7 @@ import '../../screens/users_screens/storeprofile_screen.dart';
 class Home extends StatefulWidget {
   final UserModel currentUser;
 
-  Home({required this.currentUser});
+  const Home({Key? key, required this.currentUser}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -31,8 +34,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   late TabController _tabController;
   int _selectedIndex = 0;
   bool isNewNotification = true;
-
-  final FirestoreService _firestoreService = FirestoreService();
 
   final List<String> carouselImgList = [
     'assets/carousel1.png',
@@ -468,7 +469,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
           itemCount: categories.length,
           itemBuilder: (context, index) {
-            return CategoryTile(category: categories[index]);
+            return CategoryTile(
+              category: categories[index],
+            );
           },
         ),
         SizedBox(height: 20.0),
@@ -544,7 +547,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 itemCount: 5,
                 itemBuilder: (context, index) {
                   return WishlistProductTile(
-                      product: featuredProducts[index],
+                    product: featuredProducts[index],
                   );
                 },
               ),
@@ -553,7 +556,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 itemCount: 5,
                 itemBuilder: (context, index) {
                   return WishlistProductTile(
-                      product: featuredProducts[index],
+                    product: featuredProducts[index],
                   );
                 },
               ),
@@ -562,7 +565,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 itemCount: 5,
                 itemBuilder: (context, index) {
                   return WishlistProductTile(
-                      product: featuredProducts[index],
+                    product: featuredProducts[index],
                   );
                 },
               ),
@@ -571,7 +574,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 itemCount: 5,
                 itemBuilder: (context, index) {
                   return WishlistProductTile(
-                      product: featuredProducts[index],
+                    product: featuredProducts[index],
                   );
                 },
               ),
@@ -580,7 +583,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 itemCount: 5,
                 itemBuilder: (context, index) {
                   return WishlistProductTile(
-                      product: featuredProducts[index],
+                    product: featuredProducts[index],
                   );
                 },
               ),
@@ -658,8 +661,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
         ),
 
-
-
         SizedBox(height: MediaQuery.sizeOf(context).height * 0.1),
       ],
     );
@@ -733,7 +734,14 @@ class CategoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CategoryProductsScreen(
+              categoryName: category['name'],
+            ),
+          ),
+        );
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -767,77 +775,104 @@ class CategoryTile extends StatelessWidget {
 }
 
 class CategoryProductsScreen extends StatelessWidget {
-  CategoryModel category;
+  final String categoryName;
 
-  CategoryProductsScreen({required this.category});
+  const CategoryProductsScreen({Key? key, required this.categoryName}) : super(key: key);
+
+  Stream<QuerySnapshot> _getProductsStream() {
+    if (categoryName.toLowerCase() == 'more') {
+      return FirebaseFirestore.instance
+          .collection('products')
+          .where('productCategory', whereNotIn: ['SpecialCategory1', 'SpecialCategory2'])
+          .snapshots();
+    } else {
+      return FirebaseFirestore.instance
+          .collection('products')
+          .where('productCategory', isEqualTo: categoryName)
+          .snapshots();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Container(
-            height: 100,
-            padding: EdgeInsets.only(left: 16, right: 8),
-            child: Row(
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      category.name.toUpperCase(),
-                      style: TextStyle(
-                        color: hexToColor('#1E1E1E'),
-                        fontWeight: FontWeight.w400,
-                        fontSize: 24.0,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    Text(
-                      ' •',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w400,
-                        fontSize: 28.0,
-                        color: hexToColor('#FAD524'),
-                      ),
-                    ),
-                  ],
-                ),
-                Spacer(),
-                Container(
-                  margin: EdgeInsets.all(8.0),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.grey[100],
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 100,
+              padding: const EdgeInsets.fromLTRB(16, 0, 8, 0),
+              child: Row(
+                children: [
+                  Text(
+                    categoryName.toUpperCase(),
+                    style: TextStyle(
+                      color: hexToColor('#1E1E1E'),
+                      fontWeight: FontWeight.w400,
+                      fontSize: 24.0,
+                      letterSpacing: 1.5,
                     ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          SizedBox(height: 10),
-          /*Expanded(
-            child: GridView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 8.0,
-                mainAxisSpacing: 16.0,
-                childAspectRatio: 3 / 4,
+                  Text(
+                    ' •',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 28.0,
+                      color: hexToColor('#FAD524'),
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    margin: const EdgeInsets.all(8.0),
+                    child: CircleAvatar(
+                      backgroundColor: Colors.grey[100],
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              itemCount: 10,
-              itemBuilder: (context, index) {
-                return ProductTile(
-                  product: products[index],
-                );
-              },
             ),
-          )*/
-        ]),
+            const SizedBox(height: 10),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _getProductsStream(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(child: Text('No products found in this category'));
+                  }
+
+                  final products = snapshot.data!.docs;
+
+                  return GridView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16.0,
+                      mainAxisSpacing: 16.0,
+                    ),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = ProductModel.fromFirestore(products[index]);
+                      return WishlistProductTile(product: product);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

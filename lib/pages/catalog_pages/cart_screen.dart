@@ -4,37 +4,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
 
-class CartItem {
-  final String productID;
-  final String variation;
-  int quantity;
-  String? sku;
-  String productName;
-  String productImage;
-  double productPrice;
-  bool isSelected;
-
-  CartItem({
-    required this.productID,
-    required this.variation,
-    required this.quantity,
-    this.sku,
-    this.productName = '',
-    this.productImage = '',
-    this.productPrice = 0.0,
-    this.isSelected = false,
-  });
-
-  factory CartItem.fromJson(Map<String, dynamic> json) {
-    return CartItem(
-      productID: json['productId'],
-      variation: json['variation'],
-      quantity: json['quantity'],
-      sku: json['sku'],
-    );
-  }
-}
-
 class CartScreen extends StatefulWidget {
   const CartScreen({Key? key}) : super(key: key);
 
@@ -44,7 +13,7 @@ class CartScreen extends StatefulWidget {
 
 class _CartScreenState extends State<CartScreen> {
   bool allItemsSelected = false;
-  List<CartItem> cartItems = [];
+  List<Map<String, dynamic>> cartItems = [];
   double totalAmount = 0.0;
 
   @override
@@ -56,7 +25,7 @@ class _CartScreenState extends State<CartScreen> {
     return FirebaseAuth.instance.currentUser?.uid ?? '';
   }
 
-  Stream<List<CartItem>> fetchCartItems() {
+  Stream<List<Map<String, dynamic>>> fetchCartItems() {
     String userId = getCurrentUserId();
     print("Fetching cart items for user: $userId");
 
@@ -72,56 +41,58 @@ class _CartScreenState extends State<CartScreen> {
       }
 
       List<dynamic> cartList = snapshot.data()?['cart'] ?? [];
-      List<CartItem> items = cartList.map((item) => CartItem.fromJson(item)).toList();
+      List<Map<String, dynamic>> items = [];
 
-      print("Parsed ${items.length} cart items");
-
-      for (var item in items) {
-        await fetchProductDetails(item);
+      for (var item in cartList) {
+        Map<String, dynamic> cartItem = Map<String, dynamic>.from(item);
+        await fetchProductDetails(cartItem);
+        cartItem['isSelected'] = false;
+        items.add(cartItem);
       }
 
+      print("Parsed ${items.length} cart items");
       return items;
     });
   }
 
-  Future<void> fetchProductDetails(CartItem item) async {
+  Future<void> fetchProductDetails(Map<String, dynamic> item) async {
     DocumentSnapshot productDoc = await FirebaseFirestore.instance
         .collection('products')
-        .doc(item.productID)
+        .doc(item['productId'])
         .get();
 
     if (productDoc.exists) {
       Map<String, dynamic> data = productDoc.data() as Map<String, dynamic>;
 
+      item['productName'] = data['name'] ?? '';
+      item['productImage'] = data['imageUrls'][0] ?? '';
+
       if (data.containsKey('variations') && data['variations'] is Map) {
         Map<String, dynamic> variations = data['variations'];
-        if (variations.containsKey(item.variation)) {
-          Map<String, dynamic> variationData = variations[item.variation];
 
-          item.productName = data['name'] ?? '';
-          item.productImage = variationData['imageUrls'] ?? data['imageUrls'][0] ?? '';
-          item.productPrice = (variationData['price'] ?? data['price'] ?? 0).toDouble();
-          item.sku = variationData['sku'] ?? '';
+        if (variations.containsKey(item['variation'])) {
+          Map<String, dynamic> variationData = variations[item['variation']];
+          item['productImage'] = variationData['image'] ?? item['productImage'];
+          item['productPrice'] = (variationData['price'] ?? 0).toDouble();
+          item['sku'] = variationData['sku'] ?? '';
         } else {
-          item.productName = data['name'] ?? '';
-          item.productImage = data['imageUrls'][0] ?? '';
-          item.productPrice = (data['price'] ?? 0).toDouble();
+          item['productPrice'] = (data['price'] ?? 0).toDouble();
         }
       } else {
-        item.productName = data['name'] ?? '';
-        item.productImage = data['imageUrls'][0] ?? '';
-        item.productPrice = (data['price'] ?? 0).toDouble();
+        item['productPrice'] = (data['price'] ?? 0).toDouble();
       }
     }
   }
 
-  double calculateTotalAmount(List<CartItem> items) {
-    return items.fold(0, (sum, item) => sum + (item.productPrice * item.quantity));
+  double calculateTotalAmount(List<Map<String, dynamic>> items) {
+    return items.where((item) => item['isSelected']).fold(
+        0, (sum, item) => sum + (item['productPrice'] * item['quantity']));
   }
 
-  Future<void> removeFromCart(String productID) async {
+  Future<void> removeFromCart(String productId, String variation) async {
     String userId = getCurrentUserId();
-    DocumentReference userRef = FirebaseFirestore.instance.collection('Users').doc(userId);
+    DocumentReference userRef =
+        FirebaseFirestore.instance.collection('Users').doc(userId);
 
     return FirebaseFirestore.instance.runTransaction((transaction) async {
       DocumentSnapshot snapshot = await transaction.get(userRef);
@@ -130,20 +101,24 @@ class _CartScreenState extends State<CartScreen> {
       }
 
       List<dynamic> cartList = snapshot.get('cart') ?? [];
-      cartList.removeWhere((item) => item['productId'] == productID);
+      cartList.removeWhere((item) =>
+          item['productId'] == productId && item['variation'] == variation);
 
       transaction.update(userRef, {'cart': cartList});
 
       setState(() {
-        cartItems.removeWhere((item) => item.productID == productID);
+        cartItems.removeWhere((item) =>
+            item['productId'] == productId && item['variation'] == variation);
         totalAmount = calculateTotalAmount(cartItems);
       });
     });
   }
 
-  Future<void> updateQuantity(String productID, int newQuantity) async {
+  Future<void> updateQuantity(
+      String productId, String variation, int newQuantity) async {
     String userId = getCurrentUserId();
-    DocumentReference userRef = FirebaseFirestore.instance.collection('Users').doc(userId);
+    DocumentReference userRef =
+        FirebaseFirestore.instance.collection('Users').doc(userId);
 
     return FirebaseFirestore.instance.runTransaction((transaction) async {
       DocumentSnapshot snapshot = await transaction.get(userRef);
@@ -152,7 +127,8 @@ class _CartScreenState extends State<CartScreen> {
       }
 
       List<dynamic> cartList = snapshot.get('cart') ?? [];
-      int index = cartList.indexWhere((item) => item['productId'] == productID);
+      int index = cartList.indexWhere((item) =>
+          item['productId'] == productId && item['variation'] == variation);
 
       if (index != -1) {
         if (newQuantity > 0) {
@@ -165,10 +141,11 @@ class _CartScreenState extends State<CartScreen> {
       transaction.update(userRef, {'cart': cartList});
 
       setState(() {
-        int itemIndex = cartItems.indexWhere((item) => item.productID == productID);
+        int itemIndex = cartItems.indexWhere((item) =>
+            item['productId'] == productId && item['variation'] == variation);
         if (itemIndex != -1) {
           if (newQuantity > 0) {
-            cartItems[itemIndex].quantity = newQuantity;
+            cartItems[itemIndex]['quantity'] = newQuantity;
           } else {
             cartItems.removeAt(itemIndex);
           }
@@ -178,55 +155,45 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
-  void updatePrice(String productId, int newQuantity, double price) {
+  void navigateToCheckout() {
+    List<Map<String, dynamic>> selectedItems =
+        cartItems.where((item) => item['isSelected']).toList();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CheckoutScreen(selectedItems: selectedItems),
+      ),
+    );
+  }
+
+  void updateItemSelection(
+      String productId, String variation, bool isSelected) {
     setState(() {
-      int index = cartItems.indexWhere((item) => item.productID == productId);
+      int index = cartItems.indexWhere((item) =>
+          item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
-        cartItems[index].quantity = newQuantity;
+        cartItems[index]['isSelected'] = isSelected;
         totalAmount = calculateTotalAmount(cartItems);
       }
+      allItemsSelected = cartItems.every((item) => item['isSelected']);
     });
   }
 
-  void handleItemSelection(String productId, bool isSelected) {
+  void toggleAllItemsSelection(bool? value) {
     setState(() {
-      int index = cartItems.indexWhere((item) => item.productID == productId);
-      if (index != -1) {
-        cartItems[index].isSelected = isSelected;
-        allItemsSelected = cartItems.every((item) => item.isSelected);
+      allItemsSelected = value ?? false;
+      for (var item in cartItems) {
+        item['isSelected'] = allItemsSelected;
       }
+      totalAmount = calculateTotalAmount(cartItems);
     });
-  }
-
-
-  void navigateToCheckout() {
-    List<Map<String, String>> selectedItems = cartItems
-        .where((item) => item.isSelected)
-        .map((item) => {
-      'productId': item.productID,
-      'variation': item.variation,
-    })
-        .toList();
-
-    if (selectedItems.isNotEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CheckoutScreen(selectedItems: selectedItems),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please select items to checkout')),
-      );
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: StreamBuilder<List<CartItem>>(
+        child: StreamBuilder<List<Map<String, dynamic>>>(
           stream: fetchCartItems(),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
@@ -272,7 +239,8 @@ class _CartScreenState extends State<CartScreen> {
                         child: CircleAvatar(
                           backgroundColor: Colors.grey[100],
                           child: IconButton(
-                            icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                            icon: Icon(Icons.arrow_back_ios_new,
+                                color: Colors.black),
                             onPressed: () {
                               Navigator.pop(context);
                             },
@@ -340,15 +308,7 @@ class _CartScreenState extends State<CartScreen> {
                             Checkbox(
                               activeColor: Theme.of(context).primaryColor,
                               value: allItemsSelected,
-                              onChanged: (value) {
-                                setState(() {
-                                  allItemsSelected = value!;
-                                  for (var item in cartItems) {
-                                    item.isSelected = allItemsSelected;
-                                  }
-                                });
-                                print("All items selected: $allItemsSelected"); // Add this line for debugging
-                              },
+                              onChanged: toggleAllItemsSelection,
                             ),
                           ],
                         ),
@@ -361,49 +321,36 @@ class _CartScreenState extends State<CartScreen> {
                     padding: EdgeInsets.symmetric(horizontal: 8.0),
                     itemCount: cartItems.length,
                     itemBuilder: (context, index) {
-                      return CartProductTile(
-                        id: cartItems[index].productID,
-                        productImage: cartItems[index].productImage,
-                        productName: cartItems[index].productName,
-                        productPrice: cartItems[index].productPrice,
-                        quantity: cartItems[index].quantity,
-                        variation: cartItems[index].variation,
-                        selectedItem: cartItems[index].isSelected,
+                      final item = cartItems[index];
+                      return CartItemTile(
+                        productId: item['productId'],
+                        productImage: item['productImage'],
+                        productName: item['productName'],
+                        productPrice: item['productPrice'],
+                        quantity: item['quantity'],
+                        variation: item['variation'],
+                        isSelected: item['isSelected'],
                         onRemove: removeFromCart,
                         onUpdateQuantity: updateQuantity,
-                        onUpdatePrice: updatePrice,
-                        onSelectItem: handleItemSelection,
-                        showCheckbox: cartItems.length > 1,
-                        onBuyNow: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => CheckoutScreen(
-                                selectedItems: [{
-                                  'productId': cartItems[index].productID,
-                                  'variation': cartItems[index].variation,
-                                }],
-                              ),
-                            ),
-                          );
-                        },
+                        onUpdateSelection: updateItemSelection,
                       );
                     },
                   ),
                 ),
-                if (cartItems.length > 1)
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: ElevatedButton(
-                      child: Text('Buy Selected Items'),
-                      onPressed: navigateToCheckout,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: hexToColor('#343434'),
-                        foregroundColor: Colors.white,
-                        minimumSize: Size(double.infinity, 50),
-                      ),
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: ElevatedButton(
+                    child: Text('Buy Selected Items'),
+                    onPressed: cartItems.any((item) => item['isSelected'])
+                        ? navigateToCheckout
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: hexToColor('#343434'),
+                      foregroundColor: Colors.white,
+                      minimumSize: Size(double.infinity, 50),
                     ),
                   ),
+                ),
               ],
             );
           },
@@ -413,94 +360,107 @@ class _CartScreenState extends State<CartScreen> {
   }
 }
 
-class CartProductTile extends StatefulWidget {
-  final String id;
+class CartItemTile extends StatefulWidget {
+  final String productId;
   final String productImage;
   final String productName;
   final double productPrice;
   final int quantity;
   final String variation;
-  final bool selectedItem;
-  final Function(String) onRemove;
-  final Function(String, int) onUpdateQuantity;
-  final Function(String, int, double) onUpdatePrice;
-  final Function(String, bool) onSelectItem;
-  final bool showCheckbox;
-  final Function() onBuyNow;
+  final bool isSelected;
+  final Function(String, String) onRemove;
+  final Function(String, String, int) onUpdateQuantity;
+  final Function(String, String, bool) onUpdateSelection;
 
-  CartProductTile({
-    required this.id,
+  CartItemTile({
+    required this.productId,
     required this.productImage,
     required this.productName,
     required this.productPrice,
     required this.quantity,
     required this.variation,
+    required this.isSelected,
     required this.onRemove,
     required this.onUpdateQuantity,
-    required this.onUpdatePrice,
-    required this.onSelectItem,
-    required this.showCheckbox,
-    required this.onBuyNow,
-    this.selectedItem = false,
+    required this.onUpdateSelection,
   });
 
   @override
-  State<CartProductTile> createState() => _CartProductTileState();
+  State<CartItemTile> createState() => _CartItemTileState();
 }
 
-class _CartProductTileState extends State<CartProductTile> {
+class _CartItemTileState extends State<CartItemTile> {
   bool _isInWishlist = false;
+  late bool _isSelected;
+  late Map<String, dynamic> _wishlistItem;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void initState() {
     super.initState();
-    _checkIfInWishlist();
+    _isSelected = widget.isSelected;
+    _checkWishlistStatus();
   }
 
-  void _checkIfInWishlist() async {
-    String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(userId)
-        .get();
-
-    if (userDoc.exists) {
-      String wishlistString = userDoc.get('wishlist') ?? '';
-      List<String> wishlist = wishlistString.split(',').where((item) => item.isNotEmpty).toList();
+  @override
+  void didUpdateWidget(CartItemTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isSelected != widget.isSelected) {
       setState(() {
-        _isInWishlist = wishlist.contains(widget.id);
+        _isSelected = widget.isSelected;
       });
     }
   }
 
-  void _toggleWishlist() async {
+  void _checkWishlistStatus() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc =
+          await _firestore.collection('Users').doc(user.uid).get();
+      if (userDoc.exists) {
+        List<dynamic> wishlist =
+            (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
+        setState(() {
+          _isInWishlist = wishlist.any((item) =>
+              item['productId'] == widget.productId &&
+              item['variation'] == widget.variation);
+        });
+      }
+    }
+  }
+
+  Future<void> _toggleWishlist() async {
+    User? user = _auth.currentUser;
+    if (user == null) {
+      print('User is not logged in');
+      return;
+    }
+
     setState(() {
       _isInWishlist = !_isInWishlist;
     });
 
-    String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    DocumentReference userRef = FirebaseFirestore.instance.collection('Users').doc(userId);
-
     try {
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        DocumentSnapshot snapshot = await transaction.get(userRef);
-        if (snapshot.exists) {
-          Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
-          String wishlistString = userData['wishlist'] ?? '';
-          List<String> wishlist = wishlistString.split(',').where((item) => item.isNotEmpty).toList();
+      DocumentReference userDocRef =
+          _firestore.collection('Users').doc(user.uid);
+      Map<String, dynamic> wishlistItem = {
+        'productId': widget.productId,
+        'variation': widget.variation,
+      };
 
-          if (_isInWishlist) {
-            if (!wishlist.contains(widget.id)) {
-              wishlist.add(widget.id);
-            }
-          } else {
-            wishlist.remove(widget.id);
-          }
-
-          String updatedWishlistString = wishlist.join(',');
-          transaction.update(userRef, {'wishlist': updatedWishlistString});
-        }
-      });
+      if (_isInWishlist) {
+        await userDocRef.update({
+          'wishlist': FieldValue.arrayUnion([wishlistItem])
+        });
+        print('Added to wishlist: $wishlistItem');
+      } else {
+        await userDocRef.update({
+          'wishlist': FieldValue.arrayRemove([wishlistItem])
+        });
+        print('Removed from wishlist: $wishlistItem');
+      }
     } catch (e) {
       print('Error updating wishlist: $e');
       setState(() {
@@ -588,8 +548,8 @@ class _CartProductTileState extends State<CartProductTile> {
                       onPressed: () {
                         int newQuantity = widget.quantity - 1;
                         if (newQuantity >= 0) {
-                          widget.onUpdateQuantity(widget.id, newQuantity);
-                          widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
+                          widget.onUpdateQuantity(
+                              widget.productId, widget.variation, newQuantity);
                         }
                       },
                     ),
@@ -598,8 +558,8 @@ class _CartProductTileState extends State<CartProductTile> {
                       icon: Icon(Icons.add),
                       onPressed: () {
                         int newQuantity = widget.quantity + 1;
-                        widget.onUpdateQuantity(widget.id, newQuantity);
-                        widget.onUpdatePrice(widget.id, newQuantity, widget.productPrice);
+                        widget.onUpdateQuantity(
+                            widget.productId, widget.variation, newQuantity);
                       },
                     ),
                   ],
@@ -609,9 +569,11 @@ class _CartProductTileState extends State<CartProductTile> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     GestureDetector(
-                      onTap: () => widget.onRemove(widget.id),
+                      onTap: () =>
+                          widget.onRemove(widget.productId, widget.variation),
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 12.0, vertical: 8.0),
                         decoration: BoxDecoration(
                           border: Border.all(color: hexToColor('#343434')),
                           borderRadius: BorderRadius.circular(100.0),
@@ -627,9 +589,26 @@ class _CartProductTileState extends State<CartProductTile> {
                     ),
                     SizedBox(width: 8.0),
                     GestureDetector(
-                      onTap: widget.onBuyNow,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CheckoutScreen(selectedItems: [
+                              {
+                                'productId': widget.productId,
+                                'productName': widget.productName,
+                                'productPrice': widget.productPrice,
+                                'quantity': widget.quantity,
+                                'variation': widget.variation,
+                              }
+                            ]),
+                          ),
+                        );
+                      },
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 12.0, vertical: 8.0),
                         decoration: BoxDecoration(
                           color: hexToColor('#343434'),
                           borderRadius: BorderRadius.circular(100.0),
@@ -643,21 +622,23 @@ class _CartProductTileState extends State<CartProductTile> {
                         ),
                       ),
                     ),
-                    if (widget.showCheckbox) ...[
-                      SizedBox(width: 8.0),
-                      Checkbox(
-                        checkColor: Colors.white,
-                        activeColor: Colors.black,
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(color: Colors.black),
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        value: widget.selectedItem,
-                        onChanged: (value) {
-                          widget.onSelectItem(widget.id, value ?? false);
-                        },
+                    SizedBox(width: 8.0),
+                    Checkbox(
+                      checkColor: Colors.black,
+                      activeColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black),
+                        borderRadius: BorderRadius.circular(4.0),
                       ),
-                    ],
+                      value: _isSelected,
+                      onChanged: (value) {
+                        setState(() {
+                          _isSelected = value ?? false;
+                        });
+                        widget.onUpdateSelection(
+                            widget.productId, widget.variation, _isSelected);
+                      },
+                    ),
                   ],
                 )
               ],

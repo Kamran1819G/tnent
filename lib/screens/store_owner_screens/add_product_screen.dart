@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/category_model.dart';
+import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/screens/store_owner_screens/optionals_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -11,7 +11,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
 
 class AddProductScreen extends StatefulWidget {
-  final CategoryModel category;
+  final StoreCategoryModel category;
   final String storeId;
 
   AddProductScreen({required this.category, required this.storeId});
@@ -33,23 +33,22 @@ class _AddProductScreenState extends State<AddProductScreen> {
   TextEditingController _stockQuantityController = TextEditingController();
 
   List<String> categories = [
-    'Clothing',
-    'Accessories',
-    'Electronics',
-    'Food',
-    'Florist',
-    'Sports',
-    'Book Store',
-    'Stationery',
-    'Beauty Apparels',
-    'Musical Instruments',
-    'Eyewares',
-    'Furniture',
-    'Home Decor',
-    'Jewelry',
-    'Shoes',
-    'Toys',
-    'Watches',
+    "Clothings",
+    "Accessories",
+    "Electronics",
+    "Foods",
+    "Florists",
+    "Sports",
+    "Book Stores",
+    "Stationeries",
+    "Beauty Apparels",
+    "Eyewares",
+    "Furnitures",
+    "Home Decors",
+    "Jewelries",
+    "Shoes",
+    "Toys",
+    "Watches"
   ];
 
   List<String> multiOptionCategories = [

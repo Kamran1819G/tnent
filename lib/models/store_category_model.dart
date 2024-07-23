@@ -1,19 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class CategoryModel {
+class StoreCategoryModel {
   final String id;
   final String name;
   final int totalProducts;
   List<String> productIds; // Change to List<String>
 
-  CategoryModel({
+  StoreCategoryModel({
     required this.id,
     required this.name,
     required this.totalProducts,
     required this.productIds,
   });
 
-  factory CategoryModel.fromFirestore(DocumentSnapshot doc) {
+  factory StoreCategoryModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     List<dynamic> productIdsDynamic = data['productIds'] ?? [];
     List<String> productIds = productIdsDynamic.map((id) {
@@ -24,7 +24,7 @@ class CategoryModel {
         return ''; // Return an empty string for non-string types
       }
     }).toList();
-    return CategoryModel(
+    return StoreCategoryModel(
       id: doc.id,
       name: data['name'] ?? '',
       totalProducts: data['totalProducts'] ?? 0,

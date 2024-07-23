@@ -27,6 +27,7 @@ class ProductDetailScreen extends StatefulWidget {
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   PageController imagesController = PageController(viewportFraction: 0.6);
+  late ProductModel _product;
   late String _selectedVariation;
   late ProductVariant _selectedVariant;
   bool _isInWishlist = false;
@@ -34,6 +35,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   late Future<StoreModel> _storeFuture;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  String _flagImage = 'assets/grey-flag.png';
 
   List<ProductModel> relatedProducts = List.generate(5, (index) {
     return ProductModel(
@@ -82,9 +84,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   @override
   void initState() {
     super.initState();
+    _product = widget.product;
     _storeFuture = _fetchStore();
     _initializeSelectedVariation();
     _checkWishlistStatus();
+    _checkUserVote();
   }
 
 
@@ -182,6 +186,124 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
+  Future<void> _checkUserVote() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentSnapshot voteDoc = await _firestore
+          .collection('Users')
+          .doc(user.uid)
+          .collection('votes')
+          .doc(_product.productId)
+          .get();
+
+      if (voteDoc.exists) {
+        Map<String, dynamic> voteData = voteDoc.data() as Map<String, dynamic>;
+        setState(() {
+          if (voteData['greenFlag'] == true) {
+            _flagImage = 'assets/green-flag.png';
+          } else if (voteData['redFlag'] == true) {
+            _flagImage = 'assets/red-flag.png';
+          }
+        });
+      }
+    }
+  }
+
+  Future<void> handleVote(String voteType) async {
+    User? user = _auth.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please log in to vote')),
+      );
+      return;
+    }
+
+    String userId = user.uid;
+    String productId = _product.productId;
+
+    DocumentReference userVoteRef = _firestore.collection('Users').doc(userId).collection('votes').doc(productId);
+    DocumentReference productRef = _firestore.collection('products').doc(productId);
+
+    try {
+      await _firestore.runTransaction((transaction) async {
+        DocumentSnapshot voteDoc = await transaction.get(userVoteRef);
+        DocumentSnapshot productDoc = await transaction.get(productRef);
+
+        if (!productDoc.exists) {
+          throw Exception('Product does not exist');
+        }
+
+        Map<String, dynamic> productData = productDoc.data() as Map<String, dynamic>;
+        int greenFlags = productData['greenFlags'] ?? 0;
+        int redFlags = productData['redFlags'] ?? 0;
+
+        if (voteDoc.exists) {
+          Map<String, dynamic> previousVote = voteDoc.data() as Map<String, dynamic>;
+
+          if (previousVote['greenFlag'] && voteType == 'greenFlag') {
+            greenFlags--;
+            transaction.delete(userVoteRef);
+            _flagImage = 'assets/grey-flag.png';
+          } else if (previousVote['redFlag'] && voteType == 'redFlag') {
+            redFlags--;
+            transaction.delete(userVoteRef);
+            _flagImage = 'assets/grey-flag.png';
+          } else {
+            if (previousVote['greenFlag']) {
+              greenFlags--;
+            } else if (previousVote['redFlag']) {
+              redFlags--;
+            }
+
+            if (voteType == 'greenFlag') {
+              greenFlags++;
+              _flagImage = 'assets/green-flag.png';
+            } else {
+              redFlags++;
+              _flagImage = 'assets/red-flag.png';
+            }
+
+            transaction.set(userVoteRef, {
+              'greenFlag': voteType == 'greenFlag',
+              'redFlag': voteType == 'redFlag'
+            });
+          }
+        } else {
+          if (voteType == 'greenFlag') {
+            greenFlags++;
+            _flagImage = 'assets/green-flag.png';
+          } else {
+            redFlags++;
+            _flagImage = 'assets/red-flag.png';
+          }
+
+          transaction.set(userVoteRef, {
+            'greenFlag': voteType == 'greenFlag',
+            'redFlag': voteType == 'redFlag'
+          });
+        }
+
+        transaction.update(productRef, {
+          'greenFlags': greenFlags,
+          'redFlags': redFlags,
+        });
+
+        // Update the local product state
+        setState(() {
+          _product = _product.copyWith(greenFlags: greenFlags, redFlags: redFlags);
+        });
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Vote recorded successfully')),
+      );
+    } catch (error) {
+      print('Error recording vote: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to record vote. Please try again.')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -373,7 +495,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   child: CircleAvatar(
                                     backgroundColor: hexToColor('#F5F5F5'),
                                     child: Image.asset(
-                                      'assets/grey-flag.png',
+                                      _flagImage,
                                       width: 18,
                                       height: 18,
                                     ),
@@ -846,15 +968,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               CircleAvatar(
                 radius: 15,
                 backgroundColor: hexToColor('#F5F5F5'),
-                child: Icon(
-                  Icons.flag_rounded,
-                  color: Theme.of(context).primaryColor,
-                  size: 16,
+                child: Image.asset(
+                  _flagImage,
+                  width: 16,
+                  height: 16,
                 ),
               ),
               SizedBox(width: 4),
               Text(
-                '900',
+                '${_product.greenFlags + _product.redFlags}',
                 style: TextStyle(
                     color: Theme.of(context).primaryColor, fontSize: 16.0),
               ),
@@ -866,40 +988,51 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             children: [
               Column(
                 children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: hexToColor('#F5F5F5'),
-                    child: Image.asset(
-                      'assets/red-flag.png',
-                      width: 30,
-                      height: 30,
+                  GestureDetector(
+                    onTap: () async {
+                      await handleVote('redFlag');
+                      setState(() {}); // refresh UI
+                    },
+                    child: CircleAvatar(
+                      radius: 30,
+                      backgroundColor: hexToColor('#F5F5F5'),
+                      child: Image.asset(
+                        'assets/red-flag.png',
+                        width: 30,
+                        height: 30,
+                      ),
                     ),
                   ),
                   SizedBox(height: 10),
                   Text(
-                    '100',
+                    '${_product.redFlags}',
                     style:
-                        TextStyle(color: hexToColor('#9C9C9C'), fontSize: 16.0),
+                    TextStyle(color: hexToColor('#9C9C9C'), fontSize: 16.0),
                   ),
                 ],
               ),
               SizedBox(width: 20),
               Column(
                 children: [
-                  CircleAvatar(
-                    radius: 30,
-                    backgroundColor: hexToColor('#F5F5F5'),
-                    child: Image.asset(
-                      'assets/green-flag.png',
-                      width: 30,
-                      height: 30,
+                  GestureDetector(
+                    onTap: () async {
+                      await handleVote('greenFlag');
+                  },
+                    child: CircleAvatar(
+                      radius: 30,
+                      backgroundColor: hexToColor('#F5F5F5'),
+                      child: Image.asset(
+                        'assets/green-flag.png',
+                        width: 30,
+                        height: 30,
+                      ),
                     ),
                   ),
                   SizedBox(height: 10),
                   Text(
-                    '800',
+                    '${_product.greenFlags}',
                     style:
-                        TextStyle(color: hexToColor('#9C9C9C'), fontSize: 16.0),
+                    TextStyle(color: hexToColor('#9C9C9C'), fontSize: 16.0),
                   ),
                 ],
               ),
