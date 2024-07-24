@@ -1770,6 +1770,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   void initState() {
     super.initState();
     _loadUserAddress();
+   /// _sendOrderToMiddleman();
   }
 
   Future<Uint8List?> _capturePng() async {
@@ -1798,6 +1799,40 @@ class _TransactionScreenState extends State<TransactionScreen> {
       _userAddress = userData.data()?['address'];
     });
   }
+  /*
+  Future<void> _sendOrderToMiddleman() async {
+    try {
+      for (var entry in widget.storeDetails.entries) {
+        String storeId = entry.key;
+        StoreModel store = entry.value;
+
+        Map<String, dynamic> order = {
+          "DropOfAddress": "${_userAddress?['addressLine1']}, ${_userAddress?['addressLine2']}, ${_userAddress?['city']}, ${_userAddress?['state']} ${_userAddress?['zip']}",
+          "OrderTotal": widget.totalAmount,
+          "PickUpAddress": store.address,
+          "StoreLogo": store.logoUrl,
+          "StoreName": store.name,
+          "deliveryId": widget.orderIds[storeId],
+          "items": widget.items.where((item) => item['storeId'] == storeId).map((item) => {
+            "name": item['productName'],
+            "price": item['variationDetails'].price,
+            "quantity": item['quantity'],
+          }).toList(),
+          "paymentMethod": "Cash on Delivery"
+        };
+
+        await FirebaseFirestore.instance.collection('middleman_orders').add(order);
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Order sent to middleman_orders successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error sending order: $e')),
+      );
+    }
+  }*/
 
   @override
   Widget build(BuildContext context) {
