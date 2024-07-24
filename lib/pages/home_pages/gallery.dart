@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/pages/gallery_pages/deliver_anything_anywhere.dart';
@@ -59,10 +60,10 @@ class _GalleryState extends State<Gallery> {
   }
 
   Future<void> _updateStoreStatus(bool isActive) async {
-      await FirebaseFirestore.instance
-          .collection('Stores')
-          .doc(store.storeId)
-          .update({'isActive': isActive});
+    await FirebaseFirestore.instance
+        .collection('Stores')
+        .doc(store.storeId)
+        .update({'isActive': isActive});
   }
 
   @override
@@ -76,7 +77,8 @@ class _GalleryState extends State<Gallery> {
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             Container(
-              height: 100,
+              height: 100.h,
+              margin: EdgeInsets.only(top: 20.h),
               padding: EdgeInsets.symmetric(horizontal: 2.0),
               child: Row(
                 children: [
@@ -86,14 +88,14 @@ class _GalleryState extends State<Gallery> {
                         'Gallery'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontSize: 24.0,
+                          fontSize: 35.sp,
                           letterSpacing: 1.5,
                         ),
                       ),
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontSize: 28.0,
+                          fontSize: 35.sp,
                           color: Colors.green,
                         ),
                       ),
@@ -103,9 +105,11 @@ class _GalleryState extends State<Gallery> {
                   Container(
                     padding:
                         EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+                    height: 55.h,
+                    width: 155.w,
                     decoration: BoxDecoration(
                       color: hexToColor("#131312"),
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(28.r),
                     ),
                     child: Text(
                       'Contact Us',
@@ -113,7 +117,7 @@ class _GalleryState extends State<Gallery> {
                         color: Colors.white,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
-                        fontSize: 12.0,
+                        fontSize: 16.sp,
                       ),
                     ),
                   )
@@ -145,28 +149,29 @@ class _GalleryState extends State<Gallery> {
                                 builder: (context) => MyStoreProfileScreen(
                                       store: store,
                                     )));
-
                       },
                       child: Container(
-                        height: 100,
+                        height: 180.h,
+                        width: 604.w,
                         decoration: BoxDecoration(
                           color: hexToColor('#2D332F'),
                           borderRadius: BorderRadius.circular(20.0),
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Row(
                               children: [
                                 Container(
-                                  height: 70,
-                                  width: 70,
-                                  margin: EdgeInsets.symmetric(horizontal: 15.0),
+                                  height: 135.h,
+                                  width: 135.w,
+                                  margin:
+                                      EdgeInsets.symmetric(horizontal: 15.0),
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(15.0),
+                                    borderRadius: BorderRadius.circular(18.r),
                                     image: DecorationImage(
-                                      image:
-                                          NetworkImage(store.logoUrl),
+                                      image: NetworkImage(store.logoUrl),
                                       fit: BoxFit.cover,
                                     ),
                                   ),
@@ -177,32 +182,36 @@ class _GalleryState extends State<Gallery> {
                                   children: [
                                     Row(
                                       children: [
-                                        Container(
+                                        SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.475,
                                           child: RichText(
-                                            text: TextSpan(
-                                              text: store.name,
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontFamily: 'Gotham Black',
-                                                fontSize: 20.0,
+                                            text: TextSpan(children: [
+                                              TextSpan(
+                                                text: store.name,
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontFamily: 'Gotham Black',
+                                                  fontSize: 32.sp,
+                                                ),
                                               ),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(width: 8.0),
-                                        Container(
-                                          width: 8,
-                                          height: 8,
-                                          margin:
-                                              EdgeInsets.symmetric(vertical: 10),
-                                          decoration: BoxDecoration(
-                                            color: Colors.green,
-                                            borderRadius:
-                                                BorderRadius.circular(5),
+                                              TextSpan(
+                                                text: ' •',
+                                                style: TextStyle(
+                                                  fontFamily: 'Gotham Black',
+                                                  fontSize: 32.sp,
+                                                  color: hexToColor('#42FF00'),
+                                                ),
+                                              ),
+                                            ]),
+                                            overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                       ],
                                     ),
+                                    SizedBox(height: 8.h),
                                     Row(
                                       crossAxisAlignment:
                                           CrossAxisAlignment.center,
@@ -228,28 +237,24 @@ class _GalleryState extends State<Gallery> {
                                 ),
                               ],
                             ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(right: 15.0, top: 25),
-                              child: Switch(
-                                value: isActive,
-                                activeColor: hexToColor('#41FA00'),
-                                trackOutlineColor: WidgetStateColor.resolveWith(
-                                  (states) => Colors.grey,
-                                ),
-                                trackOutlineWidth:
-                                    WidgetStateProperty.resolveWith(
-                                  (states) => 1.0,
-                                ),
-                                activeTrackColor: Colors.transparent,
-                                inactiveTrackColor: Colors.transparent,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isActive = value;
-                                  });
-                                  _updateStoreStatus(value);
-                                },
+                            Switch(
+                              value: isActive,
+                              activeColor: hexToColor('#41FA00'),
+                              trackOutlineColor: WidgetStateColor.resolveWith(
+                                (states) => Colors.grey,
                               ),
+                              trackOutlineWidth:
+                                  WidgetStateProperty.resolveWith(
+                                (states) => 1.0,
+                              ),
+                              activeTrackColor: Colors.transparent,
+                              inactiveTrackColor: Colors.transparent,
+                              onChanged: (value) {
+                                setState(() {
+                                  isActive = value;
+                                });
+                                _updateStoreStatus(value);
+                              },
                             ),
                           ],
                         ),
@@ -309,7 +314,7 @@ class _GalleryState extends State<Gallery> {
             SizedBox(height: 20.0),
             GestureDetector(
               onTap: () {
-               /* Navigator.push(
+                /* Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => DeliverAnythingAnywhere()));*/
@@ -317,9 +322,11 @@ class _GalleryState extends State<Gallery> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(22.0),
                 child: ColorFiltered(
-                    colorFilter: ColorFilter.mode(
-                        Colors.black.withOpacity(0.45), BlendMode.darken),
-                    child: Image.asset("assets/deliver_anything_banner.png",),
+                  colorFilter: ColorFilter.mode(
+                      Colors.black.withOpacity(0.45), BlendMode.darken),
+                  child: Image.asset(
+                    "assets/deliver_anything_banner.png",
+                  ),
                 ),
               ),
             ),

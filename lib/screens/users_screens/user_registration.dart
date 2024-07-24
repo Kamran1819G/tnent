@@ -6,6 +6,7 @@ import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/services/firebase/firebase_auth_service.dart';
@@ -91,16 +92,18 @@ class _UserRegistrationState extends State<UserRegistration> {
   bool _validateFields() {
     switch (currentPage) {
       case 0:
-      // Validate phone number
+        // Validate phone number
         return _phoneController.text.length == 10;
       case 1:
-      // Validate OTP
-        return _otpControllers.every((controller) => controller.text.isNotEmpty);
+        // Validate OTP
+        return _otpControllers
+            .every((controller) => controller.text.isNotEmpty);
       case 2:
-      // Validate first name and last name
-        return _firstNameController.text.isNotEmpty && _lastNameController.text.isNotEmpty;
+        // Validate first name and last name
+        return _firstNameController.text.isNotEmpty &&
+            _lastNameController.text.isNotEmpty;
       case 3:
-      // Validate location
+        // Validate location
         return _locationController.text.isNotEmpty;
       default:
         return true;
@@ -128,7 +131,8 @@ class _UserRegistrationState extends State<UserRegistration> {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Location services are disabled. Please enable the services'),
+        content:
+            Text('Location services are disabled. Please enable the services'),
       ));
       return;
     }
@@ -147,7 +151,8 @@ class _UserRegistrationState extends State<UserRegistration> {
 
     if (permission == LocationPermission.deniedForever) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Location permissions are permanently denied, we cannot request permissions.'),
+        content: Text(
+            'Location permissions are permanently denied, we cannot request permissions.'),
       ));
       return;
     }
@@ -166,7 +171,8 @@ class _UserRegistrationState extends State<UserRegistration> {
 
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
-        String address = "${place.locality}, ${place.administrativeArea}, ${place.country}";
+        String address =
+            "${place.locality}, ${place.administrativeArea}, ${place.country}";
         setState(() {
           _locationController.text = address;
         });
@@ -205,6 +211,14 @@ class _UserRegistrationState extends State<UserRegistration> {
                 if (page == 3) {
                   _confettiController.play();
                 }
+                if (page == 4) {
+                  // Start a timer of 10 seconds when the last page is reached
+                  Timer(Duration(seconds: 10), () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => WidgetTree()), // Navigate to the Home screen
+                    );
+                  });
+                }
               },
               children: <Widget>[
                 // Page 1: Registration
@@ -227,11 +241,13 @@ class _UserRegistrationState extends State<UserRegistration> {
 
   Widget _buildRegistrationPage() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildUserRegistrationPageHeader(context, _pageController, currentPage),
-        SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+        SizedBox(height: 200.h),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          margin: EdgeInsets.only(left: 60.w),
+          width: 540.w,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -239,7 +255,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                 'Registration',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  fontSize: 26,
+                  fontSize: 40.sp,
                 ),
               ),
               Text(
@@ -248,90 +264,97 @@ class _UserRegistrationState extends State<UserRegistration> {
                   color: hexToColor('#636363'),
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w500,
-                  fontSize: 16,
+                  fontSize: 26.sp,
                 ),
               ),
             ],
           ),
         ),
-        SizedBox(height: 40),
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              height: 175,
-              width: 375,
-              decoration: BoxDecoration(
-                color: hexToColor('#F5F5F5'),
-                border: Border.all(
-                  color: hexToColor('#838383'),
-                  strokeAlign: BorderSide.strokeAlignInside,
-                  style: BorderStyle.solid,
+        SizedBox(height: 50.h),
+        Padding(
+          padding: EdgeInsets.only(left: 60.w),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                height: 285.h,
+                width: 515.w,
+                decoration: BoxDecoration(
+                  color: hexToColorWithOpacity('#E1E1E1', 0.2),
+                  border: Border.all(
+                    color: hexToColor('#838383'),
+                    strokeAlign: BorderSide.strokeAlignInside,
+                    style: BorderStyle.solid,
+                  ),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 50),
-              margin: EdgeInsets.only(bottom: 25),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/india_flag.png',
-                    height: 40,
-                  ),
-                  SizedBox(width: 15),
-                  Text(
-                    '+91',
-                    style: TextStyle(
-                      color: hexToColor('#636363'),
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 18,
-                      letterSpacing: 2,
+                padding: EdgeInsets.symmetric(horizontal: 50.w),
+                margin: EdgeInsets.only(bottom: 25.h),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/india_flag.png',
+                      height: 55.h,
+                      width: 75.w,
                     ),
-                  ),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _phoneController,
-                      textAlign: TextAlign.center,
+                    SizedBox(width: 15.w),
+                    Text(
+                      '+91',
                       style: TextStyle(
                         color: hexToColor('#636363'),
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w500,
-                        fontSize: 18,
+                        fontSize: 26.sp,
                         letterSpacing: 2,
                       ),
-                      decoration: InputDecoration(
-                          border: UnderlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Theme.of(context).primaryColor,
+                    ),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _phoneController,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: hexToColor('#636363'),
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 26.sp,
+                          letterSpacing: 2,
+                        ),
+                        decoration: InputDecoration(
+                            counterText: '',
+                            border: UnderlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).primaryColor,
+                              ),
                             ),
-                          ),
-                          contentPadding: EdgeInsets.only(bottom: -15)),
-                      maxLength: 10,
-                      keyboardType: TextInputType.phone,
+                          isDense: true,
+                        ),
+                        maxLength: 10,
+                        keyboardType: TextInputType.phone,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                child: GestureDetector(
+                  onTap: () {
+                      _proceedToNextPage();
+                  },
+                  child: CircleAvatar(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    radius: 40.w,
+                    child: Icon(
+                      Icons.check,
+                      color: Colors.white,
                     ),
                   ),
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              child: ElevatedButton(
-                onPressed: _proceedToNextPage,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  shape: CircleBorder(),
-                  padding: EdgeInsets.all(15),
-                ),
-                child: Icon(
-                  Icons.check,
-                  color: Colors.white,
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -339,11 +362,13 @@ class _UserRegistrationState extends State<UserRegistration> {
 
   Widget _buildVerificationPage() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildUserRegistrationPageHeader(context, _pageController, currentPage),
-        SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+        SizedBox(height: 200.h),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          margin: EdgeInsets.only(left: 60.w),
+          width: 540.w,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -351,7 +376,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                 'Verification',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  fontSize: 26,
+                  fontSize: 40.sp,
                 ),
               ),
               Text(
@@ -360,96 +385,107 @@ class _UserRegistrationState extends State<UserRegistration> {
                   color: hexToColor('#636363'),
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w500,
-                  fontSize: 16,
+                  fontSize: 26.sp,
                 ),
               ),
             ],
           ),
         ),
-        SizedBox(height: 40),
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              height: 175,
-              width: 375,
-              decoration: BoxDecoration(
-                color: hexToColor('#F5F5F5'),
-                border: Border.all(
-                  color: hexToColor('#838383'),
-                  strokeAlign: BorderSide.strokeAlignInside,
-                  style: BorderStyle.solid,
+        SizedBox(height: 50.h),
+        Padding(
+          padding: EdgeInsets.only(left: 60.w),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                height: 285.h,
+                width: 515.w,
+                decoration: BoxDecoration(
+                  color: hexToColor('#F5F5F5'),
+                  border: Border.all(
+                    color: hexToColor('#838383'),
+                    strokeAlign: BorderSide.strokeAlignInside,
+                    style: BorderStyle.solid,
+                  ),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              margin: EdgeInsets.only(bottom: 25),
-              child: Center(
-                child: Wrap(
-                  spacing: 10,
-                  children: List.generate(
-                    _otpControllers.length,
-                        (index) {
-                      return Container(
-                        height: 50.0,
-                        width: 50.0,
-                        child: TextField(
-                          controller: _otpControllers[index],
-                          focusNode: _focusNodes[index],
-                          textAlign: TextAlign.center,
-                          keyboardType: TextInputType.number,
-                          maxLength: 1,
-                          cursorColor: Theme.of(context).primaryColor,
-                          decoration: InputDecoration(
-                            counterText: '',
-                            border: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: hexToColor('#838383'),
-                              ),
+                padding: EdgeInsets.symmetric(horizontal: 50.w),
+                margin: EdgeInsets.only(bottom: 25.h),
+                child: Center(
+                  child: Wrap(
+                    spacing: 10.w,
+                    children: List.generate(
+                      _otpControllers.length,
+                      (index) {
+                        return Container(
+                          height: 50.h,
+                          width: 75.w,
+                          child: TextField(
+                            controller: _otpControllers[index],
+                            focusNode: _focusNodes[index],
+                            style: TextStyle(
+                              color: hexToColor('#636363'),
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 26.sp,
                             ),
-                          ),
-                          onChanged: (value) {
-                            if (value.isNotEmpty) {
-                              if (index + 1 < _otpControllers.length) {
-                                FocusScope.of(context).nextFocus();
+                            textAlign: TextAlign.center,
+                            keyboardType: TextInputType.number,
+                            maxLength: 1,
+                            cursorColor: Theme.of(context).primaryColor,
+                            decoration: InputDecoration(
+                              counterText: '',
+                              border: UnderlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: hexToColor('#838383'),
+                                ),
+                              ),
+                              isDense: true,
+                            ),
+                            onChanged: (value) {
+                              if (value.isNotEmpty) {
+                                if (index + 1 < _otpControllers.length) {
+                                  FocusScope.of(context).nextFocus();
+                                } else {
+                                  setState(() {
+                                    isButtonEnabled = true;
+                                  });
+                                  FocusScope.of(context).unfocus();
+                                }
                               } else {
-                                setState(() {
-                                  isButtonEnabled = true;
-                                });
-                                FocusScope.of(context).unfocus();
+                                if (index > 0) {
+                                  FocusScope.of(context).previousFocus();
+                                  setState(() {
+                                    isButtonEnabled = false;
+                                  });
+                                }
                               }
-                            } else {
-                              if (index > 0) {
-                                FocusScope.of(context).previousFocus();
-                                setState(() {
-                                  isButtonEnabled = false;
-                                });
-                              }
-                            }
-                          },
-                        ),
-                      );
-                    },
+                            },
+                          ),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
-            Positioned(
-              bottom: 0,
-              child: ElevatedButton(
-                onPressed: _proceedToNextPage,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  shape: CircleBorder(),
-                  padding: EdgeInsets.all(15),
-                ),
-                child: Icon(
-                  Icons.arrow_forward_ios,
-                  color: Colors.white,
+              Positioned(
+                bottom: 0,
+                child: GestureDetector(
+                  onTap: () {
+                    _proceedToNextPage();
+                  },
+                  child: CircleAvatar(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    radius: 40.w,
+                    child: Icon(
+                      Icons.check,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -457,120 +493,114 @@ class _UserRegistrationState extends State<UserRegistration> {
 
   Widget _buildNamePage() {
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         _buildUserRegistrationPageHeader(context, _pageController, currentPage),
-    SizedBox(height: MediaQuery.of(context).size.height * 0.1),
-    Container(
-    padding: EdgeInsets.symmetric(horizontal: 20),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    Text(
-    'What\'s Your Name?',
-    style: TextStyle(
-    fontWeight: FontWeight.w500,
-    fontSize: 20,
-    ),
-    ),
-    Text(
-    'Add your name and surname',
-    style: TextStyle(
-    color: hexToColor('#636363'),
-    fontFamily: 'Poppins',
-    fontWeight: FontWeight.w500,
-    fontSize: 14,
-    ),
-    ),
-    ],
-    ),
-    ),
-    SizedBox(height: 40),
-    Container(
-    margin: EdgeInsets.symmetric(horizontal: 16),
-    child: TextField(
-    controller: _firstNameController,
-    style: TextStyle(
-    fontFamily: 'Gotham',
-    fontWeight: FontWeight.w500,
-    fontSize: 16,
-    ),
-      decoration: InputDecoration(
-        label: Text('First Name'),
-        labelStyle: TextStyle(
-          color: Theme.of(context).primaryColor,
-          fontSize: 16,
-        ),
-        filled: true,
-        fillColor: hexToColor('#F5F5F5'),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: hexToColor('#838383'),
-            strokeAlign: BorderSide.strokeAlignInside,
-            style: BorderStyle.solid,
-          ),
-        ),
-      ),
-      keyboardType: TextInputType.name,
-    ),
-    ),
-          SizedBox(height: 20),
-          Container(
-            margin: EdgeInsets.symmetric(horizontal: 16),
-            child: TextField(
-              controller: _lastNameController,
-              style: TextStyle(
-                fontFamily: 'Gotham',
-                fontWeight: FontWeight.w500,
-                fontSize: 16,
-              ),
-              decoration: InputDecoration(
-                label: Text('Last Name'),
-                labelStyle: TextStyle(
-                  color: Theme.of(context).primaryColor,
-                  fontSize: 16,
-                ),
-                filled: true,
-                fillColor: hexToColor('#F5F5F5'),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    color: hexToColor('#838383'),
-                    strokeAlign: BorderSide.strokeAlignInside,
-                    style: BorderStyle.solid,
-                  ),
+        SizedBox(height: 200.h),
+        Container(
+          margin: EdgeInsets.only(left: 45.w),
+          width: 540.w,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'What\'s Your Name?',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 32.sp,
                 ),
               ),
-              keyboardType: TextInputType.name,
-            ),
+              Text(
+                'Add your name and surname',
+                style: TextStyle(
+                  color: hexToColor('#636363'),
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                  fontSize: 21.sp,
+                ),
+              ),
+            ],
           ),
-          SizedBox(height: MediaQuery.of(context).size.height * 0.4),
-          Center(
-            child: ElevatedButton(
-              onPressed: _proceedToNextPage,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Theme.of(context).primaryColor,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 100, vertical: 18),
-                textStyle: TextStyle(
-                  fontSize: 16,
+        ),
+        SizedBox(height: 75.h),
+        Container(
+          width: 515.w,
+          padding: EdgeInsets.only(left: 45.w),
+          child: Column(
+            children: [
+              TextField(
+                controller: _firstNameController,
+                style: TextStyle(
                   fontFamily: 'Gotham',
                   fontWeight: FontWeight.w500,
+                  fontSize: 16,
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                decoration: InputDecoration(
+                  label: Text('First Name'),
+                  labelStyle: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 16,
+                  ),
+                  fillColor: hexToColorWithOpacity('#D9D9D9', 0.2),
+                  filled: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.r),
+                    borderSide: BorderSide(
+                      color: hexToColor('#838383'),
+                      width: 1.0,
+                    ),
+                  ),
                 ),
+                keyboardType: TextInputType.name,
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('Continue', style: TextStyle(fontSize: 16)),
-                ],
+              SizedBox(height: 20.h),
+              TextField(
+                controller: _lastNameController,
+                style: TextStyle(
+                  fontFamily: 'Gotham',
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16,
+                ),
+                decoration: InputDecoration(
+                  label: Text('Last Name'),
+                  labelStyle: TextStyle(
+                    color: Theme.of(context).primaryColor,
+                    fontSize: 16,
+                  ),
+                  fillColor: hexToColorWithOpacity('#D9D9D9', 0.2),
+                  filled: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(20.r),
+                    borderSide: BorderSide(
+                      color: hexToColor('#838383'),
+                      width: 1.0,
+                    ),
+                  ),
+                ),
+                keyboardType: TextInputType.name,
               ),
+            ],
+          ),
+        ),
+        SizedBox(height: 75.h),
+        Center(
+          child: GestureDetector(
+            onTap: () {
+              _proceedToNextPage();
+            },
+            child: Container(
+              width: 345.w,
+              height: 95.h,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Text('Continue', style: TextStyle(fontSize: 28.sp, color: Colors.white)),
             ),
           ),
-        ],
+        ),
+      ],
     );
   }
 
@@ -579,9 +609,10 @@ class _UserRegistrationState extends State<UserRegistration> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildUserRegistrationPageHeader(context, _pageController, currentPage),
-        SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+        SizedBox(height: 200.h),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          margin: EdgeInsets.only(left: 45.w),
+          width: 540.w,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -589,7 +620,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                 'Where are you located?',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
-                  fontSize: 20,
+                  fontSize: 32.sp,
                 ),
               ),
               Text(
@@ -598,35 +629,44 @@ class _UserRegistrationState extends State<UserRegistration> {
                   color: hexToColor('#636363'),
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w500,
-                  fontSize: 14,
+                  fontSize: 20.sp,
                 ),
               ),
             ],
           ),
         ),
-        SizedBox(height: 40),
+        SizedBox(height: 50.h),
         Container(
-          margin: EdgeInsets.symmetric(horizontal: 16),
+          margin: EdgeInsets.only(left: 45.w),
+          width: 515.w,
           child: TextField(
             controller: _locationController,
             style: TextStyle(
               fontFamily: 'Gotham',
               fontWeight: FontWeight.w500,
-              fontSize: 16,
+              fontSize: 24.sp,
             ),
             decoration: InputDecoration(
               label: Text('Location'),
               labelStyle: TextStyle(
                 color: Theme.of(context).primaryColor,
-                fontSize: 16,
+                fontSize: 24.sp,
               ),
-              prefixIcon: Icon(
-                Icons.location_on,
-                size: 20,
+              prefixIcon: Image.asset(
+                'assets/icons/globe.png',
+                width: 25.w,
+                height: 25.h,
               ),
               prefixIconConstraints: BoxConstraints(
                 minWidth: 40,
               ),
+              suffixIcon: IconButton(
+                icon: Icon(Icons.my_location),
+                onPressed: () {
+                  _getCurrentLocation();
+                },
+              ),
+              suffixIconColor: Theme.of(context).primaryColor,
               prefixIconColor: Theme.of(context).primaryColor,
               filled: true,
               fillColor: hexToColor('#F5F5F5'),
@@ -642,67 +682,32 @@ class _UserRegistrationState extends State<UserRegistration> {
             keyboardType: TextInputType.name,
           ),
         ),
-        SizedBox(height: 20),
+        SizedBox(height: 100.h),
         Center(
-          child: ElevatedButton(
-            onPressed: _getCurrentLocation,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              textStyle: TextStyle(
-                fontSize: 14,
-                fontFamily: 'Gotham',
-                fontWeight: FontWeight.w500,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.my_location, size: 18),
-                SizedBox(width: 8),
-                Text('Use Current Location', style: TextStyle(fontSize: 14)),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(height: MediaQuery.of(context).size.height * 0.3),
-        Center(
-          child: ElevatedButton(
-            onPressed: () async {
+          child: GestureDetector(
+            onTap: () async {
               if (_validateFields()) {
                 await addUserDetails();
                 _pageController.jumpToPage(currentPage + 1);
               } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Please fill in all required fields correctly.'),
+                    content:
+                    Text('Please fill in all required fields correctly.'),
                     backgroundColor: Colors.red,
                   ),
                 );
               }
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
-              foregroundColor: Colors.white,
-              padding: EdgeInsets.symmetric(horizontal: 100, vertical: 18),
-              textStyle: TextStyle(
-                fontSize: 16,
-                fontFamily: 'Gotham',
-                fontWeight: FontWeight.w500,
+            child: Container(
+              width: 345.w,
+              height: 95.h,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Theme.of(context).primaryColor,
+                borderRadius: BorderRadius.circular(20.r),
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('Continue', style: TextStyle(fontSize: 16)),
-              ],
+              child: Text('Continue', style: TextStyle(fontSize: 28.sp, color: Colors.white)),
             ),
           ),
         ),
@@ -715,7 +720,7 @@ class _UserRegistrationState extends State<UserRegistration> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         _buildUserRegistrationPageHeader(context, _pageController, currentPage),
-        SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+        SizedBox(height: 100.h),
         Stack(
           alignment: Alignment.center,
           children: [
@@ -726,18 +731,18 @@ class _UserRegistrationState extends State<UserRegistration> {
               colors: [Theme.of(context).primaryColor],
             ),
             ClipRRect(
-              borderRadius: BorderRadius.circular(100),
+              borderRadius: BorderRadius.circular(50.r),
               child: Image.asset(
                 'assets/congratulation.png',
-                width: 200,
-                height: 200,
+                width: 425.w,
+                height: 340.h,
               ),
             ),
           ],
         ),
-        SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+        SizedBox(height: 200.h),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          width: 430.w,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -746,25 +751,25 @@ class _UserRegistrationState extends State<UserRegistration> {
                 style: TextStyle(
                   color: hexToColor('#2A2A2A'),
                   fontWeight: FontWeight.w500,
-                  fontSize: 34,
+                  fontSize: 42.sp,
                 ),
                 textAlign: TextAlign.center,
               ),
+              SizedBox(height: 20.h),
               Text(
                 'Your account has been created',
                 style: TextStyle(
                   color: hexToColor('#636363'),
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w500,
-                  fontSize: 18,
+                  fontSize: 28.sp,
                 ),
-                maxLines: 2,
                 textAlign: TextAlign.center,
               ),
             ],
           ),
         ),
-        SizedBox(height: MediaQuery.of(context).size.height * 0.25),
+        SizedBox(height: 300.h),
         Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
@@ -774,7 +779,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                 color: hexToColor('#636363'),
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w500,
-                fontSize: 12,
+                fontSize: 17.sp,
               ),
             ),
             Text(
@@ -783,12 +788,11 @@ class _UserRegistrationState extends State<UserRegistration> {
                 color: Theme.of(context).primaryColor,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w500,
-                fontSize: 12,
+                fontSize: 17.sp,
               ),
             ),
           ],
         ),
-        SizedBox(height: 20),
       ],
     );
   }
@@ -796,25 +800,26 @@ class _UserRegistrationState extends State<UserRegistration> {
   Widget _buildUserRegistrationPageHeader(
       BuildContext context, PageController controller, int currentPage) {
     return Container(
-      height: 100,
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      height: 100.h,
+      margin: EdgeInsets.only(top: 16.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.h),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 12.0.h),
             decoration: BoxDecoration(
               color: hexToColor('#272822'),
-              borderRadius: BorderRadius.circular(20.0),
+              borderRadius: BorderRadius.circular(50.r),
             ),
             child: Row(
               children: [
                 Image.asset('assets/white_tnennt_logo.png',
-                    width: 20, height: 20),
-                SizedBox(width: 10),
+                    width: 30.w, height: 30.w),
+                SizedBox(width: 16.w),
                 Text(
                   'Tnennt inc.',
                   style:
-                  TextStyle(color: hexToColor('#E6E6E6'), fontSize: 14.0),
+                      TextStyle(color: hexToColor('#E6E6E6'), fontSize: 16.sp),
                 ),
               ],
             ),

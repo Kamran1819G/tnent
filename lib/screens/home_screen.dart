@@ -7,6 +7,7 @@ import 'package:tnennt/pages/home_pages/community.dart';
 import 'package:tnennt/pages/home_pages/gallery.dart';
 import 'package:tnennt/pages/home_pages/home.dart';
 import 'package:tnennt/models/user_model.dart';
+import 'package:tnennt/splash_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -60,34 +61,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return _isLoading
+        ? SplashScreen()
+        : Scaffold(
       body: SafeArea(
-        child: _isLoading
-            ? Center(
-                child: RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: 'Tnennt',
-                        style: TextStyle(
-                          color: hexToColor('#2D332F'),
-                          fontFamily: 'Gotham Black',
-                          fontSize: 30,
-                        ),
-                      ),
-                      TextSpan(
-                        text: ' •',
-                        style: TextStyle(
-                          fontFamily: 'Gotham Black',
-                          fontSize: 30.0,
-                          color: hexToColor('#42FF00'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            : Stack(
+        child: Stack(
                 children: [
                   PageView(
                     physics: NeverScrollableScrollPhysics(),

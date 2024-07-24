@@ -5,8 +5,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/models/user_model.dart';
+import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
 
 import '../../services/firebase/firebase_auth_service.dart';
 import '../../helpers/color_utils.dart';
@@ -30,11 +32,11 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   Future<UserModel> fetchUserData() async {
     final currentUser = FirebaseAuth.instance.currentUser!;
-      final doc = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(currentUser.uid)
-          .get();
-      return UserModel.fromFirestore(doc);
+    final doc = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(currentUser.uid)
+        .get();
+    return UserModel.fromFirestore(doc);
   }
 
   @override
@@ -59,12 +61,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   SizedBox(height: 20.0),
                   // Profile Card
                   Container(
-                    height: 125,
-                    width: double.infinity,
+                    height: 230.h,
+                    width: 620.w,
                     margin: EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
                       color: hexToColor('#2D332F'),
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(20.r),
                     ),
                     child: Stack(
                       children: [
@@ -73,12 +75,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                           top: 25.0,
                           child: CircleAvatar(
                             backgroundColor: hexToColor('#F5F5F5'),
-                            radius: 16,
+                            radius: 27.w,
                             child: IconButton(
                               icon: Icon(
                                 Icons.arrow_back_ios_new,
                                 color: Colors.black,
-                                size: 16,
+                                size: 22.sp,
                               ),
                               onPressed: () {
                                 Navigator.pop(context);
@@ -93,32 +95,35 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 10),
                                 child: GestureDetector(
                                   onTap: () {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => AddProfileImageScreen(),
+                                        builder: (context) =>
+                                            AddProfileImageScreen(),
                                       ),
                                     ).then((_) => setState(() {
-                                      _userFuture = fetchUserData();
-                                    }));
+                                          _userFuture = fetchUserData();
+                                        }));
                                   },
                                   child: Stack(
                                     children: [
                                       CircleAvatar(
-                                        radius: 40,
-                                        backgroundColor: Theme.of(context).primaryColor,
+                                        radius: 57.w,
+                                        backgroundColor:
+                                            Theme.of(context).primaryColor,
                                         backgroundImage: user.photoURL != null
                                             ? NetworkImage(user.photoURL!)
                                             : null,
                                         child: user.photoURL == null
                                             ? Icon(
-                                          Icons.person,
-                                          color: Colors.white,
-                                          size: 40,
-                                        )
+                                                Icons.person,
+                                                color: Colors.white,
+                                                size: 40.sp,
+                                              )
                                             : null,
                                       ),
                                       Positioned(
@@ -134,29 +139,31 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                   ),
                                 ),
                               ),
-                              SizedBox(width: 10.0),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '${user.firstName} ${user.lastName}',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 26.0,
+                              SizedBox(width: 10.w),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.55,
+                                child: RichText(
+                                  text: TextSpan(children: [
+                                    TextSpan(
+                                      text:
+                                          '${user.firstName} ${user.lastName}',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Gotham Black',
+                                        fontSize: 44.sp,
+                                      ),
                                     ),
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  SizedBox(width: 10.0),
-                                  Container(
-                                    width: 8,
-                                    height: 8,
-                                    margin: EdgeInsets.symmetric(vertical: 25),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green,
-                                      borderRadius: BorderRadius.circular(5),
+                                    TextSpan(
+                                      text: ' •',
+                                      style: TextStyle(
+                                        fontFamily: 'Gotham Black',
+                                        fontSize: 34.sp,
+                                        color: hexToColor('#42FF00'),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ]),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ],
                           ),
@@ -164,29 +171,31 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       ],
                     ),
                   ),
-
-                  SizedBox(height: 20),
+                  SizedBox(height: 30.h),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
                     child: ListTile(
-                      contentPadding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
                       tileColor: hexToColor('#EDEDED'),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16.0),
                       ),
                       leading: Container(
-                        padding: EdgeInsets.all(10.0),
+                        height: 80.h,
+                        width: 80.w,
                         decoration: BoxDecoration(
                           color: Theme.of(context).primaryColor,
                           borderRadius: BorderRadius.circular(10.0),
                         ),
-                        child: Icon(CupertinoIcons.location_fill, color: Colors.white),
+                        child: Icon(CupertinoIcons.location_fill,
+                            color: Colors.white),
                       ),
                       title: Text(
-                        user.location ?? 'Address not set',
+                        user.address?['zip'] ?? 'Please set address',
                         style: TextStyle(
                           color: hexToColor('#4A4F4C'),
-                          fontSize: 16.0,
+                          fontSize: 24.sp,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -197,34 +206,45 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             style: TextStyle(
                               color: Theme.of(context).primaryColor,
                               fontFamily: 'Poppins',
-                              fontSize: 12.0,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           TextSpan(
-                            text: user.pincode ?? 'Not set',
+                            text: user.address?['pincode'] ?? 'Not set',
                             style: TextStyle(
                               color: hexToColor('#787878'),
                               fontFamily: 'Poppins',
-                              fontSize: 12.0,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ]),
                       ),
-                      trailing: Container(
-                        padding: EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(100.0),
+                      trailing: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => ChangeAddressScreen(
+                                      existingAddress: user.address)));
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(12.w),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(50.r),
+                          ),
+                          child: Icon(Icons.arrow_forward_ios,
+                              size: 24.sp,
+                              color: Theme.of(context).primaryColor),
                         ),
-                        child: Icon(Icons.arrow_forward_ios, size: 18, color: Theme.of(context).primaryColor),
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  SizedBox(height: 20.h),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
                     child: Column(
                       children: [
                         _buildMenuItem(Icons.person, 'About'),
@@ -234,33 +254,33 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 50),
+                  SizedBox(height: 200.h),
                   Container(
                     alignment: Alignment.center,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Auth().signOut();
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => SignInScreen()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Theme.of(context).primaryColor,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                        textStyle: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                        onPressed: () {
+                          Auth().signOut();
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => SignInScreen()),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          foregroundColor: Colors.white,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 15),
+                          textStyle: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50.r),
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(50),
-                        ),
-                      ),
-                      child: Text('Sign Out', style: TextStyle(fontSize: 14)),
-                    ),
+                        child: Text('Sign Out')),
                   ),
-                  SizedBox(height: 20.0)
                 ],
               ),
             );
@@ -272,23 +292,24 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   Widget _buildMenuItem(IconData icon, String title) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.all(12.w),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           CircleAvatar(
             backgroundColor: hexToColor('#2B2B2B'),
             child: Icon(
               icon,
               color: Colors.white,
-              size: 16,
+              size: 20.sp,
             ),
           ),
-          SizedBox(width: 16.0),
+          SizedBox(width: 18.w),
           Text(
             title,
             style: TextStyle(
               color: hexToColor('#9B9B9B'),
-              fontSize: 14.0,
+              fontSize: 18.sp,
               letterSpacing: 1,
             ),
           ),
@@ -327,14 +348,18 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
     if (profileImage != null) {
       try {
         final String fileName = 'profile_images/${user.uid}';
-        final Reference reference = FirebaseStorage.instance.ref().child(fileName);
+        final Reference reference =
+            FirebaseStorage.instance.ref().child(fileName);
         final UploadTask uploadTask = reference.putFile(profileImage!);
         final TaskSnapshot taskSnapshot = await uploadTask;
         final String url = await taskSnapshot.ref.getDownloadURL();
         setState(() {
           photoURL = url;
         });
-        await FirebaseFirestore.instance.collection('Users').doc(user.uid).update({'photoURL': photoURL});
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .update({'photoURL': photoURL});
       } catch (e) {
         print('Error uploading image: $e');
       }
@@ -446,7 +471,7 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                       foregroundColor: Colors.white,
                       // Set the text color to white
                       padding:
-                      EdgeInsets.symmetric(horizontal: 100, vertical: 18),
+                          EdgeInsets.symmetric(horizontal: 100, vertical: 18),
                       // Set the padding
                       textStyle: TextStyle(
                         fontSize: 16, // Set the text size

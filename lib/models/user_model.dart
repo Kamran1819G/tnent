@@ -11,6 +11,7 @@ class UserModel {
   final String? pincode;
   final bool registered;
   final String? storeId;
+  Map<String, dynamic>? address;
   final List<String> likedPosts;
   final Timestamp createdAt;
   final Timestamp lastUpdated;
@@ -26,6 +27,7 @@ class UserModel {
     this.pincode,
     this.registered = false,
     this.storeId,
+    Map<String, dynamic>? address,
     List<String>? likedPosts,
     Timestamp? createdAt,
     Timestamp? lastUpdated,
@@ -48,6 +50,7 @@ class UserModel {
       pincode: data['pincode'],
       registered: data['registered'] ?? false,
       storeId: data['storeId'],
+      address: data['address'],
       likedPosts: List<String>.from(data['likedPosts'] ?? []),
       createdAt: data['createdAt'],
       lastUpdated: data['lastUpdated'],
@@ -65,6 +68,7 @@ class UserModel {
       'pincode': pincode,
       'registered': registered,
       'storeId': storeId,
+      'address': address,
       'likedPosts': likedPosts,
       'createdAt': createdAt,
       'lastUpdated': lastUpdated,
@@ -81,6 +85,7 @@ class UserModel {
     String? pincode,
     bool? registered,
     String? storeId,
+    Map<String, dynamic>? address,
     List<String>? likedPosts,
     Timestamp? lastUpdated,
   }) {
@@ -96,6 +101,7 @@ class UserModel {
       registered: registered ?? this.registered,
       storeId: storeId ?? this.storeId,
       likedPosts: likedPosts ?? this.likedPosts,
+      address: address ?? this.address,
       createdAt: this.createdAt,
       lastUpdated: lastUpdated ?? Timestamp.now(),
     );

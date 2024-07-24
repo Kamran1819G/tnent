@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/onboarding_screen.dart';
@@ -26,13 +27,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
-    return MaterialApp(
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-       primaryColor: hexToColor('#094446'),
-        fontFamily: 'Gotham Black',
+    return ScreenUtilInit(
+      designSize: Size(642, 1376),
+      builder: (_ , child) => MaterialApp(
+        theme: ThemeData(
+          scaffoldBackgroundColor: Colors.white,
+          primaryColor: hexToColor('#094446'),
+          fontFamily: 'Gotham Black',
+        ),
+        home: onboarding ? WidgetTree() : OnboardingScreen(),
       ),
-      home: onboarding ? WidgetTree() : OnboardingScreen(),
     );
   }
 }

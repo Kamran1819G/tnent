@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
@@ -232,9 +233,9 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
               SizedBox(height: 20.0),
               // Profile Card
               Container(
-                height: 200,
-                width: double.infinity,
-                margin: EdgeInsets.symmetric(horizontal: 10),
+                height: 290.h,
+                width: 618.w,
+                margin: EdgeInsets.symmetric(horizontal: 12.w),
                 decoration: BoxDecoration(
                   color: hexToColor('#2D332F'),
                   borderRadius: BorderRadius.circular(20.0),
@@ -284,8 +285,9 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 12.0, vertical: 6.0),
+                                padding: EdgeInsets.symmetric(horizontal: 12.0),
+                                height: 30.h,
+                                alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   color: Colors.transparent,
                                   border:
@@ -298,48 +300,52 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                     color: Colors.white,
                                     fontFamily: 'Poppins',
                                     fontWeight: FontWeight.w500,
-                                    fontSize: 8.0,
+                                    fontSize: 13.sp,
                                   ),
                                 ),
                               ),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    widget.store.name,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24.0,
+                              SizedBox(height: 12.h),
+                              SizedBox(
+                                width: 400.w,
+                                child: RichText(
+                                  text: TextSpan(children: [
+                                    TextSpan(
+                                      text: widget.store.name,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Gotham Black',
+                                        fontSize: 36.sp,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(width: 10.0),
-                                  Container(
-                                    width: 10,
-                                    height: 10,
-                                    margin: EdgeInsets.symmetric(vertical: 15),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green,
-                                      borderRadius: BorderRadius.circular(5),
+                                    TextSpan(
+                                      text: '•',
+                                      style: TextStyle(
+                                        fontFamily: 'Gotham Black',
+                                        fontSize: 36.sp,
+                                        color: hexToColor('#42FF00'),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ]),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
+                              SizedBox(height: 16.h),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Image.asset(
                                     'assets/icons/blue_globe.png',
-                                    height: 12.0,
-                                    width: 12.0,
+                                    height: 16.w,
+                                    width: 16.w,
                                   ),
-                                  SizedBox(width: 5.0),
+                                  SizedBox(width: 8.w),
                                   Text(
                                     widget.store.website,
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontFamily: 'Poppins',
-                                        fontSize: 12.0),
+                                        fontSize: 16.sp),
                                   ),
                                 ],
                               )
@@ -354,7 +360,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(Icons.ios_share, color: Colors.white, size: 22),
+                          Icon(Icons.ios_share, color: Colors.white, size: 25.sp),
                           SizedBox(width: 10.0),
                           Container(
                             padding: EdgeInsets.symmetric(
@@ -368,7 +374,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                               style: TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'Poppins',
-                                  fontSize: 12.0),
+                                  fontSize: 17.sp),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -407,21 +413,21 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                   ],
                 ),
               ),
-              SizedBox(height: 30.0),
+              SizedBox(height: 30.h),
 
               Container(
-                height: 125,
+                height: 225.h,
                 padding: EdgeInsets.symmetric(horizontal: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Container(
-                      height: 125,
-                      width: MediaQuery.of(context).size.width * 0.6,
-                      padding: EdgeInsets.all(8.0),
+                      height: 180.h,
+                      width: 390.w,
+                      padding: EdgeInsets.all(12.w),
                       decoration: BoxDecoration(
                         color: hexToColor('#DDF1EF'),
-                        borderRadius: BorderRadius.circular(12.0),
+                        borderRadius: BorderRadius.circular(22.r),
                       ),
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -439,13 +445,13 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                           'Store'.toUpperCase(),
                                           style: TextStyle(
                                             color: Colors.black,
-                                            fontSize: 15.0,
+                                            fontSize: 21.sp,
                                           ),
                                         ),
                                         Text(
                                           ' •',
                                           style: TextStyle(
-                                            fontSize: 15.0,
+                                            fontSize: 21.sp,
                                             fontFamily: 'Gotham Black',
                                             color: Colors.red,
                                           ),
@@ -456,7 +462,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                       'Engagement'.toUpperCase(),
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 15.0,
+                                        fontSize: 21.sp,
                                       ),
                                     ),
                                   ],
@@ -471,11 +477,11 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                         style: TextStyle(
                                           color: hexToColor('#676767'),
                                           fontFamily: 'Gotham',
-                                          fontSize: 8.0,
+                                          fontSize: 12.sp,
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                    SizedBox(width: 5.0),
+                                    SizedBox(width: 8.w),
                                     buildFlagButton(),
                                   ],
                                 ),
@@ -492,11 +498,11 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                     child: Container(
                                       key: ValueKey<bool>(isConnected),
                                       // Key helps AnimatedSwitcher identify the widget
-                                      padding: EdgeInsets.all(8.0),
+                                      padding: EdgeInsets.all(12.w),
                                       decoration: BoxDecoration(
                                         color: Colors.white,
                                         borderRadius:
-                                            BorderRadius.circular(50.0),
+                                            BorderRadius.circular(50.r),
                                       ),
                                       child: Row(
                                         crossAxisAlignment:
@@ -518,10 +524,10 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                                   ? Icons.check
                                                   : Icons.add,
                                               color: hexToColor('#272822'),
-                                              size: 16.0,
+                                              size: 18.sp,
                                             ),
                                           ),
-                                          SizedBox(width: 5.0),
+                                          SizedBox(width: 8.w),
                                           AnimatedSwitcher(
                                             duration:
                                                 Duration(milliseconds: 300),
@@ -532,7 +538,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                               key: ValueKey<bool>(isConnected),
                                               style: TextStyle(
                                                 color: hexToColor("#272822"),
-                                                fontSize: 10.0,
+                                                fontSize: 16.sp,
                                               ),
                                             ),
                                           ),
@@ -549,14 +555,14 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                       storeEngagement.toString(),
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 18.0,
+                                        fontSize: 24.sp,
                                       ),
                                     ),
                                     Text(
                                       'Connections'.toUpperCase(),
                                       style: TextStyle(
-                                        color: Colors.grey[700],
-                                        fontSize: 8.0,
+                                        color: hexToColor('#7D7D7D'),
+                                        fontSize: 12.sp,
                                       ),
                                     ),
                                   ],
@@ -565,7 +571,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                             )
                           ]),
                     ),
-                    SizedBox(width: 4.0),
+                    SizedBox(width: 8.w),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -578,12 +584,12 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                         );
                       },
                       child: Container(
-                        height: 125,
-                        width: 125,
+                        height: 180.h,
+                        width: 180.w,
                         padding: EdgeInsets.all(8.0),
                         decoration: BoxDecoration(
                           color: hexToColor('#EFEFEF'),
-                          borderRadius: BorderRadius.circular(12.0),
+                          borderRadius: BorderRadius.circular(22.r),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -597,13 +603,13 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontFamily: 'Gotham Black',
-                                      fontSize: 14.0,
+                                      fontSize: 21.sp,
                                     ),
                                   ),
                                   TextSpan(
                                     text: ' •',
                                     style: TextStyle(
-                                      fontSize: 14.0,
+                                      fontSize: 21.sp,
                                       fontFamily: 'Gotham Black',
                                       color: Colors.red,
                                     ),
@@ -615,14 +621,14 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                               'Community'.toUpperCase(),
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 14.0,
+                                fontSize: 21.sp,
                               ),
                             ),
                             Text(
                               'Post'.toUpperCase(),
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 14.0,
+                                fontSize: 21.sp,
                               ),
                             ),
                             Row(
@@ -636,14 +642,14 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                       widget.store.totalPosts.toString(),
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 18.0,
+                                        fontSize: 24.sp,
                                       ),
                                     ),
                                     Text(
                                       'Posts'.toUpperCase(),
                                       style: TextStyle(
-                                        color: Colors.grey[700],
-                                        fontSize: 8.0,
+                                        color: hexToColor('#7D7D7D'),
+                                        fontSize: 12.sp,
                                       ),
                                     ),
                                   ],

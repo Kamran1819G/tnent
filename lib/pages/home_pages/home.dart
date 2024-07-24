@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/models/product_model.dart';
@@ -31,6 +32,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> with TickerProviderStateMixin {
   late String firstName;
+  late String lastName;
   late TabController _tabController;
   int _selectedIndex = 0;
   bool isNewNotification = true;
@@ -149,6 +151,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     super.initState();
     setState(() {
       firstName = widget.currentUser.firstName;
+      lastName = widget.currentUser.lastName;
     });
     _tabController = TabController(
       length: 6,
@@ -214,25 +217,25 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   children: [
                     Text(getGreeting().toUpperCase(),
                         style: TextStyle(
-                            color: hexToColor('#727272'), fontSize: 12.0)),
+                            color: hexToColor('#727272'), fontSize: 18.sp)),
                     SizedBox(height: 8.0),
                     SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.55,
+                      width: MediaQuery.of(context).size.width * 0.5,
                       child: RichText(
                         text: TextSpan(children: [
                           TextSpan(
-                            text: '$firstName',
+                            text: '$firstName $lastName',
                             style: TextStyle(
                               color: Colors.black,
                               fontFamily: 'Gotham Black',
-                              fontSize: 24.0,
+                              fontSize: 35.sp,
                             ),
                           ),
                           TextSpan(
                             text: ' •',
                             style: TextStyle(
                               fontFamily: 'Gotham Black',
-                              fontSize: 24.0,
+                              fontSize: 35.sp,
                               color: hexToColor('#42FF00'),
                             ),
                           ),
@@ -252,10 +255,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 child: Icon(
                   Icons.shopping_cart_outlined,
                   color: hexToColor('#999999'),
-                  size: 24,
+                  size: 35.sp,
                 ),
               ),
-              SizedBox(width: 16.0),
+              SizedBox(width: 22.w),
               GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -269,17 +272,17 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   child: isNewNotification
                       ? Image.asset(
                           'assets/icons/new_notification_box.png',
-                          height: 24,
-                          width: 24,
+                          height: 35.h,
+                          width: 35.w,
                           fit: BoxFit.cover,
                         )
                       : Image.asset(
                           'assets/icons/no_new_notification_box.png',
-                          height: 24,
-                          width: 24,
+                          height: 35.h,
+                          width: 35.w,
                           fit: BoxFit.cover,
                         )),
-              SizedBox(width: 16.0),
+              SizedBox(width: 22.w),
               GestureDetector(
                 onTap: () {
                   Navigator.push(
@@ -309,11 +312,13 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 MaterialPageRoute(builder: (context) => ExploreScreen()));
           },
           child: Container(
-            margin: EdgeInsets.all(20),
-            padding: EdgeInsets.all(8),
+            margin: EdgeInsets.all(28.w),
+            padding: EdgeInsets.all(12.w),
+            width: 605.w,
+            height: 95.h,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(50),
+              borderRadius: BorderRadius.circular(50.r),
               border: Border.all(
                 width: 1,
                 color: hexToColor('#DDDDDD'),
@@ -323,10 +328,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 CircleAvatar(
-                  radius: 25.0,
+                  radius: 35.w,
                   backgroundColor: hexToColor('#EEEEEE'),
                   child: CircleAvatar(
-                    radius: 15.0,
+                    radius: 22.w,
                     backgroundColor: hexToColor('#DDDDDD'),
                     child: Icon(
                       Icons.search,
@@ -334,15 +339,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     ),
                   ),
                 ),
-                SizedBox(width: 20.0),
+                SizedBox(width: 30.sp),
                 Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       'Search Products & Store',
                       style: TextStyle(
                         color: hexToColor('#6D6D6D'),
-                        fontSize: 16.0,
+                        fontSize: 24.sp,
                       ),
                     ),
                     Text(
@@ -350,7 +355,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       style: TextStyle(
                         color: hexToColor('#989898'),
                         fontFamily: 'Gotham',
-                        fontSize: 10.0,
+                        fontSize: 14.sp,
                       ),
                     ),
                   ],
@@ -392,15 +397,16 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                           text: 'Tnennt',
                           style: TextStyle(
                             color: Colors.white,
-                            fontFamily: 'Gotham Black',
-                            fontSize: 14.0,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 24.sp,
                           ),
                         ),
                         TextSpan(
                           text: ' •',
                           style: TextStyle(
                             fontFamily: 'Gotham Black',
-                            fontSize: 14.0,
+                            fontSize: 24.sp,
                             color: hexToColor('#42FF00'),
                           ),
                         ),
@@ -409,7 +415,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     ),
                     Text(
                       'Store',
-                      style: TextStyle(color: Colors.white, fontSize: 14),
+                      style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500,fontSize: 24.sp),
                     )
                   ],
                 ),
@@ -422,7 +428,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   "Buy From Your Local Store At A Discounted Price",
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 14.0,
+                    fontSize: 20.sp,
                   ),
                 ),
               ),
@@ -701,22 +707,18 @@ class StoreTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ClipRRect(
-                borderRadius: BorderRadius.circular(18.0),
+                borderRadius: BorderRadius.circular(23.r),
                 child: Image.network(
                   store.logoUrl,
                   fit: BoxFit.fill,
-                  height: 75.0,
-                  width: 75.0,
+                  height: 120.h,
+                  width: 120.w,
                 )),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Text(
-                  store.name,
-                  style: TextStyle(fontSize: 12.0),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+            SizedBox(height: 12.h),
+            Text(
+              store.name,
+              style: TextStyle(fontSize: 16.sp),
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -748,21 +750,25 @@ class CategoryTile extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12.0),
-              child: Image.asset(
-                category['image'],
-                fit: BoxFit.cover,
+            Container(
+              height: 175.h,
+              width: 175.w,
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20.r),
+                  image: DecorationImage(
+                    image: AssetImage(category['image']),
+                    fit: BoxFit.cover,
+                  )),
               ),
-            ),
-            const SizedBox(height: 6.0),
+            SizedBox(height: 8.h),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
                 category['name'],
                 style: TextStyle(
                   color: hexToColor('#343434'),
-                  fontSize: 14.0,
+                  fontSize: 20.sp,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -902,44 +908,28 @@ class UpdateTile extends StatelessWidget {
         );
       },
       child: Container(
-        padding: EdgeInsets.all(8.0),
+        padding: EdgeInsets.symmetric(horizontal: 12.w),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 75.0,
-              height: 75.0,
+              width: 100.w,
+              height: 100.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-              ),
-              child: Padding(
-                padding: EdgeInsets.all(2.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white,
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.all(2.0),
-                    child: ClipOval(
-                      child: Image.asset(
-                        image,
-                        fit: BoxFit.cover,
-                        width: 75.0,
-                        height: 75.0,
-                      ),
-                    ),
-                  ),
+                image: DecorationImage(
+                  image: AssetImage(image),
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
-            SizedBox(height: 4.0),
+            SizedBox(height: 12.h),
             Text(
               name,
               style: TextStyle(
                 fontFamily: 'Poppins',
-                fontWeight: FontWeight.w500,
-                fontSize: 11.0,
+                fontWeight: FontWeight.w600,
+                fontSize: 15.sp,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,

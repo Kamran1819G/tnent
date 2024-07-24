@@ -2,8 +2,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_category_model.dart';
@@ -24,58 +23,6 @@ class MyStoreProfileScreen extends StatefulWidget {
   @override
   State<MyStoreProfileScreen> createState() => _MyStoreProfileScreenState();
 }
-class Update {
-  String id;
-  List<MediaItem> mediaItems;
-  String text;
-  DateTime timestamp;
-
-  Update({
-    required this.id,
-    required this.mediaItems,
-    required this.text,
-    required this.timestamp,
-  });
-
-  factory Update.fromMap(Map<String, dynamic> map) {
-    return Update(
-      id: map['id'] as String,
-      mediaItems: (map['mediaItems'] as List).map((item) => MediaItem.fromMap(item)).toList(),
-      text: map['text'] as String,
-      timestamp: (map['timestamp'] as Timestamp).toDate(),
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'mediaItems': mediaItems.map((item) => item.toMap()).toList(),
-      'text': text,
-      'timestamp': Timestamp.fromDate(timestamp),
-    };
-  }
-}
-
-class MediaItem {
-  String type;
-  String url;
-
-  MediaItem({required this.type, required this.url});
-
-  factory MediaItem.fromMap(Map<String, dynamic> map) {
-    return MediaItem(
-      type: map['type'] as String,
-      url: map['url'] as String,
-    );
-  }
-
-  Map<String, dynamic> toMap() {
-    return {
-      'type': type,
-      'url': url,
-    };
-  }
-}
 
 class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     with SingleTickerProviderStateMixin {
@@ -84,7 +31,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   late String storeName = store.name;
   late String storeCategory = store.category;
   late String storeLocation = store.location;
-  late  String storeWebsite = store.website;
+  late String storeWebsite = store.website;
   late bool isActive = store.isActive;
   late int totalProducts = store.totalProducts;
   late int totalPosts = store.totalPosts;
@@ -98,14 +45,19 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   bool isExpanded = false;
 
   List<StoreCategoryModel> categories = [];
-  List<Update> updates = [];
   List<ProductModel> allProducts = [];
   List<ProductModel> filteredProducts = [];
   TextEditingController searchController = TextEditingController();
 
-
   late AnimationController _controller;
   late Animation<double> _animation;
+
+  List<dynamic> highlights = List.generate(10, (index) {
+    return {
+      "name": "Sahachari",
+      "coverImage": "assets/sahachari_image.png",
+    };
+  });
 
   List<ProductModel> featuredProducts = List.generate(5, (index) {
     return ProductModel(
@@ -125,51 +77,47 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
       greenFlags: 0,
       redFlags: 0,
       variations: {
-          'S': ProductVariant(
-            price: 24.99,
-            mrp: 29.99,
-            discount: 16.67,
-            stockQuantity: 50,
-            sku: 'TS-S',
-          ),
-          'M': ProductVariant(
-            price: 24.99,
-            mrp: 29.99,
-            discount: 16.67,
-            stockQuantity: 100,
-            sku: 'TS-M',
-          ),
-          'L': ProductVariant(
-            price: 26.99,
-            mrp: 31.99,
-            discount: 15.63,
-            stockQuantity: 75,
-            sku: 'TS-L',
-          ),
+        'S': ProductVariant(
+          price: 24.99,
+          mrp: 29.99,
+          discount: 16.67,
+          stockQuantity: 50,
+          sku: 'TS-S',
+        ),
+        'M': ProductVariant(
+          price: 24.99,
+          mrp: 29.99,
+          discount: 16.67,
+          stockQuantity: 100,
+          sku: 'TS-M',
+        ),
+        'L': ProductVariant(
+          price: 26.99,
+          mrp: 31.99,
+          discount: 15.63,
+          stockQuantity: 75,
+          sku: 'TS-L',
+        ),
       },
     );
   });
 
   @override
-  void initState()
-  {
+  void initState() {
     super.initState();
     store = widget.store;
     fetchStore();
     _loadProducts();
-    _controller = AnimationController
-      (
+    _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    _animation = CurvedAnimation
-      (
+    _animation = CurvedAnimation(
       parent: _controller,
       curve: Curves.easeInOut,
     );
     super.initState();
     fetchCategories();
-    fetchUpdates();
   }
 
   @override
@@ -187,166 +135,9 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     setState(() {
       filteredProducts = allProducts
           .where((product) =>
-          product.name.toLowerCase().contains(query.toLowerCase()))
+              product.name.toLowerCase().contains(query.toLowerCase()))
           .toList();
     });
-  }
-
-  Future<void> fetchUpdates() async {
-    try {
-      DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('Stores')
-          .doc(store.storeId)
-          .get();
-
-      if (doc.exists && (doc.data() as Map<String, dynamic>).containsKey('updates')) {
-        List<dynamic> updatesList = (doc.data() as Map<String, dynamic>)['updates'];
-        setState(() {
-          updates = updatesList.map((update) => Update.fromMap(update as Map<String, dynamic>)).toList();
-          hasUpdates = updates.isNotEmpty;
-        });
-      } else {
-        setState(() {
-          hasUpdates = false;
-        });
-      }
-    } catch (e) {
-      print('Error fetching updates: $e');
-    }
-  }
-
-  Future<void> addUpdate(List<MediaItem> mediaItems, String text) async {
-    final newUpdate = Update(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      mediaItems: mediaItems,
-      text: text,
-      timestamp: DateTime.now(),
-    );
-
-    try {
-      await FirebaseFirestore.instance
-          .collection('Stores')
-          .doc(store.storeId)
-          .update({
-        'updates': FieldValue.arrayUnion([newUpdate.toMap()])
-      });
-
-      setState(() {
-        updates.insert(0, newUpdate);
-        hasUpdates = true;
-      });
-    } catch (e) {
-      print('Error adding update: $e');
-    }
-  }
-
-
-
-  void _showAddUpdateDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(hasUpdates ? 'Add Update' : 'Add Your First Update'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  _pickAndUploadMedia();
-                },
-                child: Text('Add Media (Images/Videos)'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> _pickAndUploadMedia() async {
-    final ImagePicker _picker = ImagePicker();
-    List<XFile>? pickedFiles = await showDialog<List<XFile>?>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Select Media'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton(
-                onPressed: () async {
-                  Navigator.of(context).pop(await _picker.pickMultiImage());
-                },
-                child: Text('Pick Images'),
-              ),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () async {
-                  final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
-                  Navigator.of(context).pop(video != null ? [video] : null);
-                },
-                child: Text('Pick Video'),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-
-    if (pickedFiles != null && pickedFiles.isNotEmpty) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return Center(child: CircularProgressIndicator());
-        },
-      );
-
-      List<MediaItem> mediaItems = [];
-      for (var file in pickedFiles) {
-        String url = await uploadFile(file);
-        String type = file.name.split('.').last.toLowerCase() == 'mp4' ? 'video' : 'image';
-        mediaItems.add(MediaItem(type: type, url: url));
-      }
-
-      Navigator.of(context).pop();
-
-      await addUpdate(mediaItems, '');
-
-      if (mediaItems.isNotEmpty) {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              content: SizedBox(
-                width: double.maxFinite,
-                child: MediaGallery(mediaItems: mediaItems),
-              ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('Close'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
-        );
-      }
-    }
-  }
-
-  Future<String> uploadFile(XFile file) async {
-    File fileToUpload = File(file.path);
-    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    Reference firebaseStorageRef = FirebaseStorage.instance.ref().child('updates/$fileName');
-    UploadTask uploadTask = firebaseStorageRef.putFile(fileToUpload);
-    TaskSnapshot taskSnapshot = await uploadTask;
-    String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-    return downloadUrl;
   }
 
   Future<List<ProductModel>> _fetchProducts() async {
@@ -361,7 +152,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   }
 
   Future<void> fetchStore() async {
-    try{
+    try {
       DocumentSnapshot doc = await FirebaseFirestore.instance
           .collection('Stores')
           .doc(store.storeId)
@@ -428,8 +219,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
               SizedBox(height: 20.0),
               // Profile Card
               Container(
-                height: 200,
-                width: double.infinity,
+                height: 290.h,
+                width: 680.w,
                 margin: EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
                   color: hexToColor('#2D332F'),
@@ -442,12 +233,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                       top: 16.0,
                       child: CircleAvatar(
                         backgroundColor: hexToColor('#F5F5F5'),
-                        radius: 20,
+                        radius: 30.w,
                         child: IconButton(
                           icon: Icon(
                             Icons.arrow_back_ios_new,
                             color: Colors.black,
-                            size: 18,
+                            size: 24.sp,
                           ),
                           onPressed: () {
                             Navigator.pop(context);
@@ -463,13 +254,14 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                         children: [
                           Container(
                             margin: EdgeInsets.only(top: 8),
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12.0),
+                              borderRadius: BorderRadius.circular(18.r),
                               child: Image.network(
                                 logoUrl,
-                                height: 90,
-                                width: 90,
+                                height: 130.h,
+                                width: 130.w,
                                 fit: BoxFit.cover,
                               ),
                             ),
@@ -479,13 +271,14 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 12.0, vertical: 6.0),
+                                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                                height: 30.h,
+                                alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   color: Colors.transparent,
                                   border:
                                       Border.all(color: hexToColor('#DEFF98')),
-                                  borderRadius: BorderRadius.circular(20.0),
+                                  borderRadius: BorderRadius.circular(50.r),
                                 ),
                                 child: Text(
                                   '$storeCategory',
@@ -493,48 +286,52 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                     color: Colors.white,
                                     fontFamily: 'Poppins',
                                     fontWeight: FontWeight.w500,
-                                    fontSize: 8.0,
+                                    fontSize: 13.sp,
                                   ),
                                 ),
                               ),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    '$storeName',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 24.0,
+                              SizedBox(height: 12.h),
+                              SizedBox(
+                                width: 400.w,
+                                child: RichText(
+                                  text: TextSpan(children: [
+                                    TextSpan(
+                                      text: storeName,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Gotham Black',
+                                        fontSize: 36.sp,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(width: 10.0),
-                                  Container(
-                                    width: 10,
-                                    height: 10,
-                                    margin: EdgeInsets.symmetric(vertical: 15),
-                                    decoration: BoxDecoration(
-                                      color: Colors.green,
-                                      borderRadius: BorderRadius.circular(5),
+                                    TextSpan(
+                                      text: '•',
+                                      style: TextStyle(
+                                        fontFamily: 'Gotham Black',
+                                        fontSize: 36.sp,
+                                        color: hexToColor('#42FF00'),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ]),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
+                              SizedBox(height: 16.h),
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Image.asset(
                                     'assets/icons/blue_globe.png',
-                                    height: 12.0,
-                                    width: 12.0,
+                                    height: 16.w,
+                                    width: 16.w,
                                   ),
-                                  SizedBox(width: 5.0),
+                                  SizedBox(width: 8.w),
                                   Text(
-                                    '$storeWebsite',
+                                    storeWebsite,
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontFamily: 'Poppins',
-                                        fontSize: 12.0),
+                                        fontSize: 16.sp),
                                   ),
                                 ],
                               )
@@ -549,8 +346,9 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(Icons.ios_share, color: Colors.white, size: 22),
-                          SizedBox(width: 10.0),
+                          Icon(Icons.ios_share,
+                              color: Colors.white, size: 25.sp),
+                          SizedBox(width: 16.w),
                           Container(
                             padding: EdgeInsets.symmetric(
                                 horizontal: 12.0, vertical: 8.0),
@@ -563,7 +361,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               style: TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'Poppins',
-                                  fontSize: 12.0),
+                                  fontSize: 17.sp),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -575,7 +373,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               color: Colors.white,
                               fontFamily: 'Gotham',
                               fontWeight: FontWeight.w700,
-                              fontSize: 11.0,
+                              fontSize: 14.sp,
                             ),
                           ),
                           Switch(
@@ -583,8 +381,9 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               activeColor: hexToColor('#41FA00'),
                               trackOutlineColor: WidgetStateColor.resolveWith(
                                   (states) => Colors.grey),
-                              trackOutlineWidth: WidgetStateProperty.resolveWith(
-                                  (states) => 1.0),
+                              trackOutlineWidth:
+                                  WidgetStateProperty.resolveWith(
+                                      (states) => 1.0),
                               activeTrackColor: Colors.transparent,
                               inactiveTrackColor: Colors.transparent,
                               onChanged: (value) {
@@ -602,7 +401,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
               Expanded(
                 flex: 0,
                 child: GridView.count(
-                  padding: EdgeInsets.symmetric(horizontal: 12.0),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
                   shrinkWrap: true,
                   physics: NeverScrollableScrollPhysics(),
                   crossAxisCount: 3,
@@ -621,10 +420,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                         );
                       },
                       child: Container(
-                        padding: EdgeInsets.all(8.0),
+                        height: 180.h,
+                        width: 180.w,
+                        padding: EdgeInsets.all(16.w),
                         decoration: BoxDecoration(
                           color: hexToColor('#DDF1EF'),
-                          borderRadius: BorderRadius.circular(12.0),
+                          borderRadius: BorderRadius.circular(22.r),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -641,14 +442,14 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                         style: TextStyle(
                                           color: Colors.black,
                                           fontFamily: 'Gotham Black',
-                                          fontSize: 14.0,
+                                          fontSize: 21.sp,
                                         ),
                                       ),
                                       TextSpan(
                                         text: ' •',
                                         style: TextStyle(
                                           fontFamily: 'Gotham Black',
-                                          fontSize: 14.0,
+                                          fontSize: 21.sp,
                                           color: Colors.red,
                                         ),
                                       ),
@@ -659,7 +460,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                   'Product'.toUpperCase(),
                                   style: TextStyle(
                                     color: Colors.black,
-                                    fontSize: 14.0,
+                                    fontSize: 21.sp,
                                   ),
                                 ),
                               ],
@@ -675,28 +476,28 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                       '$totalProducts',
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 16.0,
+                                        fontSize: 24.sp,
                                       ),
                                     ),
                                     Text(
                                       'Products'.toUpperCase(),
                                       style: TextStyle(
-                                        color: Colors.grey[700],
-                                        fontSize: 10.0,
+                                        color: hexToColor('#7D7D7D'),
+                                        fontSize: 12.sp,
                                       ),
                                     ),
                                   ],
                                 ),
                                 Container(
-                                  padding: EdgeInsets.all(4.0),
+                                  padding: EdgeInsets.all(8.0),
                                   decoration: BoxDecoration(
                                     color: hexToColor('#0D6A6D'),
-                                    borderRadius: BorderRadius.circular(50.0),
+                                    borderRadius: BorderRadius.circular(50.r),
                                   ),
                                   child: Icon(
                                     Icons.add,
                                     color: Colors.white,
-                                    size: 20.0,
+                                    size: 22.sp,
                                   ),
                                 ),
                               ],
@@ -715,10 +516,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                         );
                       },
                       child: Container(
-                        padding: EdgeInsets.all(8.0),
+                        height: 180.h,
+                        width: 180.w,
+                        padding: EdgeInsets.all(16.w),
                         decoration: BoxDecoration(
                           color: hexToColor('#EAE6F6'),
-                          borderRadius: BorderRadius.circular(12.0),
+                          borderRadius: BorderRadius.circular(22.r),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -732,14 +535,14 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                     style: TextStyle(
                                       color: Colors.black,
                                       fontFamily: 'Gotham Black',
-                                      fontSize: 14.0,
+                                      fontSize: 21.sp,
                                     ),
                                   ),
                                   TextSpan(
                                     text: ' •',
                                     style: TextStyle(
                                       fontFamily: 'Gotham Black',
-                                      fontSize: 14.0,
+                                      fontSize: 21.sp,
                                       color: Colors.green,
                                     ),
                                   ),
@@ -752,20 +555,20 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               children: [
                                 Image.asset(
                                   'assets/icons/analytics.png',
-                                  height: 40.0,
-                                  width: 50.0,
+                                  height: 60.h,
+                                  width: 80.w,
                                   fit: BoxFit.fill,
                                 ),
                                 Container(
                                   padding: EdgeInsets.all(8.0),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[800],
-                                    borderRadius: BorderRadius.circular(50.0),
+                                    borderRadius: BorderRadius.circular(50.r),
                                   ),
                                   child: Icon(
                                     Icons.arrow_forward_ios,
                                     color: Colors.white,
-                                    size: 16.0,
+                                    size: 22.sp,
                                   ),
                                 ),
                               ],
@@ -786,10 +589,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                         );
                       },
                       child: Container(
-                        padding: EdgeInsets.all(8.0),
+                        height: 180.h,
+                        width: 180.w,
+                        padding: EdgeInsets.all(16.w),
                         decoration: BoxDecoration(
                           color: hexToColor('#EFEFEF'),
-                          borderRadius: BorderRadius.circular(12.0),
+                          borderRadius: BorderRadius.circular(22.r),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -806,14 +611,14 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                         style: TextStyle(
                                           color: Colors.black,
                                           fontFamily: 'Gotham Black',
-                                          fontSize: 14.0,
+                                          fontSize: 21.sp,
                                         ),
                                       ),
                                       TextSpan(
                                         text: ' •',
                                         style: TextStyle(
                                           fontFamily: 'Gotham Black',
-                                          fontSize: 14.0,
+                                          fontSize: 21.sp,
                                           color: Colors.red,
                                         ),
                                       ),
@@ -824,14 +629,14 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                   'Community'.toUpperCase(),
                                   style: TextStyle(
                                     color: Colors.black,
-                                    fontSize: 14.0,
+                                    fontSize: 21.sp,
                                   ),
                                 ),
                                 Text(
                                   'Post'.toUpperCase(),
                                   style: TextStyle(
                                     color: Colors.black,
-                                    fontSize: 14.0,
+                                    fontSize: 21.sp,
                                   ),
                                 ),
                               ],
@@ -847,14 +652,14 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                       '$totalPosts',
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontSize: 16.0,
+                                        fontSize: 24.sp,
                                       ),
                                     ),
                                     Text(
                                       'Posts'.toUpperCase(),
                                       style: TextStyle(
                                         color: Colors.grey[700],
-                                        fontSize: 10.0,
+                                        fontSize: 12.sp,
                                       ),
                                     ),
                                   ],
@@ -864,12 +669,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                   padding: EdgeInsets.all(8.0),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[700],
-                                    borderRadius: BorderRadius.circular(50.0),
+                                    borderRadius: BorderRadius.circular(50.r),
                                   ),
                                   child: Icon(
                                     Icons.arrow_forward_ios,
                                     color: Colors.white,
-                                    size: 16.0,
+                                    size: 22.sp,
                                   ),
                                 ),
                               ],
@@ -881,289 +686,285 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                   ],
                 ),
               ),
-              SizedBox(height: 20.0),
+              SizedBox(height: 20.h),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Expanded(
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 16),
-                            margin: EdgeInsets.only(right: 8.0),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#F3F3F3'),
-                              borderRadius: BorderRadius.circular(30.0),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.only(
-                                    left: 20.0,
-                                    right: 25.0,
-                                    top: 12.0,
-                                    bottom: 6.0,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(50.0),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Store Engagement',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 12.0,
-                                        ),
-                                      ),
-                                      Text(
-                                        '$storeEngagement',
-                                        style: TextStyle(
-                                          color:
-                                              Theme.of(context).primaryColor,
-                                          fontSize: 22.0,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                        Container(
+                          width: 300.w,
+                          height: 240.h,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12.w, vertical: 16.h),
+                          decoration: BoxDecoration(
+                            color: hexToColor('#F3F3F3'),
+                            borderRadius: BorderRadius.circular(30.0),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                height: 105.h,
+                                width: 260.w,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(50.r),
                                 ),
-                                SizedBox(height: 15.0),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    AnimatedBuilder(
-                                      animation: _animation,
-                                      builder: (context, child) {
-                                        return GestureDetector(
-                                          onTap: _toggleExpansion,
-                                          child: isExpanded
-                                              ? Container(
-                                                  width: isExpanded
-                                                      ? (_animation.value *
-                                                              60 +
-                                                          40)
-                                                      : 40,
-                                                  height: 45.0,
-                                                  padding:
-                                                      EdgeInsets.symmetric(
-                                                          horizontal: 16.0),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            50.0),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
+                                    Text(
+                                      'Store Engagement',
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 17.sp,
+                                      ),
+                                    ),
+                                    Text(
+                                      '$storeEngagement',
+                                      style: TextStyle(
+                                        color: Theme.of(context).primaryColor,
+                                        fontSize: 32.sp,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 15.h),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  AnimatedBuilder(
+                                    animation: _animation,
+                                    builder: (context, child) {
+                                      return GestureDetector(
+                                        onTap: _toggleExpansion,
+                                        child: isExpanded
+                                            ? Container(
+                                                width: isExpanded
+                                                    ? (_animation.value * 80.w +
+                                                        90.w)
+                                                    : 80.w,
+                                                height: 55.h,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          50.r),
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    GestureDetector(
+                                                      onTap: () =>
+                                                          _selectFlag(true),
+                                                      child: Image.asset(
+                                                          'assets/green-flag.png',
+                                                          height: 36.h,
+                                                          width: 36.w),
+                                                    ),
+                                                    if (isExpanded)
+                                                      SizedBox(
+                                                          width:
+                                                              _animation.value *
+                                                                  35.w),
+                                                    if (isExpanded)
                                                       GestureDetector(
                                                         onTap: () =>
-                                                            _selectFlag(true),
+                                                            _selectFlag(false),
                                                         child: Image.asset(
-                                                            'assets/green-flag.png',
-                                                            height: 20.0,
-                                                            width: 20.0),
+                                                            'assets/red-flag.png',
+                                                            height: 36.h,
+                                                            width: 36.w),
                                                       ),
-                                                      if (isExpanded)
-                                                        SizedBox(
-                                                            width: _animation
-                                                                    .value *
-                                                                25),
-                                                      if (isExpanded)
-                                                        GestureDetector(
-                                                          onTap: () =>
-                                                              _selectFlag(
-                                                                  false),
-                                                          child: Image.asset(
-                                                              'assets/red-flag.png',
-                                                              height: 20.0,
-                                                              width: 20.0),
-                                                        ),
-                                                    ],
-                                                  ),
-                                                )
-                                              : Container(
-                                                  width: 40,
-                                                  height: 35.0,
-                                                  padding:
-                                                      EdgeInsets.all(8.0),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            50.0),
-                                                  ),
-                                                  child: Image.asset(
-                                                      isGreenFlag
-                                                          ? 'assets/green-flag.png'
-                                                          : 'assets/red-flag.png',
-                                                      height: 20.0,
-                                                      width: 20.0),
+                                                  ],
                                                 ),
-                                        );
-                                      },
+                                              )
+                                            : Container(
+                                                width: 40,
+                                                height: 35.0,
+                                                padding: EdgeInsets.all(8.0),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          50.0),
+                                                ),
+                                                child: Image.asset(
+                                                    isGreenFlag
+                                                        ? 'assets/green-flag.png'
+                                                        : 'assets/red-flag.png',
+                                                    height: 20.0,
+                                                    width: 20.0),
+                                              ),
+                                      );
+                                    },
+                                  ),
+                                  if (!isExpanded)
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          isGreenFlag
+                                              ? 'Good Reviews'
+                                              : 'Bad Reviews',
+                                          style: TextStyle(
+                                            color: hexToColor('#272822'),
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 20.sp,
+                                          ),
+                                        ),
+                                        Text(
+                                          isGreenFlag
+                                              ? '$greenFlags/$totalFlags'
+                                              : '$redFlags/$totalFlags',
+                                          style: TextStyle(
+                                            color: hexToColor('#838383'),
+                                            fontSize: 18.sp,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    if (!isExpanded)
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                        Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          OrderAndPaysScreen(),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 16.w, vertical: 18.h),
+                                  height: 112.h,
+                                  width: 300.w,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: hexToColor('#F3F3F3'),
+                                    borderRadius: BorderRadius.circular(50.r),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      CircleAvatar(
+                                          backgroundColor: Colors.white,
+                                          child: Icon(Icons.person_outline,
+                                              color: Colors.black)),
+                                      SizedBox(width: 16.w),
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            isGreenFlag
-                                                ? 'Good Reviews'
-                                                : 'Bad Reviews',
+                                            'Orders & Pays',
                                             style: TextStyle(
-                                              color: hexToColor('#272822'),
                                               fontFamily: 'Poppins',
                                               fontWeight: FontWeight.w600,
-                                              fontSize: 14.0,
+                                              fontSize: 20.sp,
                                             ),
                                           ),
-                                          Text(
-                                            isGreenFlag
-                                                ? '$greenFlags/$totalFlags'
-                                                : '$redFlags/$totalFlags',
-                                            style: TextStyle(
-                                              color: hexToColor('#838383'),
-                                              fontSize: 12.0,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            OrderAndPaysScreen(),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.all(16.0),
-                                    decoration: BoxDecoration(
-                                      color: hexToColor('#F3F3F3'),
-                                      borderRadius:
-                                          BorderRadius.circular(50.0),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                            backgroundColor: Colors.white,
-                                            child: Icon(Icons.person_outline,
-                                                color: Colors.black)),
-                                        SizedBox(width: 10.0),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'Orders & Pays',
-                                              style: TextStyle(
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 14.0,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 100,
-                                              child: Text(
-                                                'Orders, Payments & Coupons',
-                                                style: TextStyle(
-                                                  color:
-                                                      hexToColor('#838383'),
-                                                  fontFamily: 'Gotham',
-                                                  fontSize: 10.0,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                                maxLines: 2,
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 10.0),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            StoreSettingsScreen(store: store),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.all(16.0),
-                                    decoration: BoxDecoration(
-                                      color: hexToColor('#F3F3F3'),
-                                      borderRadius:
-                                          BorderRadius.circular(50.0),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                            backgroundColor: Colors.white,
-                                            child: Icon(
-                                                Icons.settings_outlined,
-                                                color: Colors.black)),
-                                        SizedBox(width: 10.0),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              'My Settings',
-                                              style: TextStyle(
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 14.0,
-                                              ),
-                                            ),
-                                            Text(
-                                              'Store Settings',
+                                          SizedBox(
+                                            width: 100,
+                                            child: Text(
+                                              'Orders, Payments & Coupons',
                                               style: TextStyle(
                                                 color: hexToColor('#838383'),
                                                 fontFamily: 'Gotham',
-                                                fontSize: 10.0,
+                                                fontSize: 14.sp,
                                                 fontWeight: FontWeight.w500,
                                               ),
+                                              maxLines: 2,
                                             ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
                                   ),
-                                )
-                              ]),
-                        )
+                                ),
+                              ),
+                              SizedBox(height: 16.h),
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          StoreSettingsScreen(store: store),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 16.w, vertical: 18.h),
+                                  height: 112.h,
+                                  width: 300.w,
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: hexToColor('#F3F3F3'),
+                                    borderRadius: BorderRadius.circular(50.r),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                          backgroundColor: Colors.white,
+                                          child: Icon(Icons.settings_outlined,
+                                              color: Colors.black)),
+                                      SizedBox(width: 16.w),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'My Settings',
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 20.sp,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Store Settings',
+                                            style: TextStyle(
+                                              color: hexToColor('#838383'),
+                                              fontFamily: 'Gotham',
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              )
+                            ])
                       ],
                     ),
                   ),
@@ -1188,68 +989,44 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                       Container(
                         margin: EdgeInsets.symmetric(horizontal: 4.0),
                         height: 150.0,
-                        child: hasUpdates
-                            ? ListView(
+                        child: ListView(
                           scrollDirection: Axis.horizontal,
                           children: [
-                            Container(
-                              padding: EdgeInsets.all(8.0),
-                              child: Column(
-                                children: [
-                                  GestureDetector(
-                                    onTap: () => _showAddUpdateDialog(),
-                                    child: Container(
+                            GestureDetector(
+                              onTap: () {},
+                              child: Container(
+                                padding: EdgeInsets.all(8.0),
+                                child: Column(
+                                  children: [
+                                    Container(
                                       height: 100,
                                       width: 100,
                                       decoration: BoxDecoration(
                                         color: hexToColor('#F3F3F3'),
-                                        borderRadius: BorderRadius.circular(12.0),
+                                        borderRadius:
+                                            BorderRadius.circular(12.0),
                                       ),
                                       child: Container(
-                                        margin: EdgeInsets.all(16.0),
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Colors.white,
-                                        ),
-                                        child: Icon(Icons.add, size: 34.0, color: hexToColor('#B5B5B5')),
-                                      ),
+                                          margin: EdgeInsets.all(16.0),
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.white,
+                                          ),
+                                          child: Icon(Icons.add,
+                                              size: 34.0,
+                                              color: hexToColor('#B5B5B5'))),
                                     ),
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    'Add Update',
-                                    style: TextStyle(fontSize: 12),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                            ...updates.map((update) => UpdateTile(update: update)).toList(),
+                            ...highlights.map((update) {
+                              return HighlightTile(
+                                name: update['name'],
+                                image: update['coverImage'],
+                              );
+                            }).toList(),
                           ],
-                        )
-                            : GestureDetector(
-                          onTap: () => _showAddUpdateDialog(),
-                          child: Container(
-                            padding: EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#F3F3F3'),
-                              borderRadius: BorderRadius.circular(12.0),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.add_circle_outline, size: 24, color: Theme.of(context).primaryColor),
-                                SizedBox(width: 8),
-                                Text(
-                                  'Add Your First Update',
-                                  style: TextStyle(
-                                    color: Theme.of(context).primaryColor,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
                         ),
                       ),
                     ],
@@ -1304,7 +1081,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                         ),
                       ),
                       SizedBox(height: 20.0),
-                      FeatureProductsListView(featuredProductIds: store.featuredProductIds),
+                      FeatureProductsListView(
+                          featuredProductIds: store.featuredProductIds),
                     ],
                   ),
                   SizedBox(height: 20.0),
@@ -1321,13 +1099,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                         return Column(
                           children: categories
                               .map((category) =>
-                              CategoryProductsListView(category: category))
+                                  CategoryProductsListView(category: category))
                               .toList(),
                         );
                       }
                     },
                   ),
-
                 ],
               ),
             ],
@@ -1387,10 +1164,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
 class FeatureProductsListView extends StatefulWidget {
   final List<String> featuredProductIds;
 
-  const FeatureProductsListView({Key? key, required this.featuredProductIds}) : super(key: key);
+  const FeatureProductsListView({Key? key, required this.featuredProductIds})
+      : super(key: key);
 
   @override
-  State<FeatureProductsListView> createState() => _FeatureProductsListViewState();
+  State<FeatureProductsListView> createState() =>
+      _FeatureProductsListViewState();
 }
 
 class _FeatureProductsListViewState extends State<FeatureProductsListView> {
@@ -1438,7 +1217,8 @@ class _FeatureProductsListViewState extends State<FeatureProductsListView> {
                   product: featuredProducts[index],
                   onRemove: () {
                     setState(() {
-                      widget.featuredProductIds.remove(featuredProducts[index].productId);
+                      widget.featuredProductIds
+                          .remove(featuredProducts[index].productId);
                     });
                   },
                 );
@@ -1451,14 +1231,15 @@ class _FeatureProductsListViewState extends State<FeatureProductsListView> {
   }
 }
 
-
 class CategoryProductsListView extends StatefulWidget {
   final StoreCategoryModel category;
 
-  const CategoryProductsListView({Key? key, required this.category}) : super(key: key);
+  const CategoryProductsListView({Key? key, required this.category})
+      : super(key: key);
 
   @override
-  State<CategoryProductsListView> createState() => _CategoryProductsListViewState();
+  State<CategoryProductsListView> createState() =>
+      _CategoryProductsListViewState();
 }
 
 class _CategoryProductsListViewState extends State<CategoryProductsListView> {
@@ -1520,7 +1301,8 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
                       product: products[index],
                       onRemove: () {
                         setState(() {
-                          widget.category.productIds.remove(products[index].productId);
+                          widget.category.productIds
+                              .remove(products[index].productId);
                         });
                       },
                     );
@@ -1535,175 +1317,31 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
   }
 }
 
-class UpdateTile extends StatelessWidget {
-  final Update update;
+class HighlightTile extends StatelessWidget {
+  final String name;
+  final String image;
 
-  UpdateTile({required this.update});
+  HighlightTile({
+    required this.name,
+    required this.image,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => FullUpdateView(update: update),
-          ),
-        );
-      },
-      child: Container(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Container(
+    return Container(
+      padding: EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          Container(
               height: 100,
               width: 100,
               decoration: BoxDecoration(
                 border: Border.all(color: hexToColor('#B5B5B5'), width: 1.0),
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              child: update.mediaItems.first.type == 'image'
-                  ? Image.network(update.mediaItems.first.url, fit: BoxFit.cover)
-                  : Icon(Icons.video_library, size: 48.0),
-            ),
-            SizedBox(height: 8),
-            Text(
-              update.text,
-              style: TextStyle(fontSize: 12),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
+              child: Image.asset(image, height: 48.0)),
+        ],
       ),
     );
-  }
-}
-
-class FullUpdateView extends StatefulWidget {
-  final Update update;
-
-  FullUpdateView({required this.update});
-
-  @override
-  _FullUpdateViewState createState() => _FullUpdateViewState();
-}
-
-class _FullUpdateViewState extends State<FullUpdateView> {
-  late PageController _pageController;
-  late Timer _timer;
-  int _currentPage = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController();
-    _startTimer();
-  }
-
-  void _startTimer() {
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
-      if (_currentPage < widget.update.mediaItems.length - 1) {
-        _currentPage++;
-        _pageController.animateToPage(
-          _currentPage,
-          duration: Duration(milliseconds: 350),
-          curve: Curves.easeIn,
-        );
-      } else {
-        Navigator.of(context).pop();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: GestureDetector(
-        onTap: () {
-          Navigator.of(context).pop();
-        },
-        child: Stack(
-          children: [
-            PageView.builder(
-              controller: _pageController,
-              itemCount: widget.update.mediaItems.length,
-              onPageChanged: (int page) {
-                setState(() {
-                  _currentPage = page;
-                });
-              },
-              itemBuilder: (context, index) {
-                final mediaItem = widget.update.mediaItems[index];
-                return Center(
-                  child: mediaItem.type == 'image'
-                      ? Image.network(
-                    mediaItem.url,
-                    fit: BoxFit.contain,
-                    height: MediaQuery.of(context).size.height * 0.8,
-                  )
-                      : Icon(Icons.video_library, size: 100, color: Colors.white),
-                );
-              },
-            ),
-            Positioned(
-              top: 40,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  widget.update.mediaItems.length,
-                      (index) => Container(
-                    width: 8,
-                    height: 8,
-                    margin: EdgeInsets.symmetric(horizontal: 4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _currentPage == index ? Colors.white : Colors.grey,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class MediaGallery extends StatelessWidget {
-  final List<MediaItem> mediaItems;
-
-  const MediaGallery({Key? key, required this.mediaItems}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return PageView.builder(
-      itemCount: mediaItems.length,
-      itemBuilder: (context, index) {
-        final mediaItem = mediaItems[index];
-        return mediaItem.type == 'image'
-            ? Image.network(
-          mediaItem.url,
-          fit: BoxFit.contain,
-        )
-            : Icon(Icons.video_library, size: 100, color: Colors.black);
-      },
-    );
-  }
-}
-// You might need to add this extension method somewhere in your code
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1)}";
   }
 }

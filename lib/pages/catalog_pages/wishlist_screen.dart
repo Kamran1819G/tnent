@@ -50,7 +50,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
               ...item,
               ...productDetails,
               'variationDetails': productDetails['variations']
-                  [item['variationKey']],
+                  [item['variation']],
               'isSelected': false,
             });
           }
@@ -91,7 +91,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     double newTotal = 0.0;
     for (var item in wishlistItems) {
       if (selectedItems
-          .contains('${item['productId']}_${item['variationKey']}')) {
+          .contains('${item['productId']}_${item['variation']}')) {
         newTotal += item['variationDetails'].price;
       }
     }
@@ -105,7 +105,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
       selectAllItems = value ?? false;
       if (selectAllItems) {
         selectedItems = Set.from(wishlistItems
-            .map((item) => '${item['productId']}_${item['variationKey']}'));
+            .map((item) => '${item['productId']}_${item['variation']}'));
       } else {
         selectedItems.clear();
       }
@@ -233,17 +233,17 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         return WishlistItemTile(
                           item: wishlistItems[index],
                           isSelected: selectedItems.contains(
-                              '${wishlistItems[index]['productId']}_${wishlistItems[index]['variationKey']}'),
+                              '${wishlistItems[index]['productId']}_${wishlistItems[index]['variation']}'),
                           onSelectionChanged: (isSelected) {
                             toggleItemSelection(
-                                '${wishlistItems[index]['productId']}_${wishlistItems[index]['variationKey']}',
+                                '${wishlistItems[index]['productId']}_${wishlistItems[index]['variation']}',
                                 isSelected);
                           },
                           onRemove: () {
                             setState(() {
                               wishlistItems.removeAt(index);
                               selectedItems.remove(
-                                  '${wishlistItems[index]['productId']}_${wishlistItems[index]['variationKey']}');
+                                  '${wishlistItems[index]['productId']}_${wishlistItems[index]['variation']}');
                               updateTotalPrice();
                             });
                             updateUserWishlist();
@@ -337,7 +337,7 @@ class WishlistItemTile extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Variation: ${item['variationKey']}',
+                    'Variation: ${item['variation']}',
                     style: TextStyle(
                       color: hexToColor('#737373'),
                       fontSize: 14.0,
