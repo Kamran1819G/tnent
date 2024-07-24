@@ -52,7 +52,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
 
         for (var purchase in purchases) {
           final productId = purchase['productId'] as String?;
-          final variation = purchase['variation'] as String?;
+          final variationKey = purchase['variation'] as String?;
 
           if (productId == null) {
             print('Warning: productId is null for a purchase');
@@ -66,17 +66,25 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
             final productName = productData['name'] as String? ?? 'Unknown Product';
             final imageUrls = productData['imageUrls'] as List<dynamic>? ?? [];
             final productImage = imageUrls.isNotEmpty ? imageUrls[0] as String? : null;
-            final productPrice = (productData['price'] as num?)?.toInt() ?? 0;
 
-            purchaseItems.add(PurchaseItem(
-              productId: productId,
-              variation: variation ?? 'default',
-              productName: productName,
-              productImage: productImage ?? 'https://placeholder.com/image.jpg',
-              productPrice: productPrice,
-            ));
+            final variations = productData['variations'] as Map<String, dynamic>?;
+            final variationData = variations?[variationKey] as Map<String, dynamic>?;
 
-            totalAmount += productPrice;
+            if (variationData != null) {
+              final productPrice = (variationData['price'] as num?)?.toInt() ?? 0;
+
+              purchaseItems.add(PurchaseItem(
+                productId: productId,
+                variation: variationKey ?? 'default',
+                productName: productName,
+                productImage: productImage ?? 'https://placeholder.com/image.jpg',
+                productPrice: productPrice,
+              ));
+
+              totalAmount += productPrice;
+            } else {
+              print('Warning: No variation data found for productId: $productId, variation: $variationKey');
+            }
           } else {
             print('Warning: No product data found for productId: $productId');
           }
@@ -173,6 +181,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                 itemBuilder: (context, index) {
                   final item = purchaseItems[index];
                   return PurchaseProductTile(
+                    productId: item.productId,
                     productImage: item.productImage,
                     productName: item.productName,
                     productPrice: item.productPrice,
@@ -189,12 +198,14 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
 }
 
 class PurchaseProductTile extends StatefulWidget {
+  final String productId;  //
   final String productImage;
   final String productName;
   final int productPrice;
   final String variation;
 
   const PurchaseProductTile({
+    required this.productId,
     required this.productImage,
     required this.productName,
     required this.productPrice,
@@ -312,9 +323,8 @@ class _PurchaseProductTileState extends State<PurchaseProductTile> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => DetailScreen(
-                              productImage: widget.productImage,
-                              productName: widget.productName,
-                              productPrice: widget.productPrice,
+                              productId: widget.productId,
+                              variation: widget.variation,
                             ),
                           ),
                         );
