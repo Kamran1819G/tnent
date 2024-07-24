@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -6,16 +9,17 @@ import 'package:flutter_dash/flutter_dash.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:tnennt/models/product_model.dart';
+import 'package:uuid/uuid.dart';
 
 class OptionalsScreen extends StatefulWidget {
-  final String productId;
-  final String productCategory;
+  ProductModel productData;
+  String categoryId;
+  List<File> images;
 
-  const OptionalsScreen({
-    Key? key,
-    required this.productId,
-    required this.productCategory,
-  }) : super(key: key);
+  OptionalsScreen(
+      {required this.productData,
+      required this.categoryId,
+      required this.images});
 
   @override
   _OptionalsScreenState createState() => _OptionalsScreenState();
@@ -39,20 +43,20 @@ class _OptionalsScreenState extends State<OptionalsScreen>
   }
 
   int getTabLength() {
-    switch (widget.productCategory.toLowerCase()) {
-      case 'clothing':
+    switch (widget.productData.productCategory.toLowerCase()) {
+      case 'clothings':
         return 3; // Topwear, Bottomwear, Footwear
-      case 'bakery':
+      case 'bakeries':
         return 2; // Pound, Gram/KG
-      case 'electronic':
+      case 'electronics':
         return 1; // Capacity
       default:
-        return 1;
+        return 3;
     }
   }
 
   String getCategoryTitle() {
-    switch (widget.productCategory.toLowerCase()) {
+    switch (widget.productData.productCategory.toLowerCase()) {
       case 'clothing':
         return 'Add Size';
       case 'bakery':
@@ -65,19 +69,19 @@ class _OptionalsScreenState extends State<OptionalsScreen>
   }
 
   List<Widget> getTabs() {
-    switch (widget.productCategory.toLowerCase()) {
-      case 'clothing':
+    switch (widget.productData.productCategory.toLowerCase()) {
+      case 'clothings':
         return [
           OptionTab('Topwear', hexToColor('#343434')),
           OptionTab('Bottomwear', hexToColor('#343434')),
           OptionTab('Footwear', hexToColor('#343434')),
         ];
-      case 'bakery':
+      case 'bakeries':
         return [
           OptionTab('Pound', hexToColor('#343434')),
           OptionTab('Gram/KG', hexToColor('#343434')),
         ];
-      case 'electronic':
+      case 'electronics':
         return [OptionTab('Capacity', hexToColor('#343434'))];
       default:
         return [OptionTab('Option', hexToColor('#343434'))];
@@ -85,8 +89,8 @@ class _OptionalsScreenState extends State<OptionalsScreen>
   }
 
   List<Widget> getTabViews() {
-    switch (widget.productCategory.toLowerCase()) {
-      case 'clothing':
+    switch (widget.productData.productCategory.toLowerCase()) {
+      case 'clothings':
         return [
           OptionListView(
             options: ['XS', 'S', 'M', 'L', 'XL'],
@@ -104,7 +108,7 @@ class _OptionalsScreenState extends State<OptionalsScreen>
             onOptionSelected: updateSelectedOptions,
           ),
         ];
-      case 'bakery':
+      case 'bakeries':
         return [
           OptionListView(
             options: ['1 Pound', '2 Pound', '5 Pound', '10 Pound'],
@@ -117,7 +121,7 @@ class _OptionalsScreenState extends State<OptionalsScreen>
             onOptionSelected: updateSelectedOptions,
           ),
         ];
-      case 'electronic':
+      case 'electronics':
         return [
           OptionListView(
             options: [
@@ -223,7 +227,8 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                         fontSize: 14.0,
                       ),
                       indicatorSize: TabBarIndicatorSize.label,
-                      overlayColor: MaterialStateProperty.all(Colors.transparent),
+                      overlayColor:
+                          MaterialStateProperty.all(Colors.transparent),
                       dividerColor: Colors.transparent,
                       tabs: getTabs(),
                     ),
@@ -252,7 +257,9 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                     context,
                     MaterialPageRoute(
                       builder: (context) => OptionalsPriceScreen(
-                        productId: widget.productId,
+                        productData: widget.productData,
+                        categoryId: widget.categoryId,
+                        images: widget.images,
                         selectedOptions: selectedOptions,
                       ),
                     ),
@@ -286,7 +293,6 @@ class _OptionalsScreenState extends State<OptionalsScreen>
     );
   }
 }
-
 
 class OptionTab extends StatelessWidget {
   final String title;
@@ -324,7 +330,7 @@ class OptionListView extends StatelessWidget {
       child: Column(
         children: List.generate(
           options.length,
-              (index) => CheckboxListTile(
+          (index) => CheckboxListTile(
             title: Text(
               options[index],
               style: TextStyle(
@@ -348,13 +354,16 @@ class OptionListView extends StatelessWidget {
 }
 
 class OptionalsPriceScreen extends StatefulWidget {
-  final String productId;
+  ProductModel productData;
+  String categoryId;
+  List<File> images;
   final List<String> selectedOptions;
 
-
-  const OptionalsPriceScreen({
+  OptionalsPriceScreen({
     Key? key,
-    required this.productId,
+    required this.productData,
+    required this.categoryId,
+    required this.images,
     required this.selectedOptions,
   }) : super(key: key);
 
@@ -364,14 +373,12 @@ class OptionalsPriceScreen extends StatefulWidget {
 
 class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
   Map<String, GlobalKey<_OptionalPriceAndQuantityState>> optionalPriceKeys = {};
-  bool isLoading = true;
-  Map<String, dynamic>? productData;
+  bool isLoading = false;
 
   @override
   void initState() {
     super.initState();
     initializeOptionalPriceKeys();
-    fetchProductData();
   }
 
   void initializeOptionalPriceKeys() {
@@ -380,67 +387,92 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
     }
   }
 
-  Future<void> fetchProductData() async {
+  Future<List<String>> uploadImages(String productId) async {
+    List<String> imageUrls = [];
+    FirebaseStorage storage = FirebaseStorage.instance;
+
+    for (int i = 0; i < widget.images.length; i++) {
+      String fileName = 'product_${productId}_$i.jpg';
+      Reference ref = storage.ref().child('products/$productId/$fileName');
+      UploadTask uploadTask = ref.putFile(widget.images[i]);
+      TaskSnapshot snapshot = await uploadTask;
+      String downloadUrl = await snapshot.ref.getDownloadURL();
+      imageUrls.add(downloadUrl);
+    }
+
+    return imageUrls;
+  }
+
+  Future<void> saveDataToFirebase() async {
+    setState(() {
+      isLoading = true;
+    });
+
     try {
-      DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('products')
-          .doc(widget.productId)
-          .get();
-      if (doc.exists) {
-        setState(() {
-          productData = doc.data() as Map<String, dynamic>?;
-          isLoading = false;
-        });
-      } else {
-        print('Product not found');
-        setState(() {
-          isLoading = false;
-        });
+      final FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+      // Generate a unique product ID if not already set
+      String productId = widget.productData.productId.isNotEmpty
+          ? widget.productData.productId
+          : 'Product-ID-${Uuid().v4()}';
+
+      // Upload images and get their URLs
+      List<String> imageUrls = await uploadImages(productId);
+
+      // Prepare variations data
+      Map<String, ProductVariant> variations = {};
+      for (var option in widget.selectedOptions) {
+        final state = optionalPriceKeys[option]!.currentState!;
+        variations[option] = ProductVariant(
+          discount: double.tryParse(state._discountController.text) ?? 0,
+          mrp: double.tryParse(state._mrpController.text) ?? 0,
+          price: double.tryParse(state._itemPriceController.text) ?? 0,
+          stockQuantity: int.tryParse(state._quantityController.text) ?? 0,
+          sku: '${productId}-${option.replaceAll(' ', '-').toLowerCase()}',
+        );
       }
+
+      // Prepare product data
+      Map<String, dynamic> productData = widget.productData.toFirestore();
+      productData['productId'] = productId;
+      productData['variations'] =
+          variations.map((key, value) => MapEntry(key, value.toMap()));
+      productData['imageUrls'] = imageUrls;
+
+      // Save product data to Firestore
+      await firestore.collection('products').doc(productId).set(productData);
+
+      // Update store data
+      await firestore
+          .collection('Stores')
+          .doc(widget.productData.storeId)
+          .update({'totalProducts': FieldValue.increment(1)});
+
+      // Update category data
+      await firestore
+          .collection('Stores')
+          .doc(widget.productData.storeId)
+          .collection('categories')
+          .doc(widget.categoryId)
+          .update({
+        'totalProducts': FieldValue.increment(1),
+        'productIds': FieldValue.arrayUnion([productId])
+      });
+
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Product added successfully')));
+      Navigator.pop(context);
+      Navigator.pop(context);
     } catch (e) {
-      print('Error fetching product data: $e');
+      print('Error saving data: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving product. Please try again.')));
+    } finally {
       setState(() {
         isLoading = false;
       });
     }
   }
-
-
-  Future<void> saveDataToFirebase() async {
-    final FirebaseFirestore firestore = FirebaseFirestore.instance;
-
-    Map<String, ProductVariant> variations = {};
-
-    for (var option in widget.selectedOptions) {
-      final state = optionalPriceKeys[option]!.currentState!;
-      variations[option] = ProductVariant(
-        discount: double.tryParse(state._discountController.text) ?? 0,
-        mrp: double.tryParse(state._mrpController.text) ?? 0,
-        price: double.tryParse(state._itemPriceController.text) ?? 0,
-        stockQuantity: int.tryParse(state._quantityController.text) ?? 0,
-        sku: '${widget.productId}-${option.replaceAll(' ', '-').toLowerCase()}',
-      );
-    }
-
-    Map<String, dynamic> productData = {
-      'variations': variations.map((key, value) => MapEntry(key, value.toMap())),
-    };
-
-    try {
-      await firestore
-          .collection('products')
-          .doc(widget.productId)
-          .set(productData, SetOptions(merge: true));
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Product Added Successfully')));
-      Navigator.pop(context);
-    } catch (e) {
-      print('Error saving data: $e');
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Error saving data')));
-    }
-  }
-
 
   @override
   Widget build(BuildContext context) {
@@ -559,7 +591,9 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
               ),
             ),
             Center(
-              child: GestureDetector(
+              child: isLoading
+                  ? CircularProgressIndicator()
+                  : GestureDetector(
                 onTap: saveDataToFirebase,
                 child: Container(
                   height: 50,

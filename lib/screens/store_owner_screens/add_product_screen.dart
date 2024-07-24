@@ -21,7 +21,6 @@ class AddProductScreen extends StatefulWidget {
 }
 
 class _AddProductScreenState extends State<AddProductScreen> {
-  File? _image;
   List<File> _images = [];
   String? selectedCategory;
   bool isSubmitting = false;
@@ -82,13 +81,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       setState(() {
-        _image = File(image.path);
-        _images.add(_image!);
+        _images.add(File(image.path));
       });
     }
   }
 
-  Future<void> _addProduct() async {
+  Future<void> _addSingleVariantProduct() async {
     setState(() {
       isSubmitting = true;
     });
@@ -98,46 +96,85 @@ class _AddProductScreenState extends State<AddProductScreen> {
         _nameController.text.isEmpty) {
       _showSnackBar(
           'Please fill in all required fields and add at least one image');
+      setState(() {
+        isSubmitting = false;
+      });
       return;
     }
 
     try {
-      String productId = 'ProductID' + Uuid().v4();
-      // Generate a new document reference with auto-generated ID
-      productId = FirebaseFirestore.instance.collection('products').doc().id;
-      final imageUrls = await _uploadImages(productId);
-      final productData = _createProductData(productId, imageUrls);
+      String customDocRef = 'Product-ID-${Uuid().v4()}';
+      final imageUrls = await _uploadImages(customDocRef);
+      final productData = _createProductData(customDocRef, imageUrls);
       await FirebaseFirestore.instance
           .collection('products')
-          .doc(productId)
+          .doc(customDocRef)
           .set(productData);
       await FirebaseFirestore.instance.collection('Stores').doc(widget.storeId).update({'totalProducts': FieldValue.increment(1)});
-      await FirebaseFirestore.instance.collection('Stores').doc(widget.storeId).collection('categories').doc(widget.category.id).update({'totalProducts': FieldValue.increment(1), 'productIds': FieldValue.arrayUnion([productId])});
+      await FirebaseFirestore.instance.collection('Stores').doc(widget.storeId).collection('categories').doc(widget.category.id).update({'totalProducts': FieldValue.increment(1), 'productIds': FieldValue.arrayUnion([customDocRef])});
+
       setState(() {
         isSubmitting = false;
       });
-      isMultiOptionCategory
-          ? _navigateToOptionalsScreen(productId)
-          : _clearForm();
+      _showSnackBar('Your product has been listed successfully');
+      _clearForm();
     } catch (e) {
       print('Error adding product: $e');
       _showSnackBar('Error adding product. Please try again.');
+      setState(() {
+        isSubmitting = false;
+      });
     }
   }
 
+  void _navigateToOptionalsScreen() {
+    if (_images.isEmpty ||
+        selectedCategory == null ||
+        _nameController.text.isEmpty) {
+      _showSnackBar(
+          'Please fill in all required fields and add at least one image');
+      return;
+    }
+
+    String customDocRef = 'Product-ID-${Uuid().v4()}';
+
+    ProductModel productData = ProductModel(
+      productId: customDocRef,
+      storeId: widget.storeId,
+      name: _nameController.text,
+      description: _descriptionController.text,
+      productCategory: selectedCategory!,
+      storeCategory: widget.category.name,
+      imageUrls: [], // This will be filled in the OptionalsScreen
+      isAvailable: true,
+      createdAt: Timestamp.now(),
+      greenFlags: 0,
+      redFlags: 0,
+      variations: {},
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OptionalsScreen(
+          productData: productData,
+          categoryId: widget.category.id,
+          images: _images,
+        ),
+      ),
+    );
+  }
+
   String _generateSku(String productName, Map<String, dynamic> attributes) {
-    String skuBase = productName
-        .substring(0, 3)
-        .toUpperCase(); // First 3 letters of product name
+    String skuBase = productName.substring(0, 3).toUpperCase();
     String skuAttributes = attributes.entries
         .map((entry) =>
-            '${entry.key.substring(0, 1).toUpperCase()}${entry.value.toString().substring(0, 1).toUpperCase()}')
+    '${entry.key.substring(0, 1).toUpperCase()}${entry.value.toString().substring(0, 1).toUpperCase()}')
         .join('-');
     return '$skuBase-$skuAttributes-${DateTime.now().millisecondsSinceEpoch}';
   }
 
-  Map<String, dynamic> _createProductData(
-      String productId, List<String> imageUrls) {
+  Map<String, dynamic> _createProductData(String productId, List<String> imageUrls) {
     final productData = ProductModel(
       productId: productId,
       storeId: widget.storeId,
@@ -153,16 +190,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
       variations: {},
     );
 
-    if (!isMultiOptionCategory) {
-      String sku = _generateSku(productData.name, {});
-      productData.variations['default'] = ProductVariant(
-          discount: double.tryParse(_discountController.text) ?? 0.0,
-          mrp: double.tryParse(_mrpController.text) ?? 0.0,
-          price: double.tryParse(_itemPriceController.text) ?? 0.0,
-          stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
-          sku: sku,
-        );
-    }
+    String sku = _generateSku(productData.name, {});
+    productData.variations['default'] = ProductVariant(
+      discount: double.tryParse(_discountController.text) ?? 0.0,
+      mrp: double.tryParse(_mrpController.text) ?? 0.0,
+      price: double.tryParse(_itemPriceController.text) ?? 0.0,
+      stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
+      sku: sku,
+    );
 
     return productData.toFirestore();
   }
@@ -172,16 +207,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
         .showSnackBar(SnackBar(content: Text(message)));
   }
 
-  void _navigateToOptionalsScreen(String productId) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => OptionalsScreen(
-          productId: productId,
-          productCategory: selectedCategory!,
-        ),
-      ),
-    );
+  void _clearForm() {
+    setState(() {
+      _images.clear();
+      selectedCategory = null;
+      _nameController.clear();
+      _descriptionController.clear();
+      _discountController.clear();
+      _mrpController.clear();
+      _itemPriceController.clear();
+      _stockQuantityController.clear();
+    });
   }
 
   Future<List<String>> _uploadImages(String productId) async {
@@ -198,21 +234,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
     }
 
     return imageUrls;
-  }
-
-  void _clearForm() {
-    _showSnackBar('Product added successfully');
-    setState(() {
-      _images.clear();
-      selectedCategory = null;
-      _nameController.clear();
-      _descriptionController.clear();
-      _discountController.clear();
-      _mrpController.clear();
-      _itemPriceController.clear();
-      _stockQuantityController.clear();
-    });
-    Navigator.pop(context);
   }
 
   @override
@@ -758,25 +779,20 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     Center(
                       child: isSubmitting
                           ? CircularProgressIndicator(
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                  hexToColor('#2B2B2B')),
-                            )
+                        valueColor: AlwaysStoppedAnimation<Color>(hexToColor('#2B2B2B')),
+                      )
                           : ElevatedButton(
-                              onPressed:_addProduct,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: hexToColor('#2B2B2B'),
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 75, vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                              ),
-                              child: Text(
-                                'List Item',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 16.0),
-                              ),
-                            ),
+                        onPressed: isMultiOptionCategory ? _navigateToOptionalsScreen : _addSingleVariantProduct,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: hexToColor('#2B2B2B'),
+                          padding: EdgeInsets.symmetric(horizontal: 75, vertical: 16),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                        ),
+                        child: Text(
+                          isMultiOptionCategory ? 'Next' : 'List Item',
+                          style: TextStyle(color: Colors.white, fontSize: 16.0),
+                        ),
+                      ),
                     ),
                     SizedBox(height: 30),
                   ],
