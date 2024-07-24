@@ -51,8 +51,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void _calculateTotalAmount() {
     _totalAmount = _items.fold(
         0,
-        (sum, item) =>
-            sum + (item['variationDetails'].price * item['quantity']));
+            (sum, item) =>
+        sum + (item['variationDetails'].price * item['quantity']));
   }
 
   void _updateQuantity(int index, int newQuantity) {
@@ -103,7 +103,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
                         icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -481,7 +481,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
                         icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -727,7 +727,7 @@ class CheckoutItemTile extends StatelessWidget {
                 SizedBox(height: 8.0),
                 Container(
                   padding:
-                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                  EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
                   decoration: BoxDecoration(
                     border: Border.all(color: hexToColor('#D0D0D0')),
                     borderRadius: BorderRadius.circular(4.0),
@@ -873,7 +873,7 @@ class SummaryItemTile extends StatelessWidget {
                 SizedBox(height: 8.0),
                 Container(
                   padding:
-                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                  EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
                   decoration: BoxDecoration(
                     border: Border.all(color: hexToColor('#D0D0D0')),
                     borderRadius: BorderRadius.circular(4.0),
@@ -978,8 +978,8 @@ class _SummaryScreenState extends State<SummaryScreen> {
   void _calculateTotalAmount() {
     _totalAmount = widget.items.fold(
         0,
-        (sum, item) =>
-            sum + (item['variationDetails'].price * item['quantity']));
+            (sum, item) =>
+        sum + (item['variationDetails'].price * item['quantity']));
   }
 
   @override
@@ -1131,7 +1131,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
   Widget _buildProductSection() {
     return Column(
       children:
-          widget.items.map((item) => SummaryItemTile(item: item)).toList(),
+      widget.items.map((item) => SummaryItemTile(item: item)).toList(),
     );
   }
 
@@ -1292,7 +1292,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
                         icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -1331,7 +1331,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                       onExpansionChanged: (expanded) {
                         setState(() {
                           expandedTile =
-                              expanded ? ExpandedTile.upi : ExpandedTile.none;
+                          expanded ? ExpandedTile.upi : ExpandedTile.none;
                         });
                       },
                       collapsedShape: RoundedRectangleBorder(
@@ -1421,7 +1421,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                         ExpansionTile(
                           key: Key('other_upi'),
                           initiallyExpanded:
-                              expandedTile == ExpandedTile.otherUpi,
+                          expandedTile == ExpandedTile.otherUpi,
                           onExpansionChanged: (expanded) {
                             setState(() {
                               expandedTile = expanded
@@ -1478,7 +1478,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                       ),
                                       decoration: InputDecoration(
                                         helperText:
-                                            'Your UPI ID will be encrypted and in 100% safe with us',
+                                        'Your UPI ID will be encrypted and in 100% safe with us',
                                         helperStyle: TextStyle(
                                           color: hexToColor('#6F6F6F'),
                                           fontFamily: 'Poppins',
@@ -1487,7 +1487,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                         border: OutlineInputBorder(
                                           gapPadding: 0.0,
                                           borderRadius:
-                                              BorderRadius.circular(8.0),
+                                          BorderRadius.circular(8.0),
                                           borderSide: BorderSide(
                                             color: hexToColor('#E0E0E0'),
                                             width: 1.0,
@@ -1503,7 +1503,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                     decoration: BoxDecoration(
                                       color: Theme.of(context).primaryColor,
                                       borderRadius:
-                                          BorderRadius.circular(100.0),
+                                      BorderRadius.circular(100.0),
                                     ),
                                     child: Center(
                                       child: Icon(
@@ -1526,7 +1526,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                       onExpansionChanged: (expanded) {
                         setState(() {
                           expandedTile =
-                              expanded ? ExpandedTile.card : ExpandedTile.none;
+                          expanded ? ExpandedTile.card : ExpandedTile.none;
                         });
                       },
                       collapsedShape: RoundedRectangleBorder(
@@ -1621,7 +1621,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                         border: OutlineInputBorder(
                                           gapPadding: 0.0,
                                           borderRadius:
-                                              BorderRadius.circular(8.0),
+                                          BorderRadius.circular(8.0),
                                           borderSide: BorderSide(
                                             color: hexToColor('#E0E0E0'),
                                             width: 1.0,
@@ -1651,7 +1651,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                         border: OutlineInputBorder(
                                           gapPadding: 0.0,
                                           borderRadius:
-                                              BorderRadius.circular(8.0),
+                                          BorderRadius.circular(8.0),
                                           borderSide: BorderSide(
                                             color: hexToColor('#E0E0E0'),
                                             width: 1.0,
@@ -1697,6 +1697,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                               storeDetails: widget.storeDetails,
                               orderIds: widget.orderIds,
                               totalAmount: widget.totalAmount,
+                              items: widget.items,  // Add this line
                             ),
                           ),
                         );
@@ -1747,15 +1748,18 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
   }
 }
 
-class TransactionScreen extends StatefulWidget {
+class TransactionScreen extends StatefulWidget
+{
   Map<String, StoreModel> storeDetails;
   Map<String, String> orderIds;
   double totalAmount;
+  List<Map<String, dynamic>> items;  // Add this line
 
   TransactionScreen({
     required this.storeDetails,
     required this.orderIds,
     required this.totalAmount,
+    required this.items,  // Add this line
   });
 
   @override
@@ -1770,23 +1774,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
   void initState() {
     super.initState();
     _loadUserAddress();
+    _sendOrderToFirestore();
+    ///_sendOrderToMiddleman();
   }
 
-  Future<Uint8List?> _capturePng() async {
-    try {
-      RenderRepaintBoundary boundary = _globalKey.currentContext!
-          .findRenderObject() as RenderRepaintBoundary;
-      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
-      return byteData?.buffer.asUint8List();
-    } catch (e) {
-      print(e);
-      return null;
-    }
-  }
-
-  Future<void> _loadUserAddress() async {
+  Future<void> _loadUserAddress() async
+  {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
@@ -1798,6 +1791,98 @@ class _TransactionScreenState extends State<TransactionScreen> {
       _userAddress = userData.data()?['address'];
     });
   }
+
+  Future<void> _sendOrderToFirestore() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      for (var entry in widget.storeDetails.entries) {
+        String storeId = entry.key;
+
+        Map<String, dynamic> orderData = {
+          "address": _userAddress,
+          "date": Timestamp.now(),
+          "email": user.email,
+          "orderId": widget.orderIds[storeId],
+          "status": {
+            "delivered": null,
+            "ordered": Timestamp.now(),
+          },
+          "storeId": storeId,
+          "totalAmount": widget.totalAmount,
+          "userid": user.uid,
+          "time": Timestamp.now(),
+        };
+
+        await FirebaseFirestore.instance.collection('Orders').add(orderData);
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Order placed successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error sending order data: $e')),
+      );
+    }
+  }
+
+  Future<Uint8List?> _capturePng() async {
+    try
+    {
+      RenderRepaintBoundary boundary = _globalKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData =
+      await image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    }
+    catch (e)
+    {
+      print(e);
+      return null;
+    }
+  }
+
+  /*Future<void> _sendOrderToMiddleman() async {
+    try {
+      print("Starting to send order to middleman");
+      for (var entry in widget.storeDetails.entries) {
+        String storeId = entry.key;
+        StoreModel store = entry.value;
+
+        Map<String, dynamic> order = {
+          "DropOfAddress": "${_userAddress?['addressLine1']}, ${_userAddress?['addressLine2']}, ${_userAddress?['city']}, ${_userAddress?['state']} ${_userAddress?['zip']}",
+          "OrderTotal": widget.totalAmount,
+          "PickUpAddress": store.address,
+          "StoreLogo": store.logoUrl,
+          "StoreName": store.name,
+          "deliveryId": widget.orderIds[storeId],
+          "items": widget.items.where((item) => item['storeId'] == storeId).map((item) => {
+            "name": item['productName'],
+            "price": item['variationDetails'].price,
+            "quantity": item['quantity'],
+          }).toList(),
+          "paymentMethod": "Cash on Delivery"
+        };
+
+        print("Attempting to send order: $order");
+        await FirebaseFirestore.instance.collection('middleman_orders').add(order);
+        print("Order sent successfully");
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Order sent to middleman_orders successfully')),
+      );
+    } catch (e) {
+      print("Error sending order to middleman: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error sending order: $e')),
+      );
+    }
+  }*/
+
 
   @override
   Widget build(BuildContext context) {
@@ -1834,7 +1919,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
                         icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -1897,14 +1982,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
                           ),
                           SizedBox(
                               height:
-                                  MediaQuery.of(context).size.height * 0.05),
+                              MediaQuery.of(context).size.height * 0.05),
                           SizedBox(
                             width: MediaQuery.of(context).size.width * 0.8,
                             child: Column(
                               children: [
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Date:',
@@ -1930,7 +2015,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 SizedBox(height: 12.0),
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Time:',
@@ -1956,7 +2041,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 SizedBox(height: 12.0),
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'To:',
@@ -1989,7 +2074,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 ),
                                 Row(
                                   mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       'Total',
@@ -2011,7 +2096,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                 SizedBox(height: 16.0),
                                 Container(
                                   height:
-                                      MediaQuery.of(context).size.height * 0.1,
+                                  MediaQuery.of(context).size.height * 0.1,
                                   decoration: BoxDecoration(
                                     color: hexToColor('#FFFFFF'),
                                     borderRadius: BorderRadius.circular(12.0),
@@ -2040,27 +2125,27 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                     Column(
                                       children: [
                                         ...widget.orderIds.entries.map((entry) =>
-                                        Row(
-                                          children: [
-                                            Text(
-                                              'Order ID:',
-                                              style: TextStyle(
-                                                color: hexToColor('#2D332F'),
-                                                fontSize: 18.0,
-                                              ),
-                                            ),
-                                            SizedBox(width: 8.0),
-                                            Text(
-                                              entry.value,
-                                              style: TextStyle(
-                                                color: hexToColor('#A9A9A9'),
-                                                fontSize: 18.0,
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ],
-                                        ),).toList(),
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  'Order ID:',
+                                                  style: TextStyle(
+                                                    color: hexToColor('#2D332F'),
+                                                    fontSize: 18.0,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 8.0),
+                                                Text(
+                                                  entry.value,
+                                                  style: TextStyle(
+                                                    color: hexToColor('#A9A9A9'),
+                                                    fontSize: 18.0,
+                                                    fontFamily: 'Poppins',
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),).toList(),
                                       ],
                                     ),
                                     Spacer(),
@@ -2071,7 +2156,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                           border: Border.all(
                                               color: hexToColor('#094446')),
                                           borderRadius:
-                                              BorderRadius.circular(12.0),
+                                          BorderRadius.circular(12.0),
                                         ),
                                         child: Center(
                                           child: Text(

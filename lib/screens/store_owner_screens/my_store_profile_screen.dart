@@ -26,15 +26,13 @@ class MyStoreProfileScreen extends StatefulWidget {
 }
 class Update {
   String id;
-  String type;
-  List<String> mediaUrls;
+  List<MediaItem> mediaItems;
   String text;
   DateTime timestamp;
 
   Update({
     required this.id,
-    required this.type,
-    required this.mediaUrls,
+    required this.mediaItems,
     required this.text,
     required this.timestamp,
   });
@@ -42,8 +40,7 @@ class Update {
   factory Update.fromMap(Map<String, dynamic> map) {
     return Update(
       id: map['id'] as String,
-      type: map['type'] as String,
-      mediaUrls: List<String>.from(map['mediaUrls']),
+      mediaItems: (map['mediaItems'] as List).map((item) => MediaItem.fromMap(item)).toList(),
       text: map['text'] as String,
       timestamp: (map['timestamp'] as Timestamp).toDate(),
     );
@@ -52,10 +49,30 @@ class Update {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'type': type,
-      'mediaUrls': mediaUrls,
+      'mediaItems': mediaItems.map((item) => item.toMap()).toList(),
       'text': text,
       'timestamp': Timestamp.fromDate(timestamp),
+    };
+  }
+}
+
+class MediaItem {
+  String type;
+  String url;
+
+  MediaItem({required this.type, required this.url});
+
+  factory MediaItem.fromMap(Map<String, dynamic> map) {
+    return MediaItem(
+      type: map['type'] as String,
+      url: map['url'] as String,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'type': type,
+      'url': url,
     };
   }
 }
@@ -198,11 +215,10 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     }
   }
 
-  Future<void> addUpdate(String type, List<String> mediaUrls, String text) async {
+  Future<void> addUpdate(List<MediaItem> mediaItems, String text) async {
     final newUpdate = Update(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      type: type,
-      mediaUrls: mediaUrls,
+      mediaItems: mediaItems,
       text: text,
       timestamp: DateTime.now(),
     );
@@ -236,13 +252,11 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
             mainAxisSize: MainAxisSize.min,
             children: [
               ElevatedButton(
-                onPressed: () => _pickAndUploadMedia('image'),
-                child: Text('Add Image'),
-              ),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () => _pickAndUploadMedia('video'),
-                child: Text('Add Video'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _pickAndUploadMedia();
+                },
+                child: Text('Add Media (Images/Videos)'),
               ),
             ],
           ),
@@ -251,20 +265,37 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     );
   }
 
-
-  Future<void> _pickAndUploadMedia(String type) async {
+  Future<void> _pickAndUploadMedia() async {
     final ImagePicker _picker = ImagePicker();
-    List<XFile>? pickedFiles;
-
-    if (type == 'image') {
-      pickedFiles = await _picker.pickMultiImage();
-    } else if (type == 'video') {
-      final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
-      if (video != null) pickedFiles = [video];
-    }
+    List<XFile>? pickedFiles = await showDialog<List<XFile>?>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select Media'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                onPressed: () async {
+                  Navigator.of(context).pop(await _picker.pickMultiImage());
+                },
+                child: Text('Pick Images'),
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: () async {
+                  final XFile? video = await _picker.pickVideo(source: ImageSource.gallery);
+                  Navigator.of(context).pop(video != null ? [video] : null);
+                },
+                child: Text('Pick Video'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
 
     if (pickedFiles != null && pickedFiles.isNotEmpty) {
-      // Show loading indicator
       showDialog(
         context: context,
         barrierDismissible: false,
@@ -273,78 +304,40 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
         },
       );
 
-      List<String> mediaUrls = [];
+      List<MediaItem> mediaItems = [];
       for (var file in pickedFiles) {
         String url = await uploadFile(file);
-        mediaUrls.add(url);
+        String type = file.name.split('.').last.toLowerCase() == 'mp4' ? 'video' : 'image';
+        mediaItems.add(MediaItem(type: type, url: url));
       }
 
-      // Hide loading indicator
       Navigator.of(context).pop();
 
-      // Show a dialog to get text input
-      String? text = await showDialog<String>(
-        context: context,
-        builder: (BuildContext context) {
-          String inputText = '';
-          return AlertDialog(
-            title: Text('Add a caption'),
-            content: TextField(
-              onChanged: (value) {
-                inputText = value;
-              },
-            ),
-            actions: <Widget>[
-              TextButton(
-                child: Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop(inputText);
-                },
+      await addUpdate(mediaItems, '');
+
+      if (mediaItems.isNotEmpty) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content: SizedBox(
+                width: double.maxFinite,
+                child: MediaGallery(mediaItems: mediaItems),
               ),
-            ],
-          );
-        },
-      );
-
-      if (text != null) {
-        await addUpdate(type, mediaUrls, text);
-        Navigator.of(context).pop();
-
-        // Show the uploaded images
-        if (mediaUrls.isNotEmpty) {
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                content: SizedBox(
-                  width: double.maxFinite,
-                  child: ImageGallery(imageUrls: mediaUrls),
+              actions: <Widget>[
+                TextButton(
+                  child: Text('Close'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                 ),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text('Close'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              );
-            },
-          );
-        }
-
-        if (!hasUpdates) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Congratulations on adding your first update!'),
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
+              ],
+            );
+          },
+        );
       }
     }
   }
-
 
   Future<String> uploadFile(XFile file) async {
     File fileToUpload = File(file.path);
@@ -1568,8 +1561,8 @@ class UpdateTile extends StatelessWidget {
                 border: Border.all(color: hexToColor('#B5B5B5'), width: 1.0),
                 borderRadius: BorderRadius.circular(8.0),
               ),
-              child: update.type == 'image'
-                  ? Image.network(update.mediaUrls.first, fit: BoxFit.cover)
+              child: update.mediaItems.first.type == 'image'
+                  ? Image.network(update.mediaItems.first.url, fit: BoxFit.cover)
                   : Icon(Icons.video_library, size: 48.0),
             ),
             SizedBox(height: 8),
@@ -1596,19 +1589,36 @@ class FullUpdateView extends StatefulWidget {
 }
 
 class _FullUpdateViewState extends State<FullUpdateView> {
+  late PageController _pageController;
   late Timer _timer;
+  int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer(Duration(seconds: 10), () {
-      Navigator.of(context).pop();
+    _pageController = PageController();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
+      if (_currentPage < widget.update.mediaItems.length - 1) {
+        _currentPage++;
+        _pageController.animateToPage(
+          _currentPage,
+          duration: Duration(milliseconds: 350),
+          curve: Curves.easeIn,
+        );
+      } else {
+        Navigator.of(context).pop();
+      }
     });
   }
 
   @override
   void dispose() {
     _timer.cancel();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -1620,52 +1630,77 @@ class _FullUpdateViewState extends State<FullUpdateView> {
         onTap: () {
           Navigator.of(context).pop();
         },
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (widget.update.type == 'image')
-                Image.network(
-                  widget.update.mediaUrls.first,
-                  fit: BoxFit.contain,
-                  height: MediaQuery.of(context).size.height * 0.8,
-                )
-              else if (widget.update.type == 'video')
-              // You'd need to implement video player here
-                Icon(Icons.video_library, size: 100, color: Colors.white),
-              SizedBox(height: 20),
-              Text(
-                widget.update.text,
-                style: TextStyle(color: Colors.white, fontSize: 18),
-                textAlign: TextAlign.center,
+        child: Stack(
+          children: [
+            PageView.builder(
+              controller: _pageController,
+              itemCount: widget.update.mediaItems.length,
+              onPageChanged: (int page) {
+                setState(() {
+                  _currentPage = page;
+                });
+              },
+              itemBuilder: (context, index) {
+                final mediaItem = widget.update.mediaItems[index];
+                return Center(
+                  child: mediaItem.type == 'image'
+                      ? Image.network(
+                    mediaItem.url,
+                    fit: BoxFit.contain,
+                    height: MediaQuery.of(context).size.height * 0.8,
+                  )
+                      : Icon(Icons.video_library, size: 100, color: Colors.white),
+                );
+              },
+            ),
+            Positioned(
+              top: 40,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  widget.update.mediaItems.length,
+                      (index) => Container(
+                    width: 8,
+                    height: 8,
+                    margin: EdgeInsets.symmetric(horizontal: 4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _currentPage == index ? Colors.white : Colors.grey,
+                    ),
+                  ),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class ImageGallery extends StatelessWidget {
-  final List<String> imageUrls;
+class MediaGallery extends StatelessWidget {
+  final List<MediaItem> mediaItems;
 
-  const ImageGallery({Key? key, required this.imageUrls}) : super(key: key);
+  const MediaGallery({Key? key, required this.mediaItems}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return PageView.builder(
-      itemCount: imageUrls.length,
+      itemCount: mediaItems.length,
       itemBuilder: (context, index) {
-        return Image.network(
-          imageUrls[index],
+        final mediaItem = mediaItems[index];
+        return mediaItem.type == 'image'
+            ? Image.network(
+          mediaItem.url,
           fit: BoxFit.contain,
-        );
+        )
+            : Icon(Icons.video_library, size: 100, color: Colors.black);
       },
     );
   }
 }
-
 // You might need to add this extension method somewhere in your code
 extension StringExtension on String {
   String capitalize() {
