@@ -828,6 +828,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ],
                             ),
                           ),
+                          Container(
+                            child: Row(
+                              children: [
+
+                              ],
+                            ),
+                          ),
                           SizedBox(height: 20),
                         ],
                       ),

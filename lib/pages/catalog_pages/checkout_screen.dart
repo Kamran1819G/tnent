@@ -8,11 +8,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
+// import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/pages/catalog_pages/store_coupon_screen.dart';
-
 
 class CheckoutScreen extends StatefulWidget {
   List<Map<String, dynamic>> selectedItems;
@@ -26,12 +25,27 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   late List<Map<String, dynamic>> _items;
   double _totalAmount = 0.0;
+  Map<String, dynamic>? _userAddress;
 
   @override
   void initState() {
     super.initState();
     _items = List.from(widget.selectedItems);
     _calculateTotalAmount();
+    _loadUserAddress();
+  }
+
+  Future<void> _loadUserAddress() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final userData = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(user.uid)
+        .get();
+    setState(() {
+      _userAddress = userData.data()?['address'];
+    });
   }
 
   void _calculateTotalAmount() {
@@ -99,52 +113,143 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ],
               ),
             ),
-            Card(
-              margin: EdgeInsets.all(16.0),
-              color: Colors.white,
-              surfaceTintColor: Colors.white,
-              child: Container(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Kamran Khan',
-                          style: TextStyle(
-                            color: hexToColor('#2D332F'),
-                            fontSize: 22.0,
+            if (_userAddress == null)
+              Card(
+                margin: EdgeInsets.all(16.0),
+                color: Colors.white,
+                surfaceTintColor: Colors.white,
+                child: Container(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'No Address Added',
+                        style: TextStyle(
+                          color: hexToColor('#2D332F'),
+                          fontSize: 22.0,
+                        ),
+                      ),
+                      SizedBox(height: 16.0),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChangeAddressScreen(),
+                              ),
+                            );
+                            if (result != null) {
+                              setState(() {
+                                _userAddress = result;
+                              });
+                            }
+                          },
+                          child: Container(
+                            height: 50,
+                            width: 300,
+                            margin: EdgeInsets.symmetric(vertical: 15.0),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.circular(100.0),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Add Your Address',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 12.0),
+                              ),
+                            ),
                           ),
                         ),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 12.0, vertical: 6.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Theme.of(context).primaryColor,
-                            ),
-                            borderRadius: BorderRadius.circular(100.0),
-                          ),
-                          child: Text(
-                            'Home',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontSize: 12.0,
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                    SizedBox(height: 16.0),
-                    Container(
-                      width: 250,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            if (_userAddress != null)
+              Card(
+                margin: EdgeInsets.all(16.0),
+                color: Colors.white,
+                surfaceTintColor: Colors.white,
+                child: Container(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Flat No. 505 Ammar Residency,',
+                            _userAddress!['name'],
+                            style: TextStyle(
+                              color: hexToColor('#2D332F'),
+                              fontSize: 22.0,
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12.0, vertical: 6.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                color: Theme.of(context).primaryColor,
+                              ),
+                              borderRadius: BorderRadius.circular(100.0),
+                            ),
+                            child: Text(
+                              _userAddress!['type'],
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontSize: 12.0,
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 16.0),
+                      Container(
+                        width: 250,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${_userAddress!['addressLine1']},',
+                              style: TextStyle(
+                                color: hexToColor('#727272'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12.0,
+                              ),
+                            ),
+                            SizedBox(height: 4.0),
+                            Text(
+                              _userAddress!['addressLine2'],
+                              style: TextStyle(
+                                color: hexToColor('#727272'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12.0,
+                              ),
+                            ),
+                            SizedBox(height: 4.0),
+                            Text(
+                              '${_userAddress!['city']}, ${_userAddress!['state']} ${_userAddress!['zip']}',
+                              style: TextStyle(
+                                color: hexToColor('#727272'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 16.0),
+                      Row(
+                        children: [
+                          Text(
+                            'Mobile:',
                             style: TextStyle(
                               color: hexToColor('#727272'),
                               fontFamily: 'Poppins',
@@ -152,86 +257,57 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               fontSize: 12.0,
                             ),
                           ),
-                          SizedBox(height: 4.0),
+                          SizedBox(width: 4.0),
                           Text(
-                            'Plot No 21 Sector 9 Taloja Phase 1',
+                            _userAddress!['phone'],
                             style: TextStyle(
-                              color: hexToColor('#727272'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12.0,
-                            ),
-                          ),
-                          SizedBox(height: 4.0),
-                          Text(
-                            'Navi Mumbai, Maharashtra 410208',
-                            style: TextStyle(
-                              color: hexToColor('#727272'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
+                              color: hexToColor('#2D332F'),
                               fontSize: 12.0,
                             ),
                           ),
                         ],
                       ),
-                    ),
-                    SizedBox(height: 16.0),
-                    Row(
-                      children: [
-                        Text(
-                          'Mobile:',
-                          style: TextStyle(
-                            color: hexToColor('#727272'),
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12.0,
-                          ),
-                        ),
-                        SizedBox(width: 4.0),
-                        Text(
-                          '1234567890',
-                          style: TextStyle(
-                            color: hexToColor('#2D332F'),
-                            fontSize: 12.0,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 25.0),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ChangeAddressScreen(),
+                      SizedBox(height: 25.0),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () async {
+                            final result = await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ChangeAddressScreen(
+                                    existingAddress: _userAddress),
+                              ),
+                            );
+                            if (result != null) {
+                              setState(() {
+                                _userAddress = result;
+                              });
+                            }
+                          },
+                          child: Container(
+                            height: 50,
+                            width: 300,
+                            margin: EdgeInsets.symmetric(vertical: 15.0),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: hexToColor('#E3E3E3')),
+                              borderRadius: BorderRadius.circular(100.0),
                             ),
-                          );
-                        },
-                        child: Container(
-                          height: 50,
-                          width: 300,
-                          margin: EdgeInsets.symmetric(vertical: 15.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: hexToColor('#E3E3E3')),
-                            borderRadius: BorderRadius.circular(100.0),
-                          ),
-                          child: Center(
-                            child: Text(
-                              'Change Your Address',
-                              style: TextStyle(
-                                  color: hexToColor('#343434'), fontSize: 12.0),
+                            child: Center(
+                              child: Text(
+                                'Change Your Address',
+                                style: TextStyle(
+                                    color: hexToColor('#343434'),
+                                    fontSize: 12.0),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
             SizedBox(height: 16.0),
-
             Expanded(
               child: ListView.builder(
                 itemCount: _items.length,
@@ -298,14 +374,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 }
 
 class ChangeAddressScreen extends StatefulWidget {
-  const ChangeAddressScreen({super.key});
+  final Map<String, dynamic>? existingAddress;
+
+  ChangeAddressScreen({this.existingAddress});
 
   @override
   State<ChangeAddressScreen> createState() => _ChangeAddressScreenState();
 }
 
 class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
-  String AddressType = 'Home';
+  String addressType = 'Home';
 
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
@@ -318,13 +396,52 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
-    _phoneController = TextEditingController();
-    _addressLine1Controller = TextEditingController();
-    _addressLine2Controller = TextEditingController();
-    _zipController = TextEditingController();
-    _cityController = TextEditingController();
-    _stateController = TextEditingController();
+    _nameController =
+        TextEditingController(text: widget.existingAddress?['name'] ?? '');
+    _phoneController =
+        TextEditingController(text: widget.existingAddress?['phone'] ?? '');
+    _addressLine1Controller = TextEditingController(
+        text: widget.existingAddress?['addressLine1'] ?? '');
+    _addressLine2Controller = TextEditingController(
+        text: widget.existingAddress?['addressLine2'] ?? '');
+    _zipController =
+        TextEditingController(text: widget.existingAddress?['zip'] ?? '');
+    _cityController =
+        TextEditingController(text: widget.existingAddress?['city'] ?? '');
+    _stateController =
+        TextEditingController(text: widget.existingAddress?['state'] ?? '');
+    addressType = widget.existingAddress?['type'] ?? 'Home';
+  }
+
+  Future<void> _saveAddress() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final addressData = {
+      'name': _nameController.text,
+      'phone': _phoneController.text,
+      'addressLine1': _addressLine1Controller.text,
+      'addressLine2': _addressLine2Controller.text,
+      'zip': _zipController.text,
+      'city': _cityController.text,
+      'state': _stateController.text,
+      'type': addressType,
+    };
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .update({
+        'address': addressData,
+      });
+      Navigator.pop(context, addressData);
+    } catch (e) {
+      // Handle error (show a snackbar, for example)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save address: $e')),
+      );
+    }
   }
 
   @override
@@ -478,18 +595,21 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
               ),
             ),
             Center(
-              child: Container(
-                height: 50,
-                width: 250,
-                margin: EdgeInsets.symmetric(vertical: 15.0),
-                decoration: BoxDecoration(
-                  color: hexToColor('#2B2B2B'),
-                  borderRadius: BorderRadius.circular(100.0),
-                ),
-                child: Center(
-                  child: Text(
-                    'Confirm Address',
-                    style: TextStyle(color: Colors.white, fontSize: 14.0),
+              child: GestureDetector(
+                onTap: _saveAddress,
+                child: Container(
+                  height: 50,
+                  width: 250,
+                  margin: EdgeInsets.symmetric(vertical: 15.0),
+                  decoration: BoxDecoration(
+                    color: hexToColor('#2B2B2B'),
+                    borderRadius: BorderRadius.circular(100.0),
+                  ),
+                  child: Center(
+                    child: Text(
+                      'Confirm Address',
+                      style: TextStyle(color: Colors.white, fontSize: 14.0),
+                    ),
                   ),
                 ),
               ),
@@ -501,11 +621,11 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
   }
 
   Widget _buildAddressType(String type) {
-    bool isSelected = AddressType == type;
+    bool isSelected = addressType == type;
     return GestureDetector(
       onTap: () {
         setState(() {
-          AddressType = isSelected ? '' : type;
+          addressType = isSelected ? '' : type;
         });
       },
       child: Container(
@@ -753,7 +873,7 @@ class SummaryItemTile extends StatelessWidget {
                 SizedBox(height: 8.0),
                 Container(
                   padding:
-                  EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
                   decoration: BoxDecoration(
                     border: Border.all(color: hexToColor('#D0D0D0')),
                     borderRadius: BorderRadius.circular(4.0),
@@ -836,7 +956,10 @@ class _SummaryScreenState extends State<SummaryScreen> {
     for (var item in widget.items) {
       String storeId = item['storeId'];
       if (!_storeDetails.containsKey(storeId)) {
-        DocumentSnapshot doc = await FirebaseFirestore.instance.collection('Stores').doc(storeId).get();
+        DocumentSnapshot doc = await FirebaseFirestore.instance
+            .collection('Stores')
+            .doc(storeId)
+            .get();
         _storeDetails[storeId] = StoreModel.fromFirestore(doc);
       }
     }
@@ -853,7 +976,10 @@ class _SummaryScreenState extends State<SummaryScreen> {
   }
 
   void _calculateTotalAmount() {
-    _totalAmount = widget.items.fold(0, (sum, item) => sum + (item['variationDetails'].price * item['quantity']));
+    _totalAmount = widget.items.fold(
+        0,
+        (sum, item) =>
+            sum + (item['variationDetails'].price * item['quantity']));
   }
 
   @override
@@ -1004,7 +1130,8 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
   Widget _buildProductSection() {
     return Column(
-      children: widget.items.map((item) => SummaryItemTile(item: item)).toList(),
+      children:
+          widget.items.map((item) => SummaryItemTile(item: item)).toList(),
     );
   }
 
@@ -1546,7 +1673,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                   ),
                                   child: Center(
                                     child: Text(
-                                      'Pay ₹ ${widget.totalAmount}',
+                                      'Pay ₹ ${widget.totalAmount.toStringAsFixed(2)}',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontSize: 16.0,
@@ -1637,6 +1764,13 @@ class TransactionScreen extends StatefulWidget {
 
 class _TransactionScreenState extends State<TransactionScreen> {
   GlobalKey _globalKey = GlobalKey();
+  Map<String, dynamic>? _userAddress;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserAddress();
+  }
 
   Future<Uint8List?> _capturePng() async {
     try {
@@ -1650,6 +1784,19 @@ class _TransactionScreenState extends State<TransactionScreen> {
       print(e);
       return null;
     }
+  }
+
+  Future<void> _loadUserAddress() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final userData = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(user.uid)
+        .get();
+    setState(() {
+      _userAddress = userData.data()?['address'];
+    });
   }
 
   @override
@@ -1667,12 +1814,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     onPressed: () async {
                       Uint8List? imageBytes = await _capturePng();
 
-                      if (imageBytes != null) {
+                      /*if (imageBytes != null) {
                         final result = await ImageGallerySaver.saveImage(
                           Uint8List.fromList(imageBytes),
                         );
                         print(result);
-                      }
+                      }*/
                     },
                     icon: Icon(
                       Icons.file_download_outlined,
@@ -1822,7 +1969,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                     ),
                                     SizedBox(width: 8.0),
                                     Text(
-                                      'Kamran Khan',
+                                      _userAddress!['name'],
                                       style: TextStyle(
                                         color: hexToColor('#333333'),
                                         fontSize: 20.0,
@@ -1853,7 +2000,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                     ),
                                     SizedBox(width: 8.0),
                                     Text(
-                                      '₹ ${widget.totalAmount}',
+                                      '₹ ${widget.totalAmount.toStringAsFixed(2)}',
                                       style: TextStyle(
                                         color: hexToColor('#343434'),
                                         fontSize: 20.0,
@@ -1890,22 +2037,31 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                         0.1),
                                 Row(
                                   children: [
-                                    Text(
-                                      'Order ID:',
-                                      style: TextStyle(
-                                        color: hexToColor('#2D332F'),
-                                        fontSize: 20.0,
-                                      ),
-                                    ),
-                                    SizedBox(width: 8.0),
-                                    Text(
-                                      '123456',
-                                      style: TextStyle(
-                                        color: hexToColor('#A9A9A9'),
-                                        fontSize: 20.0,
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w600,
-                                      ),
+                                    Column(
+                                      children: [
+                                        ...widget.orderIds.entries.map((entry) =>
+                                        Row(
+                                          children: [
+                                            Text(
+                                              'Order ID:',
+                                              style: TextStyle(
+                                                color: hexToColor('#2D332F'),
+                                                fontSize: 18.0,
+                                              ),
+                                            ),
+                                            SizedBox(width: 8.0),
+                                            Text(
+                                              entry.value,
+                                              style: TextStyle(
+                                                color: hexToColor('#A9A9A9'),
+                                                fontSize: 18.0,
+                                                fontFamily: 'Poppins',
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),).toList(),
+                                      ],
                                     ),
                                     Spacer(),
                                     Container(
