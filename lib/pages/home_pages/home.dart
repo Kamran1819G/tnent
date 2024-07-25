@@ -639,8 +639,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        height: 75,
-                        width: 75,
+                        height:120.h,
+                        width: 120.h,
                         decoration: BoxDecoration(
                           color: hexToColor('#F5F5F5'),
                           borderRadius: BorderRadius.circular(18.0),
@@ -652,11 +652,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                           ),
                         ),
                       ),
-                      SizedBox(height: 8.0),
+                      SizedBox(height: 8.h),
                       Expanded(
                         child: Text(
                           'View All',
-                          style: TextStyle(fontSize: 12.0),
+                          style: TextStyle(fontSize: 16.sp),
                         ),
                       ),
                     ],
@@ -714,7 +714,7 @@ class StoreTile extends StatelessWidget {
                   height: 120.h,
                   width: 120.w,
                 )),
-            SizedBox(height: 12.h),
+            SizedBox(height: 8.h),
             Text(
               store.name,
               style: TextStyle(fontSize: 16.sp),

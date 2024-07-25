@@ -8,7 +8,7 @@ class OrderUpdateNotification extends StatelessWidget {
   final String? name;
   final String? productImage;
   final String? productName;
-  final String orderID;
+  final String orderId;
   final String time;
   final double? price;
 
@@ -17,7 +17,7 @@ class OrderUpdateNotification extends StatelessWidget {
     this.name,
     this.productImage,
     this.productName,
-    required this.orderID,
+    required this.orderId,
     required this.time,
     this.price,
   });
@@ -57,7 +57,7 @@ class OrderUpdateNotification extends StatelessWidget {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       child: ListTile(
         contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
         shape: RoundedRectangleBorder(
@@ -66,16 +66,16 @@ class OrderUpdateNotification extends StatelessWidget {
         ),
         leading: productImage != null
             ? Container(
-                height: 75,
-                width: 75,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: Image.asset(
-                    productImage!,
-                    fit: BoxFit.cover, // or BoxFit.fill
-                  ),
-                ),
-              )
+          height: 75,
+          width: 75,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8.0),
+            child: Image.network(
+              productImage!,
+              fit: BoxFit.cover,
+            ),
+          ),
+        )
             : null,
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -92,7 +92,7 @@ class OrderUpdateNotification extends StatelessWidget {
                 ),
                 SizedBox(width: 8.0),
                 Text(
-                  "(${time})",
+                  "${time}",
                   style: TextStyle(
                     fontSize: 8.0,
                     color: hexToColor('#747474'),
@@ -113,7 +113,7 @@ class OrderUpdateNotification extends StatelessWidget {
                 ),
                 SizedBox(width: 4.0),
                 Text(
-                  '#${orderID}',
+                  '#${orderId}',
                   style: TextStyle(
                     fontSize: 10.0,
                     fontFamily: 'Poppins',
@@ -126,70 +126,70 @@ class OrderUpdateNotification extends StatelessWidget {
           ],
         ),
         subtitle: (type == NotificationType.delivered ||
-                type == NotificationType.cancelled ||
-                type == NotificationType.refunded)
+            type == NotificationType.cancelled ||
+            type == NotificationType.refunded)
             ? Text(
-                type == NotificationType.delivered
-                    ? name != null
-                        ? 'Item delivered to $name'
-                        : 'Item delivered'
-                    : (type == NotificationType.refunded
-                        ? 'Item refunded'
-                        : (type == NotificationType.cancelled
-                            ? 'Item cancelled'
-                            : '')),
-                style: TextStyle(
-                  color: hexToColor('#343434'),
-                  fontFamily: 'Poppins',
-                  fontSize: 12.0,
-                ),
-              )
+          type == NotificationType.delivered
+              ? name != null
+              ? 'Item delivered to $name'
+              : 'Item delivered'
+              : (type == NotificationType.refunded
+              ? 'Item refunded'
+              : (type == NotificationType.cancelled
+              ? 'Item cancelled'
+              : '')),
+          style: TextStyle(
+            color: hexToColor('#343434'),
+            fontFamily: 'Poppins',
+            fontSize: 12.0,
+          ),
+        )
             : Row(
-                children: [
-                  Text(
-                    productName!,
-                    style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontSize: 12.0,
-                    ),
-                  ),
-                  Spacer(),
-                  Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: hexToColor('#343434'),
-                        width: 1.0,
-                      ),
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    child: Text(
-                      '₹${price}',
-                      style: TextStyle(
-                        color: hexToColor('#838383'),
-                        fontSize: 10.0,
-                      ),
-                    ),
-                  ),
-                ],
+          children: [
+            Text(
+              productName!,
+              style: TextStyle(
+                color: hexToColor('#343434'),
+                fontSize: 12.0,
               ),
+            ),
+            Spacer(),
+            Container(
+              padding:
+              EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: hexToColor('#343434'),
+                  width: 1.0,
+                ),
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              child: Text(
+                '₹${price}',
+                style: TextStyle(
+                  color: hexToColor('#838383'),
+                  fontSize: 10.0,
+                ),
+              ),
+            ),
+          ],
+        ),
         trailing: (type == NotificationType.delivered ||
-                type == NotificationType.cancelled ||
-                type == NotificationType.refunded)
+            type == NotificationType.cancelled ||
+            type == NotificationType.refunded)
             ? Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Icon(
-                  iconData,
-                  color: Colors.white,
-                  size: 20.0,
-                ),
-              )
+          height: 40,
+          width: 40,
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Icon(
+            iconData,
+            color: Colors.white,
+            size: 20.0,
+          ),
+        )
             : null,
       ),
     );

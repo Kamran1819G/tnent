@@ -113,19 +113,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void navigateToCheckout() {
-    List<Map<String, String>> selectedItems = [];
-
-    // Since this is a product detail page, we're only adding the current product
-    selectedItems.add({
+    Map<String, dynamic> item = {
       'productId': widget.product.productId,
+      'productImage': widget.product.imageUrls.first,
+      'storeId': widget.product.storeId,
+      'productName': widget.product.name,
       'variation': _selectedVariation,
-    });
+      'quantity': 1,
+      'variationDetails': _selectedVariant
+    };
 
-    if (selectedItems.isNotEmpty) {
+    if (_selectedVariant.stockQuantity > 0) {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => CheckoutScreen(selectedItems: selectedItems),
+          builder: (context) => CheckoutScreen(selectedItems: [item]),
         ),
       );
     } else {
@@ -295,6 +297,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         });
       });
 
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Vote recorded successfully')),
       );
@@ -873,7 +876,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       ),
     );
   }
-
 
   Widget _buildVariationSelector() {
     return Wrap(

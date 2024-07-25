@@ -15,7 +15,15 @@ import 'package:tnennt/pages/gallery_pages/the_middlemen.dart';
 import 'package:tnennt/screens/store_owner_screens/my_store_profile_screen.dart';
 
 class Gallery extends StatefulWidget {
-  const Gallery({super.key});
+  StoreModel store;
+  bool isStoreRegistered;
+  bool isActive;
+
+  Gallery({
+    required this.store,
+    required this.isStoreRegistered,
+    required this.isActive,
+  });
 
   @override
   State<Gallery> createState() => _GalleryState();
@@ -29,33 +37,34 @@ class _GalleryState extends State<Gallery> {
   @override
   void initState() {
     super.initState();
-    intialize();
+    store = widget.store;
+    isStoreRegistered = widget.isStoreRegistered;
+    isActive = widget.isActive;
+    initialize();
   }
 
-  void intialize() async {
-    await _checkStoreRegistration();
+  void initialize() {
+    _checkStoreRegistration();
   }
+
 
   Future<void> _checkStoreRegistration() async {
-    final user = FirebaseAuth.instance.currentUser;
-    print(user?.uid);
-    if (user != null) {
-      final storeId = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(user.uid)
-          .get()
-          .then((doc) => doc.get('storeId'));
-      if (storeId.isNotEmpty) {
-        final storeDoc = await FirebaseFirestore.instance
-            .collection('Stores')
-            .doc(storeId)
-            .get();
-        setState(() {
-          isStoreRegistered = storeDoc.exists;
-          store = StoreModel.fromFirestore(storeDoc);
-          isActive = store.isActive;
-        });
-      }
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return;
+    }
+
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('Stores')
+        .doc(user.uid)
+        .get();
+
+    if (doc.exists) {
+      setState(() {
+        store = StoreModel.fromFirestore(doc);
+        isStoreRegistered = true;
+        isActive = store.isActive;
+      });
     }
   }
 

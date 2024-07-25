@@ -21,6 +21,7 @@ class AddProductScreen extends StatefulWidget {
 }
 
 class _AddProductScreenState extends State<AddProductScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   List<File> _images = [];
   String? selectedCategory;
   bool isSubmitting = false;
@@ -87,20 +88,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
   }
 
   Future<void> _addSingleVariantProduct() async {
+    if (!_formKey.currentState!.validate() ||
+        _images.isEmpty ||
+        selectedCategory == null) {
+      _showSnackBar(
+          'Please fill in all required fields and add at least one image');
+      return;
+    }
+
     setState(() {
       isSubmitting = true;
     });
-
-    if (_images.isEmpty ||
-        selectedCategory == null ||
-        _nameController.text.isEmpty) {
-      _showSnackBar(
-          'Please fill in all required fields and add at least one image');
-      setState(() {
-        isSubmitting = false;
-      });
-      return;
-    }
 
     try {
       String customDocRef = 'Product-ID-${Uuid().v4()}';
@@ -110,8 +108,19 @@ class _AddProductScreenState extends State<AddProductScreen> {
           .collection('products')
           .doc(customDocRef)
           .set(productData);
-      await FirebaseFirestore.instance.collection('Stores').doc(widget.storeId).update({'totalProducts': FieldValue.increment(1)});
-      await FirebaseFirestore.instance.collection('Stores').doc(widget.storeId).collection('categories').doc(widget.category.id).update({'totalProducts': FieldValue.increment(1), 'productIds': FieldValue.arrayUnion([customDocRef])});
+      await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(widget.storeId)
+          .update({'totalProducts': FieldValue.increment(1)});
+      await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(widget.storeId)
+          .collection('categories')
+          .doc(widget.category.id)
+          .update({
+        'totalProducts': FieldValue.increment(1),
+        'productIds': FieldValue.arrayUnion([customDocRef])
+      });
 
       setState(() {
         isSubmitting = false;
@@ -128,11 +137,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
   }
 
   void _navigateToOptionalsScreen() {
-    if (_images.isEmpty ||
-        selectedCategory == null ||
-        _nameController.text.isEmpty) {
-      _showSnackBar(
-          'Please fill in all required fields and add at least one image');
+    if (_nameController.text.isEmpty || _descriptionController.text.isEmpty || _images.isEmpty || selectedCategory == null) {
+      _showSnackBar('Please fill in all required fields and add at least one image');
       return;
     }
 
@@ -145,7 +151,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       description: _descriptionController.text,
       productCategory: selectedCategory!,
       storeCategory: widget.category.name,
-      imageUrls: [], // This will be filled in the OptionalsScreen
+      imageUrls: [],
       isAvailable: true,
       createdAt: Timestamp.now(),
       greenFlags: 0,
@@ -163,18 +169,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
         ),
       ),
     );
+
+    _clearForm();
   }
 
   String _generateSku(String productName, Map<String, dynamic> attributes) {
     String skuBase = productName.substring(0, 3).toUpperCase();
     String skuAttributes = attributes.entries
         .map((entry) =>
-    '${entry.key.substring(0, 1).toUpperCase()}${entry.value.toString().substring(0, 1).toUpperCase()}')
+            '${entry.key.substring(0, 1).toUpperCase()}${entry.value.toString().substring(0, 1).toUpperCase()}')
         .join('-');
     return '$skuBase-$skuAttributes-${DateTime.now().millisecondsSinceEpoch}';
   }
 
-  Map<String, dynamic> _createProductData(String productId, List<String> imageUrls) {
+  Map<String, dynamic> _createProductData(
+      String productId, List<String> imageUrls) {
     final productData = ProductModel(
       productId: productId,
       storeId: widget.storeId,
@@ -286,516 +295,597 @@ class _AddProductScreenState extends State<AddProductScreen> {
             ),
             Expanded(
               child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 20),
-                    // Add Image
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Add Image',
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              GestureDetector(
-                                onTap: () {
-                                  if (_images.length < 3) {
-                                    pickImage();
-                                  }
-                                },
-                                child: Container(
-                                  height: 75,
-                                  width: 75,
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: hexToColor('#848484')),
-                                    borderRadius: BorderRadius.circular(18),
-                                  ),
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.image_outlined,
-                                      size: 40,
-                                      color: hexToColor('#545454'),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              if (_images.isNotEmpty)
-                                Expanded(
-                                  child: SizedBox(
-                                    height: 75,
-                                    child: ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      physics: NeverScrollableScrollPhysics(),
-                                      itemCount: _images.length > 3
-                                          ? 3
-                                          : _images.length,
-                                      itemBuilder: (context, index) {
-                                        return Stack(
-                                          children: [
-                                            Container(
-                                              width: 75,
-                                              margin: const EdgeInsets.only(
-                                                  right: 10),
-                                              decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color:
-                                                        hexToColor('#848484')),
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                image: DecorationImage(
-                                                  image:
-                                                      FileImage(_images[index]),
-                                                  fit: BoxFit.cover,
-                                                ),
-                                              ),
-                                            ),
-                                            Positioned(
-                                              top: 0,
-                                              right: 0,
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  setState(() {
-                                                    _images.removeAt(index);
-                                                  });
-                                                },
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    shape: BoxShape.circle,
-                                                    color: Colors.red,
-                                                  ),
-                                                  child: Icon(
-                                                    Icons.close,
-                                                    color: Colors.white,
-                                                    size: 16,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              if (_images.isEmpty)
-                                Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.6,
-                                  child: Text(
-                                    'Note: Add more than one image of the product',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w500,
-                                      color: hexToColor('#636363'),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 30),
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 12.0),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: hexToColor('#AFAFAF'),
-                          width: 1.0,
-                        ),
-                        borderRadius: BorderRadius.circular(50.0),
-                      ),
-                      child: DropdownButton<String>(
-                        hint: Text('Select Product Category'),
-                        dropdownColor: Colors.white,
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        style: TextStyle(
-                          color: hexToColor('#272822'),
-                          fontSize: 16.0,
-                        ),
-                        icon: Icon(Icons.keyboard_arrow_down_rounded),
-                        underline: SizedBox(),
-                        value: selectedCategory,
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedCategory = newValue!;
-                          });
-                        },
-                        items: categories
-                            .map<DropdownMenuItem<String>>((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(
-                              value,
-                              style: TextStyle(
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                    SizedBox(height: 30),
-                    // Product Name
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Item Name',
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                          SizedBox(height: 10),
-                          TextField(
-                            controller: _nameController,
-                            textAlign: TextAlign.start,
-                            decoration: InputDecoration(
-                              hintText: 'Write your Product Name',
-                              hintStyle: TextStyle(
-                                color: hexToColor('#989898'),
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14.0,
-                              ),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: hexToColor('#848484'),
-                                ),
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 30),
-                    // Product Price
-                    if (!isMultiOptionCategory)
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 20),
+                      // Add Image
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Item Price',
-                              style: TextStyle(
-                                fontSize: 16,
-                              ),
-                            ),
-                            Text(
-                              '(Fill any two slots and the third will be calculated automatically)',
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                color: hexToColor('#636363'),
-                              ),
-                            ),
-                            SizedBox(height: 20),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                  child: TextField(
-                                    controller: _discountController,
-                                    keyboardType: TextInputType.number,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: 'Gotham',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14.0,
-                                    ),
-                                    decoration: InputDecoration(
-                                      hintText: 'Discount',
-                                      hintStyle: TextStyle(
-                                        color: hexToColor('#989898'),
-                                        fontFamily: 'Gotham',
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 14.0,
-                                      ),
-                                      prefixIcon: Text(
-                                        '%',
-                                        style: TextStyle(
-                                          color: Theme.of(context).primaryColor,
-                                          fontFamily: 'Gotham',
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 18.0,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      prefixIconConstraints: BoxConstraints(
-                                        minWidth: 30,
-                                        minHeight: 0,
-                                      ),
-                                      border: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: hexToColor('#848484'),
-                                        ),
-                                        borderRadius: BorderRadius.circular(18),
-                                      ),
-                                    ),
-                                    onSubmitted: (_) => _calculateValues(),
-                                  ),
-                                ),
-                                Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                  child: TextField(
-                                    controller: _mrpController,
-                                    keyboardType: TextInputType.number,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: 'Gotham',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14.0,
-                                    ),
-                                    decoration: InputDecoration(
-                                      hintText: 'MRP Price',
-                                      hintStyle: TextStyle(
-                                        color: hexToColor('#989898'),
-                                        fontFamily: 'Gotham',
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 14.0,
-                                      ),
-                                      prefixIcon: Text(
-                                        '₹',
-                                        style: TextStyle(
-                                          color: Theme.of(context).primaryColor,
-                                          fontFamily: 'Gotham',
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 18.0,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      prefixIconConstraints: BoxConstraints(
-                                        minWidth: 30,
-                                        minHeight: 0,
-                                      ),
-                                      border: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: hexToColor('#848484'),
-                                        ),
-                                        borderRadius: BorderRadius.circular(18),
-                                      ),
-                                    ),
-                                    onSubmitted: (_) => _calculateValues(),
-                                  ),
-                                ),
-                                Container(
-                                  width:
-                                      MediaQuery.of(context).size.width * 0.3,
-                                  child: TextField(
-                                    controller: _itemPriceController,
-                                    keyboardType: TextInputType.number,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: 'Gotham',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14.0,
-                                    ),
-                                    decoration: InputDecoration(
-                                      hintText: 'Item Price',
-                                      hintStyle: TextStyle(
-                                        color: hexToColor('#989898'),
-                                        fontFamily: 'Gotham',
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 14.0,
-                                      ),
-                                      prefixIcon: Text(
-                                        '₹',
-                                        style: TextStyle(
-                                          color: Theme.of(context).primaryColor,
-                                          fontFamily: 'Gotham',
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 18.0,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                      ),
-                                      prefixIconConstraints: BoxConstraints(
-                                        minWidth: 30,
-                                        minHeight: 0,
-                                      ),
-                                      border: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: hexToColor('#848484'),
-                                        ),
-                                        borderRadius: BorderRadius.circular(18),
-                                      ),
-                                    ),
-                                    onSubmitted: (_) => _calculateValues(),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    if (!isMultiOptionCategory) SizedBox(height: 30),
-                    // Product Description
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Add Product Description & More Details',
-                            style: TextStyle(
-                              fontSize: 16,
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          TextField(
-                            controller: _descriptionController,
-                            textAlign: TextAlign.start,
-                            maxLines: 5,
-                            maxLength: 700,
-                            decoration: InputDecoration(
-                              floatingLabelBehavior:
-                                  FloatingLabelBehavior.always,
-                              labelText: 'Description',
-                              labelStyle: TextStyle(
-                                color: hexToColor('#545454'),
-                                fontSize: 14.0,
-                              ),
-                              hintText: 'Write product description...',
-                              hintStyle: TextStyle(
-                                color: hexToColor('#989898'),
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 16.0,
-                              ),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: hexToColor('#848484'),
-                                ),
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 30),
-                    // Product Stock Quantity
-                    if (!isMultiOptionCategory) ...[
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Product Stock Quantity',
+                              'Add Image',
                               style: TextStyle(
                                 fontSize: 16,
                               ),
                             ),
                             SizedBox(height: 10),
                             Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                SizedBox(
-                                  width: 175,
-                                  child: TextField(
-                                    controller: _stockQuantityController,
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: 'Gotham',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14.0,
+                                GestureDetector(
+                                  onTap: () {
+                                    if (_images.length < 3) {
+                                      pickImage();
+                                    }
+                                  },
+                                  child: Container(
+                                    height: 75,
+                                    width: 75,
+                                    decoration: BoxDecoration(
+                                      border: Border.all(
+                                          color: hexToColor('#848484')),
+                                      borderRadius: BorderRadius.circular(18),
                                     ),
-                                    decoration: InputDecoration(
-                                      hintText: 'Ex. 100',
-                                      hintStyle: TextStyle(
-                                        color: hexToColor('#989898'),
-                                        fontFamily: 'Gotham',
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 14.0,
-                                      ),
-                                      border: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: hexToColor('#848484'),
-                                        ),
-                                        borderRadius: BorderRadius.circular(18),
-                                      ),
-                                      contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 20,
-                                        vertical: 16,
+                                    child: Center(
+                                      child: Icon(
+                                        Icons.image_outlined,
+                                        size: 40,
+                                        color: hexToColor('#545454'),
                                       ),
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 20),
-                                Expanded(
-                                  child: Text(
-                                    '(Add Total Product Stock Quantity)',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w500,
-                                      color: hexToColor('#636363'),
+                                SizedBox(width: 10),
+                                if (_images.isNotEmpty)
+                                  Expanded(
+                                    child: SizedBox(
+                                      height: 75,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        physics: NeverScrollableScrollPhysics(),
+                                        itemCount: _images.length > 3
+                                            ? 3
+                                            : _images.length,
+                                        itemBuilder: (context, index) {
+                                          return Stack(
+                                            children: [
+                                              Container(
+                                                width: 75,
+                                                margin: const EdgeInsets.only(
+                                                    right: 10),
+                                                decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                      color: hexToColor(
+                                                          '#848484')),
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  image: DecorationImage(
+                                                    image: FileImage(
+                                                        _images[index]),
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                              ),
+                                              Positioned(
+                                                top: 0,
+                                                right: 0,
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    setState(() {
+                                                      _images.removeAt(index);
+                                                    });
+                                                  },
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: Colors.red,
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.close,
+                                                      color: Colors.white,
+                                                      size: 16,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
                                     ),
                                   ),
-                                ),
+                                if (_images.isEmpty)
+                                  Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.6,
+                                    child: Text(
+                                      'Note: Add more than one image of the product',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w500,
+                                        color: hexToColor('#636363'),
+                                      ),
+                                    ),
+                                  ),
                               ],
                             ),
                           ],
                         ),
                       ),
                       SizedBox(height: 30),
-                    ],
-                    if (isMultiOptionCategory)
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Center(
-                          child: Text(
-                            'Add item price and stock quantity on next page',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              color: hexToColor('#636363'),
+                      Container(
+                        margin: EdgeInsets.symmetric(horizontal: 12.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: hexToColor('#AFAFAF'),
+                            width: 1.0,
+                          ),
+                          borderRadius: BorderRadius.circular(50.0),
+                        ),
+                        child: DropdownButton<String>(
+                          hint: Text('Select Product Category'),
+                          dropdownColor: Colors.white,
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          style: TextStyle(
+                            color: hexToColor('#272822'),
+                            fontSize: 16.0,
+                          ),
+                          icon: Icon(Icons.keyboard_arrow_down_rounded),
+                          underline: SizedBox(),
+                          value: selectedCategory,
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedCategory = newValue!;
+                            });
+                          },
+                          items: categories
+                              .map<DropdownMenuItem<String>>((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(
+                                value,
+                                style: TextStyle(
+                                  fontFamily: 'Gotham',
+                                  fontWeight: FontWeight.w800,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      // Product Name
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Item Name',
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            TextFormField(
+                              controller: _nameController,
+                              textAlign: TextAlign.start,
+                              decoration: InputDecoration(
+                                hintText: 'Write your Product Name',
+                                hintStyle: TextStyle(
+                                  color: hexToColor('#989898'),
+                                  fontFamily: 'Gotham',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14.0,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: hexToColor('#848484'),
+                                  ),
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter the product name';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      // Product Price
+                      if (!isMultiOptionCategory) ...[
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Item Price',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
+                              Text(
+                                '(Fill any two slots and the third will be calculated automatically)',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  color: hexToColor('#636363'),
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    child: TextFormField(
+                                      controller: _discountController,
+                                      keyboardType: TextInputType.number,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'Gotham',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14.0,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: 'Discount',
+                                        hintStyle: TextStyle(
+                                          color: hexToColor('#989898'),
+                                          fontFamily: 'Gotham',
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14.0,
+                                        ),
+                                        prefixIcon: Text(
+                                          '%',
+                                          style: TextStyle(
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            fontFamily: 'Gotham',
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 18.0,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        prefixIconConstraints: BoxConstraints(
+                                          minWidth: 30,
+                                          minHeight: 0,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: hexToColor('#848484'),
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(18),
+                                        ),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter the discount';
+                                        }
+                                        final double? discount =
+                                            double.tryParse(value);
+                                        if (discount == null ||
+                                            discount < 0 ||
+                                            discount > 100) {
+                                          return 'Please enter a valid discount';
+                                        }
+                                        return null;
+                                      },
+                                      onFieldSubmitted: (_) =>
+                                          _calculateValues(),
+                                    ),
+                                  ),
+                                  Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    child: TextFormField(
+                                      controller: _mrpController,
+                                      keyboardType: TextInputType.number,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'Gotham',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14.0,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: 'MRP Price',
+                                        hintStyle: TextStyle(
+                                          color: hexToColor('#989898'),
+                                          fontFamily: 'Gotham',
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14.0,
+                                        ),
+                                        prefixIcon: Text(
+                                          '₹',
+                                          style: TextStyle(
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            fontFamily: 'Gotham',
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 18.0,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        prefixIconConstraints: BoxConstraints(
+                                          minWidth: 30,
+                                          minHeight: 0,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: hexToColor('#848484'),
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(18),
+                                        ),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter the MRP';
+                                        }
+                                        final double? mrp =
+                                            double.tryParse(value);
+                                        if (mrp == null || mrp <= 0) {
+                                          return 'Please enter a valid MRP';
+                                        }
+                                        return null;
+                                      },
+                                      onFieldSubmitted: (_) =>
+                                          _calculateValues(),
+                                    ),
+                                  ),
+                                  Container(
+                                    width:
+                                        MediaQuery.of(context).size.width * 0.3,
+                                    child: TextFormField(
+                                      controller: _itemPriceController,
+                                      keyboardType: TextInputType.number,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'Gotham',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14.0,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: 'Item Price',
+                                        hintStyle: TextStyle(
+                                          color: hexToColor('#989898'),
+                                          fontFamily: 'Gotham',
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14.0,
+                                        ),
+                                        prefixIcon: Text(
+                                          '₹',
+                                          style: TextStyle(
+                                            color:
+                                                Theme.of(context).primaryColor,
+                                            fontFamily: 'Gotham',
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 18.0,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        prefixIconConstraints: BoxConstraints(
+                                          minWidth: 30,
+                                          minHeight: 0,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: hexToColor('#848484'),
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(18),
+                                        ),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter the item price';
+                                        }
+                                        final double? itemPrice =
+                                            double.tryParse(value);
+                                        if (itemPrice == null ||
+                                            itemPrice <= 0) {
+                                          return 'Please enter a valid item price';
+                                        }
+                                        return null;
+                                      },
+                                      onFieldSubmitted: (_) =>
+                                          _calculateValues(),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 30),
+                      ],
+                      // Product Description
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Add Product Description & More Details',
+                              style: TextStyle(
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            TextFormField(
+                              controller: _descriptionController,
+                              textAlign: TextAlign.start,
+                              maxLines: 5,
+                              maxLength: 700,
+                              decoration: InputDecoration(
+                                floatingLabelBehavior:
+                                    FloatingLabelBehavior.always,
+                                labelText: 'Description',
+                                labelStyle: TextStyle(
+                                  color: hexToColor('#545454'),
+                                  fontSize: 14.0,
+                                ),
+                                hintText: 'Write product description...',
+                                hintStyle: TextStyle(
+                                  color: hexToColor('#989898'),
+                                  fontFamily: 'Gotham',
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16.0,
+                                ),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: hexToColor('#848484'),
+                                  ),
+                                  borderRadius: BorderRadius.circular(18),
+                                ),
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter the product description';
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      // Product Stock Quantity
+                      if (!isMultiOptionCategory) ...[
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Product Stock Quantity',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Row(
+                                children: [
+                                  SizedBox(
+                                    width: 175,
+                                    child: TextFormField(
+                                      controller: _stockQuantityController,
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: 'Gotham',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 14.0,
+                                      ),
+                                      decoration: InputDecoration(
+                                        hintText: 'Ex. 100',
+                                        hintStyle: TextStyle(
+                                          color: hexToColor('#989898'),
+                                          fontFamily: 'Gotham',
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 14.0,
+                                        ),
+                                        border: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: hexToColor('#848484'),
+                                          ),
+                                          borderRadius:
+                                              BorderRadius.circular(18),
+                                        ),
+                                        contentPadding: EdgeInsets.symmetric(
+                                          horizontal: 20,
+                                          vertical: 16,
+                                        ),
+                                      ),
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Please enter the stock quantity';
+                                        }
+                                        final int? stockQuantity =
+                                            int.tryParse(value);
+                                        if (stockQuantity == null ||
+                                            stockQuantity < 0) {
+                                          return 'Please enter a valid stock quantity';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  SizedBox(width: 20),
+                                  Expanded(
+                                    child: Text(
+                                      '(Add Total Product Stock Quantity)',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w500,
+                                        color: hexToColor('#636363'),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 30),
+                      ],
+                      if (isMultiOptionCategory)
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(
+                            child: Text(
+                              'Add item price and stock quantity on next page',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                color: hexToColor('#636363'),
+                              ),
                             ),
                           ),
                         ),
+                      SizedBox(height: 8),
+                      Center(
+                        child: isSubmitting
+                            ? CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    hexToColor('#2B2B2B')),
+                              )
+                            : ElevatedButton(
+                                onPressed: isMultiOptionCategory
+                                    ? _navigateToOptionalsScreen
+                                    : _addSingleVariantProduct,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: hexToColor('#2B2B2B'),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 75, vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(50)),
+                                ),
+                                child: Text(
+                                  isMultiOptionCategory ? 'Next' : 'List Item',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16.0),
+                                ),
+                              ),
                       ),
-                    SizedBox(height: 8),
-                    Center(
-                      child: isSubmitting
-                          ? CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(hexToColor('#2B2B2B')),
-                      )
-                          : ElevatedButton(
-                        onPressed: isMultiOptionCategory ? _navigateToOptionalsScreen : _addSingleVariantProduct,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: hexToColor('#2B2B2B'),
-                          padding: EdgeInsets.symmetric(horizontal: 75, vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                        ),
-                        child: Text(
-                          isMultiOptionCategory ? 'Next' : 'List Item',
-                          style: TextStyle(color: Colors.white, fontSize: 16.0),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 30),
-                  ],
+                      SizedBox(height: 30),
+                    ],
+                  ),
                 ),
               ),
             ),

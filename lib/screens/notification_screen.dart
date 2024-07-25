@@ -1,11 +1,40 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:intl/intl.dart';
 import 'package:tnennt/widgets/notification/order_update_notification.dart';
 import 'package:tnennt/widgets/notification/store_connection_notification.dart';
 
 import '../helpers/color_utils.dart';
 
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  print("Handling a background message: ${message.messageId}");
+  // Store the notification
+  await _storeNotification(message);
+}
+
+Future<void> _storeNotification(RemoteMessage message) async {
+  final firestore = FirebaseFirestore.instance;
+  final userId = FirebaseAuth.instance.currentUser?.uid;
+  if (userId != null) {
+    await firestore.collection('Users').doc(userId).collection('notifications').add({
+      'title': message.notification?.title,
+      'body': message.notification?.body,
+      'data': message.data,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
+}
+
 class NotificationScreen extends StatefulWidget {
-  const NotificationScreen({super.key});
+  const NotificationScreen({Key? key}) : super(key: key);
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -16,20 +45,68 @@ class _NotificationScreenState extends State<NotificationScreen>
   late TabController _tabController;
   bool isStoreOwner = true;
   int _selectedIndex = 0;
+  Map<String, List<QueryDocumentSnapshot>> groupedGeneralNotifications = {};
+  Map<String, List<QueryDocumentSnapshot>> groupedStoreNotifications = {};
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: isStoreOwner ? 2 : 1, vsync: this);
+    _loadNotifications();
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  Future<void> _loadNotifications() async {
+    final firestore = FirebaseFirestore.instance;
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      final snapshots = await firestore
+          .collection('Users')
+          .doc(userId)
+          .collection('notifications')
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      groupedGeneralNotifications = _groupNotifications(
+          snapshots.docs.where((doc) => doc.data()['data']['type'] != 'store').toList()
+      );
+      groupedStoreNotifications = _groupNotifications(
+          snapshots.docs.where((doc) => doc.data()['data']['type'] == 'store').toList()
+      );
+
+      setState(() {});
+    }
   }
 
-  _getTabLabel(int index) {
+  Map<String, List<QueryDocumentSnapshot>> _groupNotifications(List<QueryDocumentSnapshot> notifications) {
+    Map<String, List<QueryDocumentSnapshot>> grouped = {};
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(Duration(days: 1));
+
+    for (var notification in notifications) {
+      final timestamp = (notification.data() as Map<String, dynamic>)['timestamp'] as Timestamp;
+      final date = timestamp.toDate();
+      final notificationDate = DateTime(date.year, date.month, date.day);
+
+      String key;
+      if (notificationDate == today) {
+        key = 'Today';
+      } else if (notificationDate == yesterday) {
+        key = 'Yesterday';
+      } else {
+        key = DateFormat('d MMMM y').format(date);
+      }
+
+      if (!grouped.containsKey(key)) {
+        grouped[key] = [];
+      }
+      grouped[key]!.add(notification);
+    }
+
+    return grouped;
+  }
+
+  String _getTabLabel(int index) {
     switch (index) {
       case 0:
         return 'General';
@@ -46,7 +123,7 @@ class _NotificationScreenState extends State<NotificationScreen>
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          SizedBox(height: 20.0),
+          SizedBox(height: 50.0),
           Container(
             height: 100,
             padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -87,7 +164,7 @@ class _NotificationScreenState extends State<NotificationScreen>
               ],
             ),
           ),
-          Padding(
+          Container(
             padding: const EdgeInsets.only(left: 8.0),
             child: Wrap(
               children: List.generate(2, (index) {
@@ -123,71 +200,78 @@ class _NotificationScreenState extends State<NotificationScreen>
               }),
             ),
           ),
-          SizedBox(height: 20.0),
+          SizedBox(height: 16),
           Expanded(
             child: TabBarView(
-                controller: _tabController,
-                physics: NeverScrollableScrollPhysics(),
-                children: [
-                  ListView(
-                    children: [
-                      OrderUpdateNotification(
-                        type: NotificationType.orderplaced,
-                        productImage: 'assets/sahachari_image.png',
-                        productName: 'Nikon Camera',
-                        price: 12000,
-                        orderID: '123456',
-                        time: '2024-04-24 10:00 AM',
-                      ),
-                      SizedBox(height: 20.0),
-                      OrderUpdateNotification(
-                        type: NotificationType.cancelled,
-                        orderID: '123456',
-                        time: '2024-04-24 10:00 AM',
-                      ),
-                      SizedBox(height: 20.0),
-                      OrderUpdateNotification(
-                        type: NotificationType.delivered,
-                        name: 'Kamran Khan',
-                        orderID: '789012',
-                        time: '2024-04-23 3:00 PM',
-                      ),
-                      SizedBox(height: 20.0),
-                      OrderUpdateNotification(
-                        type: NotificationType.refunded, // or delivered
-                        orderID: '345678',
-                        time: '2024-04-22 12:00 PM',
-                      ),
-                    ],
-                  ),
-                  if (isStoreOwner)
-                    ListView.separated(
-                        itemBuilder: (context, index) =>
-                            StoreConnectionNotification(
-                                name: 'Kamran Khan',
-                                image: 'assets/profile_image.png',
-                                time: 'April 20, 2024, 12:45pm'),
-                        separatorBuilder: (context, index) =>
-                            SizedBox(height: 16.0),
-                        itemCount: 5)
-                ]),
+              controller: _tabController,
+              physics: NeverScrollableScrollPhysics(),
+              children: [
+                _buildNotificationList(groupedGeneralNotifications, isGeneralTab: true),
+                if (isStoreOwner)
+                  _buildNotificationList(groupedStoreNotifications, isGeneralTab: false),
+              ],
+            ),
           )
         ],
       ),
     );
   }
 
-  Widget _buildTab(BuildContext context, String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 8.0),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: Theme.of(context).primaryColor,
-          width: 1.0,
-        ),
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Text(text),
+  Widget _buildNotificationList(Map<String, List<QueryDocumentSnapshot>> groupedNotifications, {required bool isGeneralTab}) {
+    return ListView.builder(
+      itemCount: groupedNotifications.length,
+      itemBuilder: (context, index) {
+        final date = groupedNotifications.keys.elementAt(index);
+        final notifications = groupedNotifications[date]!;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                date,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+            ...notifications.map((notification) {
+              final data = notification.data() as Map<String, dynamic>;
+              if (isGeneralTab) {
+                return OrderUpdateNotification(
+                  type: _getNotificationType(data['data']['status']),
+                  productImage: data['data']['productImage'],
+                  productName: data['data']['productName'],
+                  price: double.parse(data['data']['price']),
+                  orderId: data['data']['orderId'],
+                  time: DateFormat('jm').format((data['timestamp'] as Timestamp).toDate()),
+                );
+              } else {
+                return StoreConnectionNotification(
+                  name: data['data']['name'],
+                  image: data['data']['image'],
+                  time: DateFormat('jm').format((data['timestamp'] as Timestamp).toDate()),
+                );
+              }
+            }).toList(),
+            SizedBox(height: 16),
+          ],
+        );
+      },
     );
+  }
+
+  NotificationType _getNotificationType(String status) {
+    switch (status) {
+      case 'orderplaced':
+        return NotificationType.orderplaced;
+      case 'cancelled':
+        return NotificationType.cancelled;
+      case 'delivered':
+        return NotificationType.delivered;
+      case 'refunded':
+        return NotificationType.refunded;
+      default:
+        return NotificationType.orderplaced;
+    }
   }
 }

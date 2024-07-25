@@ -5,12 +5,17 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/screens/onboarding_screen.dart';
+import 'package:tnennt/services/permission_handler_service.dart';
 import 'package:tnennt/widget_tree.dart';
 
 import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final PermissionHandlerService _permissionHandler = PermissionHandlerService();
+  await _permissionHandler.requestMultiplePermissions();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );

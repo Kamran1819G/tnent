@@ -12,9 +12,9 @@ import 'package:tnennt/models/product_model.dart';
 import 'package:uuid/uuid.dart';
 
 class OptionalsScreen extends StatefulWidget {
-  ProductModel productData;
-  String categoryId;
-  List<File> images;
+  final ProductModel productData;
+  final String categoryId;
+  final List<File> images;
 
   OptionalsScreen(
       {required this.productData,
@@ -151,6 +151,40 @@ class _OptionalsScreenState extends State<OptionalsScreen>
     });
   }
 
+  void _validateAndProceed(BuildContext context) {
+    if (selectedOptions.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Validation Error'),
+          content: Text('Please select at least one option.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: Theme.of(context).primaryColor,
+              ),
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => OptionalsPriceScreen(
+            productData: widget.productData,
+            categoryId: widget.categoryId,
+            images: widget.images,
+            selectedOptions: selectedOptions,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -252,19 +286,7 @@ class _OptionalsScreenState extends State<OptionalsScreen>
             ),
             Center(
               child: GestureDetector(
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => OptionalsPriceScreen(
-                        productData: widget.productData,
-                        categoryId: widget.categoryId,
-                        images: widget.images,
-                        selectedOptions: selectedOptions,
-                      ),
-                    ),
-                  );
-                },
+                onTap: () => _validateAndProceed(context),
                 child: Container(
                   height: 50,
                   width: 250,
@@ -373,7 +395,7 @@ class OptionalsPriceScreen extends StatefulWidget {
 
 class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
   Map<String, GlobalKey<_OptionalPriceAndQuantityState>> optionalPriceKeys = {};
-  bool isLoading = false;
+  bool isSubmitting = false;
 
   @override
   void initState() {
@@ -403,9 +425,25 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
     return imageUrls;
   }
 
+  bool validateAllForms() {
+    bool isValid = true;
+    for (var key in optionalPriceKeys.values) {
+      if(!key.currentState!.validate()) {
+        isValid = false;
+      }
+    }
+    return isValid;
+  }
+
   Future<void> saveDataToFirebase() async {
+    if (!validateAllForms()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please fill in all the required fields.')),
+      );
+      return;
+    }
     setState(() {
-      isLoading = true;
+      isSubmitting = true;
     });
 
     try {
@@ -463,13 +501,14 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
           .showSnackBar(SnackBar(content: Text('Product added successfully')));
       Navigator.pop(context);
       Navigator.pop(context);
+      Navigator.pop(context);
     } catch (e) {
       print('Error saving data: $e');
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error saving product. Please try again.')));
     } finally {
       setState(() {
-        isLoading = false;
+        isSubmitting = false;
       });
     }
   }
@@ -591,31 +630,37 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
               ),
             ),
             Center(
-              child: isLoading
-                  ? CircularProgressIndicator()
+              child: isSubmitting
+                  ? Container(
+                      margin: EdgeInsets.symmetric(vertical: 15.0),
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            hexToColor('#2B2B2B')),
+                      ),
+                    )
                   : GestureDetector(
-                onTap: saveDataToFirebase,
-                child: Container(
-                  height: 50,
-                  width: 250,
-                  margin: EdgeInsets.symmetric(vertical: 15.0),
-                  decoration: BoxDecoration(
-                    color: hexToColor('#2B2B2B'),
-                    borderRadius: BorderRadius.circular(100.0),
-                  ),
-                  child: Center(
-                    child: Text(
-                      'Confirm',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Gotham',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 16.0,
+                      onTap: saveDataToFirebase,
+                      child: Container(
+                        height: 50,
+                        width: 250,
+                        margin: EdgeInsets.symmetric(vertical: 15.0),
+                        decoration: BoxDecoration(
+                          color: hexToColor('#2B2B2B'),
+                          borderRadius: BorderRadius.circular(100.0),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Confirm',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Gotham',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16.0,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ),
             ),
           ],
         ),
@@ -647,20 +692,42 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
 
   bool _isExpanded = false;
 
-  void _calculateValues() {
-    double discount = double.tryParse(_discountController.text) ?? 0;
-    double mrp = double.tryParse(_mrpController.text) ?? 0;
+  final _formKey = GlobalKey<FormState>();
 
-    if (discount != 0 && mrp != 0) {
-      double itemPrice = mrp - (mrp * discount / 100);
-      setState(() {
-        _itemPriceController.text = itemPrice.toStringAsFixed(2);
-      });
-    } else {
-      setState(() {
-        _itemPriceController.text = '';
-      });
+  void _calculateValues() {
+    if (_formKey.currentState?.validate() ?? false) {
+      double discount = double.tryParse(_discountController.text) ?? 0;
+      double mrp = double.tryParse(_mrpController.text) ?? 0;
+
+      if (discount != 0 && mrp != 0) {
+        double itemPrice = mrp - (mrp * discount / 100);
+        setState(() {
+          _itemPriceController.text = itemPrice.toStringAsFixed(2);
+        });
+      } else {
+        setState(() {
+          _itemPriceController.text = '';
+        });
+      }
     }
+  }
+
+  String? _validateNumber(String? value, String fieldName) {
+    if (value == null || value.isEmpty) {
+      return '$fieldName is required';
+    }
+    if (double.tryParse(value) == null) {
+      return 'Please enter a valid number for $fieldName';
+    }
+    return null;
+  }
+
+  bool validate() {
+    final form = _formKey.currentState;
+    if (form!.validate()) {
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -716,191 +783,203 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
       children: [
         Container(
           padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.3,
-                    child: TextField(
-                      controller: _discountController,
-                      keyboardType: TextInputType.number,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'Gotham',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14.0,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Discount',
-                        hintStyle: TextStyle(
-                          color: hexToColor('#989898'),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.3,
+                      child: TextFormField(
+                        controller: _discountController,
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(
+                          color: Colors.black,
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
                           fontSize: 14.0,
                         ),
-                        prefixIcon: Text(
-                          '%',
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                        decoration: InputDecoration(
+                          hintText: 'Discount',
+                          hintStyle: TextStyle(
+                            color: hexToColor('#989898'),
                             fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18.0,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14.0,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        prefixIconConstraints: BoxConstraints(
-                          minWidth: 30,
-                          minHeight: 0,
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: hexToColor('#848484'),
+                          prefixIcon: Text(
+                            '%',
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontFamily: 'Gotham',
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18.0,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          borderRadius: BorderRadius.circular(18),
+                          prefixIconConstraints: BoxConstraints(
+                            minWidth: 30,
+                            minHeight: 0,
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: hexToColor('#848484'),
+                            ),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
                         ),
+                        onFieldSubmitted: (_) => _calculateValues(),
+                        validator: (value) =>
+                            _validateNumber(value, 'Discount'),
                       ),
-                      onSubmitted: (_) => _calculateValues(),
                     ),
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.3,
-                    child: TextField(
-                      controller: _mrpController,
-                      keyboardType: TextInputType.number,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'Gotham',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14.0,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'MRP Price',
-                        hintStyle: TextStyle(
-                          color: hexToColor('#989898'),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.3,
+                      child: TextFormField(
+                        controller: _mrpController,
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(
+                          color: Colors.black,
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
                           fontSize: 14.0,
                         ),
-                        prefixIcon: Text(
-                          '₹',
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                        decoration: InputDecoration(
+                          hintText: 'MRP Price',
+                          hintStyle: TextStyle(
+                            color: hexToColor('#989898'),
                             fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18.0,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14.0,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        prefixIconConstraints: BoxConstraints(
-                          minWidth: 30,
-                          minHeight: 0,
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: hexToColor('#848484'),
+                          prefixIcon: Text(
+                            '₹',
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontFamily: 'Gotham',
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18.0,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          borderRadius: BorderRadius.circular(18),
+                          prefixIconConstraints: BoxConstraints(
+                            minWidth: 30,
+                            minHeight: 0,
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: hexToColor('#848484'),
+                            ),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
                         ),
+                        onFieldSubmitted: (_) => _calculateValues(),
+                        validator: (value) =>
+                            _validateNumber(value, 'MRP Price'),
                       ),
-                      onSubmitted: (_) => _calculateValues(),
                     ),
-                  ),
-                  Container(
-                    width: MediaQuery.of(context).size.width * 0.3,
-                    child: TextField(
-                      controller: _itemPriceController,
-                      keyboardType: TextInputType.number,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'Gotham',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14.0,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Item Price',
-                        hintStyle: TextStyle(
-                          color: hexToColor('#989898'),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.3,
+                      child: TextFormField(
+                        controller: _itemPriceController,
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(
+                          color: Colors.black,
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
                           fontSize: 14.0,
                         ),
-                        prefixIcon: Text(
-                          '₹',
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
+                        decoration: InputDecoration(
+                          hintText: 'Item Price',
+                          hintStyle: TextStyle(
+                            color: hexToColor('#989898'),
                             fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18.0,
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14.0,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        prefixIconConstraints: BoxConstraints(
-                          minWidth: 30,
-                          minHeight: 0,
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: hexToColor('#848484'),
+                          prefixIcon: Text(
+                            '₹',
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontFamily: 'Gotham',
+                              fontWeight: FontWeight.w600,
+                              fontSize: 18.0,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          borderRadius: BorderRadius.circular(18),
+                          prefixIconConstraints: BoxConstraints(
+                            minWidth: 30,
+                            minHeight: 0,
+                          ),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: hexToColor('#848484'),
+                            ),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
                         ),
+                        onFieldSubmitted: (_) => _calculateValues(),
+                        validator: (value) =>
+                            _validateNumber(value, 'Item Price'),
                       ),
-                      onSubmitted: (_) => _calculateValues(),
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 175,
-                    child: TextField(
-                      controller: _quantityController,
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'Gotham',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14.0,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'Ex. 100',
-                        hintStyle: TextStyle(
-                          color: hexToColor('#989898'),
+                  ],
+                ),
+                SizedBox(height: 20),
+                Row(
+                  children: [
+                    SizedBox(
+                      width: 175,
+                      child: TextFormField(
+                        controller: _quantityController,
+                        keyboardType: TextInputType.number,
+                        style: TextStyle(
+                          color: Colors.black,
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
                           fontSize: 14.0,
                         ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: hexToColor('#848484'),
+                        decoration: InputDecoration(
+                          hintText: 'Ex. 100',
+                          hintStyle: TextStyle(
+                            color: hexToColor('#989898'),
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14.0,
                           ),
-                          borderRadius: BorderRadius.circular(18),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: hexToColor('#848484'),
+                            ),
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 16,
+                          ),
                         ),
-                        contentPadding: EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 16,
+                        validator: (value) =>
+                            _validateNumber(value, 'Quantity'),
+                      ),
+                    ),
+                    SizedBox(width: 20),
+                    Expanded(
+                      child: Text(
+                        '(Add Total Product Stock Quantity)',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          color: hexToColor('#929292'),
                         ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 20),
-                  Expanded(
-                    child: Text(
-                      '(Add Total Product Stock Quantity)',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                        color: hexToColor('#636363'),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ],
