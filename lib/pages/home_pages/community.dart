@@ -398,6 +398,7 @@ class _CommunityPostState extends State<CommunityPost> {
   Widget _buildMoreBottomSheet() {
     return Container(
       height: 250,
+      width: double.infinity,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [

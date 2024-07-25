@@ -5,98 +5,37 @@ import 'package:tnennt/pages/catalog_pages/track_order_screen.dart';
 import '../../helpers/color_utils.dart';
 import 'detail_screen.dart';
 
-class PurchaseItem {
-  final String productId;
-  final String variation;
-  final String productName;
-  final String productImage;
-  final int productPrice;
-
-  PurchaseItem({
-    required this.productId,
-    required this.variation,
-    required this.productName,
-    required this.productImage,
-    required this.productPrice,
-  });
-}
-
 class PurchaseScreen extends StatefulWidget {
-  const PurchaseScreen({super.key});
+  const PurchaseScreen({Key? key}) : super(key: key);
 
   @override
   State<PurchaseScreen> createState() => _PurchaseScreenState();
 }
 
 class _PurchaseScreenState extends State<PurchaseScreen> {
-  List<PurchaseItem> purchaseItems = [];
-  int totalAmount = 0;
-  bool isLoading = true;
+  late Stream<QuerySnapshot> _ordersStream;
+  double _totalAmount = 0.0;
 
   @override
   void initState() {
     super.initState();
-    fetchPurchases();
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      _ordersStream = FirebaseFirestore.instance
+          .collection('Orders')
+          .where('userId', isEqualTo: user.uid)
+          .snapshots();
+    }
   }
 
-  Future<void> fetchPurchases() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final userDoc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
-        final purchases = userDoc.data()?['purchases'] as List<dynamic>? ?? [];
-
-        for (var purchase in purchases) {
-          final productId = purchase['productId'] as String?;
-          final variationKey = purchase['variation'] as String?;
-
-          if (productId == null) {
-            print('Warning: productId is null for a purchase');
-            continue;
-          }
-
-          final productDoc = await FirebaseFirestore.instance.collection('products').doc(productId).get();
-          final productData = productDoc.data();
-
-          if (productData != null) {
-            final productName = productData['name'] as String? ?? 'Unknown Product';
-            final imageUrls = productData['imageUrls'] as List<dynamic>? ?? [];
-            final productImage = imageUrls.isNotEmpty ? imageUrls[0] as String? : null;
-
-            final variations = productData['variations'] as Map<String, dynamic>?;
-            final variationData = variations?[variationKey] as Map<String, dynamic>?;
-
-            if (variationData != null) {
-              final productPrice = (variationData['price'] as num?)?.toInt() ?? 0;
-
-              purchaseItems.add(PurchaseItem(
-                productId: productId,
-                variation: variationKey ?? 'default',
-                productName: productName,
-                productImage: productImage ?? 'https://placeholder.com/image.jpg',
-                productPrice: productPrice,
-              ));
-
-              totalAmount += productPrice;
-            } else {
-              print('Warning: No variation data found for productId: $productId, variation: $variationKey');
-            }
-          } else {
-            print('Warning: No product data found for productId: $productId');
-          }
-        }
-      }
-    } catch (e) {
-      print('Error fetching purchases: $e');
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
+  void _calculateTotalAmount(List<QueryDocumentSnapshot> orders) {
+    double total = 0.0;
+    for (var order in orders) {
+      total += (order['priceDetails']['price'] as num).toDouble() * (order['quantity'] as num).toDouble();
     }
+    setState(() {
+      _totalAmount = total;
+    });
   }
 
   @override
@@ -160,7 +99,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                     ),
                   ),
                   Text(
-                    '₹ $totalAmount',
+                    '₹ ${_totalAmount.toStringAsFixed(2)}',
                     style: TextStyle(
                       color: hexToColor('#A9A9A9'),
                       fontSize: 18.0,
@@ -171,21 +110,31 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
             ),
             SizedBox(height: 16.0),
             Expanded(
-              child: isLoading
-                  ? Center(child: CircularProgressIndicator())
-                  : purchaseItems.isEmpty
-                  ? Center(child: Text('No purchases found'))
-                  : ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 10.0),
-                itemCount: purchaseItems.length,
-                itemBuilder: (context, index) {
-                  final item = purchaseItems[index];
-                  return PurchaseItemTile(
-                    productId: item.productId,
-                    productImage: item.productImage,
-                    productName: item.productName,
-                    productPrice: item.productPrice,
-                    variation: item.variation,
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _ordersStream,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Something went wrong'));
+                  }
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  final orders = snapshot.data!.docs;
+
+                  // Calculate the total amount in a microtask
+                  Future.microtask(() => _calculateTotalAmount(orders));
+
+                  return ListView.builder(
+                    padding: EdgeInsets.symmetric(horizontal: 10.0),
+                    itemCount: orders.length,
+                    itemBuilder: (context, index) {
+                      final order = orders[index].data() as Map<String, dynamic>;
+                      return PurchaseItemTile(
+                        order: order,
+                      );
+                    },
                   );
                 },
               ),
@@ -198,18 +147,10 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
 }
 
 class PurchaseItemTile extends StatefulWidget {
-  final String productId;  //
-  final String productImage;
-  final String productName;
-  final int productPrice;
-  final String variation;
+  final Map<String, dynamic> order;
 
-  const PurchaseItemTile({
-    required this.productId,
-    required this.productImage,
-    required this.productName,
-    required this.productPrice,
-    required this.variation,
+  PurchaseItemTile({
+    required this.order,
   });
 
   @override
@@ -217,101 +158,60 @@ class PurchaseItemTile extends StatefulWidget {
 }
 
 class _PurchaseItemTileState extends State<PurchaseItemTile> {
-  bool _isInWishlist = true;
-
-  void _toggleWishlist() {
-    setState(() {
-      _isInWishlist = !_isInWishlist;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 14.0),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Stack(
-            children: [
-              Container(
-                height: 190,
-                width: 150,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(4.0),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(4.0),
-                  child: Image.network(
-                    widget.productImage,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.grey[300],
-                        child: Icon(Icons.image_not_supported, size: 50, color: Colors.grey[600]),
-                      );
-                    },
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                              : null,
-                        ),
-                      );
-                    },
-                  ),
-                ),
+          Container(
+            height: 190,
+            width: 150,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4.0),
+              image: DecorationImage(
+                image: NetworkImage(widget.order['productImage']),
+                fit: BoxFit.cover,
               ),
-              Positioned(
-                right: 8.0,
-                top: 8.0,
-                child: GestureDetector(
-                  onTap: _toggleWishlist,
-                  child: Container(
-                    padding: EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(100.0),
-                    ),
-                    child: Icon(
-                      _isInWishlist ? Icons.favorite : Icons.favorite_border,
-                      color: _isInWishlist ? Colors.red : Colors.grey,
-                      size: 14.0,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
           SizedBox(width: 15.0),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Text(
-                  widget.productName,
+                  widget.order['productName'],
                   style: TextStyle(
                     color: hexToColor('#343434'),
                     fontSize: 20.0,
                   ),
                 ),
-                SizedBox(height: 4.0),
+                SizedBox(height: 8.0),
                 Text(
-                  'Variation: ${widget.variation}',
+                  'Variation: ${widget.order['variation']}',
                   style: TextStyle(
-                    color: hexToColor('#737373'),
+                    color: hexToColor('#A9A9A9'),
                     fontSize: 14.0,
                   ),
                 ),
                 SizedBox(height: 8.0),
                 Text(
-                  '₹${widget.productPrice}',
+                  'Quantity: ${widget.order['quantity']}',
+                  style: TextStyle(
+                    color: hexToColor('#A9A9A9'),
+                    fontSize: 14.0,
+                  ),
+                ),
+                SizedBox(height: 16.0),
+                Text(
+                  '₹${(widget.order['priceDetails']['price'] * widget.order['quantity']).toStringAsFixed(2)}',
                   style: TextStyle(
                     color: hexToColor('#343434'),
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 20.0,
                   ),
                 ),
                 SizedBox(height: 16.0),
@@ -323,8 +223,7 @@ class _PurchaseItemTileState extends State<PurchaseItemTile> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => DetailScreen(
-                              productId: widget.productId,
-                              variation: widget.variation,
+                              order: widget.order,
                             ),
                           ),
                         );
@@ -351,8 +250,7 @@ class _PurchaseItemTileState extends State<PurchaseItemTile> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => TrackOrderScreen(
-                              productId: widget.productId,
-                              variation: widget.variation,
+                              order: widget.order,
                             ),
                           ),
                         );

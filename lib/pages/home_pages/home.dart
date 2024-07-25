@@ -633,7 +633,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       MaterialPageRoute(builder: (context) => StoresScreen()));
                 },
                 child: Container(
-                  padding: EdgeInsets.all(8.0),
+                  padding: EdgeInsets.all(12.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

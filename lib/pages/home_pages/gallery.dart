@@ -15,15 +15,8 @@ import 'package:tnennt/pages/gallery_pages/the_middlemen.dart';
 import 'package:tnennt/screens/store_owner_screens/my_store_profile_screen.dart';
 
 class Gallery extends StatefulWidget {
-  StoreModel store;
-  bool isStoreRegistered;
-  bool isActive;
 
-  Gallery({
-    required this.store,
-    required this.isStoreRegistered,
-    required this.isActive,
-  });
+  const Gallery({Key? key}) : super(key: key);
 
   @override
   State<Gallery> createState() => _GalleryState();
@@ -37,34 +30,34 @@ class _GalleryState extends State<Gallery> {
   @override
   void initState() {
     super.initState();
-    store = widget.store;
-    isStoreRegistered = widget.isStoreRegistered;
-    isActive = widget.isActive;
     initialize();
   }
 
-  void initialize() {
-    _checkStoreRegistration();
+  void initialize() async {
+    await _checkStoreRegistration();
   }
 
 
   Future<void> _checkStoreRegistration() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) {
-      return;
-    }
-
-    DocumentSnapshot doc = await FirebaseFirestore.instance
-        .collection('Stores')
-        .doc(user.uid)
-        .get();
-
-    if (doc.exists) {
-      setState(() {
-        store = StoreModel.fromFirestore(doc);
-        isStoreRegistered = true;
-        isActive = store.isActive;
-      });
+    final user = FirebaseAuth.instance.currentUser;
+    print(user?.uid);
+    if (user != null) {
+      final storeId = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .get()
+          .then((doc) => doc.get('storeId'));
+      if (storeId.isNotEmpty) {
+        final storeDoc = await FirebaseFirestore.instance
+            .collection('Stores')
+            .doc(storeId)
+            .get();
+        setState(() {
+          isStoreRegistered = storeDoc.exists;
+          store = StoreModel.fromFirestore(storeDoc);
+          isActive = store.isActive;
+        });
+      }
     }
   }
 
@@ -112,10 +105,9 @@ class _GalleryState extends State<Gallery> {
                   ),
                   Spacer(),
                   Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
                     height: 55.h,
                     width: 155.w,
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: hexToColor("#131312"),
                       borderRadius: BorderRadius.circular(28.r),

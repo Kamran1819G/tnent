@@ -23,11 +23,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController();
   UserModel? currentUser;
-  StoreModel? store;
   int _selectedIndex = 0;
   bool _isLoading = true;
-  bool isStoreRegistered = false;
-  bool isActive = false;
 
   User? user = FirebaseAuth.instance.currentUser;
 
@@ -38,10 +35,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void initialize() async {
-    await _fetchUserAndStoreDetails();
+    await _fetchUserDetails();
   }
 
-  Future<void> _fetchUserAndStoreDetails() async {
+  Future<void> _fetchUserDetails() async {
     setState(() {
       _isLoading = true;
     });
@@ -58,28 +55,6 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() {
           currentUser = UserModel.fromFirestore(userDoc);
-        });
-      }
-
-      // Check store registration
-      final storeId = userDoc.get('storeId');
-      if (storeId != null && storeId.isNotEmpty) {
-        final storeDoc = await FirebaseFirestore.instance
-            .collection('Stores')
-            .doc(storeId)
-            .get();
-
-        if (mounted) {
-          setState(() {
-            isStoreRegistered = storeDoc.exists;
-            isActive = storeDoc.get('isActive');
-            store = StoreModel.fromFirestore(storeDoc);
-          });
-        }
-      }
-
-      if (mounted) {
-        setState(() {
           _isLoading = false;
         });
       }
@@ -107,12 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       SingleChildScrollView(
                           child: Home(currentUser: currentUser!)),
                       SingleChildScrollView(child: Community()),
-                      SingleChildScrollView(
-                          child: Gallery(
-                        store: store!,
-                        isStoreRegistered: isStoreRegistered,
-                        isActive: isActive,
-                      )),
+                      SingleChildScrollView(child: Gallery()),
                       SingleChildScrollView(
                           child: Catalog(currentUser: currentUser!)),
                     ],

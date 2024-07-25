@@ -7,6 +7,7 @@ import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/models/store_model.dart';
+import 'package:tnennt/screens/coming_soon.dart';
 import 'package:tnennt/screens/store_community.dart';
 import 'package:tnennt/screens/store_owner_screens/analytics_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/order_pays_screen.dart';
@@ -14,6 +15,7 @@ import 'package:tnennt/screens/store_owner_screens/product_categories_screen.dar
 import 'package:tnennt/screens/store_owner_screens/store_settings_screen.dart';
 import 'package:tnennt/widgets/featured_product_tile.dart';
 import 'package:tnennt/widgets/removable_product_tile.dart';
+import 'package:tnennt/widgets/removable_update_tile.dart';
 
 class MyStoreProfileScreen extends StatefulWidget {
   StoreModel store;
@@ -52,7 +54,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   late AnimationController _controller;
   late Animation<double> _animation;
 
-  List<dynamic> highlights = List.generate(10, (index) {
+  List<dynamic> updates = List.generate(10, (index) {
     return {
       "name": "Sahachari",
       "coverImage": "assets/sahachari_image.png",
@@ -278,13 +280,14 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 12.w),
                                   height: 30.h,
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
                                     color: Colors.transparent,
-                                    border:
-                                        Border.all(color: hexToColor('#DEFF98')),
+                                    border: Border.all(
+                                        color: hexToColor('#DEFF98')),
                                     borderRadius: BorderRadius.circular(50.r),
                                   ),
                                   child: Text(
@@ -473,11 +476,13 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                 ],
                               ),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         '$totalProducts',
@@ -518,7 +523,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => AnalyticsScreen(),
+                              builder: (context) => ComingSoon(),
                             ),
                           );
                         },
@@ -557,7 +562,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                 ),
                               ),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Image.asset(
@@ -649,11 +655,13 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                 ],
                               ),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
                                   Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         '$totalPosts',
@@ -724,7 +732,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                     borderRadius: BorderRadius.circular(50.r),
                                   ),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
@@ -758,7 +767,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                           child: isExpanded
                                               ? Container(
                                                   width: isExpanded
-                                                      ? (_animation.value * 80.w +
+                                                      ? (_animation.value *
+                                                              80.w +
                                                           90.w)
                                                       : 80.w,
                                                   height: 55.h,
@@ -770,7 +780,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                                   ),
                                                   child: Row(
                                                     mainAxisAlignment:
-                                                        MainAxisAlignment.center,
+                                                        MainAxisAlignment
+                                                            .center,
                                                     children: [
                                                       GestureDetector(
                                                         onTap: () =>
@@ -782,13 +793,14 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                                       ),
                                                       if (isExpanded)
                                                         SizedBox(
-                                                            width:
-                                                                _animation.value *
-                                                                    35.w),
+                                                            width: _animation
+                                                                    .value *
+                                                                35.w),
                                                       if (isExpanded)
                                                         GestureDetector(
                                                           onTap: () =>
-                                                              _selectFlag(false),
+                                                              _selectFlag(
+                                                                  false),
                                                           child: Image.asset(
                                                               'assets/red-flag.png',
                                                               height: 36.h,
@@ -983,54 +995,44 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: EdgeInsets.only(left: 25.w),
                           child: Text(
                             'Updates',
                             style: TextStyle(
                               color: hexToColor('#343434'),
-                              fontSize: 18.0,
+                              fontSize: 24.sp,
                             ),
                           ),
                         ),
                         SizedBox(height: 10.0),
                         Container(
-                          margin: EdgeInsets.symmetric(horizontal: 4.0),
-                          height: 150.0,
+                          height: 220.h,
                           child: ListView(
                             scrollDirection: Axis.horizontal,
                             children: [
                               GestureDetector(
-                                onTap: () {},
+                                onTap: () {
+                                },
                                 child: Container(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        height: 100,
-                                        width: 100,
-                                        decoration: BoxDecoration(
-                                          color: hexToColor('#F3F3F3'),
-                                          borderRadius:
-                                              BorderRadius.circular(12.0),
-                                        ),
-                                        child: Container(
-                                            margin: EdgeInsets.all(16.0),
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Colors.white,
-                                            ),
-                                            child: Icon(Icons.add,
-                                                size: 34.0,
-                                                color: hexToColor('#B5B5B5'))),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                    margin: EdgeInsets.only(left: 24.w),
+                                    height: 72.h,
+                                    width: 72.w,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: hexToColor('#EBEBEB'),
+                                    ),
+                                    child: Icon(Icons.add,
+                                        size: 40.sp,
+                                        color: hexToColor('#B5B5B5'))),
                               ),
-                              ...highlights.map((update) {
-                                return HighlightTile(
-                                  name: update['name'],
+                              ...updates.map((update) {
+                                return RemovableUpdateTile(
                                   image: update['coverImage'],
+                                  onRemove: () {
+                                    setState(() {
+                                      updates.remove(update);
+                                    });
+                                  },
                                 );
                               }).toList(),
                             ],
@@ -1039,6 +1041,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                       ],
                     ),
 
+                    SizedBox(height: 50.h),
                     // Featured Products
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1052,7 +1055,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                 'Featured',
                                 style: TextStyle(
                                   color: hexToColor('#343434'),
-                                  fontSize: 18.0,
+                                  fontSize: 24.sp,
                                 ),
                               ),
                               Spacer(),
@@ -1097,16 +1100,18 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                     FutureBuilder<List<StoreCategoryModel>>(
                       future: _fetchCategories(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return Center(child: CircularProgressIndicator());
                         } else if (snapshot.hasError) {
-                          return Center(child: Text('Error: ${snapshot.error}'));
+                          return Center(
+                              child: Text('Error: ${snapshot.error}'));
                         } else {
                           List<StoreCategoryModel> categories = snapshot.data!;
                           return Column(
                             children: categories
-                                .map((category) =>
-                                    CategoryProductsListView(category: category))
+                                .map((category) => CategoryProductsListView(
+                                    category: category))
                                 .toList(),
                           );
                         }
@@ -1268,40 +1273,36 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            widget.category.name,
-            style: TextStyle(
-              color: hexToColor('#343434'),
-              fontSize: 18.0,
-            ),
-          ),
-        ),
-        SizedBox(height: 10.0),
-        Container(
-          height: 200.0,
-          child: FutureBuilder<List<ProductModel>>(
-            future: fetchProducts(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else {
-                List<ProductModel> products = snapshot.data!;
-                if (products.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No Products in ${widget.category.name}',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  );
-                }
-                return ListView.builder(
+    return FutureBuilder<List<ProductModel>>(
+      future: fetchProducts(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return SizedBox.shrink(); // Don't show anything while loading
+        } else if (snapshot.hasError) {
+          return SizedBox.shrink(); // Don't show anything on error
+        } else {
+          List<ProductModel> products = snapshot.data!;
+          if (products.isEmpty) {
+            return SizedBox.shrink(); // Don't show the category if there are no products
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  widget.category.name,
+                  style: TextStyle(
+                    color: hexToColor('#343434'),
+                    fontSize: 24.sp,
+                  ),
+                ),
+              ),
+              SizedBox(height: 10.0),
+              Container(
+                height: 200.0,
+                margin: EdgeInsets.only(bottom: 50.0),
+                child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: products.length,
                   itemBuilder: (context, index) {
@@ -1315,41 +1316,12 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
                       },
                     );
                   },
-                );
-              }
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class HighlightTile extends StatelessWidget {
-  final String name;
-  final String image;
-
-  HighlightTile({
-    required this.name,
-    required this.image,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(8.0),
-      child: Column(
-        children: [
-          Container(
-              height: 100,
-              width: 100,
-              decoration: BoxDecoration(
-                border: Border.all(color: hexToColor('#B5B5B5'), width: 1.0),
-                borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
-              child: Image.asset(image, height: 48.0)),
-        ],
-      ),
+            ],
+          );
+        }
+      },
     );
   }
 }

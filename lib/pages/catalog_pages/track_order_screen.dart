@@ -1,128 +1,29 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../../helpers/color_utils.dart';
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
+import 'package:tnennt/helpers/color_utils.dart';
 
-class TrackOrderScreen extends StatefulWidget {
-  final String productId;
-  final String variation;
+class TrackOrderScreen extends StatelessWidget {
+  final Map<String, dynamic> order;
 
-  const TrackOrderScreen({
-    Key? key,
-    required this.productId,
-    required this.variation,
-  }) : super(key: key);
+  const TrackOrderScreen({Key? key, required this.order}) : super(key: key);
 
-  @override
-  State<TrackOrderScreen> createState() => _TrackOrderScreenState();
-}
-
-class _TrackOrderScreenState extends State<TrackOrderScreen> {
-  bool isLoading = true;
-  String productImage = '';
-  String productName = '';
-  int productPrice = 0;
-  String orderId = '';
-  List<OrderStatus> orderStatuses = [];
-  String middlemanName = '';
-  String middlemanPhone = '';
-  String middlemanImageUrl = '';
-
-  @override
-  void initState() {
-    super.initState();
-    fetchOrderDetails();
-  }
-
-  Future<void> fetchOrderDetails() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final orderDoc = await FirebaseFirestore.instance
-            .collection('Orders')
-            .where('userid', isEqualTo: user.uid)
-            .where('items', arrayContains: {
-          'productId': widget.productId,
-          'variation': widget.variation,
-        })
-            .limit(1)
-            .get();
-
-        if (orderDoc.docs.isNotEmpty) {
-          final orderData = orderDoc.docs.first.data();
-          orderId = orderData['orderId'] ?? '';
-
-          // Fetch product details
-          final productDoc = await FirebaseFirestore.instance
-              .collection('products')
-              .doc(widget.productId)
-              .get();
-          final productData = productDoc.data();
-
-          if (productData != null) {
-            setState(() {
-              productName = productData['name'] ?? 'Unknown Product';
-              final imageUrls = productData['imageUrls'] as List<dynamic>? ?? [];
-              productImage = imageUrls.isNotEmpty ? imageUrls[0] : '';
-              final items = orderData['items'] as List<dynamic>? ?? [];
-              final item = items.firstWhere(
-                    (item) => item['productId'] == widget.productId && item['variation'] == widget.variation,
-                orElse: () => {},
-              );
-              productPrice = (item['price'] as num?)?.toInt() ?? 0;
-            });
-          }
-
-          // Create order statuses based on the status map
-          final statusMap = orderData['status'] as Map<String, dynamic>? ?? {};
-          orderStatuses = [
-            OrderStatus(
-              title: 'Ordered',
-              description: 'Your order has been placed',
-              time: (statusMap['ordered'] as Timestamp?)?.toDate().toString() ?? '',
-            ),
-            OrderStatus(
-              title: 'Delivered',
-              description: 'Your order has been delivered',
-              time: (statusMap['delivered'] as Timestamp?)?.toDate().toString() ?? '',
-              isError: statusMap['delivered'] == null,
-            ),
-          ];
-
-          // Middleman details are not present in the new schema
-          // You might want to remove or modify this part
-          middlemanName = 'Not available';
-          middlemanPhone = 'N/A';
-          middlemanImageUrl = '';
-        }
-      }
-    } catch (e) {
-      print('Error fetching order details: $e');
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: isLoading
-            ? Center(child: CircularProgressIndicator())
-            : Column(
+        child: Column(
           children: [
-            _buildAppBar(),
-            _buildProductInfo(),
+            _buildHeader(context),
+            _buildOrderDetails(),
             SizedBox(height: 50.0),
-            OrderStatusWidget(status: orderStatuses),
+            _buildOrderStatus(context),
             Spacer(),
-            _buildMiddlemanInfo(),
+            if (order['providedMiddleman'] != null &&
+                order['providedMiddleman'].isNotEmpty)
+              _buildProvidedMiddlemen(),
             SizedBox(height: 20.0),
           ],
         ),
@@ -130,7 +31,7 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildHeader(BuildContext context) {
     return Container(
       height: 100,
       padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -162,7 +63,9 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
               backgroundColor: Colors.grey[100],
               child: IconButton(
                 icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
               ),
             ),
           ),
@@ -171,7 +74,7 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
     );
   }
 
-  Widget _buildProductInfo() {
+  Widget _buildOrderDetails() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.0),
       child: Row(
@@ -183,78 +86,96 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.0),
               image: DecorationImage(
-                image: NetworkImage(productImage),
-                fit: BoxFit.cover,
-                onError: (_, __) => AssetImage('assets/placeholder_image.png'),
+                image: NetworkImage(order['productImage']),
+                fit: BoxFit.fill,
               ),
             ),
           ),
           SizedBox(width: 10.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  productName,
-                  style: TextStyle(color: hexToColor('#343434'), fontSize: 16.0),
-                ),
-                SizedBox(height: 10.0),
-                Row(
-                  children: [
-                    Text(
-                      'Order ID:',
-                      style: TextStyle(color: hexToColor('#878787'), fontSize: 14.0),
-                    ),
-                    SizedBox(width: 8.0),
-                    Text(
-                      orderId,
-                      style: TextStyle(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                order['productName'],
+                style: TextStyle(
+                    color: hexToColor('#343434'),
+                    fontSize: 16.0),
+              ),
+              SizedBox(height: 10.0),
+              Row(
+                children: [
+                  Text(
+                    'Order ID:',
+                    style: TextStyle(
+                        color: hexToColor('#878787'),
+                        fontSize: 14.0),
+                  ),
+                  SizedBox(width: 8.0),
+                  Text(
+                    order['orderId'],
+                    style: TextStyle(
                         color: hexToColor('#A9A9A9'),
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
-                        fontSize: 14.0,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 50.0),
-                Text(
-                  '₹ $productPrice',
-                  style: TextStyle(color: hexToColor('#343434'), fontSize: 18.0),
-                ),
-              ],
-            ),
+                        fontSize: 14.0),
+                  ),
+                ],
+              ),
+              SizedBox(height: 50.0),
+              Text(
+                '₹ ${order['priceDetails']['price']}',
+                style: TextStyle(
+                    color: hexToColor('#343434'),
+                    fontSize: 18.0),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMiddlemanInfo() {
+  Widget _buildOrderStatus(BuildContext context) {
+    List<OrderStatus> statuses = [];
+
+    order['status'].forEach((key, value) {
+      statuses.add(OrderStatus(
+        title: key.substring(0, 1).toUpperCase() + key.substring(1),
+        description: value['message'] ?? '',
+        time: _formatTimestamp(value['timestamp']),
+      ));
+    });
+
+    return OrderStatusWidget(status: statuses);
+  }
+
+  Widget _buildProvidedMiddlemen() {
+    final middleman = order['providedMiddleman'];
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Provided Middlemen:',
-                  style: TextStyle(color: hexToColor('#343434'), fontSize: 16.0),
-                ),
-                SizedBox(height: 15.0),
-                Text(
-                  middlemanName,
-                  style: TextStyle(
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Provided Middlemen:',
+                style: TextStyle(
+                    color: hexToColor('#343434'),
+                    fontSize: 16.0),
+              ),
+              SizedBox(height: 15.0),
+              Text(
+                middleman['name'] ?? 'Not assigned yet',
+                style: TextStyle(
                     color: hexToColor('#727272'),
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w500,
-                    fontSize: 14.0,
-                  ),
-                ),
-                SizedBox(height: 1.0),
+                    fontSize: 14.0),
+              ),
+              SizedBox(height: 1.0),
+              if (middleman['phone'] != null)
                 Row(
                   children: [
                     Icon(
@@ -263,35 +184,38 @@ class _TrackOrderScreenState extends State<TrackOrderScreen> {
                       size: 14,
                     ),
                     Text(
-                      middlemanPhone,
+                      middleman['phone'],
                       style: TextStyle(
-                        color: hexToColor('#727272'),
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14.0,
-                      ),
+                          color: hexToColor('#727272'),
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14.0),
                     ),
                   ],
                 ),
-              ],
-            ),
+            ],
           ),
+          Spacer(),
           Container(
             height: 50,
             width: 50,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(100.0),
               image: DecorationImage(
-                image: middlemanImageUrl.isNotEmpty
-                    ? NetworkImage(middlemanImageUrl)
-                    : AssetImage('assets/default_profile_image.png') as ImageProvider,
-                fit: BoxFit.cover,
+                image: NetworkImage(middleman['photo'] ?? ''),
+                fit: BoxFit.fill,
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _formatTimestamp(dynamic timestamp) {
+    if (timestamp == null) return '';
+    // Implement your timestamp formatting logic here
+    return DateFormat('jm').format((timestamp as Timestamp).toDate()); // Placeholder
   }
 }
 
@@ -321,6 +245,9 @@ class OrderStatusItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isCompleted = status.time.isNotEmpty;
+    final Color timelineColor = isCompleted ? Theme.of(context).primaryColor : Colors.grey;
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12.0),
       child: Row(
@@ -329,14 +256,14 @@ class OrderStatusItem extends StatelessWidget {
           Column(
             children: [
               Icon(
-                status.isError ? Icons.cancel : CupertinoIcons.checkmark_alt_circle_fill,
-                color: status.isError ? Colors.red : Theme.of(context).primaryColor,
+                isCompleted ? CupertinoIcons.checkmark_alt_circle_fill : Icons.radio_button_unchecked,
+                color: timelineColor,
               ),
               if (!isLast)
                 Container(
                   height: 60,
                   width: 3,
-                  color: Theme.of(context).primaryColor,
+                  color: timelineColor,
                 ),
             ],
           ),
@@ -352,38 +279,44 @@ class OrderStatusItem extends StatelessWidget {
                     fontSize: 14,
                   ),
                 ),
-                SizedBox(height: 4),
-                Row(
-                  children:[
-                    Text(
-                      'Time: ',
-                      style: TextStyle(
-                        color: hexToColor('#343434'),
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12,
+                if (status.time.isNotEmpty) ...[
+                  SizedBox(height: 4),
+                  Row(
+                    children:[
+                      Text(
+                        'Time: ',
+                        style: TextStyle(
+                          color: hexToColor('#343434'),
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                    Text(
-                      status.time,
-                      style: TextStyle(
-                        color: hexToColor('#949494'),
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 12,
+                      Text(
+                        status.time,
+                        style: TextStyle(
+                          color: hexToColor('#949494'),
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                Text(
-                  status.description,
-                  style: TextStyle(
-                    color: hexToColor('#A9A9A9'),
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w500,
-                    fontSize: 12,
+                    ],
                   ),
-                ),
+                ],
+                if(status.description.isNotEmpty) ...[
+                  SizedBox(height: 4),
+                  Text(
+                    status.description,
+                    style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                ],
               ],
             ),
           ),
@@ -395,14 +328,12 @@ class OrderStatusItem extends StatelessWidget {
 
 class OrderStatus {
   final String title;
-  final String description;
+  String description;
   final String time;
-  final bool isError;
 
   OrderStatus({
     required this.title,
-    required this.description,
+    this.description = '',
     required this.time,
-    this.isError = false,
   });
 }

@@ -10,6 +10,7 @@ import 'package:tnennt/screens/store_community.dart';
 import 'package:tnennt/widgets/wishlist_product_tile.dart';
 import '../../helpers/color_utils.dart';
 import '../../models/user_model.dart';
+import '../../widgets/update_tile.dart';
 import '../update_screen.dart';
 
 class StoreProfileScreen extends StatefulWidget {
@@ -37,6 +38,13 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
   late Animation<double> _animation;
 
   String userId = FirebaseAuth.instance.currentUser!.uid;
+
+  List<dynamic> updates = List.generate(10, (index) {
+    return {
+      "coverImage": "assets/sahachari_image.png",
+    };
+  });
+
 
   Future<List<StoreCategoryModel>> fetchCategories() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -728,27 +736,49 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Updates Section
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                    child: Text(
-                      'Highlights',
-                      style: TextStyle(
-                        color: hexToColor('#343434'),
-                        fontSize: 18.0,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: 25.w),
+                        child: Text(
+                          'Updates',
+                          style: TextStyle(
+                            color: hexToColor('#343434'),
+                            fontSize: 24.sp,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                  Container(
-                    height: 150.0,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: 5,
-                      itemBuilder: (context, index) {
-                        return UpdateTile(
-                            name: "Sahachari",
-                            image: "assets/sahachari_image.png");
-                      },
-                    ),
+                      SizedBox(height: 10.0),
+                      Container(
+                        height: 220.h,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                              },
+                              child: Container(
+                                  margin: EdgeInsets.only(left: 24.w),
+                                  height: 72.h,
+                                  width: 72.w,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: hexToColor('#EBEBEB'),
+                                  ),
+                                  child: Icon(Icons.add,
+                                      size: 40.sp,
+                                      color: hexToColor('#B5B5B5'))),
+                            ),
+                            ...updates.map((update) {
+                              return UpdateTile(
+                                image: update['coverImage'],
+                              );
+                            }).toList(),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   SizedBox(height: 20.0),
                   Column(
@@ -947,106 +977,49 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            widget.category.name,
-            style: TextStyle(
-              color: hexToColor('#343434'),
-              fontSize: 18.0,
-            ),
-          ),
-        ),
-        SizedBox(height: 10.0),
-        Container(
-          height: 200.0,
-          child: FutureBuilder<List<ProductModel>>(
-            future: fetchProducts(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else {
-                List<ProductModel> products = snapshot.data!;
-                if (products.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No Products in ${widget.category.name}',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  );
-                }
-                return ListView.builder(
+    return FutureBuilder<List<ProductModel>>(
+      future: fetchProducts(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return SizedBox.shrink(); // Don't show anything while loading
+        } else if (snapshot.hasError) {
+          return SizedBox.shrink(); // Don't show anything on error
+        } else {
+          List<ProductModel> products = snapshot.data!;
+          if (products.isEmpty) {
+            return SizedBox.shrink(); // Don't show the category if there are no products
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  widget.category.name,
+                  style: TextStyle(
+                    color: hexToColor('#343434'),
+                    fontSize: 24.sp,
+                  ),
+                ),
+              ),
+              SizedBox(height: 10.0),
+              Container(
+                height: 200.0,
+                margin: EdgeInsets.only(bottom: 50.0),
+                child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: products.length,
                   itemBuilder: (context, index) {
-                    return WishlistProductTile(product: products[index]);
+                    return WishlistProductTile(
+                      product: products[index],
+                    );
                   },
-                );
-              }
-            },
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class UpdateTile extends StatelessWidget {
-  final String name;
-  final String image;
-
-  UpdateTile({
-    required this.name,
-    required this.image,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => UpdateScreen(
-              storeName: name,
-              storeImage: Image.asset(image),
-            ),
-          ),
-        );
-      },
-      child: Container(
-        padding: EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              height: 100,
-              width: 100,
-              decoration: BoxDecoration(
-                border: Border.all(color: hexToColor('#B5B5B5')),
-                borderRadius: BorderRadius.circular(18.0),
-                image: DecorationImage(
-                  image: AssetImage(image),
-                  fit: BoxFit.fill,
                 ),
               ),
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              name,
-              style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 10.0),
-            ),
-          ],
-        ),
-      ),
+            ],
+          );
+        }
+      },
     );
   }
 }

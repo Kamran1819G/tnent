@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
@@ -63,8 +64,8 @@ class RemovableProductTile extends StatelessWidget {
                     ),
                   ),
                   Positioned(
-                    right: 8.0,
-                    top: 8.0,
+                    right: 14.w,
+                    top: 14.h,
                     child: GestureDetector(
                       onTap: onRemove,
                       child: Container(
