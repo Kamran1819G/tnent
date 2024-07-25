@@ -16,6 +16,7 @@ class DetailScreen extends StatefulWidget {
   @override
   State<DetailScreen> createState() => _DetailScreenState();
 }
+
 class _DetailScreenState extends State<DetailScreen> {
   bool isLoading = true;
   late ProductDetails productDetails;
@@ -28,17 +29,15 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Future<void> fetchCurrentUserId() async {
-    // Assuming you're using Firebase Authentication
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       currentUserId = user.uid;
       fetchDetails();
     } else {
-      // Handle the case where there is no authenticated user
       setState(() {
         isLoading = false;
       });
-      // You might want to show an error message or redirect to login
+      // Handle the case where there is no authenticated user
     }
   }
 
@@ -68,15 +67,24 @@ class _DetailScreenState extends State<DetailScreen> {
       Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
       productDetails.productImage = data['productImage'] ?? '';
       productDetails.productName = data['productName'] ?? '';
-      Map<String, dynamic> variations = data['variations'] as Map<String, dynamic>;
-      String firstVariationKey = variations.keys.first;
-      Map<String, dynamic> selectedVariationData = variations[firstVariationKey] as Map<String, dynamic>;
-      productDetails.selectedVariation = firstVariationKey;
-      productDetails.variationDetails = VariationDetails(
-        discount: selectedVariationData['discount'] ?? 0,
-        mrp: selectedVariationData['mrp'] ?? 0,
-        price: selectedVariationData['price'] ?? 0,
-      );
+
+      var variations = data['variations'];
+      if (variations is Map<String, dynamic>) {
+        String firstVariationKey = variations.keys.first;
+        var selectedVariationData = variations[firstVariationKey];
+        if (selectedVariationData is Map<String, dynamic>) {
+          productDetails.selectedVariation = firstVariationKey;
+          productDetails.variationDetails = VariationDetails(
+            discount: selectedVariationData['discount'] ?? 0,
+            mrp: selectedVariationData['mrp'] ?? 0,
+            price: selectedVariationData['price'] ?? 0,
+          );
+        } else {
+          print('Selected variation data is not a Map: $selectedVariationData');
+        }
+      } else {
+        print('Variations is not a Map: $variations');
+      }
     }
   }
 
@@ -507,7 +515,6 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 }
-
 class ProductDetails {
   String productImage = '';
   String productName = '';

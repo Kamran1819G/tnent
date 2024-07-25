@@ -351,9 +351,8 @@ class _PurchaseProductTileState extends State<PurchaseProductTile> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => TrackOrderScreen(
-                              productImage: widget.productImage,
-                              productName: widget.productName,
-                              productPrice: widget.productPrice,
+                              productId: widget.productId,
+                              variation: widget.variation,
                             ),
                           ),
                         );
