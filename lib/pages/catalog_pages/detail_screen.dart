@@ -45,7 +45,7 @@ class _DetailScreenState extends State<DetailScreen> {
     try {
       productDetails = ProductDetails();
       await Future.wait([
-        _fetchProductDetails(widget.productId),
+        _fetchProductDetails(widget.productId, widget.variation),
         _fetchOrderDetails(currentUserId),
         _fetchUserDetails(currentUserId),
       ]);
@@ -58,22 +58,22 @@ class _DetailScreenState extends State<DetailScreen> {
     }
   }
 
-  Future<void> _fetchProductDetails(String productId) async {
+  Future<void> _fetchProductDetails(String productId, String variation) async {
     DocumentSnapshot docSnapshot = await FirebaseFirestore.instance
         .collection('products')
         .doc(productId)
         .get();
+
     if (docSnapshot.exists) {
       Map<String, dynamic> data = docSnapshot.data() as Map<String, dynamic>;
       productDetails.productImage = data['productImage'] ?? '';
       productDetails.productName = data['productName'] ?? '';
 
       var variations = data['variations'];
-      if (variations is Map<String, dynamic>) {
-        String firstVariationKey = variations.keys.first;
-        var selectedVariationData = variations[firstVariationKey];
+      if (variations is Map<String, dynamic> && variations.containsKey(variation)) {
+        var selectedVariationData = variations[variation];
         if (selectedVariationData is Map<String, dynamic>) {
-          productDetails.selectedVariation = firstVariationKey;
+          productDetails.selectedVariation = variation;
           productDetails.variationDetails = VariationDetails(
             discount: selectedVariationData['discount'] ?? 0,
             mrp: selectedVariationData['mrp'] ?? 0,
@@ -83,7 +83,7 @@ class _DetailScreenState extends State<DetailScreen> {
           print('Selected variation data is not a Map: $selectedVariationData');
         }
       } else {
-        print('Variations is not a Map: $variations');
+        print('Variation not found: $variation');
       }
     }
   }
@@ -92,8 +92,11 @@ class _DetailScreenState extends State<DetailScreen> {
     QuerySnapshot orderSnapshot = await FirebaseFirestore.instance
         .collection('Middleman_Orders')
         .where('userId', isEqualTo: userId)
+        .where('productId', isEqualTo: widget.productId)
+        .where('variation', isEqualTo: widget.variation)
         .limit(1)
         .get();
+
     if (orderSnapshot.docs.isNotEmpty) {
       Map<String, dynamic> orderData = orderSnapshot.docs.first.data() as Map<String, dynamic>;
       productDetails.orderDetails = OrderDetails(
@@ -109,6 +112,7 @@ class _DetailScreenState extends State<DetailScreen> {
         .collection('Users')
         .doc(userId)
         .get();
+
     if (userSnapshot.exists) {
       Map<String, dynamic> userData = userSnapshot.data() as Map<String, dynamic>;
       productDetails.userDetails = UserDetails(
@@ -515,7 +519,8 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 }
-class ProductDetails {
+
+class ProductDetails{
   String productImage = '';
   String productName = '';
   String selectedVariation = '';
