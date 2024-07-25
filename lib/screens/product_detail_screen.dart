@@ -14,6 +14,9 @@ import 'package:tnennt/pages/catalog_pages/cart_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   ProductModel product;
@@ -81,6 +84,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   });
 
+  final TextEditingController _reviewController = TextEditingController();
+  List<Map<String, dynamic>> _reviews = [];
+
 
   @override
   void initState() {
@@ -90,8 +96,87 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _initializeSelectedVariation();
     _checkWishlistStatus();
     _checkUserVote();
+    _loadReviews();
   }
 
+  Future<void> _loadReviews() async {
+    QuerySnapshot reviewsSnapshot = await FirebaseFirestore.instance
+        .collection('Reviews')
+        .where('productId', isEqualTo: widget.product.productId)
+        .orderBy('timestamp', descending: true)
+        .get();
+
+    setState(() {
+      _reviews = reviewsSnapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+    });
+  }
+
+  Future<void> _addReview(String review) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please log in to add a review')),
+      );
+      return;
+    }
+
+    // Fetch user data from Firestore
+    DocumentSnapshot userDoc = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(user.uid)
+        .get();
+
+    String displayName = '';
+    String photoURL = '';
+
+    if (userDoc.exists) {
+      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+      displayName = userData['firstName'] ?? '';
+      photoURL = userData['photoURL'] ?? '';
+    }
+
+    await FirebaseFirestore.instance.collection('Reviews').add({
+      'displayName': displayName,
+      'photoURL': photoURL,
+      'productId': widget.product.productId,
+      'reviewContent': review,
+      'timestamp': FieldValue.serverTimestamp(),
+      'userId': user.uid,
+    });
+
+    _reviewController.clear();
+    await _loadReviews();
+  }
+
+  Widget _buildReviewsList() {
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: _reviews.length,
+      itemBuilder: (context, index) {
+        final review = _reviews[index];
+        return ListTile(
+          leading: CircleAvatar(
+            backgroundImage: review['photoURL'].isNotEmpty
+                ? NetworkImage(review['photoURL'])
+                : null,
+            child: review['photoURL'].isEmpty
+                ? Icon(Icons.person)
+                : null,
+          ),
+          title: Text(review['displayName']),
+          subtitle: Text(review['reviewContent']),
+          trailing: Text(
+            DateFormat('MMM d, yyyy').format(
+              (review['timestamp'] as Timestamp).toDate(),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   Future<StoreModel> _fetchStore() async {
     DocumentSnapshot storeDoc = await FirebaseFirestore.instance
@@ -308,6 +393,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       );
     }
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -763,7 +850,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ],
                       ),
                       SizedBox(height: 40),
+
+
                       // Reviews
+
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -791,8 +881,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           SizedBox(height: 10),
                           Container(
                             margin: EdgeInsets.symmetric(horizontal: 16),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
+                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
                               color: hexToColor('#F5F5F5'),
                               borderRadius: BorderRadius.circular(50),
@@ -808,10 +897,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 SizedBox(width: 20),
                                 Expanded(
                                   child: TextField(
+                                    controller: _reviewController,
                                     decoration: InputDecoration(
-                                      constraints: BoxConstraints(
-                                        maxHeight: 100,
-                                      ),
+                                      constraints: BoxConstraints(maxHeight: 100),
                                       hintText: 'Add your review',
                                       hintStyle: TextStyle(
                                         color: hexToColor('#9C9C9C'),
@@ -819,26 +907,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         fontFamily: 'Gotham',
                                         fontWeight: FontWeight.w600,
                                       ),
-                                      suffixIcon: Icon(
-                                        Icons.send,
-                                        color: Theme.of(context).primaryColor,
-                                      ),
                                       border: InputBorder.none,
                                       focusedBorder: InputBorder.none,
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            child: Row(
-                              children: [
-
+                                IconButton(
+                                  icon: Icon(Icons.send, color: Theme.of(context).primaryColor),
+                                  onPressed: () {
+                                    if (_reviewController.text.isNotEmpty) {
+                                      _addReview(_reviewController.text);
+                                    }
+                                  },
+                                ),
                               ],
                             ),
                           ),
                           SizedBox(height: 20),
+                          _buildReviewsList(),
                         ],
                       ),
                       SizedBox(height: 75),
