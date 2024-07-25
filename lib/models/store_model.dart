@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class StoreModel {
   final String storeId;
   final String ownerId;
-  final String analyticsId;
   final String name;
   final String logoUrl;
   final String phone;
@@ -26,7 +25,6 @@ class StoreModel {
   StoreModel({
     required this.storeId,
     required this.ownerId,
-    required this.analyticsId,
     required this.name,
     required this.logoUrl,
     required this.phone,
@@ -52,7 +50,6 @@ class StoreModel {
     return StoreModel(
       storeId: doc.id,
       ownerId: data['ownerId'],
-      analyticsId: data['analyticsId'],
       name: data['name'],
       logoUrl: data['logoUrl'] ?? 'https://via.placeholder.com/150',
       phone: data['phone'],
@@ -78,7 +75,6 @@ class StoreModel {
     return {
       'storeId': storeId,
       'ownerId': ownerId,
-      'analyticsId': analyticsId,
       'name': name,
       'logoUrl': logoUrl,
       'phone': phone,
@@ -100,27 +96,3 @@ class StoreModel {
     };
   }
 }
-
-
-/*
-final store = StoreModel(
-  id: 'store123',
-  ownerId: 'owner456',
-  name: 'My Store',
-  phone: '+1234567890',
-  email: 'store@example.com',
-  location: 'Navi Mumbai ',
-  isActive: true,
-  createdAt: Timestamp.now(),
-  reviewIds: [],
-  averageRating: 0.0,
-  productIds: [],
-  followerIds: [],
-);
-
-- To save to Firestore
-await FirebaseFirestore.instance.collection('stores').doc(store.id).set(store.toFirestore());
-
-- To read from Firestore
-final docSnapshot = await FirebaseFirestore.instance.collection('stores').doc('store123').get();
-final loadedStore = StoreModel.fromFirestore(docSnapshot);*/

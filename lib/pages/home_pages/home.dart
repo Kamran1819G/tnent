@@ -124,7 +124,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     return StoreModel(
       storeId: 'store$index',
       ownerId: 'owner$index',
-      analyticsId: 'analytics$index',
       name: 'Store Name $index',
       logoUrl: 'https://via.placeholder.com/150',
       phone: '123-456-789$index',

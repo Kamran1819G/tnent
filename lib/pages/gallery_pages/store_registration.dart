@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/store_model.dart';
+import 'package:tnennt/widget_tree.dart';
 import 'package:tnennt/widgets/customCheckboxListTile.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -98,9 +101,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
 
       // Create a new StoreModel instance
       final newStore = StoreModel(
-        storeId: FirebaseFirestore.instance.collection('stores').doc().id,
+        storeId: FirebaseFirestore.instance.collection('Stores').doc().id,
         ownerId: currentUser.uid,
-        analyticsId: 'analytics_${DateTime.now().millisecondsSinceEpoch}',
         name: _nameController.text,
         phone: _phoneController.text,
         email: _emailController.text,
@@ -181,6 +183,14 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 });
                 if (index == 10) {
                   _confettiController.play();
+                }
+                if (index == 11) {
+                  // Start a timer of 10 seconds when the last page is reached
+                  Timer(Duration(seconds: 10), () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => WidgetTree()), // Navigate to the Home screen
+                    );
+                  });
                 }
               },
               physics: NeverScrollableScrollPhysics(),
