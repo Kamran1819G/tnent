@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +11,8 @@ import 'package:tnennt/pages/home_pages/home.dart';
 import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/splash_screen.dart';
 
+import '../models/store_model.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -19,41 +23,70 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final PageController _pageController = PageController();
   UserModel? currentUser;
+  StoreModel? store;
   int _selectedIndex = 0;
   bool _isLoading = true;
+  bool isStoreRegistered = false;
+  bool isActive = false;
 
   User? user = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
     super.initState();
-    _fetchUserDetails();
+    initialize();
   }
 
-  Future<void> _fetchUserDetails() async {
-    if (user == null) {
-      setState(() => _isLoading = false);
-      return;
-    }
+  void initialize() async {
+    await _fetchUserAndStoreDetails();
+  }
+
+  Future<void> _fetchUserAndStoreDetails() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    if (user == null) return;
 
     try {
-      DocumentSnapshot doc = await FirebaseFirestore.instance
+      // Fetch user details
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
           .collection('Users')
           .doc(user!.uid)
           .get();
 
       if (mounted) {
         setState(() {
-          currentUser = UserModel.fromFirestore(doc);
+          currentUser = UserModel.fromFirestore(userDoc);
+        });
+      }
+
+      // Check store registration
+      final storeId = userDoc.get('storeId');
+      if (storeId != null && storeId.isNotEmpty) {
+        final storeDoc = await FirebaseFirestore.instance
+            .collection('Stores')
+            .doc(storeId)
+            .get();
+
+        if (mounted) {
+          setState(() {
+            isStoreRegistered = storeDoc.exists;
+            isActive = storeDoc.get('isActive');
+            store = StoreModel.fromFirestore(storeDoc);
+          });
+        }
+      }
+
+      if (mounted) {
+        setState(() {
           _isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
-        setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Error fetching user details: ${e.toString()}')),
+          SnackBar(content: Text('Error fetching data: ${e.toString()}')),
         );
       }
     }
@@ -64,8 +97,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return _isLoading
         ? SplashScreen()
         : Scaffold(
-      body: SafeArea(
-        child: Stack(
+            body: SafeArea(
+              child: Stack(
                 children: [
                   PageView(
                     physics: NeverScrollableScrollPhysics(),
@@ -74,7 +107,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       SingleChildScrollView(
                           child: Home(currentUser: currentUser!)),
                       SingleChildScrollView(child: Community()),
-                      SingleChildScrollView(child: Gallery()),
+                      SingleChildScrollView(
+                          child: Gallery(
+                        store: store!,
+                        isStoreRegistered: isStoreRegistered,
+                        isActive: isActive,
+                      )),
                       SingleChildScrollView(
                           child: Catalog(currentUser: currentUser!)),
                     ],
@@ -85,8 +123,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ],
               ),
-      ),
-    );
+            ),
+          );
   }
 
   Widget _buildBottomNavigationBar() {

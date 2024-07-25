@@ -7,6 +7,42 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:950564714045:android:8ca89b2f3f284c95a39c54",
+        "android_client_info": {
+          "package_name": "com.tnennt.middlemen.tnennt_middlemen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "950564714045-tv461l0tucndk2osci1o20fi1toin8q8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2Rm9fbtD-J6W6uaOwdttRK3GQwPklC6A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "950564714045-tv461l0tucndk2osci1o20fi1toin8q8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "950564714045-8b8fggqc5g0rkrlspqnrnari117qhbvn.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.tnennt.tnennt"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:950564714045:android:b4f849ae8ccb5f9ca39c54",
         "android_client_info": {
           "package_name": "com.tnennt.tnennt"

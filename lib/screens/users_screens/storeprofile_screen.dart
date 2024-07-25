@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/models/store_category_model.dart';
@@ -8,6 +9,7 @@ import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/screens/store_community.dart';
 import 'package:tnennt/widgets/wishlist_product_tile.dart';
 import '../../helpers/color_utils.dart';
+import '../../models/user_model.dart';
 import '../update_screen.dart';
 
 class StoreProfileScreen extends StatefulWidget {
@@ -28,6 +30,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
   String userVote = 'none'; // 'none', 'green', or 'red'
   late int greenFlags;
   late int redFlags;
+  UserModel? currentUser;
 
 
   late AnimationController _controller;
@@ -53,6 +56,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
     super.initState();
     greenFlags = widget.store.greenFlags;
     redFlags = widget.store.redFlags;
+    _fetchUserDetails();
     checkConnectionStatus();
     checkUserVote();
     _controller = AnimationController(
@@ -64,6 +68,46 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
       curve: Curves.easeInOut,
     );
     listenToFlagChanges();
+  }
+
+  // In your store follow service
+  Future<void> sendStoreFollowNotification() async {
+    final firestore = FirebaseFirestore.instance;
+
+    // Store the notification in Firestore
+    await firestore.collection('Users').doc(userId).collection('notifications').add({
+      'title': 'New Follower',
+      'body': '${currentUser!.firstName} started following your store.',
+      'data': {
+        'type': 'store',
+        'name': currentUser!.firstName,
+        'image': currentUser!.photoURL.toString(),
+      },
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    // Send push notification
+    await FirebaseMessaging.instance.sendMessage(
+      to: '/topics/store_${widget.store.storeId}',
+      data: {
+        'type': 'store',
+        'name': currentUser!.firstName,
+        'image': currentUser!.photoURL.toString(), // You can update this with the actual image path
+      },
+    );
+  }
+
+  Future<void> _fetchUserDetails() async {
+    User? user  = FirebaseAuth.instance.currentUser!;
+
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .get();
+
+        setState(() {
+          currentUser = UserModel.fromFirestore(doc);
+        });
   }
 
   Future<void> checkUserVote() async {
@@ -196,6 +240,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
         isConnected = true;
         storeEngagement++;
       });
+      sendStoreFollowNotification();
     } else {
       // Disconnect from store
       await storeRef.update({

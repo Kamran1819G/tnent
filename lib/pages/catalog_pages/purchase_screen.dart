@@ -180,7 +180,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                 itemCount: purchaseItems.length,
                 itemBuilder: (context, index) {
                   final item = purchaseItems[index];
-                  return PurchaseProductTile(
+                  return PurchaseItemTile(
                     productId: item.productId,
                     productImage: item.productImage,
                     productName: item.productName,
@@ -197,14 +197,14 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
   }
 }
 
-class PurchaseProductTile extends StatefulWidget {
+class PurchaseItemTile extends StatefulWidget {
   final String productId;  //
   final String productImage;
   final String productName;
   final int productPrice;
   final String variation;
 
-  const PurchaseProductTile({
+  const PurchaseItemTile({
     required this.productId,
     required this.productImage,
     required this.productName,
@@ -213,10 +213,10 @@ class PurchaseProductTile extends StatefulWidget {
   });
 
   @override
-  State<PurchaseProductTile> createState() => _PurchaseProductTileState();
+  State<PurchaseItemTile> createState() => _PurchaseItemTileState();
 }
 
-class _PurchaseProductTileState extends State<PurchaseProductTile> {
+class _PurchaseItemTileState extends State<PurchaseItemTile> {
   bool _isInWishlist = true;
 
   void _toggleWishlist() {

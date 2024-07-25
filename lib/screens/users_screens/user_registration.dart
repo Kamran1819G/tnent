@@ -63,7 +63,6 @@ class _UserRegistrationState extends State<UserRegistration> {
         firstName: _firstNameController.text,
         lastName: _lastNameController.text,
         location: _locationController.text,
-        registered: true,
         lastUpdated: Timestamp.now(),
       );
 
@@ -92,34 +91,73 @@ class _UserRegistrationState extends State<UserRegistration> {
   bool _validateFields() {
     switch (currentPage) {
       case 0:
-        // Validate phone number
-        return _phoneController.text.length == 10;
+        return _validatePhoneNumber(_phoneController.text);
       case 1:
-        // Validate OTP
-        return _otpControllers
-            .every((controller) => controller.text.isNotEmpty);
+        return _validateOTP();
       case 2:
-        // Validate first name and last name
-        return _firstNameController.text.isNotEmpty &&
-            _lastNameController.text.isNotEmpty;
+        return _validateName(_firstNameController.text, _lastNameController.text);
       case 3:
-        // Validate location
-        return _locationController.text.isNotEmpty;
+        return _validateLocation(_locationController.text);
       default:
         return true;
     }
+  }
+
+  bool _validatePhoneNumber(String phone) {
+    // Indian phone number regex pattern
+    final RegExp phoneRegex = RegExp(r'^[6-9]\d{9}$');
+    return phoneRegex.hasMatch(phone);
+  }
+
+  bool _validateOTP() {
+    // Assuming OTP is 4 digits
+    final RegExp otpRegex = RegExp(r'^\d{4}$');
+    String otp = _otpControllers.map((controller) => controller.text).join();
+    return otpRegex.hasMatch(otp);
+  }
+
+  bool _validateName(String firstName, String lastName) {
+    // Name should contain only letters, spaces, and hyphens, and be between 2 and 50 characters
+    final RegExp nameRegex = RegExp(r'^[a-zA-Z\s-]{2,50}$');
+    return nameRegex.hasMatch(firstName) && nameRegex.hasMatch(lastName);
+  }
+
+  bool _validateLocation(String location) {
+    // Location should not be empty and be between 3 and 100 characters
+    return location.isNotEmpty && location.length >= 3 && location.length <= 100;
+  }
+
+  void _showValidationError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
 
   void _proceedToNextPage() {
     if (_validateFields()) {
       _pageController.jumpToPage(currentPage + 1);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please fill in all required fields correctly.'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      String errorMessage;
+      switch (currentPage) {
+        case 0:
+          errorMessage = 'Please enter a valid 10-digit Indian phone number.';
+          break;
+        case 1:
+          errorMessage = 'Please enter a valid 4-digit OTP.';
+          break;
+        case 2:
+          errorMessage = 'Please enter valid first and last names (2-50 characters, letters only).';
+          break;
+        case 3:
+          errorMessage = 'Please enter a valid location (3-100 characters).';
+          break;
+        default:
+          errorMessage = 'Please fill in all required fields correctly.';
+      }
+      _showValidationError(errorMessage);
     }
   }
 

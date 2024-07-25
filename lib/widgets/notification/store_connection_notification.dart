@@ -17,7 +17,7 @@ class StoreConnectionNotification extends StatelessWidget {
     return ListTile(
       leading: CircleAvatar(
         radius: 25.0,
-        child: Image.asset(image),
+        child: Image.network(image),
       ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

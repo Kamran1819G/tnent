@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../helpers/color_utils.dart';
 import 'users_screens/storeprofile_screen.dart';
@@ -127,22 +128,18 @@ class StoreTile extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ClipRRect(
-                borderRadius: BorderRadius.circular(18.0),
+                borderRadius: BorderRadius.circular(23.r),
                 child: Image.network(
                   store.logoUrl,
                   fit: BoxFit.fill,
-                  height: 75.0,
-                  width: 75.0,
+                  height: 120.h,
+                  width: 120.w,
                 )),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: Text(
-                  store.name,
-                  style: TextStyle(fontSize: 12.0),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
+            SizedBox(height: 12.h),
+            Text(
+              store.name,
+              style: TextStyle(fontSize: 16.sp),
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
