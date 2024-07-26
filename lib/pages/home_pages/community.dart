@@ -204,12 +204,12 @@ class _CommunityPostState extends State<CommunityPost> {
     return FutureBuilder<DocumentSnapshot>(
       future: _storeFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
+        if (snapshot.connectionState != ConnectionState.done) {
           return _buildLoadingPlaceholder();
         }
 
         if (!snapshot.hasData || !snapshot.data!.exists) {
-          return SizedBox.shrink();
+          return _buildLoadingPlaceholder();
         }
 
         final storeData = snapshot.data!.data() as Map<String, dynamic>;
