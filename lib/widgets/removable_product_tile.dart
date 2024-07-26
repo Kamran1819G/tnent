@@ -56,12 +56,19 @@ class RemovableProductTile extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(6.0)),
-                    child: Image.network(
-                      product.imageUrls.first,
-                      fit: BoxFit.cover,
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(6.0)),
+                      image: product.imageUrls.isNotEmpty
+                          ? DecorationImage(
+                        image: NetworkImage(product.imageUrls[0]),
+                        fit: BoxFit.cover,
+                      ) : null,
                     ),
+
+                    child: product.imageUrls.isEmpty
+                        ? Center(child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey))
+                        : null,
                   ),
                   Positioned(
                     right: 14.w,

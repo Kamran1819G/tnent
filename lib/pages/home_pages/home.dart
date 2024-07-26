@@ -896,7 +896,7 @@ class UpdateTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
+        /*Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => UpdateScreen(
@@ -904,7 +904,7 @@ class UpdateTile extends StatelessWidget {
               storeImage: Image.asset(image),
             ),
           ),
-        );
+        );*/
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w),

@@ -1,16 +1,21 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:tnennt/models/store_update_model.dart';
 import '../helpers/color_utils.dart';
 
 class UpdateScreen extends StatefulWidget {
   final Image storeImage;
   final String storeName;
+  final int initialUpdateIndex;
+  final List<StoreUpdateModel> updates;
 
   const UpdateScreen({
     Key? key,
     required this.storeImage,
     required this.storeName,
+    required this.initialUpdateIndex,
+    required this.updates,
   }) : super(key: key);
 
   @override
@@ -18,27 +23,11 @@ class UpdateScreen extends StatefulWidget {
 }
 
 class _UpdateScreenState extends State<UpdateScreen> {
-  int currentUpdateIndex = 0;
+  late int currentUpdateIndex;
   late Image _storeImage;
   late String _storeName;
   bool isPaused = false;
   Timer? _timer;
-
-  final List<Widget> updates = [
-    Image.asset(
-      'assets/sample_update.png',
-      fit: BoxFit.cover,
-    ),
-    Container(
-      color: Colors.blue[200],
-    ),
-    Container(
-      color: Colors.red[200],
-    ),
-    Container(
-      color: Colors.yellow[200],
-    )
-  ];
 
   List<double> percentWatched = [];
 
@@ -46,11 +35,12 @@ class _UpdateScreenState extends State<UpdateScreen> {
   void initState() {
     super.initState();
 
+    currentUpdateIndex = widget.initialUpdateIndex;
     _storeImage = widget.storeImage;
     _storeName = widget.storeName;
 
     // initially, all stories haven't been watched yet
-    for (int i = 0; i < updates.length; i++) {
+    for (int i = 0; i < widget.updates.length; i++) {
       percentWatched.add(0);
     }
 
@@ -68,7 +58,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
             percentWatched[currentUpdateIndex] = 1;
             timer.cancel();
 
-            if (currentUpdateIndex < updates.length - 1) {
+            if (currentUpdateIndex < widget.updates.length - 1) {
               currentUpdateIndex++;
               _startWatching();
             } else {
@@ -103,7 +93,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
       });
     } else {
       setState(() {
-        if (currentUpdateIndex < updates.length - 1) {
+        if (currentUpdateIndex < widget.updates.length - 1) {
           percentWatched[currentUpdateIndex] = 1;
           currentUpdateIndex++;
           _startWatching();
@@ -123,15 +113,21 @@ class _UpdateScreenState extends State<UpdateScreen> {
           children: [
             // story
             GestureDetector(
-                onTapDown: (details) => _onTapDown(details),
-                child: updates[currentUpdateIndex]),
+              onTapDown: (details) => _onTapDown(details),
+              child: Image.network(
+                widget.updates[currentUpdateIndex].imageUrls.first,
+                fit: BoxFit.cover,
+                height: double.infinity,
+                width: double.infinity,
+              ),
+            ),
 
             // progress bar
             Align(
               alignment: Alignment(0, -0.95),
               child: UpdateBars(
                 percentWatched: percentWatched,
-                length: updates.length,
+                length: widget.updates.length,
               ),
             ),
 

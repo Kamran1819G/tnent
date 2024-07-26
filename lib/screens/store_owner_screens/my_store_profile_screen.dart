@@ -1,18 +1,22 @@
 import 'dart:io';
 import 'dart:async';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/models/store_model.dart';
+import 'package:tnennt/models/store_update_model.dart';
 import 'package:tnennt/screens/coming_soon.dart';
 import 'package:tnennt/screens/store_community.dart';
 import 'package:tnennt/screens/store_owner_screens/analytics_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/order_pays_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/product_categories_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/store_settings_screen.dart';
+import 'package:tnennt/screens/update_screen.dart';
 import 'package:tnennt/widgets/featured_product_tile.dart';
 import 'package:tnennt/widgets/removable_product_tile.dart';
 import 'package:tnennt/widgets/removable_update_tile.dart';
@@ -49,7 +53,9 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   List<StoreCategoryModel> categories = [];
   List<ProductModel> allProducts = [];
   List<ProductModel> filteredProducts = [];
+  List<StoreUpdateModel> storeUpdates = [];
   TextEditingController searchController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
 
   late AnimationController _controller;
   late Animation<double> _animation;
@@ -111,6 +117,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     _fetchStore();
     _loadProducts();
     _fetchCategories();
+    _fetchStoreUpdates();
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -126,6 +133,97 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     _controller.dispose();
     super.dispose();
   }
+
+  Future<void> _addStoreUpdate() async {
+    List<XFile>? images = await _picker.pickMultiImage();
+    if (images == null || images.isEmpty) return;
+
+    List<String> imageUrls = [];
+    for (var image in images) {
+      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+      Reference firebaseStorageRef = FirebaseStorage.instance
+          .ref()
+          .child('store_updates/$fileName');
+      UploadTask uploadTask = firebaseStorageRef.putFile(File(image.path));
+      TaskSnapshot taskSnapshot = await uploadTask;
+      String url = await taskSnapshot.ref.getDownloadURL();
+      imageUrls.add(url);
+    }
+
+    Timestamp now = Timestamp.now();
+    Timestamp expiresAt = Timestamp.fromDate(now.toDate().add(Duration(hours: 24)));
+
+    StoreUpdateModel newUpdate = StoreUpdateModel(
+      updateId: '', // Firestore will generate this
+      storeId: store.storeId,
+      imageUrls: imageUrls,
+      createdAt: now,
+      expiresAt: expiresAt,
+    );
+
+    DocumentReference docRef = await FirebaseFirestore.instance
+        .collection('storeUpdates')
+        .add(newUpdate.toFirestore());
+
+    setState(() {
+      newUpdate = StoreUpdateModel(
+        updateId: docRef.id,
+        storeId: newUpdate.storeId,
+        imageUrls: newUpdate.imageUrls,
+        createdAt: newUpdate.createdAt,
+        expiresAt: newUpdate.expiresAt,
+      );
+      storeUpdates.insert(0, newUpdate);
+    });
+  }
+
+  Future<void> _fetchStoreUpdates() async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('storeUpdates')
+          .where('storeId', isEqualTo: store.storeId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      setState(() {
+        storeUpdates = querySnapshot.docs
+            .map((doc) => StoreUpdateModel.fromFirestore(doc))
+            .toList();
+      });
+    } catch (e) {
+      print('Error fetching store updates: $e');
+      // Handle the error, maybe show a message to the user
+      setState(() {
+        storeUpdates = []; // Set to empty list in case of error
+      });
+    }
+  }
+
+  Future<void> _deleteStoreUpdate(String updateId) async {
+    await FirebaseFirestore.instance
+        .collection('storeUpdates')
+        .doc(updateId)
+        .delete();
+
+    setState(() {
+      storeUpdates.removeWhere((update) => update.updateId == updateId);
+    });
+  }
+
+  void _previewUpdate(StoreUpdateModel update) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UpdateScreen(
+          storeImage: Image.network(store.logoUrl),
+          storeName: store.name,
+          initialUpdateIndex: storeUpdates.indexOf(update),
+          updates: storeUpdates,
+        ),
+      ),
+    );
+  }
+
 
   Future<void> _loadProducts() async {
     allProducts = await _fetchProducts();
@@ -1011,8 +1109,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                             scrollDirection: Axis.horizontal,
                             children: [
                               GestureDetector(
-                                onTap: () {
-                                },
+                                onTap: _addStoreUpdate,
                                 child: Container(
                                     margin: EdgeInsets.only(left: 24.w),
                                     height: 72.h,
@@ -1025,14 +1122,11 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                         size: 40.sp,
                                         color: hexToColor('#B5B5B5'))),
                               ),
-                              ...updates.map((update) {
+                              ...storeUpdates.map((update) {
                                 return RemovableUpdateTile(
-                                  image: update['coverImage'],
-                                  onRemove: () {
-                                    setState(() {
-                                      updates.remove(update);
-                                    });
-                                  },
+                                  image: update.imageUrls.first,
+                                  onRemove: () => _deleteStoreUpdate(update.updateId),
+                                  onTap: () => _previewUpdate(update),
                                 );
                               }).toList(),
                             ],

@@ -316,12 +316,17 @@ class WishlistItemTile extends StatelessWidget {
               height: 190,
               width: 150,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4.0),
-                image: DecorationImage(
+                borderRadius: BorderRadius.circular(8.0),
+                image: item['productImage'] != null
+                    ? DecorationImage(
                   image: NetworkImage(item['productImage']),
                   fit: BoxFit.cover,
-                ),
+                )
+                    : null,
               ),
+              child: item['productImage'] == null
+                  ? Center(child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey))
+                  : null,
             ),
             SizedBox(width: 12.0),
             Expanded(

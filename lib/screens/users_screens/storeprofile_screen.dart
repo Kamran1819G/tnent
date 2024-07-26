@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
+import 'package:tnennt/models/store_update_model.dart';
 import 'package:tnennt/screens/store_community.dart';
 import 'package:tnennt/widgets/wishlist_product_tile.dart';
 import '../../helpers/color_utils.dart';
@@ -57,7 +58,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
         .map((doc) => StoreCategoryModel.fromFirestore(doc))
         .toList();
   }
-
+  List<StoreUpdateModel> storeUpdates = [];
 
   @override
   void initState() {
@@ -67,6 +68,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
     _fetchUserDetails();
     checkConnectionStatus();
     checkUserVote();
+    _fetchStoreUpdates();
     _controller = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -76,6 +78,42 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
       curve: Curves.easeInOut,
     );
     listenToFlagChanges();
+  }
+
+  Future<void> _fetchStoreUpdates() async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('storeUpdates')
+          .where('storeId', isEqualTo: widget.store.storeId)
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      setState(() {
+        storeUpdates = querySnapshot.docs
+            .map((doc) => StoreUpdateModel.fromFirestore(doc))
+            .toList();
+      });
+    } catch (e) {
+      print('Error fetching store updates: $e');
+      // Handle the error, maybe show a message to the user
+      setState(() {
+        storeUpdates = []; // Set to empty list in case of error
+      });
+    }
+  }
+
+  void _previewUpdate(StoreUpdateModel update) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => UpdateScreen(
+          storeImage: Image.network(widget.store.logoUrl),
+          storeName: widget.store.name,
+          initialUpdateIndex: storeUpdates.indexOf(update),
+          updates: storeUpdates,
+        ),
+      ),
+    );
   }
 
   // In your store follow service
@@ -755,24 +793,10 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                         child: ListView(
                           scrollDirection: Axis.horizontal,
                           children: [
-                            GestureDetector(
-                              onTap: () {
-                              },
-                              child: Container(
-                                  margin: EdgeInsets.only(left: 24.w),
-                                  height: 72.h,
-                                  width: 72.w,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: hexToColor('#EBEBEB'),
-                                  ),
-                                  child: Icon(Icons.add,
-                                      size: 40.sp,
-                                      color: hexToColor('#B5B5B5'))),
-                            ),
-                            ...updates.map((update) {
+                            ...storeUpdates.map((update) {
                               return UpdateTile(
-                                image: update['coverImage'],
+                                image: update.imageUrls.first,
+                                onTap: () => _previewUpdate(update),
                               );
                             }).toList(),
                           ],

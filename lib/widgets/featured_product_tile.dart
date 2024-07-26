@@ -124,12 +124,19 @@ class _FeaturedProductTileState extends State<FeaturedProductTile> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(6.0)),
-                    child: Image.network(
-                      widget.product.imageUrls.first,
-                      fit: BoxFit.cover,
+                  Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(6.0)),
+                      image: widget.product.imageUrls.isNotEmpty
+                          ? DecorationImage(
+                        image: NetworkImage(widget.product.imageUrls[0]),
+                        fit: BoxFit.cover,
+                      ) : null,
                     ),
+
+                    child: widget.product.imageUrls.isEmpty
+                        ? Center(child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey))
+                        : null,
                   ),
                   Positioned(
                     right: 8.0,

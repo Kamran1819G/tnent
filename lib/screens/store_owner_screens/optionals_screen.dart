@@ -8,6 +8,7 @@ import 'package:tnennt/helpers/color_utils.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:tnennt/helpers/snackbar_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:uuid/uuid.dart';
 
@@ -396,6 +397,7 @@ class OptionalsPriceScreen extends StatefulWidget {
 class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
   Map<String, GlobalKey<_OptionalPriceAndQuantityState>> optionalPriceKeys = {};
   bool isSubmitting = false;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -409,7 +411,7 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
     }
   }
 
-  Future<List<String>> uploadImages(String productId) async {
+  Future<List<String>> _uploadImages(String productId) async {
     List<String> imageUrls = [];
     FirebaseStorage storage = FirebaseStorage.instance;
 
@@ -425,23 +427,23 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
     return imageUrls;
   }
 
-  bool validateAllForms() {
-    bool isValid = true;
-    for (var key in optionalPriceKeys.values) {
-      if(!key.currentState!.validate()) {
+  bool validateAllFields() {
+    bool isValid = _formKey.currentState?.validate() ?? false;
+    optionalPriceKeys.forEach((_, key) {
+      if (key.currentState?.validate() == false) {
         isValid = false;
       }
-    }
+    });
     return isValid;
   }
 
+
   Future<void> saveDataToFirebase() async {
-    if (!validateAllForms()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill in all the required fields.')),
-      );
+    if (!validateAllFields()) {
+      showSnackBar(context, 'Please fill all the fields');
       return;
     }
+
     setState(() {
       isSubmitting = true;
     });
@@ -455,7 +457,7 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
           : 'Product-ID-${Uuid().v4()}';
 
       // Upload images and get their URLs
-      List<String> imageUrls = await uploadImages(productId);
+      List<String> imageUrls = await _uploadImages(productId);
 
       // Prepare variations data
       Map<String, ProductVariant> variations = {};
@@ -496,16 +498,13 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
         'totalProducts': FieldValue.increment(1),
         'productIds': FieldValue.arrayUnion([productId])
       });
-
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Product added successfully')));
+      showSnackBar(context, 'Product added successfully');
       Navigator.pop(context);
       Navigator.pop(context);
       Navigator.pop(context);
     } catch (e) {
       print('Error saving data: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving product. Please try again.')));
+      showSnackBar(context, 'Error saving data. Please try again.');
     } finally {
       setState(() {
         isSubmitting = false;
@@ -517,152 +516,155 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              height: 100,
-              padding: EdgeInsets.only(left: 16, right: 8),
-              child: Row(
-                children: [
-                  Image.asset('assets/black_tnennt_logo.png',
-                      width: 30, height: 30),
-                  Spacer(),
-                  Container(
-                    margin: EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey[100],
-                      child: IconButton(
-                        icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              Container(
+                height: 100,
+                padding: EdgeInsets.only(left: 16, right: 8),
+                child: Row(
+                  children: [
+                    Image.asset('assets/black_tnennt_logo.png',
+                        width: 30, height: 30),
+                    Spacer(),
+                    Container(
+                      margin: EdgeInsets.all(8.0),
+                      child: CircleAvatar(
+                        backgroundColor: Colors.grey[100],
+                        child: IconButton(
+                          icon:
+                              Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Add Price To Your Optionals',
-                    style: TextStyle(fontSize: 24, color: Colors.black),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'All the optional will have the default pricing entered while adding product.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                      color: hexToColor('#636363'),
+              SizedBox(height: 20),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Add Price To Your Optionals',
+                      style: TextStyle(fontSize: 24, color: Colors.black),
                     ),
-                  ),
-                  SizedBox(height: 30),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(8.0),
-                      width: 175,
-                      decoration: BoxDecoration(
-                        border:
-                            Border.all(color: Theme.of(context).primaryColor),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Icon(Icons.add, color: Colors.white),
-                          ),
-                          SizedBox(width: 10),
-                          Text(
-                            'Add Optional',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14.0,
-                            ),
-                          ),
-                        ],
+                    SizedBox(height: 8),
+                    Text(
+                      'All the optional will have the default pricing entered while adding product.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        color: hexToColor('#636363'),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 20),
-            Dash(
-              direction: Axis.horizontal,
-              length: MediaQuery.of(context).size.width,
-              dashLength: 10,
-              dashColor: hexToColor('#848484'),
-            ),
-            SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: widget.selectedOptions.length,
-                itemBuilder: (context, index) {
-                  String option = widget.selectedOptions[index];
-                  return OptionalPriceAndQuantity(
-                    key: optionalPriceKeys[option],
-                    title: option,
-                    onDeletePressed: () {
-                      setState(() {
-                        widget.selectedOptions.remove(option);
-                        optionalPriceKeys.remove(option);
-                      });
-                    },
-                  );
-                },
-              ),
-            ),
-            Center(
-              child: isSubmitting
-                  ? Container(
-                      margin: EdgeInsets.symmetric(vertical: 15.0),
-                      child: CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            hexToColor('#2B2B2B')),
-                      ),
-                    )
-                  : GestureDetector(
-                      onTap: saveDataToFirebase,
+                    SizedBox(height: 30),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
                       child: Container(
-                        height: 50,
-                        width: 250,
-                        margin: EdgeInsets.symmetric(vertical: 15.0),
+                        padding: EdgeInsets.all(8.0),
+                        width: 175,
                         decoration: BoxDecoration(
-                          color: hexToColor('#2B2B2B'),
-                          borderRadius: BorderRadius.circular(100.0),
+                          border:
+                              Border.all(color: Theme.of(context).primaryColor),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Center(
-                          child: Text(
-                            'Confirm',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontFamily: 'Gotham',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16.0,
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context).primaryColor,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(Icons.add, color: Colors.white),
+                            ),
+                            SizedBox(width: 10),
+                            Text(
+                              'Add Optional',
+                              style: TextStyle(
+                                color: Theme.of(context).primaryColor,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14.0,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 20),
+              Dash(
+                direction: Axis.horizontal,
+                length: MediaQuery.of(context).size.width,
+                dashLength: 10,
+                dashColor: hexToColor('#848484'),
+              ),
+              SizedBox(height: 20),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: widget.selectedOptions.length,
+                  itemBuilder: (context, index) {
+                    String option = widget.selectedOptions[index];
+                    return OptionalPriceAndQuantity(
+                      key: optionalPriceKeys[option],
+                      title: option,
+                      onDeletePressed: () {
+                        setState(() {
+                          widget.selectedOptions.remove(option);
+                          optionalPriceKeys.remove(option);
+                        });
+                      },
+                    );
+                  },
+                ),
+              ),
+              Center(
+                child: isSubmitting
+                    ? Container(
+                        margin: EdgeInsets.symmetric(vertical: 15.0),
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              hexToColor('#2B2B2B')),
+                        ),
+                      )
+                    : GestureDetector(
+                        onTap: saveDataToFirebase,
+                        child: Container(
+                          height: 50,
+                          width: 250,
+                          margin: EdgeInsets.symmetric(vertical: 15.0),
+                          decoration: BoxDecoration(
+                            color: hexToColor('#2B2B2B'),
+                            borderRadius: BorderRadius.circular(100.0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Confirm',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16.0,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -691,43 +693,26 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
   TextEditingController _quantityController = TextEditingController();
 
   bool _isExpanded = false;
-
   final _formKey = GlobalKey<FormState>();
 
   void _calculateValues() {
-    if (_formKey.currentState?.validate() ?? false) {
-      double discount = double.tryParse(_discountController.text) ?? 0;
-      double mrp = double.tryParse(_mrpController.text) ?? 0;
+    double discount = double.tryParse(_discountController.text) ?? 0;
+    double mrp = double.tryParse(_mrpController.text) ?? 0;
 
-      if (discount != 0 && mrp != 0) {
-        double itemPrice = mrp - (mrp * discount / 100);
-        setState(() {
-          _itemPriceController.text = itemPrice.toStringAsFixed(2);
-        });
-      } else {
-        setState(() {
-          _itemPriceController.text = '';
-        });
-      }
+    if (discount != 0 && mrp != 0) {
+      double itemPrice = mrp - (mrp * discount / 100);
+      setState(() {
+        _itemPriceController.text = itemPrice.toStringAsFixed(2);
+      });
+    } else {
+      setState(() {
+        _itemPriceController.text = '';
+      });
     }
-  }
-
-  String? _validateNumber(String? value, String fieldName) {
-    if (value == null || value.isEmpty) {
-      return '$fieldName is required';
-    }
-    if (double.tryParse(value) == null) {
-      return 'Please enter a valid number for $fieldName';
-    }
-    return null;
   }
 
   bool validate() {
-    final form = _formKey.currentState;
-    if (form!.validate()) {
-      return true;
-    }
-    return false;
+    return _formKey.currentState!.validate();
   }
 
   @override
@@ -830,9 +815,16 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                             borderRadius: BorderRadius.circular(18),
                           ),
                         ),
-                        onFieldSubmitted: (_) => _calculateValues(),
-                        validator: (value) =>
-                            _validateNumber(value, 'Discount'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Required';
+                          }
+                          if (double.tryParse(value) == null) {
+                            return 'Invalid number';
+                          }
+                          return null;
+                        },
+                        onChanged: (_) => _calculateValues(),
                       ),
                     ),
                     Container(
@@ -875,9 +867,16 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                             borderRadius: BorderRadius.circular(18),
                           ),
                         ),
-                        onFieldSubmitted: (_) => _calculateValues(),
-                        validator: (value) =>
-                            _validateNumber(value, 'MRP Price'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Required';
+                          }
+                          if (double.tryParse(value) == null) {
+                            return 'Invalid number';
+                          }
+                          return null;
+                        },
+                        onChanged: (_) => _calculateValues(),
                       ),
                     ),
                     Container(
@@ -920,9 +919,16 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                             borderRadius: BorderRadius.circular(18),
                           ),
                         ),
-                        onFieldSubmitted: (_) => _calculateValues(),
-                        validator: (value) =>
-                            _validateNumber(value, 'Item Price'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Required';
+                          }
+                          if (double.tryParse(value) == null) {
+                            return 'Invalid number';
+                          }
+                          return null;
+                        },
+                        onChanged: (_) => _calculateValues(),
                       ),
                     ),
                   ],
@@ -960,8 +966,15 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                             vertical: 16,
                           ),
                         ),
-                        validator: (value) =>
-                            _validateNumber(value, 'Quantity'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Required';
+                          }
+                          if (int.tryParse(value) == null) {
+                            return 'Invalid number';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     SizedBox(width: 20),
@@ -972,7 +985,7 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                           fontSize: 12,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
-                          color: hexToColor('#929292'),
+                          color: hexToColor('#636363'),
                         ),
                       ),
                     ),

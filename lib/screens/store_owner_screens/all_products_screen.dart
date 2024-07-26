@@ -37,60 +37,49 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
   }
 
   Future<void> _deleteProduct(ProductModel product) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    scaffoldMessenger.showSnackBar(
+      SnackBar(content: Text('Deleting product...'), duration: Duration(seconds: 30)),
+    );
+
     try {
+      // Start a batch write
+      final batch = FirebaseFirestore.instance.batch();
+
       // Delete product document
-      await FirebaseFirestore.instance
-          .collection('products')
-          .doc(product.productId)
-          .delete();
-
-      // Delete product images folder from storage
-      final storageRef = FirebaseStorage.instance.ref();
-      final productFolderRef = storageRef.child('products/${product.productId}');
-
-      try {
-        // List all items in the folder
-        final ListResult result = await productFolderRef.listAll();
-
-        // Delete each item in the folder
-        for (var item in result.items) {
-          await item.delete();
-        }
-
-        // After deleting all items, delete the folder itself
-        await productFolderRef.delete();
-      } catch (e) {
-        print('Error deleting product images: $e');
-        // Continue with the rest of the deletion process even if image deletion fails
-      }
+      final productRef = FirebaseFirestore.instance.collection('products').doc(product.productId);
+      batch.delete(productRef);
 
       // Decrease product total from store
-      await FirebaseFirestore.instance
-          .collection('Stores')
-          .doc(widget.storeId)
-          .update({
-        'totalProducts': FieldValue.increment(-1)
-      });
+      final storeRef = FirebaseFirestore.instance.collection('Stores').doc(widget.storeId);
+      batch.update(storeRef, {'totalProducts': FieldValue.increment(-1)});
 
       // Remove product reference from category
-      await FirebaseFirestore.instance
+      final categoryRef = FirebaseFirestore.instance
           .collection('Stores')
           .doc(widget.storeId)
           .collection('categories')
-          .doc(product.storeCategory)
-          .update({
-        'totalProducts': FieldValue.increment(-1),
+          .doc(product.storeCategory);
+      batch.update(categoryRef, {
         'productIds': FieldValue.arrayRemove([product.productId])
       });
+
+      // Commit the batch
+      await batch.commit();
 
       // Refresh the product list
       setState(() {
         _productsFuture = _fetchProducts();
       });
+
+      scaffoldMessenger.hideCurrentSnackBar();
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('Product deleted successfully')),
+      );
     } catch (e) {
       print('Error deleting product: $e');
-      // Show error message to user
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.hideCurrentSnackBar();
+      scaffoldMessenger.showSnackBar(
         SnackBar(content: Text('Failed to delete product. Please try again.')),
       );
     }
@@ -308,11 +297,16 @@ class ProductTile extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8.0),
-                  image: DecorationImage(
+                  image: product.imageUrls.isNotEmpty
+                      ? DecorationImage(
                     image: NetworkImage(product.imageUrls[0]),
                     fit: BoxFit.cover,
-                  ),
+                  )
+                      : null,
                 ),
+                child: product.imageUrls.isEmpty
+                    ? Center(child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey))
+                    : null,
               ),
             ),
             Padding(

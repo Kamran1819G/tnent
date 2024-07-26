@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/screens/coming_soon.dart';
 import 'package:tnennt/screens/store_owner_screens/create_coupon_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/payments_screen.dart';
 
@@ -126,10 +127,11 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                 SizedBox(height: 10.0),
                 GestureDetector(
                   onTap: () {
+                    // CreateCouponScreen();
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => CreateCouponScreen()));
+                            builder: (context) => ComingSoon()));
                   },
                   child: Container(
                     width: 180.0,

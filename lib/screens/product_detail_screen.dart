@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tnennt/helpers/color_utils.dart';
@@ -59,34 +60,33 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       greenFlags: 0,
       redFlags: 0,
       variations: {
-          'S': ProductVariant(
-            price: 24.99,
-            mrp: 29.99,
-            discount: 16.67,
-            stockQuantity: 50,
-            sku: 'TS-S',
-          ),
-          'M': ProductVariant(
-            price: 24.99,
-            mrp: 29.99,
-            discount: 16.67,
-            stockQuantity: 100,
-            sku: 'TS-M',
-          ),
-          'L': ProductVariant(
-            price: 26.99,
-            mrp: 31.99,
-            discount: 15.63,
-            stockQuantity: 75,
-            sku: 'TS-L',
-          ),
+        'S': ProductVariant(
+          price: 24.99,
+          mrp: 29.99,
+          discount: 16.67,
+          stockQuantity: 50,
+          sku: 'TS-S',
+        ),
+        'M': ProductVariant(
+          price: 24.99,
+          mrp: 29.99,
+          discount: 16.67,
+          stockQuantity: 100,
+          sku: 'TS-M',
+        ),
+        'L': ProductVariant(
+          price: 26.99,
+          mrp: 31.99,
+          discount: 15.63,
+          stockQuantity: 75,
+          sku: 'TS-L',
+        ),
       },
     );
   });
 
   final TextEditingController _reviewController = TextEditingController();
   List<Map<String, dynamic>> _reviews = [];
-
 
   @override
   void initState() {
@@ -106,10 +106,37 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         .orderBy('timestamp', descending: true)
         .get();
 
+    List<Map<String, dynamic>> reviews = [];
+
+    for (var doc in reviewsSnapshot.docs) {
+      Map<String, dynamic> reviewData = doc.data() as Map<String, dynamic>;
+      String userId = reviewData['userId'];
+
+      // Fetch user data from Users collection
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userId)
+          .get();
+
+      if (userSnapshot.exists) {
+        Map<String, dynamic> userData =
+            userSnapshot.data() as Map<String, dynamic>;
+        String firstName = userData['firstName'] ?? '';
+        String lastName = userData['lastName'] ?? '';
+        String photoURL = userData['photoURL'] ?? '';
+
+        reviewData['userFullName'] = '$firstName $lastName'.trim();
+        reviewData['photoURL'] = photoURL;
+      } else {
+        reviewData['userFullName'] = 'Anonymous';
+        reviewData['photoURL'] = '';
+      }
+
+      reviews.add(reviewData);
+    }
+
     setState(() {
-      _reviews = reviewsSnapshot.docs
-          .map((doc) => doc.data() as Map<String, dynamic>)
-          .toList();
+      _reviews = reviews;
     });
   }
 
@@ -122,26 +149,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       return;
     }
 
-    // Fetch user data from Firestore
-    DocumentSnapshot userDoc = await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(user.uid)
-        .get();
-
-    String displayName = '';
-    String photoURL = '';
-
-    if (userDoc.exists) {
-      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-      displayName = userData['firstName'] ?? '';
-      photoURL = userData['photoURL'] ?? '';
-    }
-
     await FirebaseFirestore.instance.collection('Reviews').add({
-      'displayName': displayName,
-      'photoURL': photoURL,
       'productId': widget.product.productId,
-      'reviewContent': review,
+      'storeId': widget.product.storeId,
+      'content': review,
       'timestamp': FieldValue.serverTimestamp(),
       'userId': user.uid,
     });
@@ -162,12 +173,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             backgroundImage: review['photoURL'].isNotEmpty
                 ? NetworkImage(review['photoURL'])
                 : null,
-            child: review['photoURL'].isEmpty
-                ? Icon(Icons.person)
-                : null,
+            child: review['photoURL'].isEmpty ? Icon(Icons.person) : null,
           ),
-          title: Text(review['displayName']),
-          subtitle: Text(review['reviewContent']),
+          title: Text(
+            review['userFullName'],
+            overflow: TextOverflow.ellipsis,
+          ),
+          subtitle: Text(review['content']),
           trailing: Text(
             DateFormat('MMM d, yyyy').format(
               (review['timestamp'] as Timestamp).toDate(),
@@ -217,7 +229,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Unable to proceed to checkout')),
+        SnackBar(content: Text('Out of Stock, please try again later')),
       );
     }
   }
@@ -225,12 +237,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void _checkWishlistStatus() async {
     User? user = _auth.currentUser;
     if (user != null) {
-      DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user.uid).get();
+      DocumentSnapshot userDoc =
+          await _firestore.collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
-        List<dynamic> wishlist = (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
+        List<dynamic> wishlist =
+            (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
         setState(() {
           _isInWishlist = wishlist.any((item) =>
-          item['productId'] == _wishlistItem['productId'] &&
+              item['productId'] == _wishlistItem['productId'] &&
               item['variation'] == _wishlistItem['variation']);
         });
       }
@@ -250,7 +264,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     });
 
     try {
-      DocumentReference userDocRef = _firestore.collection('Users').doc(user.uid);
+      DocumentReference userDocRef =
+          _firestore.collection('Users').doc(user.uid);
 
       if (_isInWishlist) {
         // Add product to wishlist
@@ -309,8 +324,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     String userId = user.uid;
     String productId = _product.productId;
 
-    DocumentReference userVoteRef = _firestore.collection('Users').doc(userId).collection('votes').doc(productId);
-    DocumentReference productRef = _firestore.collection('products').doc(productId);
+    DocumentReference userVoteRef = _firestore
+        .collection('Users')
+        .doc(userId)
+        .collection('votes')
+        .doc(productId);
+    DocumentReference productRef =
+        _firestore.collection('products').doc(productId);
 
     try {
       await _firestore.runTransaction((transaction) async {
@@ -321,12 +341,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           throw Exception('Product does not exist');
         }
 
-        Map<String, dynamic> productData = productDoc.data() as Map<String, dynamic>;
+        Map<String, dynamic> productData =
+            productDoc.data() as Map<String, dynamic>;
         int greenFlags = productData['greenFlags'] ?? 0;
         int redFlags = productData['redFlags'] ?? 0;
 
         if (voteDoc.exists) {
-          Map<String, dynamic> previousVote = voteDoc.data() as Map<String, dynamic>;
+          Map<String, dynamic> previousVote =
+              voteDoc.data() as Map<String, dynamic>;
 
           if (previousVote['greenFlag'] && voteType == 'greenFlag') {
             greenFlags--;
@@ -378,7 +400,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
         // Update the local product state
         setState(() {
-          _product = _product.copyWith(greenFlags: greenFlags, redFlags: redFlags);
+          _product =
+              _product.copyWith(greenFlags: greenFlags, redFlags: redFlags);
         });
       });
 
@@ -393,8 +416,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       );
     }
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -513,11 +534,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           GestureDetector(
-                            onTap: (){
+                            onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => StoreProfileScreen(store: store),
+                                  builder: (context) =>
+                                      StoreProfileScreen(store: store),
                                 ),
                               );
                             },
@@ -703,57 +725,85 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   Spacer(),
                                   GestureDetector(
                                     onTap: () async {
-                                      String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+                                      String userId = FirebaseAuth
+                                              .instance.currentUser?.uid ??
+                                          '';
                                       if (userId.isEmpty) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text('Please log in to add items to cart')),
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content: Text(
+                                                  'Please log in to add items to cart')),
                                         );
                                         return;
                                       }
 
-                                      DocumentReference userRef = FirebaseFirestore.instance
-                                          .collection('Users')
-                                          .doc(userId);
+                                      DocumentReference userRef =
+                                          FirebaseFirestore.instance
+                                              .collection('Users')
+                                              .doc(userId);
 
                                       try {
-                                        await FirebaseFirestore.instance.runTransaction((transaction) async {
-                                          DocumentSnapshot snapshot = await transaction.get(userRef);
+                                        await FirebaseFirestore.instance
+                                            .runTransaction(
+                                                (transaction) async {
+                                          DocumentSnapshot snapshot =
+                                              await transaction.get(userRef);
                                           if (!snapshot.exists) {
-                                            throw Exception("User does not exist!");
+                                            throw Exception(
+                                                "User does not exist!");
                                           }
 
-                                          Map<String, dynamic> userData = snapshot.data() as Map<String, dynamic>;
-                                          List<dynamic> cartList = userData['cart'] ?? [];
+                                          Map<String, dynamic> userData =
+                                              snapshot.data()
+                                                  as Map<String, dynamic>;
+                                          List<dynamic> cartList =
+                                              userData['cart'] ?? [];
 
                                           Map<String, dynamic> cartItem = {
-                                            'productId': widget.product.productId,
+                                            'productId':
+                                                widget.product.productId,
                                             'variation': _selectedVariation,
                                             'quantity': 1, // Default quantity
                                           };
 
-                                          int existingIndex = cartList.indexWhere((item) =>
-                                          item['productId'] == widget.product.productId &&
-                                              item['variation'] == _selectedVariation
-                                          );
+                                          int existingIndex =
+                                              cartList.indexWhere((item) =>
+                                                  item['productId'] ==
+                                                      widget
+                                                          .product.productId &&
+                                                  item['variation'] ==
+                                                      _selectedVariation);
 
                                           if (existingIndex != -1) {
-                                            cartList[existingIndex]['quantity'] += 1;
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Item already in cart')),
+                                            cartList[existingIndex]
+                                                ['quantity'] += 1;
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(
+                                                      'Item already in cart')),
                                             );
                                           } else {
                                             cartList.add(cartItem);
-                                            ScaffoldMessenger.of(context).showSnackBar(
-                                              SnackBar(content: Text('Item added to cart')),
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                  content: Text(
+                                                      'Item added to cart')),
                                             );
                                           }
 
-                                          transaction.update(userRef, {'cart': cartList});
+                                          transaction.update(
+                                              userRef, {'cart': cartList});
                                         });
                                       } catch (e) {
                                         print('Error updating cart: $e');
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text('Failed to update cart. Please try again.')),
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content: Text(
+                                                  'Failed to update cart. Please try again.')),
                                         );
                                       }
                                     },
@@ -763,7 +813,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         color: Theme.of(context).primaryColor,
                                         borderRadius: BorderRadius.circular(12),
                                       ),
-                                      child: Icon(Icons.add_shopping_cart, color: Colors.white, size: 25),
+                                      child: Icon(Icons.add_shopping_cart,
+                                          color: Colors.white, size: 25),
                                     ),
                                   ),
                                 ],
@@ -851,7 +902,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                       SizedBox(height: 40),
 
-
                       // Reviews
 
                       Column(
@@ -881,7 +931,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           SizedBox(height: 10),
                           Container(
                             margin: EdgeInsets.symmetric(horizontal: 16),
-                            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
                               color: hexToColor('#F5F5F5'),
                               borderRadius: BorderRadius.circular(50),
@@ -899,7 +950,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   child: TextField(
                                     controller: _reviewController,
                                     decoration: InputDecoration(
-                                      constraints: BoxConstraints(maxHeight: 100),
+                                      constraints:
+                                          BoxConstraints(maxHeight: 100),
                                       hintText: 'Add your review',
                                       hintStyle: TextStyle(
                                         color: hexToColor('#9C9C9C'),
@@ -913,7 +965,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   ),
                                 ),
                                 IconButton(
-                                  icon: Icon(Icons.send, color: Theme.of(context).primaryColor),
+                                  icon: Icon(Icons.send,
+                                      color: Theme.of(context).primaryColor),
                                   onPressed: () {
                                     if (_reviewController.text.isNotEmpty) {
                                       _addReview(_reviewController.text);
@@ -936,7 +989,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   right: 0,
                   bottom: 0,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                     color: Colors.white,
                     child: ElevatedButton(
                       onPressed: () {
@@ -949,7 +1003,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: hexToColor('#343434'),
                         foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 15,),
+                        padding: EdgeInsets.symmetric(
+                          vertical: 15,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -973,10 +1029,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
           ),
-          label: Text(variation,
-          style: TextStyle(
-            color: _selectedVariation == variation ? Colors.white : Colors.black,
-          ),
+          label: Text(
+            variation,
+            style: TextStyle(
+              color:
+                  _selectedVariation == variation ? Colors.white : Colors.black,
+            ),
           ),
           backgroundColor: Colors.white,
           selected: _selectedVariation == variation,
@@ -999,7 +1057,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       }).toList(),
     );
   }
-
 
   _buildMoreBottomSheet() {
     return Container(
@@ -1112,7 +1169,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Text(
                     '${_product.redFlags}',
                     style:
-                    TextStyle(color: hexToColor('#9C9C9C'), fontSize: 16.0),
+                        TextStyle(color: hexToColor('#9C9C9C'), fontSize: 16.0),
                   ),
                 ],
               ),
@@ -1122,7 +1179,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   GestureDetector(
                     onTap: () async {
                       await handleVote('greenFlag');
-                  },
+                    },
                     child: CircleAvatar(
                       radius: 30,
                       backgroundColor: hexToColor('#F5F5F5'),
@@ -1137,7 +1194,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   Text(
                     '${_product.greenFlags}',
                     style:
-                    TextStyle(color: hexToColor('#9C9C9C'), fontSize: 16.0),
+                        TextStyle(color: hexToColor('#9C9C9C'), fontSize: 16.0),
                   ),
                 ],
               ),

@@ -2,6 +2,7 @@ import 'dart:ffi';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/screens/store_owner_screens/add_product_screen.dart';
@@ -20,6 +21,8 @@ class ProductCategoriesScreen extends StatefulWidget {
 class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
   TextEditingController _newCategoryController = TextEditingController();
   List<StoreCategoryModel> categories = [];
+  List<StoreCategoryModel> selectedCategories = [];
+  bool isSelectionMode = false;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
@@ -70,6 +73,61 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
 
   Future<void> _refreshCategories() async {
     await _loadCategories();
+  }
+
+  void _toggleSelectionMode() {
+    setState(() {
+      isSelectionMode = !isSelectionMode;
+      if (!isSelectionMode) {
+        selectedCategories.clear();
+      }
+    });
+  }
+
+  void _toggleCategorySelection(StoreCategoryModel category) {
+    setState(() {
+      if (selectedCategories.contains(category)) {
+        selectedCategories.remove(category);
+      } else {
+        selectedCategories.add(category);
+      }
+    });
+  }
+
+  Future<void> _deleteSelectedCategories() async {
+    try {
+      for (StoreCategoryModel category in selectedCategories) {
+        // Delete category document
+        await _firestore
+            .collection('Stores')
+            .doc(widget.storeId)
+            .collection('categories')
+            .doc(category.id)
+            .delete();
+
+        // Remove category from products
+        QuerySnapshot productsSnapshot = await _firestore
+            .collection('products')
+            .where('storeId', isEqualTo: widget.storeId)
+            .where('storeCategory', isEqualTo: category.id)
+            .get();
+
+        WriteBatch batch = _firestore.batch();
+        for (DocumentSnapshot doc in productsSnapshot.docs) {
+          batch.update(doc.reference, {'storeCategory': ''});
+        }
+        await batch.commit();
+      }
+
+      // Refresh the category list
+      await _refreshCategories();
+      _toggleSelectionMode();
+    } catch (e) {
+      print('Error deleting categories: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to delete categories. Please try again.')),
+      );
+    }
   }
 
   @override
@@ -140,7 +198,9 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                               );
                             },
                             child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              height: 70.h,
+                              width: 240.w,
+                              alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: Theme.of(context).primaryColor,
                                 borderRadius: BorderRadius.circular(100),
@@ -148,7 +208,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                               child: Text(
                                 'View All Products',
                                 style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 16.sp,
                                     fontFamily: 'Poppins',
                                     fontWeight: FontWeight.w500,
                                     color: hexToColor('#FFFFFF')),
@@ -248,6 +308,39 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                       ),
                     ),
                     SizedBox(height: 40),
+                    if (isSelectionMode)
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Row(
+                          children: [
+                            Text(
+                              '${selectedCategories.length} selected',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Spacer(),
+                            TextButton(
+                              onPressed: _deleteSelectedCategories,
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(Colors.red),
+                                foregroundColor: MaterialStateProperty.all(Colors.white),
+                              ),
+                              child: Text('Delete'),
+                            ),
+                            SizedBox(width: 8.0),
+                            TextButton(
+                              onPressed: _toggleSelectionMode,
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(Colors.grey),
+                                foregroundColor: MaterialStateProperty.all(Colors.white),
+                              ),
+                              child: Text('Cancel'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    SizedBox(height: 20),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
@@ -275,6 +368,29 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                         (context, index) => CategoryTile(
                       category: categories[index],
                       storeId: widget.storeId,
+                      isSelectionMode: isSelectionMode,
+                      isSelected: selectedCategories.contains(categories[index]),
+                      onTap: () {
+                        if (isSelectionMode) {
+                          _toggleCategorySelection(categories[index]);
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CategoryProductsScreen(
+                                category: categories[index],
+                                storeId: widget.storeId,
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      onLongPress: () {
+                        if (!isSelectionMode) {
+                          _toggleSelectionMode();
+                          _toggleCategorySelection(categories[index]);
+                        }
+                      },
                     ),
                     childCount: categories.length,
                   ),
@@ -292,6 +408,10 @@ class CategoryTile extends StatelessWidget {
   final StoreCategoryModel category;
   final String storeId;
   final Color color;
+  final bool isSelectionMode;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
 
   static final List<Color> colorList = [
     Color(0xFFDDF1EF),
@@ -305,19 +425,17 @@ class CategoryTile extends StatelessWidget {
   CategoryTile({
     required this.category,
     required this.storeId,
+    required this.isSelectionMode,
+    required this.isSelected,
+    required this.onTap,
+    required this.onLongPress,
   }) : color = colorList[Random().nextInt(colorList.length)];
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => CategoryProductsScreen(category: category, storeId: storeId),
-          ),
-        );
-      },
+      onTap: onTap,
+      onLongPress: onLongPress,
       child: Container(
         height: 100,
         width: 125,
@@ -325,6 +443,7 @@ class CategoryTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(12),
+          border: isSelected ? Border.all(color: Colors.blue, width: 2) : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -362,29 +481,30 @@ class CategoryTile extends StatelessWidget {
                     ),
                   ],
                 ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddProductScreen(category: category, storeId: storeId),
+                if (!isSelectionMode)
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddProductScreen(category: category, storeId: storeId),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(left: 10.0),
+                      padding: EdgeInsets.all(6.0),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(6.0),
                       ),
-                    );
-                  },
-                  child: Container(
-                    margin: EdgeInsets.only(left: 10.0),
-                    padding: EdgeInsets.all(6.0),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor,
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
-                    child: Icon(
-                      Icons.add,
-                      color: Colors.white,
-                      size: 14.0,
+                      child: Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 14.0,
+                      ),
                     ),
                   ),
-                ),
               ],
             ),
           ],

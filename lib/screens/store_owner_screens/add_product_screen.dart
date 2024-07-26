@@ -169,8 +169,6 @@ class _AddProductScreenState extends State<AddProductScreen> {
         ),
       ),
     );
-
-    _clearForm();
   }
 
   String _generateSku(String productName, Map<String, dynamic> attributes) {
@@ -585,7 +583,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                         }
                                         return null;
                                       },
-                                      onFieldSubmitted: (_) =>
+                                      onChanged: (_) =>
                                           _calculateValues(),
                                     ),
                                   ),
@@ -643,7 +641,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                         }
                                         return null;
                                       },
-                                      onFieldSubmitted: (_) =>
+                                      onChanged: (_) =>
                                           _calculateValues(),
                                     ),
                                   ),
@@ -702,7 +700,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                         }
                                         return null;
                                       },
-                                      onFieldSubmitted: (_) =>
+                                      onChanged: (_) =>
                                           _calculateValues(),
                                     ),
                                   ),
