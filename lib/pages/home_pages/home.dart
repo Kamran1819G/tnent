@@ -461,15 +461,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ],
           ),
         ),
-        SizedBox(height: 20.0),
+        SizedBox(height: 30.h),
         GridView.builder(
           shrinkWrap: true,
           physics: NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
-            crossAxisSpacing: 8.0,
-            mainAxisSpacing: 8.0,
+            crossAxisSpacing: 12.w,
+            mainAxisSpacing: 12.h,
             childAspectRatio: 3 / 4,
           ),
           itemCount: categories.length,
@@ -479,25 +479,25 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             );
           },
         ),
-        SizedBox(height: 20.0),
+        SizedBox(height: 30.h),
         // Featured Section
         Padding(
-          padding: const EdgeInsets.only(left: 12.0),
+          padding: EdgeInsets.only(left: 16.w),
           child: Wrap(
             children: List.generate(6, (index) {
               return Container(
-                margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                margin: EdgeInsets.symmetric(horizontal: 6.w),
+                padding: EdgeInsets.symmetric(horizontal: 4.w),
                 child: ChoiceChip(
                   label: Text(_getTabLabel(index)),
                   labelStyle: TextStyle(
-                    fontSize: 12.0,
+                    fontSize: 19.sp,
                     color: _selectedIndex == index
                         ? Colors.white
                         : hexToColor("#343434"),
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50.0),
+                    borderRadius: BorderRadius.circular(50.r),
                     side: BorderSide(
                       color: hexToColor('#343434'),
                     ),
@@ -518,19 +518,19 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
         ),
 
-        SizedBox(height: 40.0),
+        SizedBox(height: 50.h),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
             'Featured',
             style: TextStyle(
               color: hexToColor('#343434'),
-              fontSize: 22.0,
+              fontSize: 35.sp,
             ),
           ),
         ),
 
-        SizedBox(height: 20.0),
+        SizedBox(height: 30.h),
 
         Container(
           height: 200.0,
@@ -596,29 +596,28 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
         ),
 
-        SizedBox(height: 40.0),
+        SizedBox(height: 50.h),
 
         // Feature Store Section
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          padding: EdgeInsets.symmetric(horizontal: 18.w),
           child: Row(
             children: [
               Text(
                 'Featured Stores',
                 style: TextStyle(
                   color: hexToColor('#343434'),
-                  fontSize: 22.0,
+                  fontSize: 35.sp,
                 ),
               )
             ],
           ),
         ),
 
-        SizedBox(height: 30.0),
+        SizedBox(height: 30.h),
 
-        Container(
-          height: 125.0,
-          padding: EdgeInsets.only(left: 8.0),
+        SizedBox(
+          height: 200.h,
           child: ListView(
             scrollDirection: Axis.horizontal,
             children: [
@@ -632,31 +631,30 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => StoresScreen()));
                 },
-                child: Container(
-                  padding: EdgeInsets.all(12.0),
+                child:  Container(
+                  padding: EdgeInsets.all(18.w),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        height:120.h,
-                        width: 120.h,
+                        height: 120.h,
+                        width: 120.w,
                         decoration: BoxDecoration(
-                          color: hexToColor('#F5F5F5'),
-                          borderRadius: BorderRadius.circular(18.0),
+                          color: Color(0xFFF5F5F5),
+                          borderRadius: BorderRadius.circular(23.r),
                         ),
-                        child: Center(
+                        child: const Center(
                           child: Icon(
                             Icons.arrow_forward_ios,
-                            color: hexToColor('#B5B5B5'),
+                            color: Color(0xFFB5B5B5),
                           ),
                         ),
                       ),
                       SizedBox(height: 8.h),
-                      Expanded(
-                        child: Text(
-                          'View All',
-                          style: TextStyle(fontSize: 16.sp),
-                        ),
+                      Text(
+                        'View All',
+                        style: TextStyle(fontSize: 16.sp),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -701,7 +699,7 @@ class StoreTile extends StatelessWidget {
         );
       },
       child: Container(
-        padding: EdgeInsets.all(12.0),
+        padding: EdgeInsets.all(18.w),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

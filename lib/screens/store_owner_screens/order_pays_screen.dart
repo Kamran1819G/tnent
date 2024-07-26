@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -7,13 +8,101 @@ import 'package:tnennt/screens/store_owner_screens/create_coupon_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/payments_screen.dart';
 
 class OrderAndPaysScreen extends StatefulWidget {
-  const OrderAndPaysScreen({super.key});
+  final String storeId;
+
+  OrderAndPaysScreen({required this.storeId});
 
   @override
   State<OrderAndPaysScreen> createState() => _OrderAndPaysScreenState();
 }
 
 class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
+  int ongoingOrdersCount = 0;
+  int deliveredOrdersCount = 0;
+  int cancelledOrdersCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchOrderCounts();
+  }
+
+  Future<void> _fetchOrderCounts() async {
+    final ordersRef = FirebaseFirestore.instance.collection('Orders');
+
+    // Query for ongoing orders
+    final ongoingSnapshot = await ordersRef
+        .where('storeId', isEqualTo: widget.storeId)
+        .where('status.ordered', isNull: false)
+        .get();
+
+    // Query for delivered orders
+    final deliveredSnapshot = await ordersRef
+        .where('storeId', isEqualTo: widget.storeId)
+        .where('status.delivered', isNull: false)
+        .get();
+
+    // Query for cancelled orders
+    final cancelledSnapshot = await ordersRef
+        .where('storeId', isEqualTo: widget.storeId)
+        .where('status.cancelled', isNull: false)
+        .get();
+
+    print('Ongoing Orders: ${ongoingSnapshot.docs.length}');
+    print('Delivered Orders: ${deliveredSnapshot.docs.length}');
+    print('Cancelled Orders: ${cancelledSnapshot.docs.length}');
+
+    setState(() {
+      ongoingOrdersCount = ongoingSnapshot.docs.length;
+      deliveredOrdersCount = deliveredSnapshot.docs.length;
+      cancelledOrdersCount = cancelledSnapshot.docs.length;
+    });
+  }
+
+  Future<List<QueryDocumentSnapshot>> _fetchOrders(String status) async {
+    final ordersRef = FirebaseFirestore.instance.collection('Orders');
+    QuerySnapshot querySnapshot;
+
+    switch (status) {
+      case 'ordered':
+        querySnapshot = await ordersRef
+            .where('storeId', isEqualTo: widget.storeId)
+            .where('status.ordered', isNull: false)
+            .get();
+        break;
+      case 'delivered':
+        querySnapshot = await ordersRef
+            .where('storeId', isEqualTo: widget.storeId)
+            .where('status.delivered', isNull: false)
+            .get();
+        break;
+      case 'cancelled':
+        querySnapshot = await ordersRef
+            .where('storeId', isEqualTo: widget.storeId)
+            .where('status.cancelled', isNull: false)
+            .get();
+        break;
+      default:
+        throw ArgumentError('Invalid status: $status');
+    }
+
+    return querySnapshot.docs;
+  }
+
+  void _navigateToOrdersScreen(String orderType) async {
+    final orders = await _fetchOrders(orderType.toLowerCase() == 'ongoing'
+        ? 'ordered'
+        : orderType.toLowerCase() == 'delivered'
+            ? 'delivered'
+            : 'cancelled');
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => OrdersScreen(orderType: orderType, orders: orders),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -179,407 +268,104 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
-              // Ongoing Orders
               GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => OrdersScreen(orderType: 'Ongoing'),
-                    ),
-                  );
-                },
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 8.0),
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: hexToColor('#F3F3F3'),
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '100',
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Ongoing Orders',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            'Products that are out for delivery',
-                            style: TextStyle(
-                              color: hexToColor('#9B9B9B'),
-                              fontSize: 10,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.arrow_forward_ios,
-                          color: hexToColor('#9B9B9B'),
-                          size: 14,
-                        ),
-                      ),
-                    ],
-                  ),
+                onTap: () => _navigateToOrdersScreen('Ongoing'),
+                child: _buildOrderCard(
+                  'Ongoing Orders',
+                  'Products that are out for delivery',
+                  ongoingOrdersCount,
                 ),
               ),
               SizedBox(height: 10),
               // Delivered Orders
               GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          OrdersScreen(orderType: 'Delivered'),
-                    ),
-                  );
-                },
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 8.0),
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: hexToColor('#F3F3F3'),
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '100',
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Delivered Orders',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            'Products that are delivered to the customer',
-                            style: TextStyle(
-                              color: hexToColor('#9B9B9B'),
-                              fontSize: 10,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.arrow_forward_ios,
-                          color: hexToColor('#9B9B9B'),
-                          size: 14,
-                        ),
-                      ),
-                    ],
-                  ),
+                onTap: () => _navigateToOrdersScreen('Delivered'),
+                child: _buildOrderCard(
+                  'Delivered Orders',
+                  'Products that are delivered to the customer',
+                  deliveredOrdersCount,
                 ),
               ),
               SizedBox(height: 10),
               // Cancelled Orders
               GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          OrdersScreen(orderType: 'Cancelled'),
-                    ),
-                  );
-                },
-                child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 8.0),
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  decoration: BoxDecoration(
-                    color: hexToColor('#F3F3F3'),
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '100',
-                            style: TextStyle(
-                              fontSize: 20,
-                              color: Theme.of(context).primaryColor,
-                            ),
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            'Cancelled Orders',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          SizedBox(height: 5),
-                          Text(
-                            'Products that are not delivered ',
-                            style: TextStyle(
-                              color: hexToColor('#9B9B9B'),
-                              fontSize: 10,
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        child: Icon(
-                          Icons.arrow_forward_ios,
-                          color: hexToColor('#9B9B9B'),
-                          size: 14,
-                        ),
-                      ),
-                    ],
-                  ),
+                onTap: () => _navigateToOrdersScreen('Cancelled'),
+                child: _buildOrderCard(
+                  'Cancelled Orders',
+                  'Products that are not delivered',
+                  cancelledOrdersCount,
                 ),
               ),
-
-              SizedBox(height: 40),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Text(
-                  'Orders Matrix',
-                  style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontSize: 18.0,
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 8.0),
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: hexToColor('#AFAFAF')),
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Confirmed Orders',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: hexToColor('#272822'),
-                              ),
-                            ),
-                            Text(
-                              'Total confirmed order from your store',
-                              style: TextStyle(
-                                color: hexToColor('#B0B0B0'),
-                                fontSize: 8,
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              '400',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                            Text(
-                              'Numbers',
-                              style: TextStyle(
-                                color: hexToColor('#B0B0B0'),
-                                fontSize: 8,
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  '₹',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: hexToColor('#272822'),
-                                  ),
-                                ),
-                                Text(
-                                  '400k',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              'Amount',
-                              style: TextStyle(
-                                color: hexToColor('#B0B0B0'),
-                                fontSize: 8,
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 40),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Cancelled Orders',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: hexToColor('#272822'),
-                              ),
-                            ),
-                            Text(
-                              'Total cancelled order from your store',
-                              style: TextStyle(
-                                color: hexToColor('#B0B0B0'),
-                                fontSize: 8,
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              '80',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            ),
-                            Text(
-                              'Numbers',
-                              style: TextStyle(
-                                color: hexToColor('#B0B0B0'),
-                                fontSize: 8,
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  '₹',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: hexToColor('#272822'),
-                                  ),
-                                ),
-                                Text(
-                                  '80k',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              'Amount',
-                              style: TextStyle(
-                                color: hexToColor('#B0B0B0'),
-                                fontSize: 8,
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 40),
             ],
           ),
         ),
       ),
     );
   }
+
+  Widget _buildOrderCard(String title, String subtitle, int count) {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: hexToColor('#F3F3F3'),
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$count',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Theme.of(context).primaryColor,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(height: 5),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: hexToColor('#9B9B9B'),
+                  fontSize: 10,
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          CircleAvatar(
+            backgroundColor: Colors.white,
+            child: Icon(
+              Icons.arrow_forward_ios,
+              color: hexToColor('#9B9B9B'),
+              size: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
-class OrdersScreen extends StatefulWidget {
+class OrdersScreen extends StatelessWidget {
   String orderType;
+  List<QueryDocumentSnapshot> orders;
 
-  OrdersScreen({super.key, required this.orderType});
+  OrdersScreen({required this.orderType, required this.orders});
 
-  @override
-  State<OrdersScreen> createState() => _OrdersScreenState();
-}
-
-class _OrdersScreenState extends State<OrdersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -650,14 +436,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    '${widget.orderType} Orders',
+                    '$orderType Orders',
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontSize: 18.0,
                     ),
                   ),
                   Text(
-                    '5',
+                    '${orders.length}',
                     style: TextStyle(
                       color: Theme.of(context).primaryColor,
                       fontSize: 18.0,
@@ -668,55 +454,38 @@ class _OrdersScreenState extends State<OrdersScreen> {
             ),
             SizedBox(height: 20),
             Expanded(
-              child: (widget.orderType == 'Ongoing')
-                  ? ListView.builder(
-                      itemCount: 5,
-                      itemBuilder: (context, index) => OrderCard(
-                        productName: 'Nikon Camera',
-                        productImage: 'assets/product_image.png',
-                        orderId: '123456',
-                        productPrice: 1000,
-                        uniqueCode: 'HFJ98',
-                        orderStatus: OrderStatus.Ongoing,
-                        middlemanName: 'Mr. Kamran Khan',
-                        middlemanPhone: '1234567890',
-                        deliveryAddress: 'Taloja Phase 1, Navi Mumbai',
-                      ),
-                    )
-                  : (widget.orderType == 'Delivered')
-                      ? ListView.builder(
-                          itemCount: 5,
-                          itemBuilder: (context, index) => OrderCard(
-                            productName: 'Nikon Camera',
-                            productImage: 'assets/product_image.png',
-                            orderId: '123456',
-                            productPrice: 1000,
-                            uniqueCode: 'HFJ98',
-                            orderStatus: OrderStatus.Delivered,
-                            middlemanName: 'Mr. Kamran Khan',
-                            middlemanPhone: '1234567890',
-                            deliveryAddress: 'Taloja Phase 1, Navi Mumbai',
-                          ),
-                        )
-                      : ListView.builder(
-                          itemCount: 5,
-                          itemBuilder: (context, index) => OrderCard(
-                            productName: 'Nikon Camera',
-                            productImage: 'assets/product_image.png',
-                            orderId: '123456',
-                            productPrice: 1000,
-                            orderStatus: OrderStatus.Cancelled,
-                            middlemanName: 'Mr. Kamran Khan',
-                            middlemanPhone: '1234567890',
-                            cancelReason:
-                                'Customer not available at the address',
-                          ),
-                        ),
+              child: ListView.builder(
+                itemCount: orders.length,
+                itemBuilder: (context, index) {
+                  final order = orders[index].data() as Map<String, dynamic>;
+                  return OrderCard(
+                    productName: order['productName'],
+                    productImage: order['productImage'],
+                    orderId: order['orderId'],
+                    productPrice: order['priceDetails']['price'],
+                    uniqueCode: order['pickupCode'],
+                    orderStatus: _getOrderStatus(order),
+                    middleman: order['providedMiddleman'],
+                    shippingAddress: '${order['shippingAddress']['city']}, ${order['shippingAddress']['zip']}, ${order['shippingAddress']['state']}',
+                    cancelReason: order['status']['cancelled']?['message'],
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  OrderStatus _getOrderStatus(Map<String, dynamic> order) {
+    if (order['status']['cancelled'] != null) {
+      return OrderStatus.Cancelled;
+    } else if (order['status']['delivered'] != null) {
+      return OrderStatus.Delivered;
+    } else {
+      return OrderStatus.Ongoing;
+    }
   }
 }
 
@@ -729,9 +498,8 @@ class OrderCard extends StatelessWidget {
   final double productPrice;
   final String? uniqueCode;
   final OrderStatus orderStatus;
-  final String middlemanName;
-  final String middlemanPhone;
-  final String? deliveryAddress;
+  final Map<String, dynamic> middleman;
+  final String? shippingAddress;
   final String? cancelReason;
 
   OrderCard({
@@ -741,9 +509,8 @@ class OrderCard extends StatelessWidget {
     required this.productPrice,
     this.uniqueCode,
     required this.orderStatus,
-    required this.middlemanName,
-    required this.middlemanPhone,
-    this.deliveryAddress,
+    required this.middleman,
+    this.shippingAddress,
     this.cancelReason,
   });
 
@@ -769,7 +536,7 @@ class OrderCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),
                       image: DecorationImage(
-                        image: AssetImage(productImage),
+                        image: NetworkImage(productImage),
                         fit: BoxFit.fill,
                       ),
                     ),
@@ -836,7 +603,7 @@ class OrderCard extends StatelessWidget {
                         ),
                         SizedBox(height: 6),
                         Text(
-                          middlemanName,
+                          middleman['name'] ?? 'Yet to assign',
                           style: TextStyle(
                             color: hexToColor('#878787'),
                             fontWeight: FontWeight.w500,
@@ -844,7 +611,7 @@ class OrderCard extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          middlemanPhone,
+                          middleman['phone'] ?? 'Yet to assign',
                           style: TextStyle(
                             color: hexToColor('#878787'),
                             fontWeight: FontWeight.w500,
@@ -883,7 +650,7 @@ class OrderCard extends StatelessWidget {
                     ),
                     SizedBox(width: 8),
                     Text(
-                      deliveryAddress ?? 'Not Available',
+                      shippingAddress ?? 'Not Available',
                       style: TextStyle(
                         color: hexToColor('#878787'),
                         fontFamily: 'Poppins',

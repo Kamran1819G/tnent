@@ -968,7 +968,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            OrderAndPaysScreen(),
+                                            OrderAndPaysScreen(storeId: widget.store.storeId),
                                       ),
                                     );
                                   },
