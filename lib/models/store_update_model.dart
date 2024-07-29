@@ -3,14 +3,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class StoreUpdateModel {
   final String updateId;
   final String storeId;
-  final List<String> imageUrls;
+  final String storeName;
+  final String imageUrl;
   final Timestamp createdAt;
   final Timestamp expiresAt;
 
   StoreUpdateModel({
     required this.updateId,
     required this.storeId,
-    required this.imageUrls,
+    required this.storeName,
+    required this.imageUrl,
     required this.createdAt,
     required this.expiresAt,
   });
@@ -20,7 +22,8 @@ class StoreUpdateModel {
     return StoreUpdateModel(
       updateId: doc.id,
       storeId: data['storeId'] ?? '',
-      imageUrls: List<String>.from(data['imageUrls'] ?? []),
+      storeName: data['storeName'] ?? '',
+      imageUrl: data['imageUrl'] ?? '',
       createdAt: data['createdAt'] ?? Timestamp.now(),
       expiresAt: data['expiresAt'] ?? Timestamp.now(),
     );
@@ -29,7 +32,8 @@ class StoreUpdateModel {
   Map<String, dynamic> toFirestore() {
     return {
       'storeId': storeId,
-      'imageUrls': imageUrls,
+      'storeName': storeName,
+      'imageUrl': imageUrl,
       'createdAt': createdAt,
       'expiresAt': expiresAt,
     };

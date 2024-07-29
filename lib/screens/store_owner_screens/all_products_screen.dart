@@ -55,14 +55,20 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
       batch.update(storeRef, {'totalProducts': FieldValue.increment(-1)});
 
       // Remove product reference from category
-      final categoryRef = FirebaseFirestore.instance
+      final categoryQuerySnapshot = await FirebaseFirestore.instance
           .collection('Stores')
           .doc(widget.storeId)
           .collection('categories')
-          .doc(product.storeCategory);
-      batch.update(categoryRef, {
-        'productIds': FieldValue.arrayRemove([product.productId])
-      });
+          .where('name', isEqualTo: product.storeCategory)
+          .get();
+
+      if (categoryQuerySnapshot.docs.isNotEmpty) {
+        final categoryDoc = categoryQuerySnapshot.docs.first;
+        batch.update(categoryDoc.reference, {
+          'productIds': FieldValue.arrayRemove([product.productId]),
+          'totalProducts': FieldValue.increment(-1),
+        });
+      }
 
       // Commit the batch
       await batch.commit();
@@ -214,8 +220,9 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                   padding: EdgeInsets.symmetric(horizontal: 8.0),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 0.8,
                   ),
                   itemCount: products.length,
                   itemBuilder: (context, index) {

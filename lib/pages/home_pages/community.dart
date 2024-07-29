@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/models/community_post_model.dart';
@@ -55,8 +56,9 @@ class _CommunityState extends State<Community> {
       child: Column(
         children: <Widget>[
           Container(
-            height: 100,
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            height: 100.h,
+            margin: EdgeInsets.only(top: 20.h, bottom: 20.h),
+            padding: EdgeInsets.symmetric(horizontal: 24.w),
             child: Row(
               children: [
                 Row(
@@ -65,14 +67,14 @@ class _CommunityState extends State<Community> {
                       'Community'.toUpperCase(),
                       style: TextStyle(
                         color: hexToColor('#1E1E1E'),
-                        fontSize: 24.0,
+                        fontSize: 35.sp,
                         letterSpacing: 1.5,
                       ),
                     ),
                     Text(
                       ' •',
                       style: TextStyle(
-                        fontSize: 28.0,
+                        fontSize: 35.sp,
                         color: hexToColor('#FF0000'),
                       ),
                     ),
@@ -81,11 +83,11 @@ class _CommunityState extends State<Community> {
                 Spacer(),
                 if (_hasStoreId)
                   Container(
-                    margin: EdgeInsets.all(8.0),
+                    margin: EdgeInsets.all(12.w),
                     child: CircleAvatar(
                       backgroundColor: hexToColor('#F5F5F5'),
                       child: IconButton(
-                        icon: Icon(Icons.create_outlined, color: Colors.black),
+                        icon: Icon(Icons.create_outlined, color: Colors.black, size: 30.sp),
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -223,23 +225,23 @@ class _CommunityPostState extends State<CommunityPost> {
 
   Widget _buildPostContent(String userName, String userProfileImage) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(24.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildUserInfo(userName, userProfileImage),
-          SizedBox(height: 16.0),
+          SizedBox(height: 24.h),
           Text(
             widget.post.content,
             style: TextStyle(
-              color: Colors.black,
+              color: hexToColor('#737373'),
               fontFamily: 'Gotham',
-              fontSize: 12.0,
+              fontSize: 20.sp,
             ),
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 10.h),
           if (widget.post.images.isNotEmpty) _buildImageGallery(),
-          SizedBox(height: 10),
+          SizedBox(height: 10.h),
           _buildInteractionBar(),
         ],
       ),
@@ -251,22 +253,22 @@ class _CommunityPostState extends State<CommunityPost> {
       children: [
         CircleAvatar(
           backgroundImage: CachedNetworkImageProvider(userProfileImage),
-          radius: 20.0,
+          radius: 33.w,
         ),
-        const SizedBox(width: 16.0),
+        SizedBox(width: 22.w),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 userName,
-                style: const TextStyle(fontSize: 18.0),
+                style: TextStyle(fontSize: 30.sp),
               ),
               Text(
                 _formatTimestamp(widget.post.createdAt),
                 style: TextStyle(
-                  color: hexToColor('#9C9C9C'),
-                  fontSize: 10.0,
+                  color: hexToColor('#C1C1C1'),
+                  fontSize: 15.sp,
                 ),
               ),
             ],
@@ -275,11 +277,12 @@ class _CommunityPostState extends State<CommunityPost> {
         GestureDetector(
           onTap: () => _showMoreOptions(),
           child: CircleAvatar(
+            radius: 25.w,
             backgroundColor: hexToColor('#F5F5F5'),
             child: Icon(
               Icons.more_horiz,
               color: hexToColor('#BEBEBE'),
-              size: 20,
+              size: 26.sp,
             ),
           ),
         ),
@@ -319,10 +322,10 @@ class _CommunityPostState extends State<CommunityPost> {
         GestureDetector(
           onTap: _toggleLike,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 6.h),
             decoration: BoxDecoration(
               border: Border.all(color: hexToColor('#BEBEBE')),
-              borderRadius: BorderRadius.circular(50.0),
+              borderRadius: BorderRadius.circular(25.r),
             ),
             child: Row(
               children: [
@@ -335,12 +338,13 @@ class _CommunityPostState extends State<CommunityPost> {
                     _isLiked ? Icons.favorite : Icons.favorite_border,
                     key: ValueKey<bool>(_isLiked),
                     color: _isLiked ? Colors.red : hexToColor('#BEBEBE'),
+                    size: 30.sp,
                   ),
                 ),
-                const SizedBox(width: 8.0),
+                SizedBox(width: 12.w),
                 Text(
                   '$_likeCount',
-                  style: TextStyle(color: hexToColor('#989797'), fontSize: 12.0),
+                  style: TextStyle(color: hexToColor('#989797'), fontSize: 17.sp),
                 ),
               ],
             ),
@@ -348,28 +352,33 @@ class _CommunityPostState extends State<CommunityPost> {
         ),
         Spacer(),
         if (widget.post.productLink?.isNotEmpty ?? false)
-          Chip(
-            backgroundColor: hexToColor('#EDEDED'),
-            side: BorderSide.none,
-            label: Text(
-              '${widget.post.productLink!}',
-              style: TextStyle(
-                color: hexToColor('#B4B4B4'),
-                fontFamily: 'Gotham',
-                fontWeight: FontWeight.w500,
-                fontSize: 12.0,
+          SizedBox(
+            height: 50.h,
+            width: 350.w,
+            child: Chip(
+              backgroundColor: hexToColor('#EDEDED'),
+              side: BorderSide.none,
+              label: Text(
+                '${widget.post.productLink!}',
+                style: TextStyle(
+                  color: hexToColor('#B4B4B4'),
+                  fontFamily: 'Gotham',
+                  fontWeight: FontWeight.w500,
+                  fontSize: 18.sp,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            avatar: Icon(
-              Icons.link_outlined,
-              color: hexToColor('#B4B4B4'),
+              avatar: Icon(
+                Icons.link_outlined,
+                color: hexToColor('#B4B4B4'),
+                size: 24.sp,
+              ),
             ),
           ),
         Spacer(),
         IconButton(
-          icon: Icon(Icons.ios_share_outlined),
+          icon: Icon(Icons.ios_share_outlined, size: 30.sp,),
           onPressed: () => _sharePost(),
         ),
       ],

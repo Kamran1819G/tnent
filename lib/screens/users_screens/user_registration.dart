@@ -8,6 +8,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:pinput/pinput.dart';
 import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/services/firebase/firebase_auth_service.dart';
 import 'package:tnennt/helpers/color_utils.dart';
@@ -27,6 +28,7 @@ class _UserRegistrationState extends State<UserRegistration> {
   late ConfettiController _confettiController;
   int currentPage = 0;
   bool value = false;
+  bool _isPhoneNumberUnique = true;
   bool isButtonEnabled = false;
   late UserModel _userModel;
 
@@ -34,9 +36,7 @@ class _UserRegistrationState extends State<UserRegistration> {
   TextEditingController _firstNameController = TextEditingController();
   TextEditingController _lastNameController = TextEditingController();
   TextEditingController _locationController = TextEditingController();
-
-  final _otpControllers = List.generate(4, (_) => TextEditingController());
-  final _focusNodes = List.generate(4, (_) => FocusNode());
+  TextEditingController _otpController = TextEditingController();
 
   final user = FirebaseAuth.instance.currentUser!;
 
@@ -95,12 +95,24 @@ class _UserRegistrationState extends State<UserRegistration> {
       case 1:
         return _validateOTP();
       case 2:
-        return _validateName(_firstNameController.text, _lastNameController.text);
+        return _validateName(
+            _firstNameController.text, _lastNameController.text);
       case 3:
         return _validateLocation(_locationController.text);
       default:
         return true;
     }
+  }
+
+  Future<void> _validatePhoneNumberUnique(String phone) async{
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .where('phoneNumber', isEqualTo: phone)
+        .get();
+
+    setState(() {
+      _isPhoneNumberUnique = querySnapshot.docs.isEmpty;
+    });
   }
 
   bool _validatePhoneNumber(String phone) {
@@ -112,8 +124,7 @@ class _UserRegistrationState extends State<UserRegistration> {
   bool _validateOTP() {
     // Assuming OTP is 4 digits
     final RegExp otpRegex = RegExp(r'^\d{4}$');
-    String otp = _otpControllers.map((controller) => controller.text).join();
-    return otpRegex.hasMatch(otp);
+    return otpRegex.hasMatch(_otpController.text);
   }
 
   bool _validateName(String firstName, String lastName) {
@@ -124,7 +135,9 @@ class _UserRegistrationState extends State<UserRegistration> {
 
   bool _validateLocation(String location) {
     // Location should not be empty and be between 3 and 100 characters
-    return location.isNotEmpty && location.length >= 3 && location.length <= 100;
+    return location.isNotEmpty &&
+        location.length >= 3 &&
+        location.length <= 100;
   }
 
   void _showValidationError(String message) {
@@ -149,7 +162,8 @@ class _UserRegistrationState extends State<UserRegistration> {
           errorMessage = 'Please enter a valid 4-digit OTP.';
           break;
         case 2:
-          errorMessage = 'Please enter valid first and last names (2-50 characters, letters only).';
+          errorMessage =
+              'Please enter valid first and last names (2-50 characters, letters only).';
           break;
         case 3:
           errorMessage = 'Please enter a valid location (3-100 characters).';
@@ -161,75 +175,45 @@ class _UserRegistrationState extends State<UserRegistration> {
     }
   }
 
-  Future<void> _getCurrentLocation() async {
+  Future<String> getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
 
     // Check if location services are enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content:
-            Text('Location services are disabled. Please enable the services'),
-      ));
-      return;
+      return 'Location services are disabled.';
     }
 
-    // Check location permission
+    // Check for location permissions
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Location permissions are denied'),
-        ));
-        return;
+        return 'Location permissions are denied.';
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-            'Location permissions are permanently denied, we cannot request permissions.'),
-      ));
-      return;
+      return 'Location permissions are permanently denied.';
     }
 
-    // Get current position
-    try {
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+    // Get the current position
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
-      // Get place name from coordinates
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-        position.latitude,
-        position.longitude,
-      );
+    // Get the address from the coordinates
+    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
 
-      if (placemarks.isNotEmpty) {
-        Placemark place = placemarks[0];
-        String address =
-            "${place.locality}, ${place.administrativeArea}, ${place.country}";
-        setState(() {
-          _locationController.text = address;
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to get current location: $e'),
-      ));
+    if (placemarks.isNotEmpty) {
+      Placemark place = placemarks[0];
+      return '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
+    } else {
+      return 'No address available.';
     }
   }
 
   @override
   void dispose() {
-    for (var controller in _otpControllers) {
-      controller.dispose();
-    }
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
     super.dispose();
   }
 
@@ -250,10 +234,12 @@ class _UserRegistrationState extends State<UserRegistration> {
                   _confettiController.play();
                 }
                 if (page == 4) {
-                  // Start a timer of 10 seconds when the last page is reached
-                  Timer(Duration(seconds: 10), () {
+                  // Start a timer of 8 seconds when the last page is reached
+                  Timer(Duration(seconds: 7), () {
                     Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => WidgetTree()), // Navigate to the Home screen
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              WidgetTree()),
                     );
                   });
                 }
@@ -360,16 +346,20 @@ class _UserRegistrationState extends State<UserRegistration> {
                           letterSpacing: 2,
                         ),
                         decoration: InputDecoration(
-                            counterText: '',
-                            border: UnderlineInputBorder(
-                              borderSide: BorderSide(
-                                color: Theme.of(context).primaryColor,
-                              ),
+                          counterText: '',
+                          border: UnderlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Theme.of(context).primaryColor,
                             ),
+                          ),
                           isDense: true,
                         ),
                         maxLength: 10,
                         keyboardType: TextInputType.phone,
+                        onChanged: (value) {
+                          _validatePhoneNumber(value);
+                          _validatePhoneNumberUnique(value);
+                        },
                       ),
                     ),
                   ],
@@ -379,7 +369,16 @@ class _UserRegistrationState extends State<UserRegistration> {
                 bottom: 0,
                 child: GestureDetector(
                   onTap: () {
+                    if (_isPhoneNumberUnique) {
                       _proceedToNextPage();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Phone number already exists'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
                   },
                   child: CircleAvatar(
                     backgroundColor: Theme.of(context).primaryColor,
@@ -439,7 +438,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                 height: 285.h,
                 width: 515.w,
                 decoration: BoxDecoration(
-                  color: hexToColor('#F5F5F5'),
+                  color: hexToColorWithOpacity('#E1E1E1', 0.2),
                   border: Border.all(
                     color: hexToColor('#838383'),
                     strokeAlign: BorderSide.strokeAlignInside,
@@ -450,58 +449,67 @@ class _UserRegistrationState extends State<UserRegistration> {
                 padding: EdgeInsets.symmetric(horizontal: 50.w),
                 margin: EdgeInsets.only(bottom: 25.h),
                 child: Center(
-                  child: Wrap(
-                    spacing: 10.w,
-                    children: List.generate(
-                      _otpControllers.length,
-                      (index) {
-                        return Container(
-                          height: 50.h,
-                          width: 75.w,
-                          child: TextField(
-                            controller: _otpControllers[index],
-                            focusNode: _focusNodes[index],
-                            style: TextStyle(
-                              color: hexToColor('#636363'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 26.sp,
-                            ),
-                            textAlign: TextAlign.center,
-                            keyboardType: TextInputType.number,
-                            maxLength: 1,
-                            cursorColor: Theme.of(context).primaryColor,
-                            decoration: InputDecoration(
-                              counterText: '',
-                              border: UnderlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: hexToColor('#838383'),
-                                ),
-                              ),
-                              isDense: true,
-                            ),
-                            onChanged: (value) {
-                              if (value.isNotEmpty) {
-                                if (index + 1 < _otpControllers.length) {
-                                  FocusScope.of(context).nextFocus();
-                                } else {
-                                  setState(() {
-                                    isButtonEnabled = true;
-                                  });
-                                  FocusScope.of(context).unfocus();
-                                }
-                              } else {
-                                if (index > 0) {
-                                  FocusScope.of(context).previousFocus();
-                                  setState(() {
-                                    isButtonEnabled = false;
-                                  });
-                                }
-                              }
-                            },
+                  child: Pinput(
+                    length: 4,
+                    controller: _otpController,
+                    pinAnimationType: PinAnimationType.fade,
+                    onCompleted: (pin) {
+                      setState(() {
+                        isButtonEnabled = true;
+                      });
+                    },
+                    onChanged: (value) {
+                      setState(() {
+                        isButtonEnabled = value.length == 4;
+                      });
+                    },
+                    defaultPinTheme: PinTheme(
+                      width: 50.w,
+                      height: 50.h,
+                      textStyle: TextStyle(
+                        fontSize: 26.sp,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: hexToColor('#838383'),
+                            width: 2,
                           ),
-                        );
-                      },
+                        ),
+                      ),
+                    ),
+                    focusedPinTheme: PinTheme(
+                      width: 50.w,
+                      height: 50.h,
+                      textStyle: TextStyle(
+                        fontSize: 26.sp,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                    submittedPinTheme: PinTheme(
+                      width: 50.w,
+                      height: 50.h,
+                      textStyle: TextStyle(
+                        fontSize: 26.sp,
+                        color: Theme.of(context).primaryColor,
+                      ),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Theme.of(context).primaryColor,
+                            width: 2,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -634,7 +642,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                 color: Theme.of(context).primaryColor,
                 borderRadius: BorderRadius.circular(20.r),
               ),
-              child: Text('Continue', style: TextStyle(fontSize: 28.sp, color: Colors.white)),
+              child: Text('Continue',
+                  style: TextStyle(fontSize: 28.sp, color: Colors.white)),
             ),
           ),
         ),
@@ -700,8 +709,18 @@ class _UserRegistrationState extends State<UserRegistration> {
               ),
               suffixIcon: IconButton(
                 icon: Icon(Icons.my_location),
-                onPressed: () {
-                  _getCurrentLocation();
+                onPressed: () async {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Fetching your current location...'),
+                      duration: Duration(seconds: 30),
+                    ),
+                  );
+                  String location = await getCurrentLocation();
+                  setState(() {
+                    _locationController.text = location;
+                  });
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 },
               ),
               suffixIconColor: Theme.of(context).primaryColor,
@@ -731,7 +750,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content:
-                    Text('Please fill in all required fields correctly.'),
+                        Text('Please fill in all required fields correctly.'),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -745,7 +764,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                 color: Theme.of(context).primaryColor,
                 borderRadius: BorderRadius.circular(20.r),
               ),
-              child: Text('Continue', style: TextStyle(fontSize: 28.sp, color: Colors.white)),
+              child: Text('Continue',
+                  style: TextStyle(fontSize: 28.sp, color: Colors.white)),
             ),
           ),
         ),
@@ -863,24 +883,26 @@ class _UserRegistrationState extends State<UserRegistration> {
             ),
           ),
           Spacer(),
-          Container(
-            margin: EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey[100],
-              child: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                onPressed: () {
-                  if (currentPage == 0) {
-                    Navigator.pop(context);
-                  } else if (currentPage == 4) {
-                    Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (context) => WidgetTree()));
-                  } else {
-                    controller.jumpToPage(currentPage - 1);
-                  }
-                },
+          IconButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(
+                Colors.grey[100],
+              ),
+              shape: WidgetStateProperty.all(
+                CircleBorder(),
               ),
             ),
+            icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+            onPressed: () {
+              if (currentPage == 0) {
+                Navigator.pop(context);
+              } else if (currentPage == 4) {
+                Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => WidgetTree()));
+              } else {
+                controller.jumpToPage(currentPage - 1);
+              }
+            },
           ),
         ],
       ),

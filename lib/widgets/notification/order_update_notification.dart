@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 
 enum NotificationType { cancelled, delivered, refunded, orderplaced }
@@ -56,23 +57,23 @@ class OrderUpdateNotification extends StatelessWidget {
         break;
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
       child: ListTile(
         contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
         shape: RoundedRectangleBorder(
           side: BorderSide(color: hexToColor('#8F8F8F'), width: 1.0),
-          borderRadius: BorderRadius.circular(8.0),
+          borderRadius: BorderRadius.circular(12.r),
         ),
         leading: productImage != null
             ? Container(
-          height: 75,
-          width: 75,
+          height: 125.h,
+          width: 112.w,
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: BorderRadius.circular(4.r),
             child: Image.network(
               productImage!,
-              fit: BoxFit.cover,
+              fit: BoxFit.fill,
             ),
           ),
         )
@@ -86,43 +87,43 @@ class OrderUpdateNotification extends StatelessWidget {
                 Text(
                   statusText,
                   style: TextStyle(
-                    fontSize: 16.0,
+                    fontSize: 20.sp,
                     color: statusColor,
                   ),
                 ),
-                SizedBox(width: 8.0),
+                Spacer(),
                 Text(
                   "${time}",
                   style: TextStyle(
-                    fontSize: 8.0,
+                    fontSize: 12.sp,
                     color: hexToColor('#747474'),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 4.0),
+            SizedBox(height: 6.h),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
                   'Order ID:',
                   style: TextStyle(
-                    fontSize: 10.0,
+                    fontSize: 14.sp,
                     color: hexToColor('#343434'),
                   ),
                 ),
-                SizedBox(width: 4.0),
+                SizedBox(width: 6.w),
                 Text(
                   '#${orderId}',
                   style: TextStyle(
-                    fontSize: 10.0,
+                    fontSize: 14.sp,
                     fontFamily: 'Poppins',
                     color: hexToColor('#343434'),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 8.0),
+            SizedBox(height: 16.h),
           ],
         ),
         subtitle: (type == NotificationType.delivered ||
@@ -141,7 +142,7 @@ class OrderUpdateNotification extends StatelessWidget {
           style: TextStyle(
             color: hexToColor('#343434'),
             fontFamily: 'Poppins',
-            fontSize: 12.0,
+            fontSize: 18.sp,
           ),
         )
             : Row(
@@ -150,25 +151,25 @@ class OrderUpdateNotification extends StatelessWidget {
               productName!,
               style: TextStyle(
                 color: hexToColor('#343434'),
-                fontSize: 12.0,
+                fontSize: 17.sp,
               ),
             ),
             Spacer(),
             Container(
               padding:
-              EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+              EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
               decoration: BoxDecoration(
                 border: Border.all(
                   color: hexToColor('#343434'),
                   width: 1.0,
                 ),
-                borderRadius: BorderRadius.circular(8.0),
+                borderRadius: BorderRadius.circular(20.r),
               ),
               child: Text(
                 '₹${price}',
                 style: TextStyle(
                   color: hexToColor('#838383'),
-                  fontSize: 10.0,
+                  fontSize: 16.sp,
                 ),
               ),
             ),
@@ -178,16 +179,16 @@ class OrderUpdateNotification extends StatelessWidget {
             type == NotificationType.cancelled ||
             type == NotificationType.refunded)
             ? Container(
-          height: 40,
-          width: 40,
+          height: 50.h,
+          width: 50.w,
           decoration: BoxDecoration(
             color: backgroundColor,
-            borderRadius: BorderRadius.circular(8.0),
+            borderRadius: BorderRadius.circular(8.r),
           ),
           child: Icon(
             iconData,
             color: Colors.white,
-            size: 20.0,
+            size: 23.sp,
           ),
         )
             : null,

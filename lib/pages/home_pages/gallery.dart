@@ -13,6 +13,7 @@ import 'package:tnennt/pages/delivery_service_pages/deliver_product.dart';
 import 'package:tnennt/pages/gallery_pages/store_registration.dart';
 import 'package:tnennt/pages/gallery_pages/the_middlemen.dart';
 import 'package:tnennt/screens/store_owner_screens/my_store_profile_screen.dart';
+import 'package:tnennt/screens/webview_screen.dart';
 
 class Gallery extends StatefulWidget {
 
@@ -104,21 +105,29 @@ class _GalleryState extends State<Gallery> {
                     ],
                   ),
                   Spacer(),
-                  Container(
-                    height: 55.h,
-                    width: 155.w,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: hexToColor("#131312"),
-                      borderRadius: BorderRadius.circular(28.r),
-                    ),
-                    child: Text(
-                      'Contact Us',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16.sp,
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => WebViewScreen(url: 'https://tnennt-updated.vercel.app/contact', title: 'Contact Us')));
+                    },
+                    child: Container(
+                      height: 55.h,
+                      width: 155.w,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: hexToColor("#131312"),
+                        borderRadius: BorderRadius.circular(28.r),
+                      ),
+                      child: Text(
+                        'Contact Us',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16.sp,
+                        ),
                       ),
                     ),
                   )

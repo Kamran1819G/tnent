@@ -9,6 +9,7 @@ import 'package:tnennt/pages/home_pages/community.dart';
 import 'package:tnennt/pages/home_pages/gallery.dart';
 import 'package:tnennt/pages/home_pages/home.dart';
 import 'package:tnennt/models/user_model.dart';
+import 'package:tnennt/screens/users_screens/user_registration.dart';
 import 'package:tnennt/splash_screen.dart';
 
 import '../models/store_model.dart';
@@ -52,11 +53,31 @@ class _HomeScreenState extends State<HomeScreen> {
           .doc(user!.uid)
           .get();
 
-      if (mounted) {
-        setState(() {
-          currentUser = UserModel.fromFirestore(userDoc);
-          _isLoading = false;
-        });
+      if (userDoc.exists) {
+        currentUser = UserModel.fromFirestore(userDoc);
+
+        // Check if user registration is complete
+        if (currentUser!.phoneNumber == null || currentUser!.phoneNumber!.isEmpty ||
+            currentUser!.firstName.isEmpty || currentUser!.lastName.isEmpty) {
+          // Redirect to Registration Page
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => UserRegistration()),
+            );
+          }
+        } else {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      } else {
+        // Handle the case where the user document does not exist
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('User document does not exist')),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

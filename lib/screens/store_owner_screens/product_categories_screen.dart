@@ -164,30 +164,30 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 30.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SizedBox(
-                            width: 300,
+                            width: 400.w,
                             child: Text(
                               'Choose Your Personalized Category',
-                              style: TextStyle(fontSize: 24, color: Colors.black),
+                              style: TextStyle(fontSize: 32.sp, color: Colors.black),
                             ),
                           ),
-                          SizedBox(height: 8),
+                          SizedBox(height: 12.h),
                           Text(
                             'Create dedicated sections for your product list add items to their respective slot.',
                             style: TextStyle(
-                              fontSize: 14,
+                              fontSize: 20.sp,
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
                               color: hexToColor('#636363'),
                             ),
                           ),
-                          SizedBox(height: 30),
+                          SizedBox(height: 40.h),
                           GestureDetector(
                             onTap: () {
                               Navigator.push(
@@ -219,33 +219,33 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 40),
+                    SizedBox(height: 50.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'New Categories:',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 20.sp,
                               color: hexToColor('#545454'),
                             ),
                           ),
-                          SizedBox(height: 10),
+                          SizedBox(height: 12.h),
                           Container(
                             decoration: BoxDecoration(
                               border: Border.all(
                                 color: hexToColor('#848484'),
                               ),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(20.r),
                             ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Container(
                                   margin: EdgeInsets.only(left: 8),
-                                  padding: EdgeInsets.all(6),
+                                  padding: EdgeInsets.all(12.w),
                                   decoration: BoxDecoration(
                                     color: hexToColor('#2D332F'),
                                     borderRadius: BorderRadius.circular(8),
@@ -253,7 +253,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                                   child: Icon(
                                     Icons.add,
                                     color: Colors.white,
-                                    size: 20,
+                                    size: 22.sp,
                                   ),
                                 ),
                                 Expanded(
@@ -263,20 +263,20 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                                         color: Colors.black,
                                         fontFamily: 'Gotham',
                                         fontWeight: FontWeight.w700,
-                                        fontSize: 14.0),
+                                        fontSize: 20.sp),
                                     decoration: InputDecoration(
                                       hintText: 'Create Your New Category',
                                       hintTextDirection: TextDirection.ltr,
                                       hintStyle: TextStyle(
                                         color: hexToColor('#A1A1A1'),
-                                        fontSize: 14,
+                                        fontSize: 20.sp,
                                         fontFamily: 'Gotham',
                                         fontWeight: FontWeight.w700,
                                       ),
                                       border: InputBorder.none,
                                       contentPadding: EdgeInsets.symmetric(
-                                        horizontal: 20,
-                                        vertical: 20,
+                                        horizontal: 30.w,
+                                        vertical: 30.h,
                                       ),
                                     ),
                                   ),
@@ -289,8 +289,8 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                                     }
                                   },
                                   child: Container(
-                                    margin: EdgeInsets.only(right: 8),
-                                    padding: EdgeInsets.all(12),
+                                    margin: EdgeInsets.only(right: 12.w),
+                                    padding: EdgeInsets.all(18.w),
                                     decoration: BoxDecoration(
                                       color: Theme.of(context).primaryColor,
                                       borderRadius: BorderRadius.circular(8),
@@ -307,7 +307,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 40),
+                    SizedBox(height: 50.h),
                     if (isSelectionMode)
                       Container(
                         padding: EdgeInsets.symmetric(horizontal: 16),
@@ -316,7 +316,8 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                             Text(
                               '${selectedCategories.length} selected',
                               style: TextStyle(
-                                fontWeight: FontWeight.bold,
+                                fontSize: 24.sp,
+                                color: Colors.black,
                               ),
                             ),
                             Spacer(),
@@ -328,7 +329,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                               ),
                               child: Text('Delete'),
                             ),
-                            SizedBox(width: 8.0),
+                            SizedBox(width: 12.w),
                             TextButton(
                               onPressed: _toggleSelectionMode,
                               style: ButtonStyle(
@@ -340,18 +341,18 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                           ],
                         ),
                       ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 10.h),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         'Created Categories:',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 20.sp,
                           color: hexToColor('#545454'),
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 30.h),
                   ],
                 ),
               ),
@@ -437,12 +438,12 @@ class CategoryTile extends StatelessWidget {
       onTap: onTap,
       onLongPress: onLongPress,
       child: Container(
-        height: 100,
-        width: 125,
-        padding: EdgeInsets.all(8),
+        height: 155.h,
+        width: 200.w,
+        padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           color: color,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(18.r),
           border: isSelected ? Border.all(color: Colors.blue, width: 2) : null,
         ),
         child: Column(
@@ -453,11 +454,11 @@ class CategoryTile extends StatelessWidget {
               category.name.toUpperCase(),
               style: TextStyle(
                 color: Colors.black,
-                fontSize: 12.0,
+                fontSize: 16.sp,
               ),
               overflow: TextOverflow.ellipsis,
             ),
-            SizedBox(height: 8.0),
+            SizedBox(height: 10.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -469,14 +470,14 @@ class CategoryTile extends StatelessWidget {
                       category.totalProducts.toString(),
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 18.0,
+                        fontSize: 32.sp,
                       ),
                     ),
                     Text(
                       'Items'.toUpperCase(),
                       style: TextStyle(
                         color: Colors.grey[700],
-                        fontSize: 10.0,
+                        fontSize: 16.sp,
                       ),
                     ),
                   ],
@@ -492,16 +493,16 @@ class CategoryTile extends StatelessWidget {
                       );
                     },
                     child: Container(
-                      margin: EdgeInsets.only(left: 10.0),
-                      padding: EdgeInsets.all(6.0),
+                      margin: EdgeInsets.only(left: 12.w),
+                      padding: EdgeInsets.all(8.w),
                       decoration: BoxDecoration(
                         color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(6.0),
+                        borderRadius: BorderRadius.circular(8.r),
                       ),
                       child: Icon(
                         Icons.add,
                         color: Colors.white,
-                        size: 14.0,
+                        size: 20.sp,
                       ),
                     ),
                   ),

@@ -13,6 +13,7 @@ class UserModel {
   final String? storeId;
   Map<String, dynamic>? address;
   final List<String> likedPosts;
+  final List<String> followedStores;
   final Timestamp createdAt;
   final Timestamp lastUpdated;
 
@@ -27,12 +28,14 @@ class UserModel {
     this.pincode,
     this.registered = false,
     this.storeId,
-    Map<String, dynamic>? address,
+    this.address,
     List<String>? likedPosts,
+    List<String>? followedStores,
     Timestamp? createdAt,
     Timestamp? lastUpdated,
   }) :
         this.likedPosts = likedPosts ?? [],
+        this.followedStores = followedStores ?? [],
         this.createdAt = createdAt ?? Timestamp.now(),
         this.lastUpdated = lastUpdated ?? Timestamp.now();
 
@@ -50,8 +53,9 @@ class UserModel {
       pincode: data['pincode'],
       registered: data['registered'] ?? false,
       storeId: data['storeId'],
-      address: data['address'],
+      address: data['address'] as Map<String, dynamic>?,
       likedPosts: List<String>.from(data['likedPosts'] ?? []),
+      followedStores: List<String>.from(data['followedStores'] ?? []),
       createdAt: data['createdAt'],
       lastUpdated: data['lastUpdated'],
     );
@@ -69,6 +73,7 @@ class UserModel {
       'storeId': storeId,
       'address': address,
       'likedPosts': likedPosts,
+      'followedStores': followedStores,
       'createdAt': createdAt,
       'lastUpdated': lastUpdated,
     };
@@ -85,6 +90,7 @@ class UserModel {
     String? storeId,
     Map<String, dynamic>? address,
     List<String>? likedPosts,
+    List<String>? followedStores,
     Timestamp? lastUpdated,
   }) {
     return UserModel(
@@ -98,9 +104,16 @@ class UserModel {
       pincode: pincode ?? this.pincode,
       storeId: storeId ?? this.storeId,
       likedPosts: likedPosts ?? this.likedPosts,
+      followedStores: followedStores ?? this.followedStores,
       address: address ?? this.address,
       createdAt: this.createdAt,
       lastUpdated: lastUpdated ?? Timestamp.now(),
     );
   }
+
+  bool isFollowingStore(String storeId) {
+    return followedStores.contains(storeId);
+  }
+
+  int get followedStoresCount => followedStores.length;
 }

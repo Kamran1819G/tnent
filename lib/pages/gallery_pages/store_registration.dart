@@ -5,14 +5,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:pinput/pinput.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/store_model.dart';
+import 'package:tnennt/screens/webview_screen.dart';
 import 'package:tnennt/widget_tree.dart';
-import 'package:tnennt/widgets/customCheckboxListTile.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 
 class StoreRegistration extends StatefulWidget {
   const StoreRegistration({super.key});
@@ -20,7 +20,6 @@ class StoreRegistration extends StatefulWidget {
   @override
   State<StoreRegistration> createState() => _StoreRegistrationState();
 }
-
 
 class _StoreRegistrationState extends State<StoreRegistration> {
   PageController _pageController = PageController();
@@ -30,6 +29,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   late ConfettiController _confettiController;
 
   bool value = false;
+  bool _termsAccepted = false;
+  bool isButtonEnabled = false;
+  bool _isStorePhoneUnique = true;
+  bool _isStoreEmailUnique = true;
+  bool _isStoreDomainUnique = true;
 
   List<String> categories = [
     "Clothings",
@@ -48,7 +52,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     "Musicals",
     "Sports"
   ];
-  String selectedCategory= '';
+  String selectedCategory = '';
 
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -57,9 +61,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   final _upiUsernameController = TextEditingController();
   final _upiIdController = TextEditingController();
   final _locationController = TextEditingController();
-  final _otpControllers = List.generate(4, (_) => TextEditingController());
-  final _focusNodes = List.generate(4, (_) => FocusNode());
-  bool isButtonEnabled = false;
+  final TextEditingController _otpController = TextEditingController();
 
   @override
   void initState() {
@@ -77,19 +79,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
 
   @override
   void dispose() {
-    for (var controller in _otpControllers) {
-      controller.dispose();
-    }
-    for (var node in _focusNodes) {
-      node.dispose();
-    }
-
     _confettiController.dispose();
     _storeFeaturesPageController.dispose();
     _pageController.dispose();
     super.dispose();
   }
-
 
   Future<void> _registerStore() async {
     try {
@@ -133,7 +127,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
       await FirebaseFirestore.instance
           .collection('Users')
           .doc(currentUser.uid)
-          .update({'storeId':  newStore.storeId});
+          .update({'storeId': newStore.storeId});
 
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -147,6 +141,32 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     }
   }
 
+  Future<void> _validateStoreDomain(String domain) async {
+    final storeRef = FirebaseFirestore.instance.collection('Stores');
+    final querySnapshot = await storeRef.where('website', isEqualTo: '$domain.tnennt.com').get();
+
+    setState(() {
+      _isStoreDomainUnique = querySnapshot.docs.isEmpty;
+    });
+  }
+
+  Future<void> _validateStoreEmail(String email) async {
+    final storeRef = FirebaseFirestore.instance.collection('Stores');
+    final querySnapshot = await storeRef.where('email', isEqualTo: email).get();
+
+    setState(() {
+      _isStoreEmailUnique = querySnapshot.docs.isEmpty;
+    });
+  }
+
+  Future<void> _validateStorePhone(String phone) async {
+    final storeRef = FirebaseFirestore.instance.collection('Stores');
+    final querySnapshot = await storeRef.where('phone', isEqualTo: phone).get();
+
+    setState(() {
+      _isStorePhoneUnique = querySnapshot.docs.isEmpty;
+    });
+  }
 
   void _onCategoryChanged(String category) {
     setState(() {
@@ -163,9 +183,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
       print('Selected category: $selectedCategory');
       _pageController.jumpToPage(_currentPageIndex + 1);
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Please select a category'))
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Please select a category')));
     }
   }
 
@@ -185,10 +204,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   _confettiController.play();
                 }
                 if (index == 11) {
-                  // Start a timer of 10 seconds when the last page is reached
-                  Timer(Duration(seconds: 10), () {
+                  // Start a timer of 7 seconds when the last page is reached
+                  Timer(Duration(seconds: 7), () {
                     Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => WidgetTree()), // Navigate to the Home screen
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              WidgetTree()), // Navigate to the Home screen
                     );
                   });
                 }
@@ -199,23 +220,22 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 _buildStoreFeatures(),
                 // Page 2: Registration
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildStoreRegistrationPageHeader(
                         context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.1),
+                    SizedBox(height: 200.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      margin: EdgeInsets.only(left: 60.w),
+                      width: 540.w,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Registration',
                             style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 26,
+                              fontWeight: FontWeight.w500,
+                              fontSize: 40.sp,
                             ),
                           ),
                           Text(
@@ -224,111 +244,123 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              fontSize: 16,
+                              fontSize: 26.sp,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 40),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          height: 175,
-                          width: 375,
-                          decoration: BoxDecoration(
-                            color: hexToColor('#F5F5F5'),
-                            border: Border.all(
-                              color: hexToColor('#838383'),
-                              strokeAlign: BorderSide.strokeAlignInside,
-                              style: BorderStyle.solid,
+                    SizedBox(height: 50.h),
+                    Padding(
+                      padding: EdgeInsets.only(left: 60.w),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            height: 285.h,
+                            width: 515.w,
+                            decoration: BoxDecoration(
+                              color: hexToColorWithOpacity('#E1E1E1', 0.2),
+                              border: Border.all(
+                                color: hexToColor('#838383'),
+                                strokeAlign: BorderSide.strokeAlignInside,
+                                style: BorderStyle.solid,
+                              ),
+                              borderRadius: BorderRadius.circular(20.r),
                             ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 50),
-                          margin: EdgeInsets.only(bottom: 25),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'assets/india_flag.png',
-                                height: 40,
-                              ),
-                              SizedBox(width: 15),
-                              Text(
-                                '+91',
-                                style: TextStyle(
-                                  color: hexToColor('#636363'),
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 18,
-                                  letterSpacing: 2,
+                            padding: EdgeInsets.symmetric(horizontal: 50.w),
+                            margin: EdgeInsets.only(bottom: 25.h),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/india_flag.png',
+                                  height: 55.h,
+                                  width: 75.w,
                                 ),
-                              ),
-                              SizedBox(width: 8),
-                              Expanded(
-                                child: TextField(
-                                  controller: _phoneController,
-                                  textAlign: TextAlign.center,
+                                SizedBox(width: 15.w),
+                                Text(
+                                  '+91',
                                   style: TextStyle(
                                     color: hexToColor('#636363'),
                                     fontFamily: 'Poppins',
                                     fontWeight: FontWeight.w500,
-                                    fontSize: 18,
+                                    fontSize: 26.sp,
                                     letterSpacing: 2,
                                   ),
-                                  decoration: InputDecoration(
+                                ),
+                                SizedBox(width: 8),
+                                Expanded(
+                                  child: TextField(
+                                    controller: _phoneController,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      color: hexToColor('#636363'),
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 26.sp,
+                                      letterSpacing: 2,
+                                    ),
+                                    decoration: InputDecoration(
+                                      counterText: '',
                                       border: UnderlineInputBorder(
                                         borderSide: BorderSide(
-                                          color: Theme
-                                              .of(context)
-                                              .primaryColor,
+                                          color: Theme.of(context).primaryColor,
                                         ),
                                       ),
-                                      contentPadding:
-                                      EdgeInsets.only(bottom: -15)),
-                                  maxLength: 10,
-                                  keyboardType: TextInputType.phone,
+                                      isDense: true,
+                                    ),
+                                    maxLength: 10,
+                                    keyboardType: TextInputType.phone,
+                                    onChanged: (value) {
+                                      _validateStorePhone(value);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            child: GestureDetector(
+                              onTap: () {
+                                if (_isStorePhoneUnique) {
+                                  _pageController
+                                      .jumpToPage(_currentPageIndex + 1);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'This phone number is already registered'),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: CircleAvatar(
+                                backgroundColor: Theme.of(context).primaryColor,
+                                radius: 40.w,
+                                child: Icon(
+                                  Icons.check,
+                                  color: Colors.white,
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              _pageController.jumpToPage(_currentPageIndex + 1);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Theme
-                                  .of(context)
-                                  .primaryColor,
-                              shape: CircleBorder(),
-                              padding: EdgeInsets.all(15),
-                            ),
-                            child: Icon(
-                              Icons.check,
-                              color: Colors.white,
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
                 // Page 3: Verification
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildStoreRegistrationPageHeader(
                         context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.1),
+                    SizedBox(height: 200.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      margin: EdgeInsets.only(left: 60.w),
+                      width: 540.w,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -336,7 +368,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             'Verification',
                             style: TextStyle(
                               fontWeight: FontWeight.w400,
-                              fontSize: 26,
+                              fontSize: 40.sp,
                             ),
                           ),
                           Text(
@@ -345,109 +377,121 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              fontSize: 16,
+                              fontSize: 26.sp,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 40),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          height: 175,
-                          width: 375,
-                          decoration: BoxDecoration(
-                            color: hexToColor('#F5F5F5'),
-                            border: Border.all(
-                              color: hexToColor('#838383'),
-                              strokeAlign: BorderSide.strokeAlignInside,
-                              style: BorderStyle.solid,
+                    SizedBox(height: 50.h),
+                    Padding(
+                      padding: EdgeInsets.only(left: 60.w),
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Container(
+                            height: 285.h,
+                            width: 515.w,
+                            decoration: BoxDecoration(
+                              color: hexToColorWithOpacity('#E1E1E1', 0.2),
+                              border: Border.all(
+                                color: hexToColor('#838383'),
+                                strokeAlign: BorderSide.strokeAlignInside,
+                                style: BorderStyle.solid,
+                              ),
+                              borderRadius: BorderRadius.circular(20.r),
                             ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          margin: EdgeInsets.only(bottom: 25),
-                          child: Center(
-                            child: Wrap(
-                              spacing: 10,
-                              children: List.generate(
-                                _otpControllers.length,
-                                    (index) {
-                                  return Container(
-                                    height: 50.0,
-                                    width: 50.0,
-                                    child: TextField(
-                                      controller: _otpControllers[index],
-                                      focusNode: _focusNodes[index],
-                                      textAlign: TextAlign.center,
-                                      keyboardType: TextInputType.number,
-                                      maxLength: 1,
-                                      cursorColor:
-                                      Theme
-                                          .of(context)
-                                          .primaryColor,
-                                      decoration: InputDecoration(
-                                        counterText: '',
-                                        border: UnderlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: hexToColor('#838383'),
-                                          ),
-                                        ),
-                                      ),
-                                      onChanged: (value) {
-                                        if (value.isNotEmpty) {
-                                          if (index + 1 <
-                                              _otpControllers.length) {
-                                            FocusScope.of(context).nextFocus();
-                                          } else {
-                                            setState(() {
-                                              isButtonEnabled = true;
-                                            });
-                                            FocusScope.of(context).unfocus();
-                                          }
-                                        } else {
-                                          if (index > 0) {
-                                            FocusScope.of(context)
-                                                .previousFocus();
-                                            setState(() {
-                                              isButtonEnabled = false;
-                                            });
-                                          }
-                                        }
-                                      },
-                                    ),
-                                  );
+                            padding: EdgeInsets.symmetric(horizontal: 50.w),
+                            margin: EdgeInsets.only(bottom: 25.h),
+                            child: Center(
+                              child: Pinput(
+                                length: 4,
+                                controller: _otpController,
+                                pinAnimationType: PinAnimationType.fade,
+                                onCompleted: (pin) {
+                                  setState(() {
+                                    isButtonEnabled = true;
+                                  });
                                 },
+                                onChanged: (value) {
+                                  setState(() {
+                                    isButtonEnabled = value.length == 4;
+                                  });
+                                },
+                                defaultPinTheme: PinTheme(
+                                  width: 50.w,
+                                  height: 50.h,
+                                  textStyle: TextStyle(
+                                    fontSize: 26.sp,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: hexToColor('#838383'),
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                focusedPinTheme: PinTheme(
+                                  width: 50.w,
+                                  height: 50.h,
+                                  textStyle: TextStyle(
+                                    fontSize: 26.sp,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Theme.of(context).primaryColor,
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                submittedPinTheme: PinTheme(
+                                  width: 50.w,
+                                  height: 50.h,
+                                  textStyle: TextStyle(
+                                    fontSize: 26.sp,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Theme.of(context).primaryColor,
+                                        width: 2,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          child: ElevatedButton(
-                            onPressed: isButtonEnabled
-                                ? () {
-                              _pageController.jumpToPage(_currentPageIndex + 1);
-                            }
-                                : null,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: isButtonEnabled
-                                  ? Theme
-                                  .of(context)
-                                  .primaryColor
-                                  : Colors.grey,
-                              shape: CircleBorder(),
-                              padding: EdgeInsets.all(15),
-                            ),
-                            child: Icon(
-                              Icons.arrow_forward_ios,
-                              color: Colors.white,
+                          Positioned(
+                            bottom: 0,
+                            child: GestureDetector(
+                              onTap: isButtonEnabled
+                                  ? () {
+                                      _pageController
+                                          .jumpToPage(_currentPageIndex + 1);
+                                    }
+                                  : null,
+                              child: CircleAvatar(
+                                backgroundColor: isButtonEnabled
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.grey,
+                                radius: 40.w,
+                                child: Icon(
+                                  Icons.arrow_forward,
+                                  color: Colors.white,
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -457,12 +501,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   children: [
                     _buildStoreRegistrationPageHeader(
                         context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.1),
+                    SizedBox(height: 200.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.only(left: 45.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -470,7 +511,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             'Enter Your Business/Store email',
                             style: TextStyle(
                               fontWeight: FontWeight.w400,
-                              fontSize: 20,
+                              fontSize: 32.sp,
                             ),
                           ),
                           Text(
@@ -479,38 +520,35 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              fontSize: 14,
+                              fontSize: 20.sp,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 40),
+                    SizedBox(height: 50.h),
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 16),
+                      margin: EdgeInsets.only(left: 45.w),
+                      width: 515.w,
                       child: TextField(
                         controller: _emailController,
                         style: TextStyle(
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
-                          fontSize: 16,
+                          fontSize: 24.sp,
                         ),
                         decoration: InputDecoration(
                           label: Text('Email'),
                           labelStyle: TextStyle(
-                            color: Theme
-                                .of(context)
-                                .primaryColor,
-                            fontSize: 16,
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 24.sp,
                           ),
                           filled: true,
                           fillColor: hexToColor('#F5F5F5'),
                           suffixIcon: Icon(Icons.email_outlined),
-                          suffixIconColor: Theme
-                              .of(context)
-                              .primaryColor,
+                          suffixIconColor: Theme.of(context).primaryColor,
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(20.sp),
                             borderSide: BorderSide(
                               color: hexToColor('#838383'),
                               strokeAlign: BorderSide.strokeAlignInside,
@@ -519,28 +557,55 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           ),
                         ),
                         keyboardType: TextInputType.emailAddress,
+                        onChanged: (value) {
+                          _validateStoreEmail(value);
+                        },
                       ),
                     ),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.4),
+                    if(!_isStoreEmailUnique)...[
+                    SizedBox(height: 20.h),
                     Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        margin: EdgeInsets.only(left: 45.w),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: Colors.red,
+                              radius: 12.w,
+                              child: Icon(
+                                Icons.close,
+                                color: Colors.white,
+                                size: 16.sp,
+                              ),
+                            ),
+                            SizedBox(width: 12.w),
+                            Text(
+                              'This email is already registered',
+                              style: TextStyle(
+                                color: hexToColor('#636363'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                    ),
+                    ],
+                    SizedBox(height: 550.h),
+                    Container(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Checkbox(
-                              activeColor: Theme
-                                  .of(context)
-                                  .primaryColor,
+                              activeColor: Theme.of(context).primaryColor,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              value: value,
+                              value: _termsAccepted,
                               onChanged: (value) {
                                 setState(() {
-                                  this.value = value!;
+                                  _termsAccepted = value!;
                                 });
                               },
                             ),
@@ -550,21 +615,27 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 color: hexToColor('#636363'),
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w500,
-                                fontSize: 14,
+                                fontSize: 20.sp,
                               ),
                             ),
-                            SizedBox(width: 4),
+                            SizedBox(width: 6.w),
                             GestureDetector(
-                              onTap: () {},
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => WebViewScreen(
+                                            url:
+                                                'https://tnennt-updated.vercel.app/legals',
+                                            title: 'Terms and Conditions')));
+                              },
                               child: Text(
                                 'Terms and Conditions',
                                 style: TextStyle(
-                                  color: Theme
-                                      .of(context)
-                                      .primaryColor,
+                                  color: Theme.of(context).primaryColor,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w500,
-                                  fontSize: 14,
+                                  fontSize: 20.sp,
                                 ),
                               ),
                             ),
@@ -572,33 +643,32 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         )),
                     SizedBox(height: 20),
                     Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.jumpToPage(_currentPageIndex + 1);
+                      child: GestureDetector(
+                        onTap: () {
+                          if (_termsAccepted && _isStoreEmailUnique) {
+                            _pageController.jumpToPage(_currentPageIndex + 1);
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                    'Please accept the terms and conditions and provide a unique email'),
+                              ),
+                            );
+                          }
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: hexToColor('#2D332F'),
-                          // Set the button color to black
-                          foregroundColor: Colors.white,
-                          // Set the text color to white
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 100, vertical: 18),
-                          // Set the padding
-                          textStyle: TextStyle(
-                            fontSize: 16, // Set the text size
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500, // Set the text weight
+                        child: Container(
+                          height: 95.h,
+                          width: 480.w,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: hexToColor('#2D332F'),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                30), // Set the button corner radius
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Continue', style: TextStyle(fontSize: 16)),
-                          ],
+                          child: Text('Continue',
+                              style: TextStyle(
+                                  fontSize: 25.sp,
+                                  fontFamily: 'Gotham',
+                                  color: Colors.white)),
                         ),
                       ),
                     ),
@@ -610,20 +680,16 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   children: [
                     _buildStoreRegistrationPageHeader(
                         context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.1),
+                    SizedBox(height: 200.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.only(left: 45.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Your Store Name',
                             style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 20,
+                              fontSize: 32.sp,
                             ),
                           ),
                           Text(
@@ -632,29 +698,33 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              fontSize: 14,
+                              fontSize: 20.sp,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 40),
+                    SizedBox(height: 50.h),
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 16),
+                      margin: EdgeInsets.only(left: 45.w),
+                      width: 515.w,
                       child: TextField(
                         controller: _nameController,
+                        style: TextStyle(
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 24.sp,
+                        ),
                         decoration: InputDecoration(
                           label: Text('Store Name'),
                           labelStyle: TextStyle(
-                            color: Theme
-                                .of(context)
-                                .primaryColor,
-                            fontSize: 16,
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 24.sp,
                           ),
                           filled: true,
                           fillColor: hexToColor('#F5F5F5'),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(20.sp),
                             borderSide: BorderSide(
                               color: hexToColor('#838383'),
                               strokeAlign: BorderSide.strokeAlignInside,
@@ -665,38 +735,30 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         keyboardType: TextInputType.name,
                       ),
                     ),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.475),
+                    SizedBox(height: 650.h),
                     Center(
-                      child: ElevatedButton(
-                        onPressed: () {
+                      child: GestureDetector(
+                        onTap: () {
                           _pageController.jumpToPage(_currentPageIndex + 1);
+                          setState(() {
+                            _websiteController.text = _nameController.text
+                                .toLowerCase()
+                                .replaceAll(' ', '');
+                          });
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: hexToColor('#2D332F'),
-                          // Set the button color to black
-                          foregroundColor: Colors.white,
-                          // Set the text color to white
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 100, vertical: 18),
-                          // Set the padding
-                          textStyle: TextStyle(
-                            fontSize: 16, // Set the text size
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500, // Set the text weight
+                        child: Container(
+                          height: 95.h,
+                          width: 480.w,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: hexToColor('#2D332F'),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                30), // Set the button corner radius
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Next', style: TextStyle(fontSize: 16)),
-                          ],
+                          child: Text('Next',
+                              style: TextStyle(
+                                  fontSize: 25.sp,
+                                  fontFamily: 'Gotham',
+                                  color: Colors.white)),
                         ),
                       ),
                     ),
@@ -708,20 +770,16 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   children: [
                     _buildStoreRegistrationPageHeader(
                         context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.1),
+                    SizedBox(height: 200.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.only(left: 45.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Set Your Store Domain',
                             style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 20,
+                              fontSize: 32.sp,
                             ),
                           ),
                           Text(
@@ -730,36 +788,40 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              fontSize: 14,
+                              fontSize: 20.sp,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 40),
+                    SizedBox(height: 50.h),
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 16),
+                      margin: EdgeInsets.only(left: 45.w),
+                      width: 515.w,
                       child: TextField(
-                        controller : _websiteController,
+                        controller: _websiteController,
+                        style: TextStyle(
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 24.sp,
+                        ),
                         decoration: InputDecoration(
                           label: Text('Store Name'),
                           labelStyle: TextStyle(
-                            color: Theme
-                                .of(context)
-                                .primaryColor,
-                            fontSize: 16,
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 24.sp,
                           ),
                           suffixText: '.tnennt.com',
                           suffixStyle: TextStyle(
                             color: hexToColor('#636363'),
                             fontFamily: 'Gotham',
                             fontWeight: FontWeight.w500,
-                            fontSize: 16,
+                            fontSize: 24.sp,
                           ),
                           filled: true,
                           fillColor: hexToColor('#F5F5F5'),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(20.r),
                             borderSide: BorderSide(
                               color: hexToColor('#838383'),
                               strokeAlign: BorderSide.strokeAlignInside,
@@ -768,68 +830,56 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           ),
                         ),
                         keyboardType: TextInputType.name,
+                        onChanged: (value) {
+                          _validateStoreDomain(value);
+                        },
                       ),
                     ),
-                    SizedBox(height: 10),
+                    SizedBox(height: 20.h),
                     Container(
-                        padding: EdgeInsets.symmetric(horizontal: 25),
+                        margin: EdgeInsets.only(left: 45.w),
                         child: Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor: Theme
-                                  .of(context)
-                                  .primaryColor,
-                              radius: 8,
+                              backgroundColor: _isStoreDomainUnique ? Theme.of(context).primaryColor : Colors.red,
+                              radius: 12.w,
                               child: Icon(
-                                Icons.check,
+                                _isStoreDomainUnique ? Icons.check : Icons.close,
                                 color: Colors.white,
-                                size: 12,
+                                size: 16.sp,
                               ),
                             ),
-                            SizedBox(width: 8),
+                            SizedBox(width: 12.w),
                             Text(
-                              'This domain is available',
+                                _isStoreDomainUnique ? 'This domain is available' : 'This domain is not available',
                               style: TextStyle(
                                 color: hexToColor('#636363'),
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w500,
-                                fontSize: 14,
+                                fontSize: 16.sp,
                               ),
                             ),
                           ],
                         )),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.4375),
+                    SizedBox(height: 600.h),
                     Center(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _pageController.jumpToPage(_currentPageIndex + 1);
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: hexToColor('#2D332F'),
-                          // Set the button color to black
-                          foregroundColor: Colors.white,
-                          // Set the text color to white
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 100, vertical: 18),
-                          // Set the padding
-                          textStyle: TextStyle(
-                            fontSize: 16, // Set the text size
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500, // Set the text weight
+                      child: GestureDetector(
+                        onTap: _isStoreDomainUnique ? () {
+                            _pageController.jumpToPage(_currentPageIndex + 1);
+                          } : null,
+                        child: Container(
+                          height: 95.h,
+                          width: 480.w,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: hexToColor('#2D332F'),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                30), // Set the button corner radius
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Next', style: TextStyle(fontSize: 16)),
-                          ],
+                          child: Text('Next',
+                              style: TextStyle(
+                                  fontSize: 25.sp,
+                                  fontFamily: 'Gotham',
+                                  color: Colors.white)),
                         ),
                       ),
                     ),
@@ -841,21 +891,16 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   children: [
                     _buildStoreRegistrationPageHeader(
                         context, _pageController, _currentPageIndex),
-                    SizedBox(
-                        height: MediaQuery
-                            .of(context)
-                            .size
-                            .height * 0.025),
+                    SizedBox(height: 50.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.only(left: 20.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Choose Your Store Category',
                             style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 20,
+                              fontSize: 32.sp,
                             ),
                           ),
                           Text(
@@ -864,62 +909,109 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              fontSize: 14,
+                              fontSize: 20.sp,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 40),
+                    SizedBox(height: 50),
                     Expanded(
-                      child: GridView.count(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 0,
-                        mainAxisSpacing: 10,
-                        childAspectRatio: 3.5,
+                      child: GridView.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16.w,
+                          mainAxisSpacing: 16.h,
+                          childAspectRatio: 3.5,
+                        ),
                         physics: BouncingScrollPhysics(),
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        children: [
-                          ...categories.map((category) {
-                            return Container(
-                              margin: EdgeInsets.symmetric(horizontal: 8),
-                              child: CustomCheckboxListTile(
-                                title: category,
-                                value: selectedCategory == category,
-                                onChanged: (_) => _onCategoryChanged(category),
-                                selectedStyle: true,
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        itemCount: categories.length,
+                        itemBuilder: (context, index) {
+                          final category = categories[index];
+                          final isSelected = selectedCategory == category;
+
+                          return Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: isSelected
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.grey[300]!,
+                                width: 1,
                               ),
-                            );
-                          }).toList(),
-                        ],
+                              color: isSelected
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.white,
+                            ),
+                            child: InkWell(
+                              onTap: () => _onCategoryChanged(category),
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 24.w,
+                                      height: 24.h,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? Colors.white
+                                              : Colors.grey[400]!,
+                                          width: 2,
+                                        ),
+                                      ),
+                                      child: isSelected
+                                          ? Center(
+                                              child: Icon(Icons.check,
+                                                  size: 16.sp,
+                                                  color: Colors.white),
+                                            )
+                                          : null,
+                                    ),
+                                    SizedBox(width: 12.w),
+                                    Expanded(
+                                      child: Text(
+                                        category,
+                                        style: TextStyle(
+                                          color: isSelected
+                                              ? Colors.white
+                                              : Colors.black,
+                                          fontSize: 16.sp,
+                                          fontFamily: 'Poppins',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     ),
                     Center(
-                      child: ElevatedButton(
-                        onPressed: _onContinuePressed,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: hexToColor('#2D332F'),
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 100, vertical: 18),
-                          textStyle: TextStyle(
-                            fontSize: 16,
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500,
+                      child: GestureDetector(
+                        onTap: _onContinuePressed,
+                        child: Container(
+                          height: 95.h,
+                          width: 480.w,
+                          margin: EdgeInsets.only(bottom: 50.h),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: hexToColor('#2D332F'),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Continue', style: TextStyle(fontSize: 16)),
-                          ],
+                          child: Text('Continue',
+                              style: TextStyle(
+                                  fontSize: 25.sp,
+                                  fontFamily: 'Gotham',
+                                  color: Colors.white)),
                         ),
                       ),
                     ),
-                    SizedBox(height: 30),
                   ],
                 ),
                 // Page 8: UPI Details
@@ -928,20 +1020,16 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   children: [
                     _buildStoreRegistrationPageHeader(
                         context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.1),
+                    SizedBox(height: 200.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.only(left: 45.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Enter Your UPI Details',
                             style: TextStyle(
-                              fontWeight: FontWeight.w400,
-                              fontSize: 20,
+                              fontSize: 32.sp,
                             ),
                           ),
                           Text(
@@ -950,34 +1038,33 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              fontSize: 14,
+                              fontSize: 20.sp,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 40),
+                    SizedBox(height: 50.h),
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 16),
+                      margin: EdgeInsets.only(left: 45.w),
+                      width: 515.w,
                       child: TextField(
                         controller: _upiUsernameController,
                         style: TextStyle(
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
-                          fontSize: 16,
+                          fontSize: 24.sp,
                         ),
                         decoration: InputDecoration(
                           label: Text('Username'),
                           labelStyle: TextStyle(
-                            color: Theme
-                                .of(context)
-                                .primaryColor,
-                            fontSize: 16,
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 24.sp,
                           ),
                           filled: true,
                           fillColor: hexToColor('#F5F5F5'),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(20.r),
                             borderSide: BorderSide(
                               color: hexToColor('#838383'),
                               strokeAlign: BorderSide.strokeAlignInside,
@@ -988,28 +1075,27 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         keyboardType: TextInputType.name,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 20.h),
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 16),
+                      margin: EdgeInsets.only(left: 45.w),
+                      width: 515.w,
                       child: TextField(
                         controller: _upiIdController,
                         style: TextStyle(
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
-                          fontSize: 16,
+                          fontSize: 24.sp,
                         ),
                         decoration: InputDecoration(
                           label: Text('UPI ID'),
                           labelStyle: TextStyle(
-                            color: Theme
-                                .of(context)
-                                .primaryColor,
-                            fontSize: 16,
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 24.sp,
                           ),
                           filled: true,
                           fillColor: hexToColor('#F5F5F5'),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(20.r),
                             borderSide: BorderSide(
                               color: hexToColor('#838383'),
                               strokeAlign: BorderSide.strokeAlignInside,
@@ -1020,66 +1106,51 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         keyboardType: TextInputType.name,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    SizedBox(height: 20.h),
                     Container(
-                        padding: EdgeInsets.symmetric(horizontal: 25),
+                        margin: EdgeInsets.only(left: 45.w),
                         child: Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor: Theme
-                                  .of(context)
-                                  .primaryColor,
-                              radius: 8,
+                              backgroundColor: Theme.of(context).primaryColor,
+                              radius: 12.w,
                               child: Icon(
                                 Icons.check,
                                 color: Colors.white,
-                                size: 12,
+                                size: 16.sp,
                               ),
                             ),
-                            SizedBox(width: 8),
+                            SizedBox(width: 12.w),
                             Text(
                               'UPI ID Verified',
                               style: TextStyle(
                                 color: hexToColor('#636363'),
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w500,
-                                fontSize: 14,
+                                fontSize: 16.sp,
                               ),
                             ),
                           ],
                         )),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.34),
+                    SizedBox(height: 500.h),
                     Center(
-                      child: ElevatedButton(
-                        onPressed: () {
+                      child: GestureDetector(
+                        onTap: () {
                           _pageController.jumpToPage(_currentPageIndex + 1);
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: hexToColor('#2D332F'),
-                          // Set the button color to black
-                          foregroundColor: Colors.white,
-                          // Set the text color to white
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 100, vertical: 18),
-                          // Set the padding
-                          textStyle: TextStyle(
-                            fontSize: 16, // Set the text size
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500, // Set the text weight
+                        child: Container(
+                          height: 95.h,
+                          width: 480.w,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: hexToColor('#2D332F'),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                30), // Set the button corner radius
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Next', style: TextStyle(fontSize: 16)),
-                          ],
+                          child: Text('Next',
+                              style: TextStyle(
+                                  fontSize: 25.sp,
+                                  fontFamily: 'Gotham',
+                                  color: Colors.white)),
                         ),
                       ),
                     ),
@@ -1091,12 +1162,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   children: [
                     _buildStoreRegistrationPageHeader(
                         context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.1),
+                    SizedBox(height: 200.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.only(left: 45.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -1104,7 +1172,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             'Enter Your Store Location',
                             style: TextStyle(
                               fontWeight: FontWeight.w400,
-                              fontSize: 20,
+                              fontSize: 35.sp,
                             ),
                           ),
                           Text(
@@ -1113,44 +1181,41 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              fontSize: 14,
+                              fontSize: 20.sp,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: 40),
+                    SizedBox(height: 50.h),
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 16),
+                      margin: EdgeInsets.only(left: 45.w),
+                      width: 515.w,
                       child: TextField(
                         controller: _locationController,
                         style: TextStyle(
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,
-                          fontSize: 16,
+                          fontSize: 24.sp,
                         ),
                         decoration: InputDecoration(
                           label: Text('Location'),
                           labelStyle: TextStyle(
-                            color: Theme
-                                .of(context)
-                                .primaryColor,
-                            fontSize: 16,
+                            color: Theme.of(context).primaryColor,
+                            fontSize: 24.sp,
                           ),
                           prefixIcon: Icon(
                             Icons.location_on,
-                            size: 20,
+                            size: 30.sp,
                           ),
                           prefixIconConstraints: BoxConstraints(
-                            minWidth: 40,
+                            minWidth: 60.w,
                           ),
-                          prefixIconColor: Theme
-                              .of(context)
-                              .primaryColor,
+                          prefixIconColor: Theme.of(context).primaryColor,
                           filled: true,
                           fillColor: hexToColor('#F5F5F5'),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(20.r),
                             borderSide: BorderSide(
                               color: hexToColor('#838383'),
                               strokeAlign: BorderSide.strokeAlignInside,
@@ -1161,38 +1226,25 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         keyboardType: TextInputType.name,
                       ),
                     ),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.475),
+                    SizedBox(height: 650.h),
                     Center(
-                      child: ElevatedButton(
-                        onPressed: () {
+                      child: GestureDetector(
+                        onTap: () {
                           _pageController.jumpToPage(_currentPageIndex + 1);
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: hexToColor('#2D332F'),
-                          // Set the button color to black
-                          foregroundColor: Colors.white,
-                          // Set the text color to white
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 100, vertical: 18),
-                          // Set the padding
-                          textStyle: TextStyle(
-                            fontSize: 16, // Set the text size
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500, // Set the text weight
+                        child: Container(
+                          height: 95.h,
+                          width: 480.w,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: hexToColor('#2D332F'),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                30), // Set the button corner radius
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Continue', style: TextStyle(fontSize: 16)),
-                          ],
+                          child: Text('Continue',
+                              style: TextStyle(
+                                  fontSize: 25.sp,
+                                  fontFamily: 'Gotham',
+                                  color: Colors.white)),
                         ),
                       ),
                     ),
@@ -1204,13 +1256,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   children: [
                     _buildStoreRegistrationPageHeader(
                         context, _pageController, _currentPageIndex),
-                    SizedBox(
-                        height: MediaQuery
-                            .of(context)
-                            .size
-                            .height * 0.025),
+                    SizedBox(height: 100.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      padding: EdgeInsets.symmetric(horizontal: 32.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -1219,7 +1267,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             style: TextStyle(
                               color: hexToColor('#2A2A2A'),
                               fontWeight: FontWeight.w500,
-                              fontSize: 34,
+                              fontSize: 55.sp,
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -1229,20 +1277,16 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              fontSize: 14,
+                              fontSize: 20.sp,
                             ),
                             textAlign: TextAlign.center,
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.1),
+                    SizedBox(height: 100.h),
                     Container(
-                        margin: EdgeInsets.symmetric(horizontal: 16),
-                        padding: EdgeInsets.symmetric(horizontal: 20),
+                        margin: EdgeInsets.symmetric(horizontal: 50.w),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -1250,169 +1294,154 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                  Theme
-                                      .of(context)
-                                      .primaryColor,
-                                  radius: 10,
+                                      Theme.of(context).primaryColor,
+                                  radius: 15.w,
                                   child: Icon(
                                     Icons.check,
                                     color: Colors.white,
-                                    size: 12,
+                                    size: 16.sp,
                                   ),
                                 ),
-                                SizedBox(width: 8),
+                                SizedBox(width: 12.w),
                                 Text(
                                   'Lifetime Store Access',
                                   style: TextStyle(
                                     color: hexToColor('#636363'),
                                     fontFamily: 'Poppins',
                                     fontWeight: FontWeight.w500,
-                                    fontSize: 14,
+                                    fontSize: 20.sp,
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
+                            SizedBox(height: 20.h),
                             Row(
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                  Theme
-                                      .of(context)
-                                      .primaryColor,
-                                  radius: 10,
+                                      Theme.of(context).primaryColor,
+                                  radius: 15.w,
                                   child: Icon(
                                     Icons.check,
                                     color: Colors.white,
-                                    size: 12,
+                                    size: 16.sp,
                                   ),
                                 ),
-                                SizedBox(width: 8),
+                                SizedBox(width: 12.w),
                                 Text(
                                   'Provided middlemen for item delivery',
                                   style: TextStyle(
                                     color: hexToColor('#636363'),
                                     fontFamily: 'Poppins',
                                     fontWeight: FontWeight.w500,
-                                    fontSize: 14,
+                                    fontSize: 20.sp,
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
+                            SizedBox(height: 20.h),
                             Row(
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                  Theme
-                                      .of(context)
-                                      .primaryColor,
-                                  radius: 10,
+                                      Theme.of(context).primaryColor,
+                                  radius: 15.w,
                                   child: Icon(
                                     Icons.check,
                                     color: Colors.white,
-                                    size: 12,
+                                    size: 16.sp,
                                   ),
                                 ),
-                                SizedBox(width: 8),
+                                SizedBox(width: 12.w),
                                 Text(
                                   'Free store domain',
                                   style: TextStyle(
                                     color: hexToColor('#636363'),
                                     fontFamily: 'Poppins',
                                     fontWeight: FontWeight.w500,
-                                    fontSize: 14,
+                                    fontSize: 20.sp,
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
+                            SizedBox(height: 20.h),
                             Row(
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                  Theme
-                                      .of(context)
-                                      .primaryColor,
-                                  radius: 10,
+                                      Theme.of(context).primaryColor,
+                                  radius: 15.w,
                                   child: Icon(
                                     Icons.check,
                                     color: Colors.white,
-                                    size: 12,
+                                    size: 16.sp,
                                   ),
                                 ),
-                                SizedBox(width: 8),
+                                SizedBox(width: 12.w),
                                 Text(
                                   'Free marketing & advertisement space',
                                   style: TextStyle(
                                     color: hexToColor('#636363'),
                                     fontFamily: 'Poppins',
                                     fontWeight: FontWeight.w500,
-                                    fontSize: 14,
+                                    fontSize: 20.sp,
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
+                            SizedBox(height: 20.sp),
                             Row(
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                  Theme
-                                      .of(context)
-                                      .primaryColor,
-                                  radius: 10,
+                                      Theme.of(context).primaryColor,
+                                  radius: 15.w,
                                   child: Icon(
                                     Icons.check,
                                     color: Colors.white,
-                                    size: 12,
+                                    size: 16.sp,
                                   ),
                                 ),
-                                SizedBox(width: 8),
+                                SizedBox(width: 12.w),
                                 Text(
                                   'Unlimited coupon generator for your store',
                                   style: TextStyle(
                                     color: hexToColor('#636363'),
                                     fontFamily: 'Poppins',
                                     fontWeight: FontWeight.w500,
-                                    fontSize: 14,
+                                    fontSize: 20.sp,
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
+                            SizedBox(height: 20.h),
                             Row(
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                  Theme
-                                      .of(context)
-                                      .primaryColor,
-                                  radius: 10,
+                                      Theme.of(context).primaryColor,
+                                  radius: 15.w,
                                   child: Icon(
                                     Icons.check,
                                     color: Colors.white,
-                                    size: 12,
+                                    size: 16.sp,
                                   ),
                                 ),
-                                SizedBox(width: 8),
+                                SizedBox(width: 12.w),
                                 Text(
                                   'Print store analytics in excel, pdf or jpeg',
                                   style: TextStyle(
                                     color: hexToColor('#636363'),
                                     fontFamily: 'Poppins',
                                     fontWeight: FontWeight.w500,
-                                    fontSize: 14,
+                                    fontSize: 20.sp,
                                   ),
                                 ),
                               ],
                             ),
                           ],
                         )),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.2),
+                    SizedBox(height: 300.h),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -1422,59 +1451,45 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             color: hexToColor('#636363'),
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w500,
-                            fontSize: 12,
+                            fontSize: 16.sp,
                           ),
                         ),
                         Text(
                           'Join Our Tnennt Community',
                           style: TextStyle(
-                            color: Theme
-                                .of(context)
-                                .primaryColor,
+                            color: Theme.of(context).primaryColor,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w500,
-                            fontSize: 12,
+                            fontSize: 16.sp,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 30.h),
                     Center(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          try{
+                      child: GestureDetector(
+                        onTap: () async {
+                          try {
                             await _registerStore();
                             _pageController.jumpToPage(_currentPageIndex + 1);
                           } catch (e) {
                             print(e);
                           }
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Theme
-                              .of(context)
-                              .primaryColor,
-                          // Set the button color to black
-                          foregroundColor: Colors.white,
-                          // Set the text color to white
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 120, vertical: 18),
-                          // Set the padding
-                          textStyle: TextStyle(
-                            fontSize: 16, // Set the text size
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500, // Set the text weight
+                        child: Container(
+                          height: 95.h,
+                          width: 595.w,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).primaryColor,
+                            borderRadius: BorderRadius.circular(22.r),
                           ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(
-                                12), // Set the button corner radius
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text('Pay ₹2999.00',
-                                style: TextStyle(fontSize: 18)),
-                          ],
+                          child: Text('Pay ₹2999.00',
+                              style: TextStyle(
+                                  fontSize: 28.sp,
+                                  color: Colors.white,
+                                  fontFamily: 'Gotham',
+                                  fontWeight: FontWeight.w500)),
                         ),
                       ),
                     ),
@@ -1486,10 +1501,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   children: [
                     _buildStoreRegistrationPageHeader(
                         context, _pageController, _currentPageIndex),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.1),
+                    SizedBox(height: 100.h),
                     Stack(
                       alignment: Alignment.center,
                       children: [
@@ -1497,27 +1509,21 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           confettiController: _confettiController,
                           blastDirectionality: BlastDirectionality.explosive,
                           shouldLoop: false,
-                          colors: [Theme
-                              .of(context)
-                              .primaryColor
-                          ],
+                          colors: [Theme.of(context).primaryColor],
                         ),
                         ClipRRect(
-                          borderRadius: BorderRadius.circular(100),
+                          borderRadius: BorderRadius.circular(50.r),
                           child: Image.asset(
                             'assets/congratulation.png',
-                            width: 200,
-                            height: 200,
+                            width: 425.w,
+                            height: 340.h,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.05),
+                    SizedBox(height: 200.h),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      width: 430.w,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -1526,53 +1532,48 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             style: TextStyle(
                               color: hexToColor('#2A2A2A'),
                               fontWeight: FontWeight.w500,
-                              fontSize: 34,
+                              fontSize: 42.sp,
                             ),
                             textAlign: TextAlign.center,
                           ),
+                          SizedBox(height: 20.h),
                           Text(
                             'Your Store has been created',
                             style: TextStyle(
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              fontSize: 18,
+                              fontSize: 28.sp,
                             ),
                             textAlign: TextAlign.center,
                           ),
                         ],
                       ),
                     ),
-                    SizedBox(height: MediaQuery
-                        .of(context)
-                        .size
-                        .height * 0.25),
+                    SizedBox(height: 300.h),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Text(
-                          'Hurry up! Register now and start your digital store',
+                          'Hurray! you are now ready to shop from your local stores',
                           style: TextStyle(
                             color: hexToColor('#636363'),
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w500,
-                            fontSize: 12,
+                            fontSize: 17.sp,
                           ),
                         ),
                         Text(
                           'Join Our Tnennt Community',
                           style: TextStyle(
-                            color: Theme
-                                .of(context)
-                                .primaryColor,
+                            color: Theme.of(context).primaryColor,
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w500,
-                            fontSize: 12,
+                            fontSize: 17.sp,
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 20),
                   ],
                 ),
               ],
@@ -1583,48 +1584,51 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     );
   }
 
-  Widget _buildStoreRegistrationPageHeader(BuildContext context,
-      PageController controller, int currentPage) {
+  Widget _buildStoreRegistrationPageHeader(
+      BuildContext context, PageController controller, int currentPage) {
     return Container(
-      height: 100,
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      height: 100.h,
+      margin: EdgeInsets.only(top: 16.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.h),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 12.0.h),
             decoration: BoxDecoration(
               color: hexToColor('#272822'),
-              borderRadius: BorderRadius.circular(20.0),
+              borderRadius: BorderRadius.circular(50.r),
             ),
             child: Row(
               children: [
-                Image.asset(
-                    'assets/white_tnennt_logo.png', width: 20, height: 20),
-                SizedBox(width: 10),
+                Image.asset('assets/white_tnennt_logo.png',
+                    width: 30.w, height: 30.w),
+                SizedBox(width: 16.w),
                 Text(
                   'Tnennt inc.',
-                  style: TextStyle(
-                      color: hexToColor('#E6E6E6'), fontSize: 14.0),
+                  style:
+                      TextStyle(color: hexToColor('#E6E6E6'), fontSize: 16.sp),
                 ),
               ],
             ),
           ),
           Spacer(),
-          Container(
-            margin: EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey[100],
-              child: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                onPressed: () {
-                  if (currentPage == 0 || currentPage > 9) {
-                    Navigator.pop(context);
-                  } else {
-                    controller.jumpToPage(currentPage - 1);
-                  }
-                },
+          IconButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(
+                Colors.grey[100],
+              ),
+              shape: WidgetStateProperty.all(
+                CircleBorder(),
               ),
             ),
+            icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+            onPressed: () {
+              if (currentPage == 0 || currentPage > 9) {
+                Navigator.pop(context);
+              } else {
+                controller.jumpToPage(currentPage - 1);
+              }
+            },
           ),
         ],
       ),
@@ -1637,19 +1641,24 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         PageView(
           controller: _storeFeaturesPageController,
           children: [
-            _buildStoreFeaturePage('Create Your Own e-Store',
+            _buildStoreFeaturePage(
+                'Create Your Own e-Store',
                 'Make your own digital store and start selling online',
                 'assets/create_your_own_e-store.png'),
             _buildStoreFeaturePage(
-                'Delivery Support', 'Provided middlemen for product delivery',
+                'Delivery Support',
+                'Provided middlemen for product delivery',
                 'assets/delivery_support.png'),
             _buildStoreFeaturePage(
-                'Packaging', 'Provide product delivery in our custom packaging',
+                'Packaging',
+                'Provide product delivery in our custom packaging',
                 'assets/packaging.png'),
             _buildStoreFeaturePage(
-                'Analytics', 'See Your Business Insights & Store Matrics',
+                'Analytics',
+                'See Your Business Insights & Store Matrics',
                 'assets/analytics.png'),
-            _buildStoreFeaturePage('Discount Coupons',
+            _buildStoreFeaturePage(
+                'Discount Coupons',
                 'Create Discount Coupons For Your Store And Products Easily And Instantly',
                 'assets/discount_coupons.png'),
           ],
@@ -1661,39 +1670,33 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     );
   }
 
-  Widget _buildStoreFeaturePage(String title, String subtitle,
-      String imagePath) {
+  Widget _buildStoreFeaturePage(
+      String title, String subtitle, String imagePath) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Image.asset(
           imagePath,
-          width: MediaQuery
-              .of(context)
-              .size
-              .width * 0.7,
-          height: MediaQuery
-              .of(context)
-              .size
-              .height * 0.35,
+          width: 600.w,
+          height: 600.h,
           fit: BoxFit.contain,
         ),
-        SizedBox(height: 50),
+        SizedBox(height: 50.h),
         Text(
           title,
-          style: TextStyle(color: hexToColor('#1E1E1E'), fontSize: 26.0),
+          style: TextStyle(color: hexToColor('#1E1E1E'), fontSize: 35.sp),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 10),
+        SizedBox(height: 20.h),
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: 26.w),
           child: Text(
             subtitle,
             style: TextStyle(
               color: hexToColor('#858585'),
               fontFamily: 'Poppins',
               fontWeight: FontWeight.w500,
-              fontSize: 16.0,
+              fontSize: 23.sp,
             ),
             maxLines: 2,
             textAlign: TextAlign.center,
@@ -1710,53 +1713,53 @@ class _StoreRegistrationState extends State<StoreRegistration> {
       left: 0,
       right: 0,
       child: Container(
-        height: 100,
-        padding: EdgeInsets.symmetric(horizontal: 16.0),
+        height: 100.h,
+        margin: EdgeInsets.only(top: 16.h),
+        padding: EdgeInsets.symmetric(horizontal: 16.h),
         child: Row(
           children: [
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding:
+                  EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 12.0.h),
               decoration: BoxDecoration(
                 color: hexToColor('#272822'),
-                borderRadius: BorderRadius.circular(20.0),
+                borderRadius: BorderRadius.circular(50.r),
               ),
               child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Image.asset('assets/white_tnennt_logo.png',
-                      width: 20, height: 20),
-                  SizedBox(width: 10),
+                      width: 30.w, height: 30.w),
+                  SizedBox(width: 16.w),
                   Text(
                     'Tnennt inc.',
                     style: TextStyle(
-                      color: hexToColor('#E6E6E6'),
-                      fontSize: 14.0,
-                    ),
+                        color: hexToColor('#E6E6E6'), fontSize: 16.sp),
                   ),
                 ],
               ),
             ),
             Spacer(),
-            Container(
-              margin: EdgeInsets.all(8.0),
-              child: CircleAvatar(
-                backgroundColor: Colors.grey[100],
-                child: IconButton(
-                  icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                  onPressed: () {
-                    if (_storeFeaturesPageController.hasClients &&
-                        _featuresCurrentPageIndex > 0) {
-                      _storeFeaturesPageController.previousPage(
-                        duration: Duration(milliseconds: 300),
-                        curve: Curves.easeInOutBack,
-                      );
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
+            IconButton(
+              style: ButtonStyle(
+                backgroundColor: WidgetStateProperty.all(
+                  Colors.grey[100],
+                ),
+                shape: WidgetStateProperty.all(
+                  CircleBorder(),
                 ),
               ),
+              icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+              onPressed: () {
+                if (_storeFeaturesPageController.hasClients &&
+                    _featuresCurrentPageIndex > 0) {
+                  _storeFeaturesPageController.previousPage(
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOutBack,
+                  );
+                } else {
+                  Navigator.pop(context);
+                }
+              },
             ),
           ],
         ),
@@ -1766,7 +1769,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
 
   Widget _buildStoreFeaturePageIndicator() {
     return Positioned(
-      bottom: 100,
+      bottom: 150.h,
       left: 0,
       right: 0,
       child: Center(
@@ -1775,11 +1778,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
           count: 5,
           effect: ExpandingDotsEffect(
             dotColor: hexToColor('#787878'),
-            activeDotColor: Theme
-                .of(context)
-                .primaryColor,
-            dotHeight: 4,
-            dotWidth: 4,
+            activeDotColor: Theme.of(context).primaryColor,
+            dotHeight: 6.h,
+            dotWidth: 6.w,
             spacing: 10,
             expansionFactor: 5,
           ),
@@ -1790,12 +1791,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
 
   Widget _buildStoreFeatureNavigationButton() {
     return Positioned(
-      bottom: 20,
+      bottom: 30.h,
       left: 0,
       right: 0,
       child: Center(
-        child: ElevatedButton(
-          onPressed: () {
+        child: GestureDetector(
+          onTap: () {
             if (_storeFeaturesPageController.hasClients) {
               if (_featuresCurrentPageIndex < 4) {
                 _storeFeaturesPageController.nextPage(
@@ -1809,24 +1810,19 @@ class _StoreRegistrationState extends State<StoreRegistration> {
               }
             }
           },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme
-                .of(context)
-                .primaryColor,
-            foregroundColor: Colors.white,
-            padding: EdgeInsets.symmetric(horizontal: 75, vertical: 20),
-            textStyle: TextStyle(
-              fontSize: 16,
-              fontFamily: 'Gotham',
-              fontWeight: FontWeight.w500,
+          child: Container(
+            height: 95.h,
+            width: 490.w,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: Theme.of(context).primaryColor,
+              borderRadius: BorderRadius.circular(50.r),
             ),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30),
+            child: Text(
+              _featuresCurrentPageIndex >= 4 ? 'Finish' : 'Next',
+              style: TextStyle(
+                  fontFamily: 'Gotham', fontSize: 25.sp, color: Colors.white),
             ),
-          ),
-          child: Text(
-            _featuresCurrentPageIndex >= 4 ? 'Finish' : 'Next',
-            style: TextStyle(fontSize: 16),
           ),
         ),
       ),

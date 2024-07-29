@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 
@@ -33,8 +34,9 @@ class TrackOrderScreen extends StatelessWidget {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      height: 100,
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      height: 100.h,
+      margin: EdgeInsets.only(top: 20.h, bottom: 20.h),
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Row(
         children: [
           Row(
@@ -43,31 +45,34 @@ class TrackOrderScreen extends StatelessWidget {
                 'Track Order'.toUpperCase(),
                 style: TextStyle(
                   color: hexToColor('#1E1E1E'),
-                  fontSize: 24.0,
+                  fontSize: 35.sp,
                   letterSpacing: 1.5,
                 ),
               ),
               Text(
                 ' •',
                 style: TextStyle(
-                  fontSize: 28.0,
+                  fontSize: 35.sp,
                   color: hexToColor('#42FF00'),
                 ),
               ),
             ],
           ),
           Spacer(),
-          Container(
-            margin: EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey[100],
-              child: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+          IconButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(
+                Colors.grey[100],
+              ),
+              shape: WidgetStateProperty.all(
+                CircleBorder(),
               ),
             ),
+            icon: Icon(Icons.arrow_back_ios_new,
+                color: Colors.black),
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
         ],
       ),
@@ -76,22 +81,23 @@ class TrackOrderScreen extends StatelessWidget {
 
   Widget _buildOrderDetails() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.0),
+      height: 175.h,
+      padding: EdgeInsets.symmetric(horizontal: 18.w),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Container(
-            height: 125,
-            width: 125,
+            height: 175.h,
+            width: 165.w,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: BorderRadius.circular(8.r),
               image: DecorationImage(
                 image: NetworkImage(order['productImage']),
                 fit: BoxFit.fill,
               ),
             ),
           ),
-          SizedBox(width: 10.0),
+          SizedBox(width: 12.w),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -99,34 +105,34 @@ class TrackOrderScreen extends StatelessWidget {
                 order['productName'],
                 style: TextStyle(
                     color: hexToColor('#343434'),
-                    fontSize: 16.0),
+                    fontSize: 24.sp),
               ),
-              SizedBox(height: 10.0),
+              SizedBox(height: 12.h),
               Row(
                 children: [
                   Text(
                     'Order ID:',
                     style: TextStyle(
                         color: hexToColor('#878787'),
-                        fontSize: 14.0),
+                        fontSize: 17.sp),
                   ),
-                  SizedBox(width: 8.0),
+                  SizedBox(width: 8.w),
                   Text(
                     order['orderId'],
                     style: TextStyle(
                         color: hexToColor('#A9A9A9'),
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
-                        fontSize: 14.0),
+                        fontSize: 17.sp),
                   ),
                 ],
               ),
-              SizedBox(height: 50.0),
+              SizedBox(height: 60.h),
               Text(
                 '₹ ${order['priceDetails']['price']}',
                 style: TextStyle(
                     color: hexToColor('#343434'),
-                    fontSize: 18.0),
+                    fontSize: 22.sp),
               ),
             ],
           ),
@@ -152,7 +158,7 @@ class TrackOrderScreen extends StatelessWidget {
   Widget _buildProvidedMiddlemen() {
     final middleman = order['providedMiddleman'];
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -163,25 +169,25 @@ class TrackOrderScreen extends StatelessWidget {
                 'Provided Middlemen:',
                 style: TextStyle(
                     color: hexToColor('#343434'),
-                    fontSize: 16.0),
+                    fontSize: 24.sp),
               ),
-              SizedBox(height: 15.0),
+              SizedBox(height: 16.h),
               Text(
                 middleman['name'] ?? 'Not assigned yet',
                 style: TextStyle(
                     color: hexToColor('#727272'),
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w500,
-                    fontSize: 14.0),
+                    fontSize: 20.sp),
               ),
-              SizedBox(height: 1.0),
+              SizedBox(height: 2.h),
               if (middleman['phone'] != null)
                 Row(
                   children: [
                     Icon(
                       Icons.phone,
                       color: hexToColor('#727272'),
-                      size: 14,
+                      size: 20.sp,
                     ),
                     Text(
                       middleman['phone'],
@@ -189,7 +195,7 @@ class TrackOrderScreen extends StatelessWidget {
                           color: hexToColor('#727272'),
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
-                          fontSize: 14.0),
+                          fontSize: 20.sp),
                     ),
                   ],
                 ),
@@ -197,10 +203,10 @@ class TrackOrderScreen extends StatelessWidget {
           ),
           Spacer(),
           Container(
-            height: 50,
-            width: 50,
+            width: 70.w,
+            height: 70.h,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(100.0),
+              borderRadius: BorderRadius.circular(100.r),
               image: DecorationImage(
                 image: NetworkImage(middleman['photo'] ?? ''),
                 fit: BoxFit.fill,
@@ -249,7 +255,7 @@ class OrderStatusItem extends StatelessWidget {
     final Color timelineColor = isCompleted ? Theme.of(context).primaryColor : Colors.grey;
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 18.w),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -261,13 +267,13 @@ class OrderStatusItem extends StatelessWidget {
               ),
               if (!isLast)
                 Container(
-                  height: 60,
-                  width: 3,
+                  height: 70.h,
+                  width: 4.sp,
                   color: timelineColor,
                 ),
             ],
           ),
-          SizedBox(width: 8),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -276,11 +282,11 @@ class OrderStatusItem extends StatelessWidget {
                   status.title,
                   style: TextStyle(
                     color: hexToColor('#727272'),
-                    fontSize: 14,
+                    fontSize: 20.sp,
                   ),
                 ),
                 if (status.time.isNotEmpty) ...[
-                  SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Row(
                     children:[
                       Text(
@@ -289,7 +295,7 @@ class OrderStatusItem extends StatelessWidget {
                           color: hexToColor('#343434'),
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
-                          fontSize: 12,
+                          fontSize: 16.sp,
                         ),
                       ),
                       Text(
@@ -298,24 +304,23 @@ class OrderStatusItem extends StatelessWidget {
                           color: hexToColor('#949494'),
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
-                          fontSize: 12,
+                          fontSize: 16.sp,
                         ),
                       ),
                     ],
                   ),
                 ],
                 if(status.description.isNotEmpty) ...[
-                  SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     status.description,
                     style: TextStyle(
                       color: hexToColor('#343434'),
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.w500,
-                      fontSize: 12,
+                      fontSize: 16.sp,
                     ),
                   ),
-                  SizedBox(height: 4),
                 ],
               ],
             ),

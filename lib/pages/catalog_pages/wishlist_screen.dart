@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
 import '../../helpers/color_utils.dart';
+import 'checkout_screen.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({Key? key}) : super(key: key);
@@ -131,41 +133,51 @@ class _WishlistScreenState extends State<WishlistScreen> {
         child: Column(
           children: [
             Container(
-              height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              height: 100.h,
+              margin: EdgeInsets.only(top: 20.h, bottom: 20.h),
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
                 children: [
                   Text(
                     'Wishlist'.toUpperCase(),
                     style: TextStyle(
                       color: hexToColor('#1E1E1E'),
-                      fontSize: 24.0,
+                      fontSize: 35.sp,
                       letterSpacing: 1.5,
                     ),
                   ),
                   Text(
                     ' •',
                     style: TextStyle(
-                      fontSize: 24.0,
+                      fontSize: 35.sp,
                       color: hexToColor('#42FF00'),
                     ),
                   ),
                   Spacer(),
-                  CircleAvatar(
-                    backgroundColor: Colors.grey[100],
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                      onPressed: () => Navigator.pop(context),
+                  IconButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        Colors.grey[100],
+                      ),
+                      shape: WidgetStateProperty.all(
+                        CircleBorder(),
+                      ),
                     ),
+                    icon: Icon(Icons.arrow_back_ios_new,
+                        color: Colors.black),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 24.h),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.0),
-              height: 75,
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              height: 100.h,
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
@@ -175,14 +187,14 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         'Total Amount',
                         style: TextStyle(
                           color: hexToColor('#343434'),
-                          fontSize: 16.0,
+                          fontSize: 24.sp,
                         ),
                       ),
                       Text(
                         '₹ ${totalPrice.toStringAsFixed(2)}',
                         style: TextStyle(
                           color: hexToColor('#A9A9A9'),
-                          fontSize: 18.0,
+                          fontSize: 26.sp,
                         ),
                       ),
                     ],
@@ -198,7 +210,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                               'Select All Items',
                               style: TextStyle(
                                 color: hexToColor('#343434'),
-                                fontSize: 16.0,
+                                fontSize: 22.sp,
                               ),
                             ),
                             Text(
@@ -207,7 +219,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                                 color: hexToColor('#989898'),
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w500,
-                                fontSize: 9.0,
+                                fontSize: 14.sp,
                               ),
                             ),
                           ],
@@ -222,12 +234,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 20.h),
             Expanded(
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
                   : ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      padding: EdgeInsets.symmetric(horizontal: 12.w),
                       itemCount: wishlistItems.length,
                       itemBuilder: (context, index) {
                         return WishlistItemTile(
@@ -308,15 +320,16 @@ class WishlistItemTile extends StatelessWidget {
         );
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 14.0),
+        height: 285.h,
+        margin: EdgeInsets.symmetric(vertical: 12.h, horizontal: 18.w),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              height: 190,
-              width: 150,
+              height: 285.h,
+              width: 255.w,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.0),
+                borderRadius: BorderRadius.circular(8.r),
                 image: item['productImage'] != null
                     ? DecorationImage(
                   image: NetworkImage(item['productImage']),
@@ -325,10 +338,10 @@ class WishlistItemTile extends StatelessWidget {
                     : null,
               ),
               child: item['productImage'] == null
-                  ? Center(child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey))
+                  ? Center(child: Icon(Icons.image_not_supported, size: 50.sp, color: Colors.grey))
                   : null,
             ),
-            SizedBox(width: 12.0),
+            SizedBox(width: 16.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -338,66 +351,70 @@ class WishlistItemTile extends StatelessWidget {
                     item['productName'],
                     style: TextStyle(
                       color: hexToColor('#343434'),
-                      fontSize: 20.0,
+                      fontSize: 26.sp,
                     ),
                   ),
+                  SizedBox(height: 8.h),
                   Text(
                     'Variation: ${item['variation']}',
                     style: TextStyle(
                       color: hexToColor('#737373'),
-                      fontSize: 14.0,
+                      fontSize: 18.sp,
                     ),
                   ),
-                  SizedBox(height: 45.0),
+                  SizedBox(height: 60.h),
                   Text(
                     '₹${item['variationDetails'].price.toStringAsFixed(2)}',
                     style: TextStyle(
                       color: hexToColor('#343434'),
-                      fontSize: 20.0,
+                      fontSize: 28.sp,
                     ),
                   ),
-                  SizedBox(height: 25.0),
+                  SizedBox(height: 40.h),
                   Row(
                     children: [
                       GestureDetector(
                         onTap: onRemove,
                         child: Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 12.0, vertical: 8.0),
+                          height: 50.h,
+                          width: 105.w,
+                          alignment: Alignment.center,
                           decoration: BoxDecoration(
                             border: Border.all(color: hexToColor('#343434')),
-                            borderRadius: BorderRadius.circular(100.0),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
                           child: Text(
                             'Remove',
                             style: TextStyle(
                               color: hexToColor('#737373'),
-                              fontSize: 12.0,
+                              fontSize: 17.sp,
                             ),
                           ),
                         ),
                       ),
-                      SizedBox(width: 8.0),
+                      SizedBox(width: 8.w),
                       GestureDetector(
                         onTap: () {
-                          // Navigate to checkout screen
+                          // Navigate to Checkout
                         },
                         child: Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 12.0, vertical: 8.0),
+                          height: 50.h,
+                          width: 105.w,
+                          alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: hexToColor('#343434'),
-                            borderRadius: BorderRadius.circular(100.0),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
                           child: Text(
                             'Buy Now',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 12.0,
+                              fontSize: 17.sp,
                             ),
                           ),
                         ),
                       ),
+                      SizedBox(width: 8.w),
                       Checkbox(
                         checkColor: Colors.black,
                         activeColor: Colors.white,

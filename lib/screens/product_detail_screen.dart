@@ -209,31 +209,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
-  void navigateToCheckout() {
-    Map<String, dynamic> item = {
-      'productId': widget.product.productId,
-      'productImage': widget.product.imageUrls.first,
-      'storeId': widget.product.storeId,
-      'productName': widget.product.name,
-      'variation': _selectedVariation,
-      'quantity': 1,
-      'variationDetails': _selectedVariant
-    };
-
-    if (_selectedVariant.stockQuantity > 0) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CheckoutScreen(selectedItems: [item]),
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Out of Stock, please try again later')),
-      );
-    }
-  }
-
   void _checkWishlistStatus() async {
     User? user = _auth.currentUser;
     if (user != null) {
@@ -332,6 +307,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     DocumentReference productRef =
         _firestore.collection('products').doc(productId);
 
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Vote recorded successfully')),
+    );
+
     try {
       await _firestore.runTransaction((transaction) async {
         DocumentSnapshot voteDoc = await transaction.get(userVoteRef);
@@ -404,11 +384,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               _product.copyWith(greenFlags: greenFlags, redFlags: redFlags);
         });
       });
-
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Vote recorded successfully')),
-      );
     } catch (error) {
       print('Error recording vote: $error');
       ScaffoldMessenger.of(context).showSnackBar(
@@ -441,8 +416,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        height: 100,
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        height: 100.h,
+                        margin: EdgeInsets.only(top: 20.h, bottom: 20.h),
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
                         child: Row(
                           children: [
                             Row(
@@ -451,32 +427,34 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   'Product'.toUpperCase(),
                                   style: TextStyle(
                                     color: hexToColor('#1E1E1E'),
-                                    fontSize: 24.0,
+                                    fontSize: 35.sp,
                                     letterSpacing: 1.5,
                                   ),
                                 ),
                                 Text(
                                   ' •',
                                   style: TextStyle(
-                                    fontSize: 28.0,
+                                    fontSize: 35.sp,
                                     color: hexToColor('#FF0000'),
                                   ),
                                 ),
                               ],
                             ),
                             Spacer(),
-                            Container(
-                              margin: EdgeInsets.all(8.0),
-                              child: CircleAvatar(
-                                backgroundColor: Colors.grey[100],
-                                child: IconButton(
-                                  icon: Icon(Icons.arrow_back_ios_new,
-                                      color: Colors.black),
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
+                            IconButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all(
+                                  Colors.grey[100],
+                                ),
+                                shape: WidgetStateProperty.all(
+                                  CircleBorder(),
                                 ),
                               ),
+                              icon: Icon(Icons.arrow_back_ios_new,
+                                  color: Colors.black),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
                             ),
                           ],
                         ),
@@ -484,18 +462,19 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       Column(
                         children: [
                           Container(
-                            height: 300,
+                            height: 495.h,
+                            width: 620.w,
                             child: ListView.builder(
                               controller: imagesController,
                               scrollDirection: Axis.horizontal,
                               itemCount: widget.product.imageUrls.length,
                               itemBuilder: (context, index) {
                                 return Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 8),
-                                  width: 300,
-                                  height: 300,
+                                  margin: EdgeInsets.symmetric(horizontal: 12.w),
+                                  width: 445.w,
+                                  height: 490.h,
                                   child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
+                                    borderRadius: BorderRadius.circular(8.r),
                                     child: Image.network(
                                       widget.product.imageUrls[index],
                                       fit: BoxFit.cover,
@@ -505,9 +484,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               },
                             ),
                           ),
-                          SizedBox(height: 10),
+                          SizedBox(height: 30.h),
                           Container(
-                            height: 20,
+                            height: 30.h,
                             child: SmoothPageIndicator(
                               controller: imagesController,
                               count: widget.product.imageUrls.length,
@@ -529,7 +508,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 30.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -544,34 +523,36 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               );
                             },
                             child: Padding(
-                              padding: const EdgeInsets.only(left: 16.0),
+                              padding: EdgeInsets.only(left: 16.w),
                               child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Container(
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(10),
+                                        borderRadius: BorderRadius.circular(6.r),
                                       ),
                                       child: Image.network(
                                         store.logoUrl,
-                                        width: 30,
-                                        height: 30,
+                                        width: 50.w,
+                                        height: 50.h,
                                       )),
-                                  SizedBox(width: 8),
+                                  SizedBox(width: 12.w),
                                   Text(
                                     store.name,
                                     style: TextStyle(
                                       color: hexToColor('#9C9C9C'),
-                                      fontSize: 14,
+                                      fontSize: 20.sp,
                                       fontFamily: 'Poppins',
                                       fontWeight: FontWeight.w600,
                                     ),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.only(right: 8.0),
+                            padding: EdgeInsets.only(right: 12.w),
                             child: Row(
                               children: [
                                 GestureDetector(
@@ -580,8 +561,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       backgroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(12),
-                                          topRight: Radius.circular(12),
+                                          topLeft: Radius.circular(16.r),
+                                          topRight: Radius.circular(16.r),
                                         ),
                                       ),
                                       context: context,
@@ -590,23 +571,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     );
                                   },
                                   child: CircleAvatar(
+                                    radius: 30.w,
                                     backgroundColor: hexToColor('#F5F5F5'),
                                     child: Icon(
                                       Icons.more_horiz,
                                       color: hexToColor('#BEBEBE'),
-                                      size: 20,
+                                      size: 32.sp,
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 8),
+                                SizedBox(width: 12.w),
                                 GestureDetector(
                                   onTap: () {
                                     showModalBottomSheet(
                                       backgroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(12),
-                                          topRight: Radius.circular(12),
+                                          topLeft: Radius.circular(16.r),
+                                          topRight: Radius.circular(16.r),
                                         ),
                                       ),
                                       context: context,
@@ -615,15 +597,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     );
                                   },
                                   child: CircleAvatar(
+                                    radius: 30.w,
                                     backgroundColor: hexToColor('#F5F5F5'),
                                     child: Image.asset(
                                       _flagImage,
-                                      width: 18,
-                                      height: 18,
+                                      width: 24.w,
+                                      height: 24.h,
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 8),
+                                SizedBox(width: 12.w),
                                 GestureDetector(
                                   onTap: () async {
                                     await Share.share(
@@ -631,18 +614,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     );
                                   },
                                   child: CircleAvatar(
+                                    radius: 30.w,
                                     backgroundColor: hexToColor('#F5F5F5'),
                                     child: Icon(
                                       Icons.ios_share_outlined,
                                       color: hexToColor('#BEBEBE'),
-                                      size: 20,
+                                      size: 32.sp,
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 8),
+                                SizedBox(width: 12.w),
                                 GestureDetector(
                                   onTap: _toggleWishlist,
                                   child: CircleAvatar(
+                                    radius: 30.w,
                                     backgroundColor: hexToColor('#F5F5F5'),
                                     child: Icon(
                                       _isInWishlist
@@ -651,7 +636,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       color: _isInWishlist
                                           ? Colors.red
                                           : Colors.grey,
-                                      size: 20,
+                                      size: 32.sp,
                                     ),
                                   ),
                                 ),
@@ -660,9 +645,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 30),
+                      SizedBox(height: 50.h),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: EdgeInsets.symmetric(horizontal: 28.w),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -670,17 +655,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               widget.product.name,
                               style: TextStyle(
                                 color: hexToColor('#343434'),
-                                fontSize: 20,
+                                fontSize: 28.sp,
                               ),
                             ),
-                            SizedBox(height: 20),
+                            SizedBox(height: 30.h),
                             _buildVariationSelector(),
-                            SizedBox(height: 20),
+                            SizedBox(height: 30.h),
                             Container(
-                              padding: EdgeInsets.all(16),
+                              padding: EdgeInsets.all(18.w),
                               decoration: BoxDecoration(
                                 color: hexToColor('#F5F5F5'),
-                                borderRadius: BorderRadius.circular(18),
+                                borderRadius: BorderRadius.circular(28.r),
                               ),
                               child: Row(
                                 children: [
@@ -693,27 +678,28 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             CrossAxisAlignment.center,
                                         children: [
                                           Text(
-                                            '₹${_selectedVariant.price.toStringAsFixed(2)}',
+                                            '₹${_selectedVariant.price.toStringAsFixed(0)}',
                                             style: TextStyle(
                                               color: hexToColor('#343434'),
-                                              fontSize: 28,
+                                              fontSize: 50.sp,
                                             ),
                                           ),
-                                          SizedBox(width: 10),
-                                          Text(
-                                            '${_selectedVariant.discount}% Off',
-                                            style: TextStyle(
-                                              color: hexToColor('#FF0000'),
-                                              fontSize: 16,
+                                          SizedBox(width: 10.w),
+                                          if(_selectedVariant.discount > 0)
+                                            Text(
+                                              '${_selectedVariant.discount}% Off',
+                                              style: TextStyle(
+                                                color: hexToColor('#FF0000'),
+                                                fontSize: 22.sp,
+                                              ),
                                             ),
-                                          ),
                                         ],
                                       ),
                                       Text(
                                         'M.R.P ₹${_selectedVariant.mrp.toStringAsFixed(2)}',
                                         style: TextStyle(
                                           color: hexToColor('#B9B9B9'),
-                                          fontSize: 16,
+                                          fontSize: 22.sp,
                                           decoration:
                                               TextDecoration.lineThrough,
                                           decorationColor:
@@ -725,96 +711,108 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   Spacer(),
                                   GestureDetector(
                                     onTap: () async {
-                                      String userId = FirebaseAuth
-                                              .instance.currentUser?.uid ??
-                                          '';
-                                      if (userId.isEmpty) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                              content: Text(
-                                                  'Please log in to add items to cart')),
-                                        );
-                                        return;
+                                      if(_selectedVariant.stockQuantity > 0 && store.isActive) {
+                                        String userId = FirebaseAuth
+                                                .instance.currentUser?.uid ??
+                                            '';
+                                        if (userId.isEmpty) {
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                                content: Text(
+                                                    'Please log in to add items to cart')),
+                                          );
+                                          return;
+                                        }
+
+                                        DocumentReference userRef =
+                                            FirebaseFirestore.instance
+                                                .collection('Users')
+                                                .doc(userId);
+
+                                        try {
+                                          await FirebaseFirestore.instance
+                                              .runTransaction(
+                                                  (transaction) async {
+                                            DocumentSnapshot snapshot =
+                                                await transaction.get(userRef);
+                                            if (!snapshot.exists) {
+                                              throw Exception(
+                                                  "User does not exist!");
+                                            }
+
+                                            Map<String, dynamic> userData =
+                                                snapshot.data()
+                                                    as Map<String, dynamic>;
+                                            List<dynamic> cartList =
+                                                userData['cart'] ?? [];
+
+                                            Map<String, dynamic> cartItem = {
+                                              'productId':
+                                                  widget.product.productId,
+                                              'variation': _selectedVariation,
+                                              'quantity': 1,
+                                              // Default quantity
+                                            };
+
+                                            int existingIndex =
+                                                cartList.indexWhere((item) =>
+                                                    item['productId'] ==
+                                                        widget.product
+                                                            .productId &&
+                                                    item['variation'] ==
+                                                        _selectedVariation);
+
+                                            if (existingIndex != -1) {
+                                              cartList[existingIndex]
+                                                  ['quantity'] += 1;
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(
+                                                        'Item already in cart')),
+                                              );
+                                            } else {
+                                              cartList.add(cartItem);
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(
+                                                        'Item added to cart')),
+                                              );
+                                            }
+
+                                            transaction.update(
+                                                userRef, {'cart': cartList});
+                                          });
+                                        } catch (e) {
+                                          print('Error updating cart: $e');
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(
+                                                content: Text(
+                                                    'Failed to update cart. Please try again.')),
+                                          );
+                                        }
                                       }
-
-                                      DocumentReference userRef =
-                                          FirebaseFirestore.instance
-                                              .collection('Users')
-                                              .doc(userId);
-
-                                      try {
-                                        await FirebaseFirestore.instance
-                                            .runTransaction(
-                                                (transaction) async {
-                                          DocumentSnapshot snapshot =
-                                              await transaction.get(userRef);
-                                          if (!snapshot.exists) {
-                                            throw Exception(
-                                                "User does not exist!");
-                                          }
-
-                                          Map<String, dynamic> userData =
-                                              snapshot.data()
-                                                  as Map<String, dynamic>;
-                                          List<dynamic> cartList =
-                                              userData['cart'] ?? [];
-
-                                          Map<String, dynamic> cartItem = {
-                                            'productId':
-                                                widget.product.productId,
-                                            'variation': _selectedVariation,
-                                            'quantity': 1, // Default quantity
-                                          };
-
-                                          int existingIndex =
-                                              cartList.indexWhere((item) =>
-                                                  item['productId'] ==
-                                                      widget
-                                                          .product.productId &&
-                                                  item['variation'] ==
-                                                      _selectedVariation);
-
-                                          if (existingIndex != -1) {
-                                            cartList[existingIndex]
-                                                ['quantity'] += 1;
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                  content: Text(
-                                                      'Item already in cart')),
-                                            );
-                                          } else {
-                                            cartList.add(cartItem);
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(
-                                                  content: Text(
-                                                      'Item added to cart')),
-                                            );
-                                          }
-
-                                          transaction.update(
-                                              userRef, {'cart': cartList});
-                                        });
-                                      } catch (e) {
-                                        print('Error updating cart: $e');
+                                      else{
                                         ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                              content: Text(
-                                                  'Failed to update cart. Please try again.')),
-                                        );
+                                              .showSnackBar(
+                                            SnackBar(
+                                                content: Text(
+                                                    'Product is out of stock or store is inactive')),
+                                          );
                                       }
                                     },
                                     child: Container(
-                                      padding: EdgeInsets.all(16),
+                                      height: 95.h,
+                                      width: 95.w,
                                       decoration: BoxDecoration(
                                         color: Theme.of(context).primaryColor,
-                                        borderRadius: BorderRadius.circular(12),
+                                        borderRadius: BorderRadius.circular(12.r),
                                       ),
                                       child: Icon(Icons.add_shopping_cart,
-                                          color: Colors.white, size: 25),
+                                          color: Colors.white, size: 35.sp),
                                     ),
                                   ),
                                 ],
@@ -823,9 +821,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 40),
+                      SizedBox(height: 50.h),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: EdgeInsets.symmetric(horizontal: 28.w),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -835,59 +833,59 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   'Description',
                                   style: TextStyle(
                                     color: hexToColor('#1E1E1E'),
-                                    fontSize: 20.0,
+                                    fontSize: 30.sp,
                                   ),
                                 ),
                                 Text(
                                   ' •',
                                   style: TextStyle(
-                                    fontSize: 20.0,
+                                    fontSize: 30.sp,
                                     color: hexToColor('#FF0000'),
                                   ),
                                 ),
                               ],
                             ),
-                            SizedBox(height: 10),
+                            SizedBox(height: 20.h),
                             Text(
                               widget.product.description,
                               style: TextStyle(
                                 color: hexToColor('#9C9C9C'),
-                                fontSize: 14,
+                                fontSize: 20.sp,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 40),
+                      SizedBox(height: 50.h),
                       // Related Products
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0),
+                            padding: EdgeInsets.symmetric(horizontal: 28.w),
                             child: Row(
                               children: [
                                 Text(
                                   'Related Products',
                                   style: TextStyle(
                                     color: hexToColor('#1E1E1E'),
-                                    fontSize: 20.0,
+                                    fontSize: 30.sp,
                                   ),
                                 ),
                                 Text(
                                   ' •',
                                   style: TextStyle(
-                                    fontSize: 20.0,
+                                    fontSize: 30.sp,
                                     color: hexToColor('#FF0000'),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          SizedBox(height: 10),
+                          SizedBox(height: 20.h),
                           Container(
-                            margin: EdgeInsets.only(left: 8.0),
-                            height: 200,
+                            margin: EdgeInsets.only(left: 12.w),
+                            height: 300.h,
                             child: ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: relatedProducts.length,
@@ -900,7 +898,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 40),
+                      SizedBox(height: 50.h),
 
                       // Reviews
 
@@ -908,54 +906,58 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 16.0),
+                            padding: EdgeInsets.symmetric(horizontal: 28.w),
                             child: Row(
                               children: [
                                 Text(
                                   'Reviews',
                                   style: TextStyle(
                                     color: hexToColor('#1E1E1E'),
-                                    fontSize: 20.0,
+                                    fontSize: 30.sp,
                                   ),
                                 ),
                                 Text(
                                   ' •',
                                   style: TextStyle(
-                                    fontSize: 20.0,
+                                    fontSize: 30.sp,
                                     color: hexToColor('#FF0000'),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          SizedBox(height: 10),
+                          SizedBox(height: 20.h),
                           Container(
-                            margin: EdgeInsets.symmetric(horizontal: 16),
+                            margin: EdgeInsets.symmetric(horizontal: 18.w),
                             padding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
+                                horizontal: 24.w, vertical: 12.h),
                             decoration: BoxDecoration(
                               color: hexToColor('#F5F5F5'),
-                              borderRadius: BorderRadius.circular(50),
+                              borderRadius: BorderRadius.circular(50.r),
                             ),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Image.asset(
                                   'assets/black_tnennt_logo.png',
-                                  width: 25,
-                                  height: 25,
+                                  width: 40.w,
+                                  height: 40.h,
                                 ),
-                                SizedBox(width: 20),
+                                SizedBox(width: 30.w),
                                 Expanded(
                                   child: TextField(
                                     controller: _reviewController,
+                                    style: TextStyle(
+                                      color: hexToColor('#343434'),
+                                      fontSize: 24.sp,
+                                      fontFamily: 'Gotham',
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                     decoration: InputDecoration(
-                                      constraints:
-                                          BoxConstraints(maxHeight: 100),
                                       hintText: 'Add your review',
                                       hintStyle: TextStyle(
                                         color: hexToColor('#9C9C9C'),
-                                        fontSize: 16,
+                                        fontSize: 24.sp,
                                         fontFamily: 'Gotham',
                                         fontWeight: FontWeight.w600,
                                       ),
@@ -976,11 +978,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ],
                             ),
                           ),
-                          SizedBox(height: 20),
+                          SizedBox(height: 30.h),
                           _buildReviewsList(),
                         ],
                       ),
-                      SizedBox(height: 75),
+                      SizedBox(height: 100.h),
                     ],
                   ),
                 ),
@@ -990,24 +992,45 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   bottom: 0,
                   child: Container(
                     padding:
-                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                        EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
                     color: Colors.white,
                     child: ElevatedButton(
                       onPressed: () {
-                        navigateToCheckout();
+                        Map<String, dynamic> item = {
+                          'productId': widget.product.productId,
+                          'productImage': widget.product.imageUrls.first,
+                          'storeId': widget.product.storeId,
+                          'productName': widget.product.name,
+                          'variation': _selectedVariation,
+                          'quantity': 1,
+                          'variationDetails': _selectedVariant
+                        };
+
+                        if (_selectedVariant.stockQuantity > 0 && store.isActive) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => CheckoutScreen(selectedItems: [item]),
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Product is out of stock or store is inactive')),
+                          );
+                        }
                       },
                       child: Text(
                         'Buy Now',
-                        style: TextStyle(fontSize: 18),
+                        style: TextStyle(fontSize: 28.sp),
                       ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: hexToColor('#343434'),
                         foregroundColor: Colors.white,
                         padding: EdgeInsets.symmetric(
-                          vertical: 15,
+                          vertical: 22.h,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(16.r),
                         ),
                       ),
                     ),
@@ -1025,15 +1048,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       runSpacing: 8.0,
       children: widget.product.variations.keys.map((variation) {
         return ChoiceChip(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0),
+          padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 0),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
+            borderRadius: BorderRadius.circular(8.r),
           ),
           label: Text(
             variation,
             style: TextStyle(
               color:
                   _selectedVariation == variation ? Colors.white : Colors.black,
+              fontSize: 18.sp,
             ),
           ),
           backgroundColor: Colors.white,
@@ -1060,39 +1084,39 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   _buildMoreBottomSheet() {
     return Container(
-      height: 250,
+      height: 350.h,
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Center(
             child: Container(
-              width: 100,
-              height: 4,
-              margin: const EdgeInsets.symmetric(vertical: 15),
+              width: 150.w,
+              height: 6.h,
+              margin: EdgeInsets.symmetric(vertical: 18.h),
               decoration: BoxDecoration(
                 color: hexToColor('#CACACA'),
-                borderRadius: BorderRadius.circular(5),
+                borderRadius: BorderRadius.circular(50.r),
               ),
             ),
           ),
-          SizedBox(height: 50),
+          SizedBox(height: 75.h),
           CircleAvatar(
             backgroundColor: hexToColor('#2B2B2B'),
             child: Icon(
               Icons.report_gmailerrorred,
               color: hexToColor('#BEBEBE'),
-              size: 20,
+              size: 28.sp,
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 30.h),
           Text(
             'Report',
             style: TextStyle(
               color: hexToColor('#9B9B9B'),
-              fontSize: 16.0,
+              fontSize: 23.sp,
             ),
           ),
         ],
@@ -1102,49 +1126,49 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   _buildRatingBottomSheet() {
     return Container(
-      height: 275,
+      height: 450.h,
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      padding: EdgeInsets.symmetric(horizontal: 18.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Center(
             child: Container(
-              width: 100,
-              height: 4,
-              margin: const EdgeInsets.symmetric(vertical: 15),
+              width: 150.w,
+              height: 8.h,
+              margin: EdgeInsets.symmetric(vertical: 18.h),
               decoration: BoxDecoration(
                 color: hexToColor('#CACACA'),
-                borderRadius: BorderRadius.circular(5),
+                borderRadius: BorderRadius.circular(50.r),
               ),
             ),
           ),
-          SizedBox(height: 20),
+          SizedBox(height: 30.h),
           Row(
             children: [
               Text(
                 'Add Your Rating',
-                style: TextStyle(color: hexToColor('#343434'), fontSize: 16.0),
+                style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
               ),
               Spacer(),
               CircleAvatar(
-                radius: 15,
+                radius: 22.w,
                 backgroundColor: hexToColor('#F5F5F5'),
                 child: Image.asset(
                   _flagImage,
-                  width: 16,
-                  height: 16,
+                  width: 20.w,
+                  height: 20.h,
                 ),
               ),
-              SizedBox(width: 4),
+              SizedBox(width: 12.w),
               Text(
                 '${_product.greenFlags + _product.redFlags}',
                 style: TextStyle(
-                    color: Theme.of(context).primaryColor, fontSize: 16.0),
+                    color: Theme.of(context).primaryColor, fontSize: 23.sp),
               ),
             ],
           ),
-          SizedBox(height: 40),
+          SizedBox(height: 50.h),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -1156,24 +1180,24 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       setState(() {}); // refresh UI
                     },
                     child: CircleAvatar(
-                      radius: 30,
+                      radius: 50.w,
                       backgroundColor: hexToColor('#F5F5F5'),
                       child: Image.asset(
                         'assets/red-flag.png',
-                        width: 30,
-                        height: 30,
+                        width: 50.w,
+                        height: 50.h,
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 20.h),
                   Text(
                     '${_product.redFlags}',
                     style:
-                        TextStyle(color: hexToColor('#9C9C9C'), fontSize: 16.0),
+                        TextStyle(color: hexToColor('#9C9C9C'), fontSize: 24.sp),
                   ),
                 ],
               ),
-              SizedBox(width: 20),
+              SizedBox(width: 30.w),
               Column(
                 children: [
                   GestureDetector(
@@ -1181,20 +1205,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       await handleVote('greenFlag');
                     },
                     child: CircleAvatar(
-                      radius: 30,
+                      radius: 50.w,
                       backgroundColor: hexToColor('#F5F5F5'),
                       child: Image.asset(
                         'assets/green-flag.png',
-                        width: 30,
-                        height: 30,
+                        width: 50.w,
+                        height: 50.h,
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
+                  SizedBox(height: 20.h),
                   Text(
                     '${_product.greenFlags}',
                     style:
-                        TextStyle(color: hexToColor('#9C9C9C'), fontSize: 16.0),
+                        TextStyle(color: hexToColor('#9C9C9C'), fontSize: 24.sp),
                   ),
                 ],
               ),

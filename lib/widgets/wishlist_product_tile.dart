@@ -1,6 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
 import '../helpers/color_utils.dart';
@@ -12,9 +15,10 @@ class WishlistProductTile extends StatefulWidget {
 
   WishlistProductTile({
     required this.product,
-    this.width = 150.0,
-    this.height = 200.0,
-  });
+    double? width,
+    double? height,
+  })  : width = width ?? 240.w,
+        height = height ?? 340.h;
 
   @override
   _WishlistProductTileState createState() => _WishlistProductTileState();
@@ -39,12 +43,14 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
   void _checkWishlistStatus() async {
     User? user = _auth.currentUser;
     if (user != null) {
-      DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user.uid).get();
+      DocumentSnapshot userDoc =
+          await _firestore.collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
-        List<dynamic> wishlist = (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
+        List<dynamic> wishlist =
+            (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
         setState(() {
           _isInWishlist = wishlist.any((item) =>
-          item['productId'] == _wishlistItem['productId'] &&
+              item['productId'] == _wishlistItem['productId'] &&
               item['variation'] == _wishlistItem['variation']);
         });
       }
@@ -54,7 +60,6 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
   Future<void> _toggleWishlist() async {
     User? user = _auth.currentUser;
     if (user == null) {
-      // Handle the case when the user is not logged in
       print('User is not logged in');
       return;
     }
@@ -64,16 +69,15 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
     });
 
     try {
-      DocumentReference userDocRef = _firestore.collection('Users').doc(user.uid);
+      DocumentReference userDocRef =
+          _firestore.collection('Users').doc(user.uid);
 
       if (_isInWishlist) {
-        // Add product to wishlist
         await userDocRef.update({
           'wishlist': FieldValue.arrayUnion([_wishlistItem])
         });
         print('Added to wishlist: $_wishlistItem');
       } else {
-        // Remove product from wishlist
         await userDocRef.update({
           'wishlist': FieldValue.arrayRemove([_wishlistItem])
         });
@@ -81,7 +85,6 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
       }
     } catch (e) {
       print('Error updating wishlist: $e');
-      // Revert the UI state if the operation failed
       setState(() {
         _isInWishlist = !_isInWishlist;
       });
@@ -93,6 +96,56 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
       return widget.product.variations.values.first;
     }
     return null;
+  }
+
+  Widget _buildShimmerSkeleton() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(
+        width: widget.width,
+        height: widget.height,
+        margin: EdgeInsets.all(12.w),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8.r),
+          color: Colors.white,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(6.r)),
+                  color: Colors.white,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 150.w,
+                    height: 18.h,
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: 8.h),
+                  Container(
+                    width: 100.w,
+                    height: 16.h,
+                    color: Colors.white,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -116,9 +169,9 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
       child: Container(
         width: widget.width,
         height: widget.height,
-        margin: EdgeInsets.all(8.0),
+        margin: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6.0),
+          borderRadius: BorderRadius.circular(8.r),
           color: hexToColor('#F5F5F5'),
         ),
         child: Column(
@@ -128,35 +181,41 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(6.0)),
-                      image: widget.product.imageUrls.isNotEmpty
-                          ? DecorationImage(
-                        image: NetworkImage(widget.product.imageUrls[0]),
-                        fit: BoxFit.cover,
-                      ) : null,
-                    ),
-
-                    child: widget.product.imageUrls.isEmpty
-                        ? Center(child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey))
-                        : null,
+                  ClipRRect(
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(6.r)),
+                    child: widget.product.imageUrls.isNotEmpty
+                        ? CachedNetworkImage(
+                            imageUrl: widget.product.imageUrls[0],
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) =>
+                                _buildShimmerSkeleton(),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
+                          )
+                        : Container(
+                            color: Colors.grey[300],
+                            child: Icon(Icons.image_not_supported,
+                                size: 40, color: Colors.grey),
+                          ),
                   ),
                   Positioned(
-                    right: 8.0,
-                    top: 8.0,
+                    right: 14.w,
+                    top: 14.h,
                     child: GestureDetector(
                       onTap: _toggleWishlist,
                       child: Container(
-                        padding: EdgeInsets.all(6.0),
+                        padding: EdgeInsets.all(6.w),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          _isInWishlist ? Icons.favorite : Icons.favorite_border,
+                          _isInWishlist
+                              ? Icons.favorite
+                              : Icons.favorite_border,
                           color: _isInWishlist ? Colors.red : Colors.grey,
-                          size: 18.0,
+                          size: 20.sp,
                         ),
                       ),
                     ),
@@ -174,28 +233,28 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                     widget.product.name,
                     style: TextStyle(
                       color: hexToColor('#343434'),
-                      fontSize: 12.0,
+                      fontSize: 18.sp,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4.0),
+                  SizedBox(height: 8.h),
                   Row(
                     children: [
                       Text(
                         '₹${price.toStringAsFixed(2)}',
                         style: TextStyle(
                           color: hexToColor('#343434'),
-                          fontSize: 12.0,
+                          fontSize: 16.sp,
                         ),
                       ),
-                      SizedBox(width: 4.0),
+                      SizedBox(width: 8.w),
                       if (discount > 0)
                         Text(
                           '${discount.toStringAsFixed(0)}% OFF',
                           style: TextStyle(
                             color: hexToColor('#FF0000'),
-                            fontSize: 10.0,
+                            fontSize: 16.sp,
                           ),
                         ),
                     ],

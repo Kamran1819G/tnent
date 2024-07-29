@@ -216,11 +216,10 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                 SizedBox(height: 10.0),
                 GestureDetector(
                   onTap: () {
-                    // CreateCouponScreen();
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => ComingSoon()));
+                            builder: (context) => CreateCouponScreen()));
                   },
                   child: Container(
                     width: 180.0,

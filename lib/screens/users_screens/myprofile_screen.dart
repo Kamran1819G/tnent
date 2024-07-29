@@ -9,6 +9,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
+import 'package:tnennt/screens/webview_screen.dart';
 
 import '../../services/firebase/firebase_auth_service.dart';
 import '../../helpers/color_utils.dart';
@@ -192,7 +193,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             color: Colors.white),
                       ),
                       title: Text(
-                        user.address?['zip'] ?? 'Please set address',
+                        user.address?['addressLine1'] ?? 'Please set address',
                         style: TextStyle(
                           color: hexToColor('#4A4F4C'),
                           fontSize: 24.sp,
@@ -211,7 +212,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             ),
                           ),
                           TextSpan(
-                            text: user.address?['pincode'] ?? 'Not set',
+                            text: user.address?['zip'] ?? 'Not set',
                             style: TextStyle(
                               color: hexToColor('#787878'),
                               fontFamily: 'Poppins',
@@ -250,7 +251,19 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                         _buildMenuItem(Icons.person, 'About'),
                         _buildMenuItem(Icons.delete, 'Delete Account'),
                         _buildMenuItem(Icons.help, 'Help'),
-                        _buildMenuItem(Icons.gavel, 'Legal'),
+                        GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => WebViewScreen(
+                                    title: 'Terms of Service',
+                                    url: 'https://tnennt-updated.vercel.app/legals',
+                                  ),
+                                ),
+                              );
+                            },
+                            child: _buildMenuItem(Icons.gavel, 'Legal')),
                       ],
                     ),
                   ),

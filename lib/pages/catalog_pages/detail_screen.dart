@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 
 class DetailScreen extends StatefulWidget {
@@ -11,6 +13,37 @@ class DetailScreen extends StatefulWidget {
 }
 
 class _DetailScreenState extends State<DetailScreen> {
+
+  void _cancelOrder() async {
+    try {
+      await FirebaseFirestore.instance.collection('Orders').where('orderId', isEqualTo: widget.order['orderId']).get().then((snapshot) {
+        snapshot.docs.forEach((doc) {
+          doc.reference.update({
+            'status.cancelled': {
+              'timestamp': Timestamp.now(),
+              'message': 'Order was cancelled',
+            },
+          });
+        });
+      });
+
+      setState(() {
+        widget.order['status']['cancelled'] = {
+          'timestamp': Timestamp.now(),
+          'message': 'Order was cancelled',
+        };
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Order cancelled successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to cancel order: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,8 +81,9 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      height: 100,
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      height: 100.h,
+      margin: EdgeInsets.only(top: 20.h, bottom: 20.h),
+      padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Row(
         children: [
           Row(
@@ -58,29 +92,34 @@ class _DetailScreenState extends State<DetailScreen> {
                 'Details'.toUpperCase(),
                 style: TextStyle(
                   color: hexToColor('#1E1E1E'),
-                  fontSize: 24.0,
+                  fontSize: 35.sp,
                   letterSpacing: 1.5,
                 ),
               ),
               Text(
                 ' •',
                 style: TextStyle(
-                  fontSize: 28.0,
+                  fontSize: 34.sp,
                   color: hexToColor('#42FF00'),
                 ),
               ),
             ],
           ),
           Spacer(),
-          Container(
-            margin: EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              backgroundColor: Colors.grey[100],
-              child: IconButton(
-                icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                onPressed: () => Navigator.pop(context),
+          IconButton(
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(
+                Colors.grey[100],
+              ),
+              shape: WidgetStateProperty.all(
+                CircleBorder(),
               ),
             ),
+            icon: Icon(Icons.arrow_back_ios_new,
+                color: Colors.black),
+            onPressed: () {
+              Navigator.pop(context);
+            },
           ),
         ],
       ),
@@ -89,13 +128,14 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Widget _buildProductDetails() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.0),
+      height: 175.h,
+      padding: EdgeInsets.symmetric(horizontal: 18.w),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Container(
-            height: 125,
-            width: 125,
+            height: 175.h,
+            width: 165.w,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.0),
               image: DecorationImage(
@@ -104,32 +144,32 @@ class _DetailScreenState extends State<DetailScreen> {
               ),
             ),
           ),
-          SizedBox(width: 10.0),
+          SizedBox(width: 12.w),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 widget.order['productName'],
-                style: TextStyle(color: hexToColor('#343434'), fontSize: 16.0),
+                style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
               ),
-              SizedBox(height: 10.0),
+              SizedBox(height: 12.h),
               Row(
                 children: [
                   Text(
                     'Order ID:',
-                    style: TextStyle(color: hexToColor('#878787'), fontSize: 14.0),
+                    style: TextStyle(color: hexToColor('#878787'), fontSize: 17.sp),
                   ),
                   SizedBox(width: 8.0),
                   Text(
                     widget.order['orderId'],
-                    style: TextStyle(color: hexToColor('#A9A9A9'), fontSize: 14.0),
+                    style: TextStyle(color: hexToColor('#A9A9A9'), fontSize: 17.sp),
                   ),
                 ],
               ),
-              SizedBox(height: 50.0),
+              SizedBox(height: 60.h),
               Text(
                 '₹ ${widget.order['priceDetails']['price']}',
-                style: TextStyle(color: hexToColor('#343434'), fontSize: 16.0),
+                style: TextStyle(color: hexToColor('#343434'), fontSize: 22.sp),
               ),
             ],
           ),
@@ -140,15 +180,15 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Widget _buildProvidedMiddleman() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Provided Middlemen:',
-            style: TextStyle(color: hexToColor('#343434'), fontSize: 16.0),
+            style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
           ),
-          SizedBox(height: 15.0),
+          SizedBox(height: 16.h),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -161,16 +201,16 @@ class _DetailScreenState extends State<DetailScreen> {
                       color: hexToColor('#727272'),
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.w500,
-                      fontSize: 14.0,
+                      fontSize: 20.sp,
                     ),
                   ),
-                  SizedBox(height: 1.0),
+                  SizedBox(height: 2.h),
                   Row(
                     children: [
                       Icon(
                         Icons.phone,
                         color: hexToColor('#727272'),
-                        size: 14,
+                        size: 20.sp,
                       ),
                       Text(
                         widget.order['providedMiddleman']['phone'] ?? '',
@@ -178,7 +218,7 @@ class _DetailScreenState extends State<DetailScreen> {
                           color: hexToColor('#727272'),
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
-                          fontSize: 14.0,
+                          fontSize: 20.sp,
                         ),
                       ),
                     ],
@@ -188,10 +228,10 @@ class _DetailScreenState extends State<DetailScreen> {
               Spacer(),
               if (widget.order['providedMiddleman']['image'] != null)
                 Container(
-                  height: 50,
-                  width: 50,
+                  width: 70.w,
+                  height: 70.h,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(100.0),
+                    borderRadius: BorderRadius.circular(100.r),
                     image: DecorationImage(
                       image: NetworkImage(widget.order['providedMiddleman']['image']),
                       fit: BoxFit.fill,
@@ -207,17 +247,17 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Widget _buildAmountDetails() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Amount Details:',
-            style: TextStyle(color: hexToColor('#343434'), fontSize: 16.0),
+            style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
           ),
-          SizedBox(height: 15.0),
+          SizedBox(height: 16.h),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
             child: Column(
               children: [
                 _buildAmountRow('Subtotal', widget.order['priceDetails']['price']),
@@ -227,8 +267,8 @@ class _DetailScreenState extends State<DetailScreen> {
             ),
           ),
           Container(
-            margin: EdgeInsets.symmetric(vertical: 15.0),
-            height: 0.75,
+            margin: EdgeInsets.symmetric(vertical: 16.h),
+            height: 1.h,
             color: hexToColor('#2B2B2B'),
           ),
           Row(
@@ -236,11 +276,11 @@ class _DetailScreenState extends State<DetailScreen> {
             children: [
               Text(
                 'Total Amount',
-                style: TextStyle(color: hexToColor('#343434'), fontSize: 16.0),
+                style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
               ),
               Text(
                 '₹ ${widget.order['priceDetails']['price']}',
-                style: TextStyle(color: hexToColor('#838383'), fontSize: 16.0),
+                style: TextStyle(color: hexToColor('#838383'), fontSize: 24.sp),
               ),
             ],
           ),
@@ -259,7 +299,7 @@ class _DetailScreenState extends State<DetailScreen> {
             color: hexToColor('#727272'),
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w500,
-            fontSize: 14.0,
+            fontSize: 20.sp,
           ),
         ),
         Text(
@@ -268,7 +308,7 @@ class _DetailScreenState extends State<DetailScreen> {
             color: hexToColor('#727272'),
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w500,
-            fontSize: 14.0,
+            fontSize: 20.sp,
           ),
         ),
       ],
@@ -277,17 +317,17 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Widget _buildPaymentDetails() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Payment Details:',
-            style: TextStyle(color: hexToColor('#343434'), fontSize: 16.0),
+            style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
           ),
-          SizedBox(height: 15.0),
+          SizedBox(height: 16.h),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
             child: Column(
               children: [
                 _buildDetailRow('Payment Mode', widget.order['payment']['method']),
@@ -302,7 +342,7 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Widget _buildDeliveryDetails() {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -310,9 +350,9 @@ class _DetailScreenState extends State<DetailScreen> {
             'Delivery Details:',
             style: TextStyle(color: hexToColor('#343434'), fontSize: 16.0),
           ),
-          SizedBox(height: 15.0),
+          SizedBox(height: 16.h),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -322,10 +362,10 @@ class _DetailScreenState extends State<DetailScreen> {
                     color: hexToColor('#2D332F'),
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w600,
-                    fontSize: 14.0,
+                    fontSize: 20.sp,
                   ),
                 ),
-                SizedBox(height: 5.0),
+                SizedBox(height: 8.h),
                 Text(widget.order['shippingAddress']['name'] ?? '',
                     style: _addressTextStyle()),
                 Text(widget.order['shippingAddress']['addressLine1'] ?? '',
@@ -349,7 +389,7 @@ class _DetailScreenState extends State<DetailScreen> {
       color: hexToColor('#727272'),
       fontFamily: 'Poppins',
       fontWeight: FontWeight.w500,
-      fontSize: 14.0,
+      fontSize: 20.sp,
     );
   }
 
@@ -365,18 +405,22 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Widget _buildCancelOrderButton() {
     return Center(
-      child: Container(
-        height: 50,
-        width: 150,
-        margin: EdgeInsets.symmetric(vertical: 15.0),
-        decoration: BoxDecoration(
-          color: hexToColor('#2B2B2B'),
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        child: Center(
-          child: Text(
-            'Cancel Order',
-            style: TextStyle(color: Colors.white, fontSize: 12.0),
+      child: GestureDetector(
+        onTap: _cancelOrder,
+        child: Container(
+          height: 75.h,
+          width: 200.w,
+          margin: EdgeInsets.symmetric(vertical: 15.0),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: hexToColor('#2B2B2B'),
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: Center(
+            child: Text(
+              'Cancel Order',
+              style: TextStyle(color: Colors.white, fontFamily: 'Poppins' ,fontSize: 18.sp),
+            ),
           ),
         ),
       ),

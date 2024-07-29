@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -58,12 +59,14 @@ class _OptionalsScreenState extends State<OptionalsScreen>
 
   String getCategoryTitle() {
     switch (widget.productData.productCategory.toLowerCase()) {
-      case 'clothing':
+      case 'clothings':
         return 'Add Size';
-      case 'bakery':
+      case 'bakeries':
         return 'Add Bakery';
-      case 'electronic':
+      case 'electronics':
         return 'Add Storage';
+      case 'restaurants':
+        return 'Add Bowel Size';
       default:
         return 'Add Option';
     }
@@ -84,6 +87,8 @@ class _OptionalsScreenState extends State<OptionalsScreen>
         ];
       case 'electronics':
         return [OptionTab('Capacity', hexToColor('#343434'))];
+      case 'restaurants':
+        return [OptionTab('Bowel Size', hexToColor('#343434'))];
       default:
         return [OptionTab('Option', hexToColor('#343434'))];
     }
@@ -133,6 +138,14 @@ class _OptionalsScreenState extends State<OptionalsScreen>
               '12GB + 256GB',
               '12GB + 512GB'
             ],
+            selectedOptions: selectedOptions,
+            onOptionSelected: updateSelectedOptions,
+          ),
+        ];
+      case 'restaurants':
+        return [
+          OptionListView(
+            options: ['Half', 'Full'],
             selectedOptions: selectedOptions,
             onOptionSelected: updateSelectedOptions,
           ),
@@ -193,8 +206,9 @@ class _OptionalsScreenState extends State<OptionalsScreen>
         child: Column(
           children: [
             Container(
-              height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              height: 100.h,
+              margin: EdgeInsets.only(top: 20.h, bottom: 20.h),
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
                 children: [
                   Row(
@@ -203,50 +217,52 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                         'Optionals'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontSize: 24.0,
+                          fontSize: 35.sp,
                           letterSpacing: 1.5,
                         ),
                       ),
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontSize: 28.0,
+                          fontSize: 35.sp,
                           color: hexToColor('#FF0000'),
                         ),
                       ),
                     ],
                   ),
                   Spacer(),
-                  Container(
-                    margin: EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey[100],
-                      child: IconButton(
-                        icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                  IconButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        Colors.grey[100],
+                      ),
+                      shape: WidgetStateProperty.all(
+                        CircleBorder(),
                       ),
                     ),
+                    icon: Icon(Icons.arrow_back_ios_new,
+                        color: Colors.black),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 20.h),
             Expanded(
               child: Container(
-                padding: EdgeInsets.only(left: 16.0),
+                padding: EdgeInsets.only(left: 24.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       getCategoryTitle(),
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 23.sp,
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 30.h),
                     TabBar(
                       controller: optionTabController,
                       isScrollable: true,
@@ -255,11 +271,11 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                       labelColor: Colors.white,
                       indicator: BoxDecoration(
                         color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14.r),
                       ),
-                      labelPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                      labelPadding: EdgeInsets.symmetric(horizontal: 6.w),
                       labelStyle: TextStyle(
-                        fontSize: 14.0,
+                        fontSize: 20.sp,
                       ),
                       indicatorSize: TabBarIndicatorSize.label,
                       overlayColor:
@@ -267,10 +283,10 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                       dividerColor: Colors.transparent,
                       tabs: getTabs(),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 30.h),
                     Dash(
                       direction: Axis.horizontal,
-                      length: MediaQuery.of(context).size.width * 0.9,
+                      length: 600.w,
                       dashLength: 10,
                       dashColor: hexToColor('#848484'),
                     ),
@@ -329,7 +345,7 @@ class OptionTab extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       decoration: BoxDecoration(
         border: Border.all(color: color, width: 1.0),
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(14.r),
       ),
       child: Text(title),
     );
@@ -357,7 +373,7 @@ class OptionListView extends StatelessWidget {
             title: Text(
               options[index],
               style: TextStyle(
-                fontSize: 16.0,
+                fontSize: 23.sp,
                 color: Theme.of(context).primaryColor,
                 fontFamily: 'Poppins',
                 fontWeight: FontWeight.w500,
@@ -544,27 +560,27 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 30.h),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 16),
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Add Price To Your Optionals',
-                      style: TextStyle(fontSize: 24, color: Colors.black),
+                      style: TextStyle(fontSize: 32.sp, color: Colors.black),
                     ),
-                    SizedBox(height: 8),
+                    SizedBox(height: 20.h),
                     Text(
                       'All the optional will have the default pricing entered while adding product.',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 20.sp,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w500,
                         color: hexToColor('#636363'),
                       ),
                     ),
-                    SizedBox(height: 30),
+                    SizedBox(height: 30.h),
                     GestureDetector(
                       onTap: () {
                         Navigator.pop(context);

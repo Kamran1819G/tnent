@@ -17,8 +17,6 @@ import 'package:tnennt/screens/notification_screen.dart';
 import 'package:tnennt/screens/stores_screen.dart';
 import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
 import 'package:tnennt/widgets/wishlist_product_tile.dart';
-
-import '../../screens/update_screen.dart';
 import '../../screens/users_screens/storeprofile_screen.dart';
 
 class Home extends StatefulWidget {
@@ -151,6 +149,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     setState(() {
       firstName = widget.currentUser.firstName;
       lastName = widget.currentUser.lastName;
+
     });
     _tabController = TabController(
       length: 6,
@@ -205,8 +204,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          height: 100,
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          height: 100.h,
+          margin: EdgeInsets.only(top: 20.h, bottom: 20.h),
+          padding: EdgeInsets.symmetric(horizontal: 24.w),
           child: Row(
             children: [
               Expanded(
@@ -217,7 +217,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     Text(getGreeting().toUpperCase(),
                         style: TextStyle(
                             color: hexToColor('#727272'), fontSize: 18.sp)),
-                    SizedBox(height: 8.0),
+                    SizedBox(height: 12.h),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: RichText(
@@ -364,7 +364,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
         ),
         // Updates Section
-        Container(
+        /*Container(
           height: 125.0,
           padding: EdgeInsets.only(left: 8.0),
           child: ListView.builder(
@@ -376,86 +376,115 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   image: updates[index]["coverImage"]);
             },
           ),
-        ),
+        ),*/
         SizedBox(height: 20.0),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Stack(
+          height: 250.h,
+          child: PageView(
+            controller: PageController(viewportFraction: 1),
             children: [
-              Image.asset('assets/store_profile_banner.png'),
-              Positioned(
-                right: 20,
-                bottom: 50,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 16.w),
+                child: Stack(
                   children: [
-                    RichText(
-                      text: TextSpan(children: [
-                        TextSpan(
-                          text: 'Tnennt',
+                    Image.asset('assets/store_profile_banner.png',
+                        height: 250.h,
+                        width: double.infinity,
+                        fit: BoxFit.cover),
+                    Positioned(
+                      right: 30.w,
+                      bottom: 80.h,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          RichText(
+                            text: TextSpan(children: [
+                              TextSpan(
+                                text: 'Tnennt',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 24.sp,
+                                ),
+                              ),
+                              TextSpan(
+                                text: ' •',
+                                style: TextStyle(
+                                  fontFamily: 'Gotham Black',
+                                  fontSize: 24.sp,
+                                  color: hexToColor('#42FF00'),
+                                ),
+                              ),
+                            ]),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          Text(
+                            'Store',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 24.sp),
+                          )
+                        ],
+                      ),
+                    ),
+                    Positioned(
+                      top: 16.h,
+                      left: 70.w,
+                      child: Container(
+                        width: 350.w,
+                        child: Text(
+                          "Buy From Your Local Store At A Discounted Price",
                           style: TextStyle(
                             color: Colors.white,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 24.sp,
+                            fontSize: 20.sp,
                           ),
                         ),
-                        TextSpan(
-                          text: ' •',
-                          style: TextStyle(
-                            fontFamily: 'Gotham Black',
-                            fontSize: 24.sp,
-                            color: hexToColor('#42FF00'),
-                          ),
-                        ),
-                      ]),
-                      overflow: TextOverflow.ellipsis,
+                      ),
                     ),
-                    Text(
-                      'Store',
-                      style: TextStyle(color: Colors.white, fontFamily: 'Poppins', fontWeight: FontWeight.w500,fontSize: 24.sp),
-                    )
+                    Positioned(
+                      left: 14.w,
+                      bottom: 20.h,
+                      child: Container(
+                        width: 175,
+                        child: CarouselSlider(
+                          options: CarouselOptions(
+                            enlargeStrategy: CenterPageEnlargeStrategy.scale,
+                            autoPlay: true,
+                            enlargeCenterPage: true,
+                            enlargeFactor: 0.4,
+                            aspectRatio: 2.5,
+                            autoPlayInterval: Duration(seconds: 3),
+                            autoPlayAnimationDuration:
+                                Duration(milliseconds: 800),
+                            enableInfiniteScroll: true,
+                            viewportFraction: 0.35,
+                          ),
+                          items: carouselImgList
+                              .map((item) => Center(
+                                    child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.asset(item,
+                                            fit: BoxFit.cover)),
+                                  ))
+                              .toList(),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
-              Positioned(
-                top: 10,
-                left: 50,
-                right: 120,
-                child: Text(
-                  "Buy From Your Local Store At A Discounted Price",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20.sp,
-                  ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 16.w),
+                decoration: BoxDecoration(
+                  color: hexToColor('#F5F5F5'),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              ),
-              Positioned(
-                left: 10,
-                bottom: 10,
-                child: Container(
-                  width: 175,
-                  child: CarouselSlider(
-                    options: CarouselOptions(
-                      enlargeStrategy: CenterPageEnlargeStrategy.scale,
-                      autoPlay: true,
-                      enlargeCenterPage: true,
-                      enlargeFactor: 0.4,
-                      aspectRatio: 2.5,
-                      autoPlayInterval: Duration(seconds: 3),
-                      autoPlayAnimationDuration: Duration(milliseconds: 800),
-                      enableInfiniteScroll: true,
-                      viewportFraction: 0.35,
-                    ),
-                    items: carouselImgList
-                        .map((item) => Center(
-                              child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.asset(item, fit: BoxFit.cover)),
-                            ))
-                        .toList(),
-                  ),
+                child: Center(
+                  child: Text('Second Page Content'),
                 ),
               ),
             ],
@@ -470,7 +499,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             crossAxisCount: 3,
             crossAxisSpacing: 12.w,
             mainAxisSpacing: 12.h,
-            childAspectRatio: 3 / 4,
+            childAspectRatio: 3/4,
           ),
           itemCount: categories.length,
           itemBuilder: (context, index) {
@@ -533,7 +562,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         SizedBox(height: 30.h),
 
         Container(
-          height: 200.0,
+          height: 340.h,
           padding: EdgeInsets.only(left: 8.0),
           child: TabBarView(
             controller: _tabController,
@@ -631,7 +660,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   Navigator.push(context,
                       MaterialPageRoute(builder: (context) => StoresScreen()));
                 },
-                child:  Container(
+                child: Container(
                   padding: EdgeInsets.all(18.w),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -757,7 +786,7 @@ class CategoryTile extends StatelessWidget {
                     image: AssetImage(category['image']),
                     fit: BoxFit.cover,
                   )),
-              ),
+            ),
             SizedBox(height: 8.h),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -780,14 +809,14 @@ class CategoryTile extends StatelessWidget {
 class CategoryProductsScreen extends StatelessWidget {
   final String categoryName;
 
-  const CategoryProductsScreen({Key? key, required this.categoryName}) : super(key: key);
+  const CategoryProductsScreen({Key? key, required this.categoryName})
+      : super(key: key);
 
   Stream<QuerySnapshot> _getProductsStream() {
     if (categoryName.toLowerCase() == 'more') {
-      return FirebaseFirestore.instance
-          .collection('products')
-          .where('productCategory', whereNotIn: ['SpecialCategory1', 'SpecialCategory2'])
-          .snapshots();
+      return FirebaseFirestore.instance.collection('products').where(
+          'productCategory',
+          whereNotIn: ['SpecialCategory1', 'SpecialCategory2']).snapshots();
     } else {
       return FirebaseFirestore.instance
           .collection('products')
@@ -831,7 +860,8 @@ class CategoryProductsScreen extends StatelessWidget {
                     child: CircleAvatar(
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        icon: const Icon(Icons.arrow_back_ios_new,
+                            color: Colors.black),
                         onPressed: () => Navigator.pop(context),
                       ),
                     ),
@@ -853,21 +883,25 @@ class CategoryProductsScreen extends StatelessWidget {
                   }
 
                   if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(child: Text('No products found in this category'));
+                    return const Center(
+                        child: Text('No products found in this category'));
                   }
 
                   final products = snapshot.data!.docs;
 
                   return GridView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 16.0,
-                      mainAxisSpacing: 16.0,
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                          childAspectRatio: 0.8,
                     ),
                     itemCount: products.length,
                     itemBuilder: (context, index) {
-                      final product = ProductModel.fromFirestore(products[index]);
+                      final product =
+                          ProductModel.fromFirestore(products[index]);
                       return WishlistProductTile(product: product);
                     },
                   );

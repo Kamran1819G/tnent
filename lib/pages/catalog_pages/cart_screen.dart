@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
@@ -162,8 +163,9 @@ class _CartScreenState extends State<CartScreen> {
         child: Column(
           children: [
             Container(
-              height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              height: 100.h,
+              margin: EdgeInsets.only(top: 20.h, bottom: 20.h),
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
                 children: [
                   Row(
@@ -172,65 +174,64 @@ class _CartScreenState extends State<CartScreen> {
                         'Cart'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontSize: 24.0,
+                          fontSize: 35.sp,
                           letterSpacing: 1.5,
                         ),
                       ),
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontSize: 24.0,
+                          fontSize: 35.sp,
                           color: hexToColor('#42FF00'),
                         ),
                       ),
                     ],
                   ),
                   Spacer(),
-                  Container(
-                    margin: EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey[100],
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_back_ios_new,
-                            color: Colors.black),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                  IconButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        Colors.grey[100],
+                      ),
+                      shape: WidgetStateProperty.all(
+                        CircleBorder(),
                       ),
                     ),
+                    icon: Icon(Icons.arrow_back_ios_new,
+                        color: Colors.black),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 24.h),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.0),
-              height: 75,
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              height: 100.h,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    margin: EdgeInsets.only(top: 4.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Total Amount',
-                          style: TextStyle(
-                            color: hexToColor('#343434'),
-                            fontSize: 16.0,
-                          ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Total Amount',
+                        style: TextStyle(
+                          color: hexToColor('#343434'),
+                          fontSize: 24.sp,
                         ),
-                        Text(
-                          '₹ ${_totalAmount.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            color: hexToColor('#A9A9A9'),
-                            fontSize: 18.0,
-                          ),
+                      ),
+                      Text(
+                        '₹ ${_totalAmount.toStringAsFixed(2)}',
+                        style: TextStyle(
+                          color: hexToColor('#A9A9A9'),
+                          fontSize: 26.sp,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                   if (_cartItems.length > 1)
                     Row(
@@ -243,7 +244,7 @@ class _CartScreenState extends State<CartScreen> {
                               'Select All Items',
                               style: TextStyle(
                                 color: hexToColor('#343434'),
-                                fontSize: 16.0,
+                                fontSize: 22.sp,
                               ),
                             ),
                             Text(
@@ -252,7 +253,7 @@ class _CartScreenState extends State<CartScreen> {
                                 color: hexToColor('#989898'),
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w500,
-                                fontSize: 9.0,
+                                fontSize: 14.sp,
                               ),
                             ),
                           ],
@@ -267,10 +268,10 @@ class _CartScreenState extends State<CartScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 20.h),
             Expanded(
               child: ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
                 itemCount: _cartItems.length,
                 itemBuilder: (context, index) {
                   final item = _cartItems[index];
@@ -284,16 +285,19 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(24.w),
               child: ElevatedButton(
-                child: Text('Buy Selected Items'),
+                child: Text('Buy Selected Items', style: TextStyle(fontSize: 22.sp)),
                 onPressed: _cartItems.any((item) => item['isSelected'] == true)
                     ? _navigateToCheckout
                     : null,
                 style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.r),
+                  ),
                   backgroundColor: hexToColor('#343434'),
                   foregroundColor: Colors.white,
-                  minimumSize: Size(double.infinity, 50),
+                  minimumSize: Size(double.infinity, 75.h),
                 ),
               ),
             ),
@@ -321,16 +325,17 @@ class CartItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6.0, vertical: 14.0),
+      height: 285.h,
+      margin: EdgeInsets.symmetric(vertical: 12.h, horizontal: 18.w),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Container(
-            height: 190,
-            width: 150,
+            height: 285.h,
+            width: 255.w,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
+              borderRadius: BorderRadius.circular(8.r),
               image: item['productImage'] != null
                   ? DecorationImage(
                 image: NetworkImage(item['productImage']),
@@ -339,128 +344,127 @@ class CartItemTile extends StatelessWidget {
                   : null,
             ),
             child: item['productImage'] == null
-                ? Center(child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey))
+                ? Center(child: Icon(Icons.image_not_supported, size: 50.sp, color: Colors.grey))
                 : null,
           ),
-          SizedBox(width: 12.0),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: [
-                Text(
-                  item['productName'],
-                  style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontSize: 20.0,
-                  ),
+          SizedBox(width: 16.w),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                item['productName'],
+                style: TextStyle(
+                  color: hexToColor('#343434'),
+                  fontSize: 26.sp,
                 ),
-                SizedBox(height: 8.0),
-                Text(
-                  'Variation: ${item['variation']}',
-                  style: TextStyle(
-                    color: hexToColor('#989898'),
-                    fontSize: 14.0,
-                  ),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                'Variation: ${item['variation']}',
+                style: TextStyle(
+                  color: hexToColor('#989898'),
+                  fontSize: 18.sp,
                 ),
-                SizedBox(height: 25.0),
-                Text(
-                  '₹${item['variationDetails'].price.toStringAsFixed(2)}',
-                  style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontSize: 20.0,
-                  ),
+              ),
+              SizedBox(height: 25.h),
+              Text(
+                '₹${item['variationDetails'].price.toStringAsFixed(2)}',
+                style: TextStyle(
+                  color: hexToColor('#343434'),
+                  fontSize: 28.h,
                 ),
-                SizedBox(height: 15.0),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.remove),
-                      onPressed: () {
-                        int newQuantity = item['quantity'] - 1;
-                        if (newQuantity >= 0) {
-                          onUpdateQuantity(
-                              item['productId'], item['variation'], newQuantity);
-                        }
-                      },
-                    ),
-                    Text(item['quantity'].toString()),
-                    IconButton(
-                      icon: Icon(Icons.add),
-                      onPressed: () {
-                        int newQuantity = item['quantity'] + 1;
+              ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.remove, size: 20.sp),
+                    onPressed: () {
+                      int newQuantity = item['quantity'] - 1;
+                      if (newQuantity >= 0) {
                         onUpdateQuantity(
                             item['productId'], item['variation'], newQuantity);
-                      },
-                    ),
-                  ],
-                ),
-                SizedBox(height: 15.0),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () => onRemove(item['productId'], item['variation']),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 8.0),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: hexToColor('#343434')),
-                          borderRadius: BorderRadius.circular(100.0),
-                        ),
-                        child: Text(
-                          'Remove',
-                          style: TextStyle(
-                            color: hexToColor('#737373'),
-                            fontSize: 12.0,
-                          ),
+                      }
+                    },
+                  ),
+                  Text(item['quantity'].toString(), style: TextStyle(fontSize: 20.sp)),
+                  IconButton(
+                    icon: Icon(Icons.add, size: 20.sp),
+                    onPressed: () {
+                      int newQuantity = item['quantity'] + 1;
+                      onUpdateQuantity(
+                          item['productId'], item['variation'], newQuantity);
+                    },
+                  ),
+                ],
+              ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: () => onRemove(item['productId'], item['variation']),
+                    child: Container(
+                      height: 50.h,
+                      width: 105.w,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: hexToColor('#343434')),
+                        borderRadius: BorderRadius.circular(50.r),
+                      ),
+                      child: Text(
+                        'Remove',
+                        style: TextStyle(
+                          color: hexToColor('#737373'),
+                          fontSize: 17.sp,
                         ),
                       ),
                     ),
-                    SizedBox(width: 8.0),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                CheckoutScreen(selectedItems: [item]),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 8.0),
-                        decoration: BoxDecoration(
-                          color: hexToColor('#343434'),
-                          borderRadius: BorderRadius.circular(100.0),
+                  ),
+                  SizedBox(width: 8.w),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              CheckoutScreen(selectedItems: [item]),
                         ),
-                        child: Text(
-                          'Buy Now',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12.0,
-                          ),
+                      );
+                    },
+                    child: Container(
+                      height: 50.h,
+                      width: 105.w,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: hexToColor('#343434'),
+                        borderRadius: BorderRadius.circular(50.r),
+                      ),
+                      child: Text(
+                        'Buy Now',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17.sp,
                         ),
                       ),
                     ),
-                    SizedBox(width: 8.0),
-                    Checkbox(
-                      checkColor: Colors.black,
-                      activeColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black),
-                        borderRadius: BorderRadius.circular(4.0),
-                      ),
-                      value: item['isSelected'] ?? false,
-                      onChanged: (value) {
-                        onUpdateSelection(item['productId'], item['variation'], value ?? false);
-                      },
+                  ),
+                  SizedBox(width: 12.w),
+                  Checkbox(
+                    checkColor: Colors.black,
+                    activeColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(color: Colors.black),
+                      borderRadius: BorderRadius.circular(6.r),
                     ),
-                  ],
-                )
-              ],
-            ),
+                    value: item['isSelected'] ?? false,
+                    onChanged: (value) {
+                      onUpdateSelection(item['productId'], item['variation'], value ?? false);
+                    },
+                  ),
+                ],
+              )
+            ],
           ),
         ],
       ),

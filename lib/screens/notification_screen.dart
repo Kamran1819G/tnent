@@ -1,37 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:tnennt/widgets/notification/order_update_notification.dart';
 import 'package:tnennt/widgets/notification/store_connection_notification.dart';
 
 import '../helpers/color_utils.dart';
-
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
-
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  print("Handling a background message: ${message.messageId}");
-  // Store the notification
-  await _storeNotification(message);
-}
-
-Future<void> _storeNotification(RemoteMessage message) async {
-  final firestore = FirebaseFirestore.instance;
-  final userId = FirebaseAuth.instance.currentUser?.uid;
-  if (userId != null) {
-    await firestore.collection('Users').doc(userId).collection('notifications').add({
-      'title': message.notification?.title,
-      'body': message.notification?.body,
-      'data': message.data,
-      'timestamp': FieldValue.serverTimestamp(),
-    });
-  }
-}
 
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({Key? key}) : super(key: key);
@@ -120,99 +95,112 @@ class _NotificationScreenState extends State<NotificationScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          SizedBox(height: 50.0),
-          Container(
-            height: 100,
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                Row(
-                  children: [
-                    Text(
-                      'Update'.toUpperCase(),
-                      style: TextStyle(
-                        color: hexToColor('#1E1E1E'),
-                        fontSize: 24.0,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    Text(
-                      ' •',
-                      style: TextStyle(
-                        fontSize: 28.0,
-                        color: hexToColor('#1770B5'),
-                      ),
-                    ),
-                  ],
-                ),
-                Spacer(),
-                Container(
-                  margin: EdgeInsets.all(8.0),
-                  child: CircleAvatar(
-                    backgroundColor: Colors.grey[100],
-                    child: IconButton(
-                      icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Container(
+              color: Colors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 100.h,
+                    margin: EdgeInsets.only(top: 20.h, bottom: 20.h),
+                    padding: EdgeInsets.symmetric(horizontal: 24.w),
+                    child: Row(
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Update'.toUpperCase(),
+                              style: TextStyle(
+                                color: hexToColor('#1E1E1E'),
+                                fontSize: 24.0,
+                                letterSpacing: 1.5,
+                              ),
+                            ),
+                            Text(
+                              ' •',
+                              style: TextStyle(
+                                fontSize: 28.0,
+                                color: hexToColor('#1770B5'),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Spacer(),
+                        IconButton(
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.all(
+                              Colors.grey[100],
+                            ),
+                            shape: WidgetStateProperty.all(
+                              CircleBorder(),
+                            ),
+                          ),
+                          icon: Icon(Icons.arrow_back_ios_new,
+                              color: Colors.black),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ],
                     ),
                   ),
-                )
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Wrap(
-              children: List.generate(2, (index) {
-                return Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4.0),
-                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                  child: ChoiceChip(
-                    label: Text(_getTabLabel(index)),
-                    labelStyle: TextStyle(
-                      fontSize: 12.0,
-                      color: _selectedIndex == index
-                          ? Colors.white
-                          : hexToColor("#343434"),
+                  Container(
+                    padding:EdgeInsets.only(left: 12.w),
+                    child: Wrap(
+                      children: List.generate(2, (index) {
+                        return Container(
+                          margin: EdgeInsets.symmetric(horizontal: 6.w),
+                          padding: EdgeInsets.symmetric(horizontal: 4.w),
+                          child: ChoiceChip(
+                            label: Text(_getTabLabel(index)),
+                            labelStyle: TextStyle(
+                              fontSize: 18.sp,
+                              color: _selectedIndex == index
+                                  ? Colors.white
+                                  : hexToColor("#343434"),
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8.0),
+                              side: BorderSide(
+                                color: hexToColor('#343434'),
+                              ),
+                            ),
+                            showCheckmark: false,
+                            selected: _selectedIndex == index,
+                            selectedColor: Theme.of(context).primaryColor,
+                            backgroundColor: Colors.white,
+                            onSelected: (selected) {
+                              setState(() {
+                                _selectedIndex = index;
+                                _tabController.index = index;
+                              });
+                            },
+                          ),
+                        );
+                      }),
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                      side: BorderSide(
-                        color: hexToColor('#343434'),
-                      ),
-                    ),
-                    showCheckmark: false,
-                    selected: _selectedIndex == index,
-                    selectedColor: Theme.of(context).primaryColor,
-                    backgroundColor: Colors.white,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedIndex = index;
-                        _tabController.index = index;
-                      });
-                    },
                   ),
-                );
-              }),
+                  SizedBox(height: 50.h),
+                ],
+              ),
             ),
-          ),
-          SizedBox(height: 16),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              physics: NeverScrollableScrollPhysics(),
-              children: [
-                _buildNotificationList(groupedGeneralNotifications, isGeneralTab: true),
-                if (isStoreOwner)
-                  _buildNotificationList(groupedStoreNotifications, isGeneralTab: false),
-              ],
-            ),
-          )
-        ],
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                physics: NeverScrollableScrollPhysics(),
+                children: [
+                  _buildNotificationList(groupedGeneralNotifications, isGeneralTab: true),
+                  if (isStoreOwner)
+                    _buildNotificationList(groupedStoreNotifications, isGeneralTab: false),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -231,7 +219,7 @@ class _NotificationScreenState extends State<NotificationScreen>
               padding: const EdgeInsets.all(8.0),
               child: Text(
                 date,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                style: TextStyle(fontSize: 20.sp),
               ),
             ),
             ...notifications.map((notification) {

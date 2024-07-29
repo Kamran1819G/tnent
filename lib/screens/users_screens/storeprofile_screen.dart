@@ -121,7 +121,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
     final firestore = FirebaseFirestore.instance;
 
     // Store the notification in Firestore
-    await firestore.collection('Users').doc(userId).collection('notifications').add({
+    await firestore.collection('Users').doc(widget.store.ownerId).collection('notifications').add({
       'title': 'New Follower',
       'body': '${currentUser!.firstName} started following your store.',
       'data': {
@@ -268,37 +268,52 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
     DocumentReference storeRef = FirebaseFirestore.instance
         .collection('Stores')
         .doc(widget.store.storeId);
+    DocumentReference userRef = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userId);
 
-    // Fetch the store document to check current state
-    DocumentSnapshot storeDoc = await storeRef.get();
-    List<dynamic> followerIds = storeDoc.get('followerIds') ?? [];
-    bool isCurrentlyConnected = followerIds.contains(userId);
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      DocumentSnapshot storeDoc = await transaction.get(storeRef);
+      DocumentSnapshot userDoc = await transaction.get(userRef);
 
-    // Update follower IDs and engagement count based on current state
-    if (!isCurrentlyConnected) {
-      // Connect to store
-      await storeRef.update({
-        'followerIds': FieldValue.arrayUnion([userId]),
-        'storeEngagement': FieldValue.increment(1),
-      });
+      List<dynamic> followerIds = storeDoc.get('followerIds') ?? [];
+      Map<String, dynamic>? userData = userDoc.data() as Map<String, dynamic>?;
 
-      setState(() {
-        isConnected = true;
-        storeEngagement++;
-      });
-      sendStoreFollowNotification();
-    } else {
-      // Disconnect from store
-      await storeRef.update({
-        'followerIds': FieldValue.arrayRemove([userId]),
-        'storeEngagement': FieldValue.increment(-1),
-      });
+      List<dynamic> followedStores = userData?['followedStores'] ?? [];
 
-      setState(() {
-        isConnected = false;
-        storeEngagement--;
-      });
-    }
+      bool isCurrentlyConnected = followerIds.contains(userId);
+
+      if (!isCurrentlyConnected) {
+        // Connect to store
+        transaction.update(storeRef, {
+          'followerIds': FieldValue.arrayUnion([userId]),
+          'storeEngagement': FieldValue.increment(1),
+        });
+        transaction.update(userRef, {
+          'followedStores': FieldValue.arrayUnion([widget.store.storeId]),
+        });
+
+        setState(() {
+          isConnected = true;
+          storeEngagement++;
+        });
+        sendStoreFollowNotification();
+      } else {
+        // Disconnect from store
+        transaction.update(storeRef, {
+          'followerIds': FieldValue.arrayRemove([userId]),
+          'storeEngagement': FieldValue.increment(-1),
+        });
+        transaction.update(userRef, {
+          'followedStores': FieldValue.arrayRemove([widget.store.storeId]),
+        });
+
+        setState(() {
+          isConnected = false;
+          storeEngagement--;
+        });
+      }
+    });
   }
 
   void _toggleExpansion() {
@@ -795,7 +810,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                           children: [
                             ...storeUpdates.map((update) {
                               return UpdateTile(
-                                image: update.imageUrls.first,
+                                image: update.imageUrl,
                                 onTap: () => _previewUpdate(update),
                               );
                             }).toList(),
@@ -940,7 +955,7 @@ class _FeatureProductsListViewState extends State<FeatureProductsListView> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 200.0,
+      height: 340.h,
       child: FutureBuilder<List<ProductModel>>(
         future: fetchProducts(),
         builder: (context, snapshot) {
@@ -1028,7 +1043,7 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
               ),
               SizedBox(height: 10.0),
               Container(
-                height: 200.0,
+                height: 340.h,
                 margin: EdgeInsets.only(bottom: 50.0),
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,

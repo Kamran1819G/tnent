@@ -2,10 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dash/flutter_dash.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/pages/coupon_pages/fixed_price_coupon.dart';
 import 'package:tnennt/pages/coupon_pages/my_coupons.dart';
 import 'package:tnennt/pages/coupon_pages/percentage_coupon.dart';
+import 'package:tnennt/screens/coming_soon.dart';
 
 class CreateCouponScreen extends StatefulWidget {
   const CreateCouponScreen({super.key});
@@ -81,8 +83,8 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  margin: EdgeInsets.all(16.0),
-                  width: MediaQuery.of(context).size.width * 0.6,
+                  margin: EdgeInsets.all(20.w),
+                  width: 450.w,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -90,19 +92,19 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                         'Create Your Store Coupon',
                         style: TextStyle(
                           color: hexToColor('#272822'),
-                          fontSize: 28.0,
+                          fontSize: 52.sp,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 20.h),
                       Text(
                         'Create Discount Coupons For Your Store And Products Easily And Instantly',
                         style: TextStyle(
                           color: hexToColor('#5E5E5E'),
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w400,
-                          fontSize: 12.0,
+                          fontSize: 15.sp,
                         ),
                         maxLines: 3,
                       ),
@@ -110,7 +112,7 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                   ),
                 ),
                 Container(
-                  height: 200,
+                  height: 310.h,
                   child: ClipRRect(
                     child: Image.asset(
                       'assets/sample_coupon.png',
@@ -120,31 +122,35 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                 )
               ],
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 30.h),
             Dash(
               direction: Axis.horizontal,
-              length: MediaQuery.of(context).size.width * 0.9,
+              length: 600.w,
               dashLength: 6,
               dashColor: hexToColor('#2B2B2B'),
             ),
-            SizedBox(height: MediaQuery.of(context).size.height * 0.075),
+            SizedBox(height: 100.h),
             GestureDetector(
               onTap: () {
+                // FixedPriceCoupon();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => FixedPriceCoupon(),
+                    builder: (context) => ComingSoon(),
                   ),
                 );
               },
               child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 16.0),
-                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 30.0),
+                height: 235.h,
+                width: 580.w,
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(20.0),
+                  borderRadius: BorderRadius.circular(34.r),
                 ),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
                       children: [
@@ -152,50 +158,54 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                           'Fixed Price Discount',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 22.0,
+                            fontSize: 35.sp,
                           ),
                         ),
                         Text(
                           ' •',
                           style: TextStyle(
-                            fontSize: 18.0,
+                            fontSize: 35.sp,
                             color: hexToColor('#FF0000'),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 30.h),
                     Text(
                       'Create fixed amount discount coupons for your customers ',
                       style: TextStyle(
                         color: hexToColor('#D0D0D0'),
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w400,
-                        fontSize: 12.0,
+                        fontSize: 18.sp,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 30.h),
             GestureDetector(
               onTap: () {
+                // PercentageCoupon();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PercentageCoupon(),
+                    builder: (context) => ComingSoon(),
                   ),
                 );
               },
               child: Container(
-                margin: EdgeInsets.symmetric(horizontal: 16.0),
-                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 30.0),
+                height: 235.h,
+                width: 580.w,
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(20.0),
+                  borderRadius: BorderRadius.circular(34.r),
                 ),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
                       children: [
@@ -203,53 +213,56 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                           'Percentage Discount',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 22.0,
+                            fontSize: 35.sp,
                           ),
                         ),
                         Text(
                           ' •',
                           style: TextStyle(
-                            fontSize: 18.0,
+                            fontSize: 35.sp,
                             color: hexToColor('#34A853'),
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 30.h),
                     Text(
                       'Create percentage based discount coupons for your customers',
                       style: TextStyle(
                         color: hexToColor('#D0D0D0'),
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w400,
-                        fontSize: 12.0,
+                        fontSize: 18.sp,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-            SizedBox(height: 50),
+            SizedBox(height: 100.h),
             Center(
-              child: ElevatedButton(
-                onPressed: () {
+              child: GestureDetector(
+                onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return MyCoupons();
+                    return ComingSoon();
                   }));
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: hexToColor('#323232'),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50.0),
+                child: Container(
+                  height: 95.h,
+                  width: 470.w,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: hexToColor('#2D332F'),
+                    borderRadius: BorderRadius.circular(50.r),
                   ),
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 80.0, vertical: 20.0),
-                ),
-                child: Text(
-                  'My Coupons',
-                  style: TextStyle(
-                    fontSize: 16.0,
+                  child: Text(
+                    'My Coupons',
+                    style: TextStyle(
+                      fontSize: 24.sp,
+                      fontFamily: 'Gotham',
+                      fontWeight: FontWeight.w500,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),

@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/store_category_model.dart';
@@ -54,7 +55,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
     'Clothings',
     'Electronics',
     'Bakeries',
-    'Footwears'
+    'Footwears',
+    "Restaurants",
   ];
 
   bool get isMultiOptionCategory =>
@@ -251,8 +253,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              height: 100.h,
+              margin: EdgeInsets.only(top: 20.h, bottom: 20.h),
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
                 children: [
                   Row(
@@ -261,32 +264,34 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         'Add Products'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontSize: 24.0,
+                          fontSize: 35.sp,
                           letterSpacing: 1.5,
                         ),
                       ),
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontSize: 28.0,
+                          fontSize: 35.sp,
                           color: hexToColor('#FF0000'),
                         ),
                       ),
                     ],
                   ),
                   Spacer(),
-                  Container(
-                    margin: EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey[100],
-                      child: IconButton(
-                        icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                  IconButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        Colors.grey[100],
+                      ),
+                      shape: WidgetStateProperty.all(
+                        CircleBorder(),
                       ),
                     ),
+                    icon: Icon(Icons.arrow_back_ios_new,
+                        color: Colors.black),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                   ),
                 ],
               ),
@@ -298,20 +303,20 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 20),
+                      SizedBox(height: 20.h),
                       // Add Image
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Add Image',
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 23.sp,
                               ),
                             ),
-                            SizedBox(height: 10),
+                            SizedBox(height: 12.h),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
@@ -322,27 +327,27 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                     }
                                   },
                                   child: Container(
-                                    height: 75,
-                                    width: 75,
+                                    height: 105.h,
+                                    width: 105.w,
                                     decoration: BoxDecoration(
                                       border: Border.all(
                                           color: hexToColor('#848484')),
-                                      borderRadius: BorderRadius.circular(18),
+                                      borderRadius: BorderRadius.circular(22.r),
                                     ),
                                     child: Center(
                                       child: Icon(
                                         Icons.image_outlined,
-                                        size: 40,
+                                        size: 45.sp,
                                         color: hexToColor('#545454'),
                                       ),
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 10),
+                                SizedBox(width: 14.w),
                                 if (_images.isNotEmpty)
                                   Expanded(
                                     child: SizedBox(
-                                      height: 75,
+                                      height: 105.h,
                                       child: ListView.builder(
                                         scrollDirection: Axis.horizontal,
                                         physics: NeverScrollableScrollPhysics(),
@@ -353,15 +358,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           return Stack(
                                             children: [
                                               Container(
-                                                width: 75,
+                                                height: 105.h,
+                                                width: 105.w,
                                                 margin: const EdgeInsets.only(
                                                     right: 10),
                                                 decoration: BoxDecoration(
-                                                  border: Border.all(
-                                                      color: hexToColor(
-                                                          '#848484')),
                                                   borderRadius:
-                                                      BorderRadius.circular(12),
+                                                      BorderRadius.circular(22.r),
                                                   image: DecorationImage(
                                                     image: FileImage(
                                                         _images[index]),
@@ -370,8 +373,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                 ),
                                               ),
                                               Positioned(
-                                                top: 0,
-                                                right: 0,
+                                                top: 2.h,
+                                                right: 8.w,
                                                 child: GestureDetector(
                                                   onTap: () {
                                                     setState(() {
@@ -386,7 +389,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                     child: Icon(
                                                       Icons.close,
                                                       color: Colors.white,
-                                                      size: 16,
+                                                      size: 24.sp,
                                                     ),
                                                   ),
                                                 ),
@@ -399,12 +402,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   ),
                                 if (_images.isEmpty)
                                   Container(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.6,
+                                    width: 340.w,
                                     child: Text(
                                       'Note: Add more than one image of the product',
                                       style: TextStyle(
-                                        fontSize: 12,
+                                        fontSize: 17.sp,
                                         fontFamily: 'Poppins',
                                         fontWeight: FontWeight.w500,
                                         color: hexToColor('#636363'),
@@ -416,15 +418,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 30),
+                      SizedBox(height: 50.h),
                       Container(
-                        margin: EdgeInsets.symmetric(horizontal: 12.0),
+                        width: 320.w,
+                        height: 75.h,
+                        margin: EdgeInsets.only(left: 24.w),
                         decoration: BoxDecoration(
                           border: Border.all(
                             color: hexToColor('#AFAFAF'),
                             width: 1.0,
                           ),
-                          borderRadius: BorderRadius.circular(50.0),
+                          borderRadius: BorderRadius.circular(50.r),
                         ),
                         child: DropdownButton<String>(
                           hint: Text('Select Product Category'),
@@ -432,7 +436,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           padding: EdgeInsets.symmetric(horizontal: 16.0),
                           style: TextStyle(
                             color: hexToColor('#272822'),
-                            fontSize: 16.0,
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w900,
                           ),
                           icon: Icon(Icons.keyboard_arrow_down_rounded),
                           underline: SizedBox(),
@@ -449,44 +454,50 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               child: Text(
                                 value,
                                 style: TextStyle(
-                                  fontFamily: 'Gotham',
-                                  fontWeight: FontWeight.w800,
+                                  fontSize: 20.sp,
+                                  fontWeight: FontWeight.w900,
                                 ),
                               ),
                             );
                           }).toList(),
                         ),
                       ),
-                      SizedBox(height: 30),
+                      SizedBox(height: 50.h),
                       // Product Name
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
                               'Item Name',
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 23.sp,
                               ),
                             ),
-                            SizedBox(height: 10),
+                            SizedBox(height: 12.h),
                             TextFormField(
                               controller: _nameController,
                               textAlign: TextAlign.start,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20.sp,
+                              ),
                               decoration: InputDecoration(
                                 hintText: 'Write your Product Name',
                                 hintStyle: TextStyle(
                                   color: hexToColor('#989898'),
                                   fontFamily: 'Gotham',
                                   fontWeight: FontWeight.w700,
-                                  fontSize: 14.0,
+                                  fontSize: 20.sp,
                                 ),
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide(
                                     color: hexToColor('#848484'),
                                   ),
-                                  borderRadius: BorderRadius.circular(18),
+                                  borderRadius: BorderRadius.circular(20.r),
                                 ),
                               ),
                               validator: (value) {
@@ -499,37 +510,36 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 30),
+                      SizedBox(height: 50.h),
                       // Product Price
                       if (!isMultiOptionCategory) ...[
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: EdgeInsets.symmetric(horizontal: 24.w),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 'Item Price',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 23.sp,
                                 ),
                               ),
                               Text(
                                 '(Fill any two slots and the third will be calculated automatically)',
                                 style: TextStyle(
-                                  fontSize: 11,
+                                  fontSize: 17.sp,
                                   fontFamily: 'Poppins',
                                   fontWeight: FontWeight.w500,
                                   color: hexToColor('#636363'),
                                 ),
                               ),
-                              SizedBox(height: 20),
+                              SizedBox(height: 20.h),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
+                                    width: 190.w,
                                     child: TextFormField(
                                       controller: _discountController,
                                       keyboardType: TextInputType.number,
@@ -537,7 +547,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                         color: Colors.black,
                                         fontFamily: 'Gotham',
                                         fontWeight: FontWeight.w700,
-                                        fontSize: 14.0,
+                                        fontSize: 20.sp,
                                       ),
                                       decoration: InputDecoration(
                                         hintText: 'Discount',
@@ -545,29 +555,22 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           color: hexToColor('#989898'),
                                           fontFamily: 'Gotham',
                                           fontWeight: FontWeight.w700,
-                                          fontSize: 14.0,
+                                          fontSize: 20.sp,
                                         ),
-                                        prefixIcon: Text(
-                                          '%',
-                                          style: TextStyle(
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                            fontFamily: 'Gotham',
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 18.0,
-                                          ),
-                                          textAlign: TextAlign.center,
+                                        prefixIcon: Icon(
+                                          Icons.percent,
+                                          color: Theme.of(context).primaryColor,
+                                          size: 30.sp,
                                         ),
                                         prefixIconConstraints: BoxConstraints(
                                           minWidth: 30,
-                                          minHeight: 0,
                                         ),
                                         border: OutlineInputBorder(
                                           borderSide: BorderSide(
                                             color: hexToColor('#848484'),
                                           ),
                                           borderRadius:
-                                              BorderRadius.circular(18),
+                                              BorderRadius.circular(18.r),
                                         ),
                                       ),
                                       validator: (value) {
@@ -588,8 +591,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                     ),
                                   ),
                                   Container(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
+                                    width: 190.w,
                                     child: TextFormField(
                                       controller: _mrpController,
                                       keyboardType: TextInputType.number,
@@ -597,7 +599,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                         color: Colors.black,
                                         fontFamily: 'Gotham',
                                         fontWeight: FontWeight.w700,
-                                        fontSize: 14.0,
+                                        fontSize: 20.sp,
                                       ),
                                       decoration: InputDecoration(
                                         hintText: 'MRP Price',
@@ -605,29 +607,22 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           color: hexToColor('#989898'),
                                           fontFamily: 'Gotham',
                                           fontWeight: FontWeight.w700,
-                                          fontSize: 14.0,
+                                          fontSize: 20.sp,
                                         ),
-                                        prefixIcon: Text(
-                                          '₹',
-                                          style: TextStyle(
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                            fontFamily: 'Gotham',
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 18.0,
-                                          ),
-                                          textAlign: TextAlign.center,
+                                        prefixIcon: Icon(
+                                          Icons.currency_rupee,
+                                          color: Theme.of(context).primaryColor,
+                                          size: 30.sp,
                                         ),
                                         prefixIconConstraints: BoxConstraints(
                                           minWidth: 30,
-                                          minHeight: 0,
                                         ),
                                         border: OutlineInputBorder(
                                           borderSide: BorderSide(
                                             color: hexToColor('#848484'),
                                           ),
                                           borderRadius:
-                                              BorderRadius.circular(18),
+                                              BorderRadius.circular(18.r),
                                         ),
                                       ),
                                       validator: (value) {
@@ -646,8 +641,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                     ),
                                   ),
                                   Container(
-                                    width:
-                                        MediaQuery.of(context).size.width * 0.3,
+                                    width: 190.w,
                                     child: TextFormField(
                                       controller: _itemPriceController,
                                       keyboardType: TextInputType.number,
@@ -655,7 +649,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                         color: Colors.black,
                                         fontFamily: 'Gotham',
                                         fontWeight: FontWeight.w700,
-                                        fontSize: 14.0,
+                                        fontSize: 20.sp,
                                       ),
                                       decoration: InputDecoration(
                                         hintText: 'Item Price',
@@ -663,29 +657,22 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           color: hexToColor('#989898'),
                                           fontFamily: 'Gotham',
                                           fontWeight: FontWeight.w700,
-                                          fontSize: 14.0,
+                                          fontSize: 20.sp,
                                         ),
-                                        prefixIcon: Text(
-                                          '₹',
-                                          style: TextStyle(
-                                            color:
-                                                Theme.of(context).primaryColor,
-                                            fontFamily: 'Gotham',
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 18.0,
-                                          ),
-                                          textAlign: TextAlign.center,
+                                        prefixIcon: Icon(
+                                          Icons.currency_rupee,
+                                          color: Theme.of(context).primaryColor,
+                                          size: 30.sp,
                                         ),
                                         prefixIconConstraints: BoxConstraints(
                                           minWidth: 30,
-                                          minHeight: 0,
                                         ),
                                         border: OutlineInputBorder(
                                           borderSide: BorderSide(
                                             color: hexToColor('#848484'),
                                           ),
                                           borderRadius:
-                                              BorderRadius.circular(18),
+                                              BorderRadius.circular(18.r),
                                         ),
                                       ),
                                       validator: (value) {
@@ -709,7 +696,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             ],
                           ),
                         ),
-                        SizedBox(height: 30),
+                        SizedBox(height: 50.h),
                       ],
                       // Product Description
                       Container(
@@ -720,35 +707,41 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             Text(
                               'Add Product Description & More Details',
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 23.sp,
                               ),
                             ),
-                            SizedBox(height: 20),
+                            SizedBox(height: 30.h),
                             TextFormField(
                               controller: _descriptionController,
                               textAlign: TextAlign.start,
                               maxLines: 5,
                               maxLength: 700,
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w700,
+                                fontSize: 20.sp,
+                              ),
                               decoration: InputDecoration(
                                 floatingLabelBehavior:
                                     FloatingLabelBehavior.always,
                                 labelText: 'Description',
                                 labelStyle: TextStyle(
                                   color: hexToColor('#545454'),
-                                  fontSize: 14.0,
+                                  fontSize: 20.sp,
                                 ),
                                 hintText: 'Write product description...',
                                 hintStyle: TextStyle(
                                   color: hexToColor('#989898'),
                                   fontFamily: 'Gotham',
                                   fontWeight: FontWeight.w700,
-                                  fontSize: 16.0,
+                                  fontSize: 20.sp,
                                 ),
                                 border: OutlineInputBorder(
                                   borderSide: BorderSide(
                                     color: hexToColor('#848484'),
                                   ),
-                                  borderRadius: BorderRadius.circular(18),
+                                  borderRadius: BorderRadius.circular(20.r),
                                 ),
                               ),
                               validator: (value) {
@@ -761,32 +754,32 @@ class _AddProductScreenState extends State<AddProductScreen> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 30),
+                      SizedBox(height: 50.h),
                       // Product Stock Quantity
                       if (!isMultiOptionCategory) ...[
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                          padding: EdgeInsets.symmetric(horizontal: 24.w),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 'Product Stock Quantity',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 23.sp,
                                 ),
                               ),
-                              SizedBox(height: 10),
+                              SizedBox(height: 12.h),
                               Row(
                                 children: [
                                   SizedBox(
-                                    width: 175,
+                                    width: 300.w,
                                     child: TextFormField(
                                       controller: _stockQuantityController,
                                       style: TextStyle(
                                         color: Colors.black,
                                         fontFamily: 'Gotham',
                                         fontWeight: FontWeight.w700,
-                                        fontSize: 14.0,
+                                        fontSize: 20.sp,
                                       ),
                                       decoration: InputDecoration(
                                         hintText: 'Ex. 100',
@@ -794,7 +787,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           color: hexToColor('#989898'),
                                           fontFamily: 'Gotham',
                                           fontWeight: FontWeight.w700,
-                                          fontSize: 14.0,
+                                          fontSize: 20.sp,
                                         ),
                                         border: OutlineInputBorder(
                                           borderSide: BorderSide(
@@ -822,12 +815,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                       },
                                     ),
                                   ),
-                                  SizedBox(width: 20),
+                                  SizedBox(width: 20.w),
                                   Expanded(
                                     child: Text(
                                       '(Add Total Product Stock Quantity)',
                                       style: TextStyle(
-                                        fontSize: 12,
+                                        fontSize: 17.sp,
                                         fontFamily: 'Poppins',
                                         fontWeight: FontWeight.w500,
                                         color: hexToColor('#636363'),
@@ -839,7 +832,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             ],
                           ),
                         ),
-                        SizedBox(height: 30),
+                        SizedBox(height: 30.h),
                       ],
                       if (isMultiOptionCategory)
                         Padding(
@@ -848,7 +841,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             child: Text(
                               'Add item price and stock quantity on next page',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 17.sp,
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w500,
                                 color: hexToColor('#636363'),
@@ -856,7 +849,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             ),
                           ),
                         ),
-                      SizedBox(height: 8),
+                      SizedBox(height: 8.h),
                       Center(
                         child: isSubmitting
                             ? CircularProgressIndicator(
@@ -872,12 +865,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 75, vertical: 16),
                                   shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(50)),
+                                      borderRadius: BorderRadius.circular(50.r)),
                                 ),
                                 child: Text(
                                   isMultiOptionCategory ? 'Next' : 'List Item',
                                   style: TextStyle(
-                                      color: Colors.white, fontSize: 16.0),
+                                      color: Colors.white, fontSize: 25.sp,fontFamily: 'Gotham' ,fontWeight: FontWeight.w500),
                                 ),
                               ),
                       ),

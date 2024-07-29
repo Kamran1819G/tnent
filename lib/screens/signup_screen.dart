@@ -34,11 +34,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ),
         );
       }
-    }on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException catch (e) {
       setState(() {
-        errorMessage = e.toString();
+        errorMessage = e.message ?? 'An error occurred during sign up';
       });
-      print(errorMessage);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            errorMessage!,
+            style: TextStyle(
+              color: Colors.white,
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      setState(() {
+        errorMessage = 'An unexpected error occurred';
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
@@ -57,7 +73,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> signUpWithGoogle() async {
     try {
-      await Auth().signInWithGoogle();
+      await Auth().signUpWithGoogle();
       Navigator.push(
         context,
         MaterialPageRoute(

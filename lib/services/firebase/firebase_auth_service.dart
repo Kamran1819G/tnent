@@ -35,6 +35,39 @@ class Auth {
     );
 
     await _auth.signInWithCredential(credential);
+  }
+
+  Future<void> signUpWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    await _auth.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    if (currentUser != null && !currentUser!.emailVerified) {
+      await currentUser!.sendEmailVerification();
+    }
+
+    if (currentUser != null) {
+      await _firestore.collection('Users').doc(currentUser!.uid).set({
+        'email': currentUser!.email,
+      });
+    }
+  }
+
+  Future<void> signUpWithGoogle() async {
+    final googleSignInAccount = await _googleSignIn.signIn();
+    final googleSignInAuthentication =
+        await googleSignInAccount?.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleSignInAuthentication?.accessToken,
+      idToken: googleSignInAuthentication?.idToken,
+    );
+
+    await _auth.signInWithCredential(credential);
 
     if (currentUser != null) {
       await _firestore.collection('Users').doc(currentUser!.uid).set({
@@ -51,6 +84,17 @@ class Auth {
           FacebookAuthProvider.credential(accessToken.tokenString);
 
       await _auth.signInWithCredential(credential);
+    }
+  }
+
+  Future<void> signUpWithFacebook() async {
+    final LoginResult result = await FacebookAuth.instance.login();
+    if (result.status == LoginStatus.success) {
+      final AccessToken accessToken = result.accessToken!;
+      final OAuthCredential credential =
+          FacebookAuthProvider.credential(accessToken.tokenString);
+
+      await _auth.signInWithCredential(credential);
 
       if (currentUser != null) {
         await _firestore.collection('Users').doc(currentUser!.uid).set({
@@ -59,32 +103,6 @@ class Auth {
       }
     }
   }
-
-
-  Future<void> signUpWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      if (currentUser != null && !currentUser!.emailVerified) {
-        await currentUser!.sendEmailVerification();
-      }
-
-      if (currentUser != null) {
-        await _firestore.collection('Users').doc(currentUser!.uid).set({
-          'email': currentUser!.email,
-        });
-      }
-    } catch (e) {
-      print("Error signing up with email and password: $e");
-    }
-  }
-
 
   Future<void> changePassword({required String password}) async {
     await currentUser!.updatePassword(password);
@@ -95,6 +113,13 @@ class Auth {
   }
 
   Future<void> signOut() async {
+    // Sign out from Firebase
     await _auth.signOut();
+
+    // Sign out from Google
+    await _googleSignIn.signOut();
+
+    // Sign out from Facebook
+    await FacebookAuth.instance.logOut();
   }
 }

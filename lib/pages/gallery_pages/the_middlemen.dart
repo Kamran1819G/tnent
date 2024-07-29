@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_stack/flutter_image_stack.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 
 class TheMiddlemen extends StatefulWidget {
@@ -18,57 +19,51 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.0),
+            padding: EdgeInsets.symmetric(horizontal: 18.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 20),
-                Image.asset('assets/the_middlemen.png'),
-                SizedBox(height: 20),
+                Container(
+                  margin: EdgeInsets.only(top: 30.h),
+                  height: 440.h,
+                  width: 610.w,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/the_middlemen.png'),
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 30.h),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Container(
-                      width: MediaQuery.of(context).size.width * 0.7,
+                      width: 450.w,
                       child: Text(
                         "The Middlemen Groups!".toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#2D332F'),
-                          fontSize: 28.0,
+                          fontSize: 40.sp,
                         ),
                         maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 12.0),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                      child: Text(
-                        'View List',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10.0,
-                        ),
-                      ),
-                    )
+                    Spacer(),
                   ],
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 30.h),
                 Text(
                   "Get a chance to work as a certified middlemen and let’s grow together!",
                   style: TextStyle(
                     color: hexToColor('#727272'),
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w500,
-                    fontSize: 12.0,
+                    fontSize: 20.sp,
                   ),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 30.sp),
                 Row(
                   children: [
                     FlutterImageStack(
@@ -82,43 +77,43 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                       showTotalCount: true,
                       extraCountTextStyle: TextStyle(
                         color: hexToColor('#727272'),
-                        fontSize: 10.0,
+                        fontSize: 14.sp,
                       ),
                       backgroundColor: hexToColor('#C4C4C4'),
-                      itemRadius: 25,
+                      itemRadius: 50.w,
                       itemCount: 3,
                       itemBorderWidth: 0,
                     ),
-                    SizedBox(width: 20),
+                    SizedBox(width: 20.w),
                     Text(
                       'Active Middlemen',
                       style: TextStyle(
                         color: hexToColor('#727272'),
                         fontFamily: 'Poppins',
-                        fontSize: 12.0,
+                        fontSize: 16.sp,
                       ),
                     )
                   ],
                 ),
-                SizedBox(height: 40),
+                SizedBox(height: 50.h),
                 Text(
                   "Description".toUpperCase(),
                   style: TextStyle(
                     color: hexToColor('#2D332F'),
-                    fontSize: 16.0,
+                    fontSize: 24.sp,
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 30.h),
                 Text(
                   "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
                   style: TextStyle(
                     color: hexToColor('#727272'),
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w500,
-                    fontSize: 12.0,
+                    fontSize: 20.sp,
                   ),
                 ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                SizedBox(height: 175.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -129,11 +124,11 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                         child: Icon(
                           Icons.arrow_back_ios_new,
                           color: Colors.white,
-                          size: 18,
+                          size: 30.sp,
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
-                          padding: EdgeInsets.all(16.0),
+                          padding: EdgeInsets.all(24.w),
                           shape: CircleBorder(
                               side: BorderSide(color: hexToColor('#2D332F'))),
                         )),
@@ -153,28 +148,27 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                               'Register Now',
                               style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 16.0,
+                                  fontSize: 25.sp,
                                   fontFamily: 'Gotham'),
                             ),
-                            SizedBox(width: 20.0),
+                            SizedBox(width: 30.w),
                             Icon(
                               Icons.list_alt_rounded,
                               color: Colors.white,
-                              size: 16.0,
+                              size: 30.sp,
                             ),
                           ],
                         ),
                         style: TextButton.styleFrom(
                           padding: EdgeInsets.symmetric(
-                              horizontal: 60.0, vertical: 16.0),
+                              horizontal: 80.w, vertical: 24.h),
                           backgroundColor: hexToColor('#2D332F'),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50.0),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
                         ))
                   ],
                 ),
-                SizedBox(height: 20),
               ],
             ),
           ),
@@ -217,9 +211,6 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
     }
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -259,8 +250,8 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                       child: CircleAvatar(
                         backgroundColor: Colors.grey[100],
                         child: IconButton(
-                          icon:
-                              Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                          icon: Icon(Icons.arrow_back_ios_new,
+                              color: Colors.black),
                           onPressed: () {
                             Navigator.pop(context);
                           },
@@ -272,7 +263,6 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
               ),
               SizedBox(height: 16.0),
               Image.asset('assets/black_tnennt_logo.png', width: 75),
-
               SizedBox(height: 16),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),

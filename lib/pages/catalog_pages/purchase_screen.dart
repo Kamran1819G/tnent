@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnennt/pages/catalog_pages/track_order_screen.dart';
 import '../../helpers/color_utils.dart';
 import 'detail_screen.dart';
@@ -46,8 +47,9 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              height: 100.h,
+              margin: EdgeInsets.only(top: 20.h, bottom: 20.h),
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
                 children: [
                   Row(
@@ -56,38 +58,42 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                         'Purchase'.toUpperCase(),
                         style: TextStyle(
                           color: hexToColor('#1E1E1E'),
-                          fontSize: 24.0,
+                          fontSize: 35.sp,
                           letterSpacing: 1.5,
                         ),
                       ),
                       Text(
                         ' •',
                         style: TextStyle(
-                          fontSize: 28.0,
+                          fontSize: 35.sp,
                           color: hexToColor('#FF0000'),
                         ),
                       ),
                     ],
                   ),
                   Spacer(),
-                  Container(
-                    margin: EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey[100],
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                  IconButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        Colors.grey[100],
+                      ),
+                      shape: WidgetStateProperty.all(
+                        CircleBorder(),
                       ),
                     ),
+                    icon: Icon(Icons.arrow_back_ios_new,
+                        color: Colors.black),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 16.0),
+            SizedBox(height: 24.h),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.0),
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              height: 100.h,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -95,14 +101,14 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                     'Total Amount',
                     style: TextStyle(
                       color: hexToColor('#343434'),
-                      fontSize: 16.0,
+                      fontSize: 24.sp,
                     ),
                   ),
                   Text(
                     '₹ ${_totalAmount.toStringAsFixed(2)}',
                     style: TextStyle(
                       color: hexToColor('#A9A9A9'),
-                      fontSize: 18.0,
+                      fontSize: 26.sp,
                     ),
                   ),
                 ],
@@ -127,7 +133,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                   Future.microtask(() => _calculateTotalAmount(orders));
 
                   return ListView.builder(
-                    padding: EdgeInsets.symmetric(horizontal: 10.0),
+                    padding: EdgeInsets.symmetric(horizontal: 12.w),
                     itemCount: orders.length,
                     itemBuilder: (context, index) {
                       final order = orders[index].data() as Map<String, dynamic>;
@@ -162,59 +168,65 @@ class _PurchaseItemTileState extends State<PurchaseItemTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 14.0),
+      height: 285.h,
+      margin: EdgeInsets.symmetric(vertical: 12.h, horizontal: 18.w),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Container(
-            height: 190,
-            width: 150,
+            height: 285.h,
+            width: 255.w,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4.0),
-              image: DecorationImage(
+              borderRadius: BorderRadius.circular(8.r),
+              image: widget.order['productImage'] != null
+                  ? DecorationImage(
                 image: NetworkImage(widget.order['productImage']),
                 fit: BoxFit.cover,
-              ),
+              )
+                  : null,
             ),
+            child: widget.order['productImage'] == null
+                ? Center(child: Icon(Icons.image_not_supported, size: 50.sp, color: Colors.grey))
+                : null,
           ),
-          SizedBox(width: 15.0),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
                   widget.order['productName'],
                   style: TextStyle(
                     color: hexToColor('#343434'),
-                    fontSize: 20.0,
+                    fontSize: 26.sp,
                   ),
                 ),
-                SizedBox(height: 8.0),
+                SizedBox(height: 8.h),
                 Text(
                   'Variation: ${widget.order['variation']}',
                   style: TextStyle(
                     color: hexToColor('#A9A9A9'),
-                    fontSize: 14.0,
+                    fontSize: 18.sp,
                   ),
                 ),
-                SizedBox(height: 8.0),
+                SizedBox(height: 8.h),
                 Text(
                   'Quantity: ${widget.order['quantity']}',
                   style: TextStyle(
                     color: hexToColor('#A9A9A9'),
-                    fontSize: 14.0,
+                    fontSize: 18.sp,
                   ),
                 ),
-                SizedBox(height: 16.0),
+                SizedBox(height: 50.h),
                 Text(
                   '₹${(widget.order['priceDetails']['price'] * widget.order['quantity']).toStringAsFixed(2)}',
                   style: TextStyle(
                     color: hexToColor('#343434'),
-                    fontSize: 20.0,
+                    fontSize: 28.sp,
                   ),
                 ),
-                SizedBox(height: 16.0),
+                SizedBox(height: 40.h),
                 Row(
                   children: [
                     GestureDetector(
@@ -229,16 +241,18 @@ class _PurchaseItemTileState extends State<PurchaseItemTile> {
                         );
                       },
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                        height: 50.h,
+                        width: 105.w,
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border: Border.all(color: hexToColor('#343434')),
-                          borderRadius: BorderRadius.circular(100.0),
+                          borderRadius: BorderRadius.circular(50.r),
                         ),
                         child: Text(
                           'Details',
                           style: TextStyle(
                             color: hexToColor('#737373'),
-                            fontSize: 12.0,
+                            fontSize: 17.sp,
                           ),
                         ),
                       ),
@@ -256,16 +270,18 @@ class _PurchaseItemTileState extends State<PurchaseItemTile> {
                         );
                       },
                       child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+                        height: 50.h,
+                        width: 150.w,
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
                           color: hexToColor('#343434'),
-                          borderRadius: BorderRadius.circular(100.0),
+                          borderRadius: BorderRadius.circular(50.r),
                         ),
                         child: Text(
                           'Track Order',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 12.0,
+                            fontSize: 17.sp,
                           ),
                         ),
                       ),

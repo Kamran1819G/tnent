@@ -135,20 +135,10 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   }
 
   Future<void> _addStoreUpdate() async {
-    List<XFile>? images = await _picker.pickMultiImage();
-    if (images == null || images.isEmpty) return;
+    XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image == null) return;
 
-    List<String> imageUrls = [];
-    for (var image in images) {
-      String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-      Reference firebaseStorageRef = FirebaseStorage.instance
-          .ref()
-          .child('store_updates/$fileName');
-      UploadTask uploadTask = firebaseStorageRef.putFile(File(image.path));
-      TaskSnapshot taskSnapshot = await uploadTask;
-      String url = await taskSnapshot.ref.getDownloadURL();
-      imageUrls.add(url);
-    }
+    String imageUrl = await _uploadImage(image);
 
     Timestamp now = Timestamp.now();
     Timestamp expiresAt = Timestamp.fromDate(now.toDate().add(Duration(hours: 24)));
@@ -156,7 +146,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     StoreUpdateModel newUpdate = StoreUpdateModel(
       updateId: '', // Firestore will generate this
       storeId: store.storeId,
-      imageUrls: imageUrls,
+      storeName: store.name,
+      imageUrl: imageUrl,
       createdAt: now,
       expiresAt: expiresAt,
     );
@@ -169,12 +160,24 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
       newUpdate = StoreUpdateModel(
         updateId: docRef.id,
         storeId: newUpdate.storeId,
-        imageUrls: newUpdate.imageUrls,
+        storeName: newUpdate.storeName,
+        imageUrl: newUpdate.imageUrl,
         createdAt: newUpdate.createdAt,
         expiresAt: newUpdate.expiresAt,
       );
       storeUpdates.insert(0, newUpdate);
     });
+  }
+
+  Future<String> _uploadImage(XFile image) async {
+    String fileName = DateTime.now().millisecondsSinceEpoch.toString();
+    Reference firebaseStorageRef = FirebaseStorage.instance
+        .ref()
+        .child('store_updates/$fileName');
+    UploadTask uploadTask = firebaseStorageRef.putFile(File(image.path));
+    TaskSnapshot taskSnapshot = await uploadTask;
+    String url = await taskSnapshot.ref.getDownloadURL();
+    return url;
   }
 
   Future<void> _fetchStoreUpdates() async {
@@ -192,7 +195,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
       });
     } catch (e) {
       print('Error fetching store updates: $e');
-      // Handle the error, maybe show a message to the user
       setState(() {
         storeUpdates = []; // Set to empty list in case of error
       });
@@ -311,6 +313,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     await _fetchStore();
     await _loadProducts();
     await _fetchCategories();
+    await _fetchStoreUpdates();
   }
 
   @override
@@ -1124,7 +1127,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               ),
                               ...storeUpdates.map((update) {
                                 return RemovableUpdateTile(
-                                  image: update.imageUrls.first,
+                                  image: update.imageUrl,
                                   onRemove: () => _deleteStoreUpdate(update.updateId),
                                   onTap: () => _previewUpdate(update),
                                 );
@@ -1298,7 +1301,7 @@ class _FeatureProductsListViewState extends State<FeatureProductsListView> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 200.0,
+      height: 340.h,
       child: FutureBuilder<List<ProductModel>>(
         future: fetchProducts(),
         builder: (context, snapshot) {
@@ -1394,7 +1397,7 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
               ),
               SizedBox(height: 10.0),
               Container(
-                height: 200.0,
+                height: 340.h,
                 margin: EdgeInsets.only(bottom: 50.0),
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,

@@ -99,7 +99,6 @@ class _UpdateScreenState extends State<UpdateScreen> {
           _startWatching();
         } else {
           percentWatched[currentUpdateIndex] = 1;
-          Navigator.pop(context);
         }
       });
     }
@@ -115,7 +114,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
             GestureDetector(
               onTapDown: (details) => _onTapDown(details),
               child: Image.network(
-                widget.updates[currentUpdateIndex].imageUrls.first,
+                widget.updates[currentUpdateIndex].imageUrl,
                 fit: BoxFit.cover,
                 height: double.infinity,
                 width: double.infinity,
@@ -174,84 +173,8 @@ class _UpdateScreenState extends State<UpdateScreen> {
                 ),
               ),
             ),
-
-            Align(
-              alignment: Alignment(0, 0.9),
-              child: ElevatedButton(
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (context) => _buildBottomSheet(),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: hexToColorWithOpacity("#FFFFFF", 0.5),
-                  foregroundColor: Colors.black,
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(50),
-                  ),
-                ),
-                child: Text(
-                  'Save As Highlight',
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
-                ),
-              ),
-            )
           ],
         ),
-      ),
-    );
-  }
-  Widget _buildBottomSheet() {
-    return Container(
-      height: 250,
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child: Container(
-              width: 100,
-              height: 4,
-              margin: const EdgeInsets.symmetric(vertical: 15),
-              decoration: BoxDecoration(
-                color: hexToColor('#CACACA'),
-                borderRadius: BorderRadius.circular(5),
-              ),
-            ),
-          ),
-          SizedBox(height: 20),
-          Text(
-            'Add to Highlights',
-            style: TextStyle(
-                color: hexToColor('#343434'),
-                fontSize: 16.0),
-          ),
-          SizedBox(height: 25),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: hexToColorWithOpacity("#474747", 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.add,
-                  color: hexToColor('#FFFFFF'),
-                  size: 50,
-                ),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
