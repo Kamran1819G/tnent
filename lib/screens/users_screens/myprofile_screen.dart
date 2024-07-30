@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
 import 'package:tnennt/screens/webview_screen.dart';
@@ -248,9 +249,26 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     padding: EdgeInsets.symmetric(horizontal: 12.w),
                     child: Column(
                       children: [
-                        _buildMenuItem(Icons.person, 'About'),
-                        _buildMenuItem(Icons.delete, 'Delete Account'),
-                        _buildMenuItem(Icons.help, 'Help'),
+                        GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AppVersionScreen(),
+                                ),
+                              );
+                            },
+                            child: _buildMenuItem(Icons.person, 'About')),
+                        GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => HelpScreen(),
+                                ),
+                              );
+                            },
+                            child: _buildMenuItem(Icons.help, 'Help')),
                         GestureDetector(
                             onTap: () {
                               Navigator.push(
@@ -258,7 +276,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                 MaterialPageRoute(
                                   builder: (context) => WebViewScreen(
                                     title: 'Terms of Service',
-                                    url: 'https://tnennt-updated.vercel.app/legals',
+                                    url:
+                                        'https://tnennt-updated.vercel.app/legals',
                                   ),
                                 ),
                               );
@@ -626,6 +645,120 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                   ),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class HelpScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Help'),
+      ),
+      body: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Contact Mail:',
+              style: TextStyle(fontSize: 30.sp),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'tnenntofficial@gmail.com',
+              style: TextStyle(
+                  fontSize: 24.sp,
+                  fontFamily: 'Gotham',
+                  fontWeight: FontWeight.w500),
+            ),
+            SizedBox(height: 50.h),
+            Text(
+              'Ph No:',
+              style: TextStyle(fontSize: 30.sp),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              '+91 9395593877',
+              style: TextStyle(
+                  fontSize: 24.sp,
+                  fontFamily: 'Gotham',
+                  fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AppVersionScreen extends StatefulWidget {
+  @override
+  State<AppVersionScreen> createState() => _AppVersionScreenState();
+}
+
+class _AppVersionScreenState extends State<AppVersionScreen> {
+  String? _appName;
+  String? _packageName;
+  String? _version;
+  String? _buildNumber;
+
+  @override
+  void initState() {
+    super.initState();
+    _getInfoPressed();
+  }
+
+  void _getInfoPressed() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+
+    String appName = packageInfo.appName;
+    String packageName = packageInfo.packageName;
+    String version = packageInfo.version;
+    String buildNumber = packageInfo.buildNumber;
+
+    setState(() {
+      _appName = appName;
+      _packageName = packageName;
+      _version = version;
+      _buildNumber = buildNumber;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('About'),
+      ),
+      body: Center(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'App Name: $_appName',
+              style: TextStyle(fontSize: 24.sp),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Package Name: $_packageName',
+              style: TextStyle(fontSize: 24.sp),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Version: $_version',
+              style: TextStyle(fontSize: 24.sp),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              'Build Number: $_buildNumber',
+              style: TextStyle(fontSize: 24.sp),
             ),
           ],
         ),

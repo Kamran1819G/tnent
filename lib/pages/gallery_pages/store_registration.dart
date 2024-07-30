@@ -6,6 +6,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:pinput/pinput.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tnennt/helpers/color_utils.dart';
@@ -185,6 +187,43 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     } else {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Please select a category')));
+    }
+  }
+
+  Future<String> getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Check if location services are enabled
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return 'Location services are disabled.';
+    }
+
+    // Check for location permissions
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return 'Location permissions are denied.';
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return 'Location permissions are permanently denied.';
+    }
+
+    // Get the current position
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+    // Get the address from the coordinates
+    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+
+    if (placemarks.isNotEmpty) {
+      Placemark place = placemarks[0];
+      return '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
+    } else {
+      return 'No address available.';
     }
   }
 
@@ -1204,18 +1243,36 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             color: Theme.of(context).primaryColor,
                             fontSize: 24.sp,
                           ),
-                          prefixIcon: Icon(
-                            Icons.location_on,
-                            size: 30.sp,
+                          prefixIcon: Image.asset(
+                            'assets/icons/globe.png',
+                            width: 25.w,
+                            height: 25.h,
                           ),
                           prefixIconConstraints: BoxConstraints(
-                            minWidth: 60.w,
+                            minWidth: 40,
                           ),
+                          suffixIcon: IconButton(
+                            icon: Icon(Icons.my_location),
+                            onPressed: () async {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Fetching your current location...'),
+                                  duration: Duration(seconds: 30),
+                                ),
+                              );
+                              String location = await getCurrentLocation();
+                              setState(() {
+                                _locationController.text = location;
+                              });
+                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            },
+                          ),
+                          suffixIconColor: Theme.of(context).primaryColor,
                           prefixIconColor: Theme.of(context).primaryColor,
                           filled: true,
                           fillColor: hexToColor('#F5F5F5'),
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(20.r),
+                            borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
                               color: hexToColor('#838383'),
                               strokeAlign: BorderSide.strokeAlignInside,

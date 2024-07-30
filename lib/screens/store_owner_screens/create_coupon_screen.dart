@@ -17,9 +17,6 @@ class CreateCouponScreen extends StatefulWidget {
 }
 
 class _CreateCouponScreenState extends State<CreateCouponScreen> {
-  int currentPage = 0;
-  PageController _pageController = PageController();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,54 +24,45 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
         child: Column(
           children: [
             Container(
-              height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              height: 100.h,
+              margin: EdgeInsets.only(top: 16.h),
+              padding: EdgeInsets.symmetric(horizontal: 16.h),
               child: Row(
                 children: [
                   Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 16.0.w, vertical: 12.0.h),
                     decoration: BoxDecoration(
                       color: hexToColor('#272822'),
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(50.r),
                     ),
                     child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset('assets/white_tnennt_logo.png',
-                              width: 20, height: 20),
-                          SizedBox(width: 10),
-                          Text(
-                            'Tnennt inc.',
-                            style: TextStyle(
-                              color: hexToColor('#E6E6E6'),
-                              fontSize: 14.0,
-                            ),
-                          ),
-                        ]),
+                      children: [
+                        Image.asset('assets/white_tnennt_logo.png',
+                            width: 30.w, height: 30.w),
+                        SizedBox(width: 16.w),
+                        Text(
+                          'Tnennt inc.',
+                          style: TextStyle(
+                              color: hexToColor('#E6E6E6'), fontSize: 16.sp),
+                        ),
+                      ],
+                    ),
                   ),
                   Spacer(),
-                  Container(
-                    margin: EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey[100],
-                      child: IconButton(
-                        icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                        onPressed: () {
-                          if (currentPage == 0) {
-                            Navigator.pop(context);
-                          } else {
-                            _pageController.previousPage(
-                              duration: Duration(milliseconds: 500),
-                              curve: Curves.easeInOut,
-                            );
-                            currentPage--;
-                          }
-                        },
+                  IconButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        Colors.grey[100],
+                      ),
+                      shape: WidgetStateProperty.all(
+                        CircleBorder(),
                       ),
                     ),
+                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                   ),
                 ],
               ),
@@ -130,13 +118,22 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
               dashColor: hexToColor('#2B2B2B'),
             ),
             SizedBox(height: 100.h),
-            GestureDetector(
+            Container(
+              height: 500.h,
+              width: 580.w,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/coming_soon.png'),
+                  fit: BoxFit.fill,
+                ),
+              ),
+            ),
+            /*GestureDetector(
               onTap: () {
-                // FixedPriceCoupon();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ComingSoon(),
+                    builder: (context) => FixedPriceCoupon(),
                   ),
                 );
               },
@@ -191,7 +188,7 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ComingSoon(),
+                    builder: (context) => PercentageCoupon(),
                   ),
                 );
               },
@@ -266,7 +263,7 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                   ),
                 ),
               ),
-            ),
+            ),*/
           ],
         ),
       ),
