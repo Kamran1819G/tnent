@@ -1043,6 +1043,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Widget _buildVariationSelector() {
+    List<String> variations = widget.product.variations.keys.where((variation) => variation.toLowerCase() != 'default').toList();
+
+    if (variations.isEmpty) {
+      return SizedBox.shrink(); // Don't show any chips if only default variation exists
+    }
     return Wrap(
       spacing: 8.0,
       runSpacing: 8.0,
