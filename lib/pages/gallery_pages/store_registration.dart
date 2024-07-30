@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,10 +14,13 @@ import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/screens/webview_screen.dart';
 import 'package:tnennt/widget_tree.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class StoreRegistration extends StatefulWidget {
+
+class StoreRegistration extends StatefulWidget
+{
   const StoreRegistration({super.key});
-
   @override
   State<StoreRegistration> createState() => _StoreRegistrationState();
 }
@@ -29,8 +31,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   int _featuresCurrentPageIndex = 0;
   int _currentPageIndex = 0;
   late ConfettiController _confettiController;
+  String _verificationId = '';
 
-  bool value = false;
   bool _termsAccepted = false;
   bool isButtonEnabled = false;
   bool _isStorePhoneUnique = true;
@@ -63,11 +65,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   final _upiUsernameController = TextEditingController();
   final _upiIdController = TextEditingController();
   final _locationController = TextEditingController();
-  final TextEditingController _otpController = TextEditingController();
+  final  _otpController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 5));
     _storeFeaturesPageController = PageController()
@@ -84,6 +87,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     _confettiController.dispose();
     _storeFeaturesPageController.dispose();
     _pageController.dispose();
+    _phoneController.dispose();
+    _otpController.dispose();
     super.dispose();
   }
 
@@ -169,6 +174,86 @@ class _StoreRegistrationState extends State<StoreRegistration> {
       _isStorePhoneUnique = querySnapshot.docs.isEmpty;
     });
   }
+
+  Future<void> sendOTP(String phoneNumber) async {
+    debugPrint("sendOTP function called with number: $phoneNumber");
+
+    final apiKey = '7d149616-483e-11ef-8b60-0200cd936042';
+
+    // Convert phoneNumber to numerical form
+    String numericalPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+    debugPrint("Numerical phone number: $numericalPhoneNumber");
+
+    // Ensure the phone number starts with the country code (assuming Indian numbers)
+    if (!numericalPhoneNumber.startsWith('91')) {
+      numericalPhoneNumber = '91$numericalPhoneNumber';
+    }
+    debugPrint("Final phone number with country code: $numericalPhoneNumber");
+
+    final url = 'https://2factor.in/API/V1/$apiKey/SMS/$numericalPhoneNumber/AUTOGEN';
+    debugPrint("API URL: $url");
+
+    try {
+      debugPrint('Attempting to send OTP to: $numericalPhoneNumber');
+      final response = await http.get(Uri.parse(url)).timeout(Duration(seconds: 10));
+      debugPrint('Response received');
+      debugPrint('Response status: ${response.statusCode}');
+      debugPrint('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        debugPrint('Decoded response: $responseData');
+        if (responseData['Status'] == 'Success') {
+          _verificationId = responseData['Details'];
+          debugPrint('Verification ID: $_verificationId');
+        } else {
+          throw Exception('API returned error: ${responseData['Details']}');
+        }
+      } else {
+        debugPrint('Failed to send OTP: ${response.body}');
+        throw Exception('Failed to send OTP: ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Error sending OTP: $e');
+      throw e;
+    }
+  }
+
+  Future<bool> verifyOTP(String phoneNumber, String otp) async {
+    debugPrint('Verifying OTP: $otp for phone number: $phoneNumber');
+    final apiKey = '7d149616-483e-11ef-8b60-0200cd936042';
+
+    // Convert phoneNumber to numerical form
+    String numericalPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+
+    // Ensure the phone number starts with the country code (assuming Indian numbers)
+    if (!numericalPhoneNumber.startsWith('91')) {
+      numericalPhoneNumber = '91$numericalPhoneNumber';
+    }
+
+    final url = 'https://2factor.in/API/V1/$apiKey/SMS/VERIFY3/$numericalPhoneNumber/$otp';
+    debugPrint('Verification URL: $url');
+
+    try {
+      final response = await http.get(Uri.parse(url));
+      debugPrint('Verification response status: ${response.statusCode}');
+      debugPrint('Verification response body: ${response.body}');
+      if (response.statusCode == 200) {
+        // OTP verified successfully
+        debugPrint('OTP verified successfully');
+        return true;
+      } else {
+        // Handle error
+        debugPrint('Failed to verify OTP: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('Error verifying OTP: $e');
+      return false;
+    }
+  }
+
+
 
   void _onCategoryChanged(String category) {
     setState(() {
@@ -362,15 +447,25 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           Positioned(
                             bottom: 0,
                             child: GestureDetector(
-                              onTap: () {
+                              onTap: () async {
                                 if (_isStorePhoneUnique) {
-                                  _pageController
-                                      .jumpToPage(_currentPageIndex + 1);
+                                  debugPrint('Sending OTP');
+                                  try {
+                                    await sendOTP(_phoneController.text);
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('OTP sent successfully')),
+                                    );
+                                    _pageController.jumpToPage(_currentPageIndex + 1);
+                                  } catch (e) {
+                                    debugPrint('Error in on tap : $e');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('Failed to send OTP. Please try again.')),
+                                    );
+                                  }
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text(
-                                          'This phone number is already registered'),
+                                      content: Text('This phone number is already registered'),
                                     ),
                                   );
                                 }
@@ -512,10 +607,21 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             bottom: 0,
                             child: GestureDetector(
                               onTap: isButtonEnabled
-                                  ? () {
+                                  ? () async {
+                                debugPrint('Verifying OTP...');
+                                 bool isVerified = await verifyOTP(_phoneController.text, _otpController.text);
+                                 if (isVerified) {
+                                   debugPrint('OTP verified successfully');
                                       _pageController
                                           .jumpToPage(_currentPageIndex + 1);
-                                    }
+                                    } else {
+                                   debugPrint('Failed to verify OTP');
+                                   ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Failed to verify OTP. Please try again.')),
+                                    );
+                                  }
+                                 }
                                   : null,
                               child: CircleAvatar(
                                 backgroundColor: isButtonEnabled
