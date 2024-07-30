@@ -586,31 +586,34 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
                         Navigator.pop(context);
                       },
                       child: Container(
-                        padding: EdgeInsets.all(8.0),
-                        width: 175,
+                        width: 235.w,
+                        height: 70.h,
+                        alignment: Alignment.center,
                         decoration: BoxDecoration(
                           border:
                               Border.all(color: Theme.of(context).primaryColor),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(14.r),
                         ),
                         child: Row(
                           children: [
                             Container(
-                              padding: EdgeInsets.all(8),
+                              height: 50.h,
+                              width: 50.w,
+                              margin: EdgeInsets.only(left: 10.w),
                               decoration: BoxDecoration(
                                 color: Theme.of(context).primaryColor,
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(12.r),
                               ),
                               child: Icon(Icons.add, color: Colors.white),
                             ),
-                            SizedBox(width: 10),
+                            SizedBox(width: 10.w),
                             Text(
                               'Add Optional',
                               style: TextStyle(
                                 color: Theme.of(context).primaryColor,
                                 fontFamily: 'Poppins',
                                 fontWeight: FontWeight.w500,
-                                fontSize: 14.0,
+                                fontSize: 17.sp,
                               ),
                             ),
                           ],
@@ -623,11 +626,11 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
               SizedBox(height: 20),
               Dash(
                 direction: Axis.horizontal,
-                length: MediaQuery.of(context).size.width,
+                length: 600.w,
                 dashLength: 10,
                 dashColor: hexToColor('#848484'),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 30.h),
               Expanded(
                 child: ListView.builder(
                   itemCount: widget.selectedOptions.length,
@@ -711,19 +714,15 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
   bool _isExpanded = false;
   final _formKey = GlobalKey<FormState>();
 
-  void _calculateValues() {
-    double discount = double.tryParse(_discountController.text) ?? 0;
-    double mrp = double.tryParse(_mrpController.text) ?? 0;
+  void _calculateItemPrice() {
+    double discount = double.tryParse(_discountController.text) ?? 0.0;
+    double mrp = double.tryParse(_mrpController.text) ?? 0.0;
 
-    if (discount != 0 && mrp != 0) {
+    if (mrp > 0) {
       double itemPrice = mrp - (mrp * discount / 100);
-      setState(() {
-        _itemPriceController.text = itemPrice.toStringAsFixed(2);
-      });
+      _itemPriceController.text = itemPrice.toStringAsFixed(2);
     } else {
-      setState(() {
-        _itemPriceController.text = '';
-      });
+      _itemPriceController.text = '';
     }
   }
 
@@ -749,7 +748,7 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
             color: Theme.of(context).primaryColor,
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w500,
-            fontSize: 16.0,
+            fontSize: 23.sp,
           ),
         ),
       ),
@@ -757,21 +756,24 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            height: 35.h,
+            width: 115.w,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               color: Theme.of(context).primaryColor,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(6.r),
             ),
             child: Text(
               _isExpanded ? 'Hide' : 'Price',
               style: TextStyle(
                 fontFamily: 'Poppins',
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w500,
                 color: hexToColor('#FFFFFF'),
               ),
             ),
           ),
-          SizedBox(width: 8),
+          SizedBox(width: 10.w),
           IconButton(
             icon: Icon(
               Icons.delete_outline,
@@ -782,8 +784,9 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
         ],
       ),
       children: [
+        SizedBox(height: 20.h),
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+          padding: EdgeInsets.only(left: 45.w, right: 10.w),
           child: Form(
             key: _formKey,
             child: Column(
@@ -792,190 +795,155 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Container(
-                      width: MediaQuery.of(context).size.width * 0.3,
+                      width: 190.w,
                       child: TextFormField(
                         controller: _discountController,
                         keyboardType: TextInputType.number,
                         style: TextStyle(
                           color: Colors.black,
                           fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14.0,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 20.sp,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Discount',
                           hintStyle: TextStyle(
                             color: hexToColor('#989898'),
                             fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14.0,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20.sp,
                           ),
-                          prefixIcon: Text(
-                            '%',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontFamily: 'Gotham',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18.0,
-                            ),
-                            textAlign: TextAlign.center,
+                          prefixIcon: Icon(
+                            Icons.percent,
+                            color: Theme.of(context).primaryColor,
+                            size: 30.sp,
                           ),
-                          prefixIconConstraints: BoxConstraints(
-                            minWidth: 30,
-                            minHeight: 0,
-                          ),
+                          prefixIconConstraints: BoxConstraints(minWidth: 30),
                           border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: hexToColor('#848484'),
-                            ),
-                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide(color: hexToColor('#848484')),
+                            borderRadius: BorderRadius.circular(18.r),
                           ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Required';
+                            setState(() {
+                              _discountController.text = '0';
+                            });
+                            return null; // Allow empty discount (0%)
                           }
-                          if (double.tryParse(value) == null) {
-                            return 'Invalid number';
+                          final double? discount = double.tryParse(value);
+                          if (discount == null || discount < 0 || discount > 100) {
+                            return 'Please enter a valid discount (0-100)';
                           }
                           return null;
                         },
-                        onChanged: (_) => _calculateValues(),
+                        onChanged: (_) => _calculateItemPrice(),
                       ),
                     ),
                     Container(
-                      width: MediaQuery.of(context).size.width * 0.3,
+                      width: 190.w,
                       child: TextFormField(
                         controller: _mrpController,
                         keyboardType: TextInputType.number,
                         style: TextStyle(
                           color: Colors.black,
                           fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14.0,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 20.sp,
                         ),
                         decoration: InputDecoration(
                           hintText: 'MRP Price',
                           hintStyle: TextStyle(
                             color: hexToColor('#989898'),
                             fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14.0,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20.sp,
                           ),
-                          prefixIcon: Text(
-                            '₹',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontFamily: 'Gotham',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18.0,
-                            ),
-                            textAlign: TextAlign.center,
+                          prefixIcon: Icon(
+                            Icons.currency_rupee,
+                            color: Theme.of(context).primaryColor,
+                            size: 30.sp,
                           ),
-                          prefixIconConstraints: BoxConstraints(
-                            minWidth: 30,
-                            minHeight: 0,
-                          ),
+                          prefixIconConstraints: BoxConstraints(minWidth: 30),
                           border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: hexToColor('#848484'),
-                            ),
-                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide(color: hexToColor('#848484')),
+                            borderRadius: BorderRadius.circular(18.r),
                           ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Required';
+                            return 'Please enter the MRP';
                           }
-                          if (double.tryParse(value) == null) {
-                            return 'Invalid number';
+                          final double? mrp = double.tryParse(value);
+                          if (mrp == null || mrp <= 0) {
+                            return 'Please enter a valid MRP';
                           }
                           return null;
                         },
-                        onChanged: (_) => _calculateValues(),
+                        onChanged: (_) => _calculateItemPrice(),
                       ),
                     ),
                     Container(
-                      width: MediaQuery.of(context).size.width * 0.3,
+                      width: 190.w,
                       child: TextFormField(
                         controller: _itemPriceController,
-                        keyboardType: TextInputType.number,
+                        enabled: false, // Make it non-editable
                         style: TextStyle(
                           color: Colors.black,
                           fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14.0,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 20.sp,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Item Price',
                           hintStyle: TextStyle(
                             color: hexToColor('#989898'),
                             fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14.0,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20.sp,
                           ),
-                          prefixIcon: Text(
-                            '₹',
-                            style: TextStyle(
-                              color: Theme.of(context).primaryColor,
-                              fontFamily: 'Gotham',
-                              fontWeight: FontWeight.w600,
-                              fontSize: 18.0,
-                            ),
-                            textAlign: TextAlign.center,
+                          prefixIcon: Icon(
+                            Icons.currency_rupee,
+                            color: Theme.of(context).primaryColor,
+                            size: 30.sp,
                           ),
-                          prefixIconConstraints: BoxConstraints(
-                            minWidth: 30,
-                            minHeight: 0,
-                          ),
+                          prefixIconConstraints: BoxConstraints(minWidth: 30),
                           border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: hexToColor('#848484'),
-                            ),
-                            borderRadius: BorderRadius.circular(18),
+                            borderSide: BorderSide(color: hexToColor('#848484')),
+                            borderRadius: BorderRadius.circular(18.r),
                           ),
                         ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Required';
-                          }
-                          if (double.tryParse(value) == null) {
-                            return 'Invalid number';
-                          }
-                          return null;
-                        },
-                        onChanged: (_) => _calculateValues(),
                       ),
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 30.h),
                 Row(
                   children: [
                     SizedBox(
-                      width: 175,
+                      width: 300.w,
                       child: TextFormField(
                         controller: _quantityController,
-                        keyboardType: TextInputType.number,
                         style: TextStyle(
                           color: Colors.black,
                           fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14.0,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 20.sp,
                         ),
                         decoration: InputDecoration(
                           hintText: 'Ex. 100',
                           hintStyle: TextStyle(
                             color: hexToColor('#989898'),
                             fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14.0,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20.sp,
                           ),
                           border: OutlineInputBorder(
                             borderSide: BorderSide(
                               color: hexToColor('#848484'),
                             ),
-                            borderRadius: BorderRadius.circular(18),
+                            borderRadius:
+                            BorderRadius.circular(20.r),
                           ),
                           contentPadding: EdgeInsets.symmetric(
                             horizontal: 20,
@@ -984,21 +952,24 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Required';
+                            return 'Please enter the stock quantity';
                           }
-                          if (int.tryParse(value) == null) {
-                            return 'Invalid number';
+                          final int? stockQuantity =
+                          int.tryParse(value);
+                          if (stockQuantity == null ||
+                              stockQuantity < 0) {
+                            return 'Please enter a valid stock quantity';
                           }
                           return null;
                         },
                       ),
                     ),
-                    SizedBox(width: 20),
+                    SizedBox(width: 20.w),
                     Expanded(
                       child: Text(
                         '(Add Total Product Stock Quantity)',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 17.sp,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
                           color: hexToColor('#636363'),

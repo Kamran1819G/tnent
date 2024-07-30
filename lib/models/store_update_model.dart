@@ -4,6 +4,7 @@ class StoreUpdateModel {
   final String updateId;
   final String storeId;
   final String storeName;
+  final String logoUrl;
   final String imageUrl;
   final Timestamp createdAt;
   final Timestamp expiresAt;
@@ -12,6 +13,7 @@ class StoreUpdateModel {
     required this.updateId,
     required this.storeId,
     required this.storeName,
+    required this.logoUrl,
     required this.imageUrl,
     required this.createdAt,
     required this.expiresAt,
@@ -23,6 +25,7 @@ class StoreUpdateModel {
       updateId: doc.id,
       storeId: data['storeId'] ?? '',
       storeName: data['storeName'] ?? '',
+      logoUrl: data['logoUrl'] ?? '',
       imageUrl: data['imageUrl'] ?? '',
       createdAt: data['createdAt'] ?? Timestamp.now(),
       expiresAt: data['expiresAt'] ?? Timestamp.now(),
@@ -33,6 +36,7 @@ class StoreUpdateModel {
     return {
       'storeId': storeId,
       'storeName': storeName,
+      'logoUrl': logoUrl,
       'imageUrl': imageUrl,
       'createdAt': createdAt,
       'expiresAt': expiresAt,

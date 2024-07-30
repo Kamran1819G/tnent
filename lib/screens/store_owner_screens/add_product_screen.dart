@@ -62,20 +62,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
   bool get isMultiOptionCategory =>
       multiOptionCategories.contains(selectedCategory);
 
-  void _calculateValues() {
+  void _calculateItemPrice() {
     double discount = double.tryParse(_discountController.text) ?? 0.0;
     double mrp = double.tryParse(_mrpController.text) ?? 0.0;
-    double itemPrice = double.tryParse(_itemPriceController.text) ?? 0.0;
 
-    if (discount != 0.0 && mrp != 0.0) {
-      itemPrice = mrp - (mrp * discount / 100);
+    if (mrp > 0) {
+      double itemPrice = mrp - (mrp * discount / 100);
       _itemPriceController.text = itemPrice.toStringAsFixed(2);
-    } else if (discount != 0.0 && itemPrice != 0.0) {
-      mrp = itemPrice / (1 - discount / 100);
-      _mrpController.text = mrp.toStringAsFixed(2);
-    } else if (mrp != 0.0 && itemPrice != 0.0) {
-      discount = ((mrp - itemPrice) / mrp) * 100;
-      _discountController.text = discount.toStringAsFixed(2);
+    } else {
+      _itemPriceController.text = '';
     }
   }
 
@@ -520,12 +515,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             children: [
                               Text(
                                 'Item Price',
-                                style: TextStyle(
-                                  fontSize: 23.sp,
-                                ),
+                                style: TextStyle(fontSize: 23.sp),
                               ),
                               Text(
-                                '(Fill any two slots and the third will be calculated automatically)',
+                                '(Fill in Discount and MRP, and Item Price will be calculated automatically)',
                                 style: TextStyle(
                                   fontSize: 17.sp,
                                   fontFamily: 'Poppins',
@@ -535,8 +528,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               ),
                               SizedBox(height: 20.h),
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(
                                     width: 190.w,
@@ -562,32 +554,26 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           color: Theme.of(context).primaryColor,
                                           size: 30.sp,
                                         ),
-                                        prefixIconConstraints: BoxConstraints(
-                                          minWidth: 30,
-                                        ),
+                                        prefixIconConstraints: BoxConstraints(minWidth: 30),
                                         border: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: hexToColor('#848484'),
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(18.r),
+                                          borderSide: BorderSide(color: hexToColor('#848484')),
+                                          borderRadius: BorderRadius.circular(18.r),
                                         ),
                                       ),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
-                                          return 'Please enter the discount';
+                                          setState(() {
+                                            _discountController.text = '0';
+                                          });
+                                          return null; // Allow empty discount (0%)
                                         }
-                                        final double? discount =
-                                            double.tryParse(value);
-                                        if (discount == null ||
-                                            discount < 0 ||
-                                            discount > 100) {
-                                          return 'Please enter a valid discount';
+                                        final double? discount = double.tryParse(value);
+                                        if (discount == null || discount < 0 || discount > 100) {
+                                          return 'Please enter a valid discount (0-100)';
                                         }
                                         return null;
                                       },
-                                      onChanged: (_) =>
-                                          _calculateValues(),
+                                      onChanged: (_) => _calculateItemPrice(),
                                     ),
                                   ),
                                   Container(
@@ -614,37 +600,30 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           color: Theme.of(context).primaryColor,
                                           size: 30.sp,
                                         ),
-                                        prefixIconConstraints: BoxConstraints(
-                                          minWidth: 30,
-                                        ),
+                                        prefixIconConstraints: BoxConstraints(minWidth: 30),
                                         border: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: hexToColor('#848484'),
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(18.r),
+                                          borderSide: BorderSide(color: hexToColor('#848484')),
+                                          borderRadius: BorderRadius.circular(18.r),
                                         ),
                                       ),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
                                           return 'Please enter the MRP';
                                         }
-                                        final double? mrp =
-                                            double.tryParse(value);
+                                        final double? mrp = double.tryParse(value);
                                         if (mrp == null || mrp <= 0) {
                                           return 'Please enter a valid MRP';
                                         }
                                         return null;
                                       },
-                                      onChanged: (_) =>
-                                          _calculateValues(),
+                                      onChanged: (_) => _calculateItemPrice(),
                                     ),
                                   ),
                                   Container(
                                     width: 190.w,
                                     child: TextFormField(
                                       controller: _itemPriceController,
-                                      keyboardType: TextInputType.number,
+                                      enabled: false, // Make it non-editable
                                       style: TextStyle(
                                         color: Colors.black,
                                         fontFamily: 'Gotham',
@@ -664,31 +643,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           color: Theme.of(context).primaryColor,
                                           size: 30.sp,
                                         ),
-                                        prefixIconConstraints: BoxConstraints(
-                                          minWidth: 30,
-                                        ),
+                                        prefixIconConstraints: BoxConstraints(minWidth: 30),
                                         border: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: hexToColor('#848484'),
-                                          ),
-                                          borderRadius:
-                                              BorderRadius.circular(18.r),
+                                          borderSide: BorderSide(color: hexToColor('#848484')),
+                                          borderRadius: BorderRadius.circular(18.r),
                                         ),
                                       ),
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return 'Please enter the item price';
-                                        }
-                                        final double? itemPrice =
-                                            double.tryParse(value);
-                                        if (itemPrice == null ||
-                                            itemPrice <= 0) {
-                                          return 'Please enter a valid item price';
-                                        }
-                                        return null;
-                                      },
-                                      onChanged: (_) =>
-                                          _calculateValues(),
                                     ),
                                   ),
                                 ],

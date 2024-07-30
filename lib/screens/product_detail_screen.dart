@@ -464,7 +464,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           Container(
                             height: 495.h,
                             width: 620.w,
-                            child: ListView.builder(
+                            child: widget.product.imageUrls.length == 1
+                                ? Center(
+                              child: Container(
+                                width: 445.w,
+                                height: 490.h,
+                                margin: EdgeInsets.symmetric(horizontal: 12.w),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  child: Image.network(
+                                    widget.product.imageUrls[0],
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            )
+                                : ListView.builder(
                               controller: imagesController,
                               scrollDirection: Axis.horizontal,
                               itemCount: widget.product.imageUrls.length,

@@ -100,7 +100,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         name: _nameController.text,
         phone: _phoneController.text,
         email: _emailController.text,
-        logoUrl: 'https://via.placeholder.com/150',
+        logoUrl: "https://firebasestorage.googleapis.com/v0/b/tnennt-1e1f2.appspot.com/o/Don't%20Delete%2Fblack_tnennt_logo.png?alt=media&token=7880c411-c4dc-4615-b800-f55193f23721",
         website: '${_websiteController.text}.tnennt.com',
         upiUsername: _upiUsernameController.text,
         upiId: _upiIdController.text,

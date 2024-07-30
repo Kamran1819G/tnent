@@ -36,7 +36,8 @@ class _CartScreenState extends State<CartScreen> {
 
         List<Map<String, dynamic>> updatedCartItems = [];
         for (var item in cartData) {
-          Map<String, dynamic> productDetails = await _fetchProductDetails(item['productId']);
+          Map<String, dynamic> productDetails =
+              await _fetchProductDetails(item['productId']);
           updatedCartItems.add({
             ...item,
             ...productDetails,
@@ -73,14 +74,16 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   void _updateSelectionState() {
-    _allItemsSelected = _cartItems.isNotEmpty && _cartItems.every((item) => item['isSelected'] == true);
+    _allItemsSelected = _cartItems.isNotEmpty &&
+        _cartItems.every((item) => item['isSelected'] == true);
     _calculateTotalAmount();
   }
 
   void _calculateTotalAmount() {
-    _totalAmount = _cartItems
-        .where((item) => item['isSelected'] == true)
-        .fold(0, (sum, item) => sum + (item['variationDetails'].price * item['quantity']));
+    _totalAmount = _cartItems.where((item) => item['isSelected'] == true).fold(
+        0,
+        (sum, item) =>
+            sum + (item['variationDetails'].price * item['quantity']));
   }
 
   void _toggleAllItemsSelection(bool? value) {
@@ -94,10 +97,11 @@ class _CartScreenState extends State<CartScreen> {
     _updateFirestore();
   }
 
-  void _updateItemSelection(String productId, String variation, bool isSelected) {
+  void _updateItemSelection(
+      String productId, String variation, bool isSelected) {
     setState(() {
       int index = _cartItems.indexWhere((item) =>
-      item['productId'] == productId && item['variation'] == variation);
+          item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
         _cartItems[index]['isSelected'] = isSelected;
         _updateSelectionState();
@@ -107,11 +111,13 @@ class _CartScreenState extends State<CartScreen> {
 
   void _updateFirestore() {
     String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    List<Map<String, dynamic>> cartData = _cartItems.map((item) => {
-      'productId': item['productId'],
-      'quantity': item['quantity'],
-      'variation': item['variation'],
-    }).toList();
+    List<Map<String, dynamic>> cartData = _cartItems
+        .map((item) => {
+              'productId': item['productId'],
+              'quantity': item['quantity'],
+              'variation': item['variation'],
+            })
+        .toList();
 
     FirebaseFirestore.instance
         .collection('Users')
@@ -122,7 +128,7 @@ class _CartScreenState extends State<CartScreen> {
   void _removeFromCart(String productId, String variation) {
     setState(() {
       _cartItems.removeWhere((item) =>
-      item['productId'] == productId && item['variation'] == variation);
+          item['productId'] == productId && item['variation'] == variation);
       _updateSelectionState();
     });
     _updateFirestore();
@@ -131,7 +137,7 @@ class _CartScreenState extends State<CartScreen> {
   void _updateQuantity(String productId, String variation, int newQuantity) {
     setState(() {
       int index = _cartItems.indexWhere((item) =>
-      item['productId'] == productId && item['variation'] == variation);
+          item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
         if (newQuantity > 0) {
           _cartItems[index]['quantity'] = newQuantity;
@@ -146,7 +152,7 @@ class _CartScreenState extends State<CartScreen> {
 
   void _navigateToCheckout() {
     List<Map<String, dynamic>> selectedItems =
-    _cartItems.where((item) => item['isSelected'] == true).toList();
+        _cartItems.where((item) => item['isSelected'] == true).toList();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -154,7 +160,6 @@ class _CartScreenState extends State<CartScreen> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -197,8 +202,7 @@ class _CartScreenState extends State<CartScreen> {
                         CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new,
-                        color: Colors.black),
+                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -287,7 +291,8 @@ class _CartScreenState extends State<CartScreen> {
             Padding(
               padding: EdgeInsets.all(24.w),
               child: ElevatedButton(
-                child: Text('Buy Selected Items', style: TextStyle(fontSize: 22.sp)),
+                child: Text('Buy Selected Items',
+                    style: TextStyle(fontSize: 22.sp)),
                 onPressed: _cartItems.any((item) => item['isSelected'] == true)
                     ? _navigateToCheckout
                     : null,
@@ -338,13 +343,15 @@ class CartItemTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(8.r),
               image: item['productImage'] != null
                   ? DecorationImage(
-                image: NetworkImage(item['productImage']),
-                fit: BoxFit.cover,
-              )
+                      image: NetworkImage(item['productImage']),
+                      fit: BoxFit.cover,
+                    )
                   : null,
             ),
             child: item['productImage'] == null
-                ? Center(child: Icon(Icons.image_not_supported, size: 50.sp, color: Colors.grey))
+                ? Center(
+                    child: Icon(Icons.image_not_supported,
+                        size: 50.sp, color: Colors.grey))
                 : null,
           ),
           SizedBox(width: 16.w),
@@ -360,14 +367,16 @@ class CartItemTile extends StatelessWidget {
                   fontSize: 26.sp,
                 ),
               ),
-              SizedBox(height: 8.h),
-              Text(
-                'Variation: ${item['variation']}',
-                style: TextStyle(
-                  color: hexToColor('#989898'),
-                  fontSize: 18.sp,
+              if (item['variation'] != 'default') ...[
+                SizedBox(height: 8.h),
+                Text(
+                  'Variation: ${item['variation']}',
+                  style: TextStyle(
+                    color: hexToColor('#989898'),
+                    fontSize: 18.sp,
+                  ),
                 ),
-              ),
+              ],
               SizedBox(height: 25.h),
               Text(
                 '₹${item['variationDetails'].price.toStringAsFixed(2)}',
@@ -388,7 +397,8 @@ class CartItemTile extends StatelessWidget {
                       }
                     },
                   ),
-                  Text(item['quantity'].toString(), style: TextStyle(fontSize: 20.sp)),
+                  Text(item['quantity'].toString(),
+                      style: TextStyle(fontSize: 20.sp)),
                   IconButton(
                     icon: Icon(Icons.add, size: 20.sp),
                     onPressed: () {
@@ -459,7 +469,8 @@ class CartItemTile extends StatelessWidget {
                     ),
                     value: item['isSelected'] ?? false,
                     onChanged: (value) {
-                      onUpdateSelection(item['productId'], item['variation'], value ?? false);
+                      onUpdateSelection(
+                          item['productId'], item['variation'], value ?? false);
                     },
                   ),
                 ],

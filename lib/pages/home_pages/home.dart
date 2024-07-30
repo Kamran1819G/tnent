@@ -10,6 +10,7 @@ import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
+import 'package:tnennt/models/store_update_model.dart';
 import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/pages/catalog_pages/cart_screen.dart';
 import 'package:tnennt/screens/explore_screen.dart';
@@ -149,7 +150,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     setState(() {
       firstName = widget.currentUser.firstName;
       lastName = widget.currentUser.lastName;
-
     });
     _tabController = TabController(
       length: 6,
@@ -385,97 +385,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             children: [
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
-                child: Stack(
-                  children: [
-                    Image.asset('assets/store_profile_banner.png',
-                        height: 250.h,
-                        width: double.infinity,
-                        fit: BoxFit.cover),
-                    Positioned(
-                      right: 30.w,
-                      bottom: 80.h,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          RichText(
-                            text: TextSpan(children: [
-                              TextSpan(
-                                text: 'Tnennt',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 24.sp,
-                                ),
-                              ),
-                              TextSpan(
-                                text: ' •',
-                                style: TextStyle(
-                                  fontFamily: 'Gotham Black',
-                                  fontSize: 24.sp,
-                                  color: hexToColor('#42FF00'),
-                                ),
-                              ),
-                            ]),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          Text(
-                            'Store',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 24.sp),
-                          )
-                        ],
-                      ),
-                    ),
-                    Positioned(
-                      top: 16.h,
-                      left: 70.w,
-                      child: Container(
-                        width: 350.w,
-                        child: Text(
-                          "Buy From Your Local Store At A Discounted Price",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20.sp,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      left: 14.w,
-                      bottom: 20.h,
-                      child: Container(
-                        width: 175,
-                        child: CarouselSlider(
-                          options: CarouselOptions(
-                            enlargeStrategy: CenterPageEnlargeStrategy.scale,
-                            autoPlay: true,
-                            enlargeCenterPage: true,
-                            enlargeFactor: 0.4,
-                            aspectRatio: 2.5,
-                            autoPlayInterval: Duration(seconds: 3),
-                            autoPlayAnimationDuration:
-                                Duration(milliseconds: 800),
-                            enableInfiniteScroll: true,
-                            viewportFraction: 0.35,
-                          ),
-                          items: carouselImgList
-                              .map((item) => Center(
-                                    child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.asset(item,
-                                            fit: BoxFit.cover)),
-                                  ))
-                              .toList(),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                child: Image.asset('assets/store_profile_banner.png',
+                    height: 250.h, width: double.infinity, fit: BoxFit.cover),
               ),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
@@ -499,7 +410,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             crossAxisCount: 3,
             crossAxisSpacing: 12.w,
             mainAxisSpacing: 12.h,
-            childAspectRatio: 3/4,
+            childAspectRatio: 3 / 4,
           ),
           itemCount: categories.length,
           itemBuilder: (context, index) {
@@ -625,6 +536,47 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
         ),
 
+        SizedBox(height: 30.h),
+
+        Container(
+          height: 350.h,
+          child: PageView(
+            controller: PageController(viewportFraction: 1),
+            children: [
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 16.w),
+                decoration: BoxDecoration(
+                  color: hexToColor('#F5F5F5'),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Center(
+                  child: Text('First Page Content'),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 16.w),
+                decoration: BoxDecoration(
+                  color: hexToColor('#F5F5F5'),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Center(
+                  child: Text('Second Page Content'),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 16.w),
+                decoration: BoxDecoration(
+                  color: hexToColor('#F5F5F5'),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Center(
+                  child: Text('Third Page Content'),
+                ),
+              ),
+            ],
+          ),
+        ),
+
         SizedBox(height: 50.h),
 
         // Feature Store Section
@@ -692,19 +644,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ],
           ),
         ),
-
-        SizedBox(height: MediaQuery.sizeOf(context).height * 0.1),
+        SizedBox(height: 200.h),
       ],
-    );
-  }
-
-  Widget Tile({required int index, required double extent}) {
-    return Container(
-      color: Colors.blue,
-      height: extent,
-      child: Center(
-        child: Text('$index'),
-      ),
     );
   }
 }
@@ -893,10 +834,10 @@ class CategoryProductsScreen extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                          childAspectRatio: 0.8,
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      childAspectRatio: 0.8,
                     ),
                     itemCount: products.length,
                     itemBuilder: (context, index) {

@@ -147,6 +147,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
       updateId: '', // Firestore will generate this
       storeId: store.storeId,
       storeName: store.name,
+      logoUrl: store.logoUrl,
       imageUrl: imageUrl,
       createdAt: now,
       expiresAt: expiresAt,
@@ -161,6 +162,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
         updateId: docRef.id,
         storeId: newUpdate.storeId,
         storeName: newUpdate.storeName,
+        logoUrl: newUpdate.logoUrl,
         imageUrl: newUpdate.imageUrl,
         createdAt: newUpdate.createdAt,
         expiresAt: newUpdate.expiresAt,

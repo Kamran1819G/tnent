@@ -9,7 +9,6 @@ class UserModel {
   final String? phoneNumber;
   final String? location;
   final String? pincode;
-  final bool registered;
   final String? storeId;
   Map<String, dynamic>? address;
   final List<String> likedPosts;
@@ -26,7 +25,6 @@ class UserModel {
     this.phoneNumber,
     this.location,
     this.pincode,
-    this.registered = false,
     this.storeId,
     this.address,
     List<String>? likedPosts,
@@ -51,7 +49,6 @@ class UserModel {
       phoneNumber: data['phoneNumber'],
       location: data['location'],
       pincode: data['pincode'],
-      registered: data['registered'] ?? false,
       storeId: data['storeId'],
       address: data['address'] as Map<String, dynamic>?,
       likedPosts: List<String>.from(data['likedPosts'] ?? []),
