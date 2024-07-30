@@ -24,13 +24,16 @@ class StoreCommunity extends StatefulWidget {
 
 class _StoreCommunityState extends State<StoreCommunity> {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseAuth _auth = FirebaseAuth.instance;
   List<CommunityPostModel> _posts = [];
   bool _isLoading = true;
+  bool _isStoreOwner = false;
 
   @override
   void initState() {
     super.initState();
     _fetchPosts();
+    _checkStoreOwnership();
   }
 
   Future<void> _fetchPosts() async {
@@ -43,6 +46,35 @@ class _StoreCommunityState extends State<StoreCommunity> {
       _isLoading = false;
     });
   }
+
+  Future<void> _checkStoreOwnership() async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    try {
+      DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user.uid).get();
+      if (userDoc.exists) {
+        String? userStoreId = userDoc.get('storeId') as String?;
+        if (userStoreId == widget.store.storeId) {
+          setState(() {
+            _isStoreOwner = true;
+          });
+          return;
+        }
+      }
+
+      DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(widget.store.storeId).get();
+      if (storeDoc.exists) {
+        String? ownerId = storeDoc.get('ownerId') as String?;
+        setState(() {
+          _isStoreOwner = (ownerId == user.uid);
+        });
+      }
+    } catch (e) {
+      print('Error checking store ownership: $e');
+    }
+  }
+
 
   Future<List<CommunityPostModel>> fetchPostsByStore(StoreModel store) async {
     try {
@@ -68,17 +100,17 @@ class _StoreCommunityState extends State<StoreCommunity> {
         child: Column(
           children: <Widget>[
             Container(
-              height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              height: 100.h,
+              margin: EdgeInsets.only(top: 20.h, bottom: 20.h),
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
                 children: [
                   Container(
-                    height: 75,
-                    width: 100,
-                    padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    height: 100.h,
+                    width: 160.w,
                     decoration: BoxDecoration(
                       border: Border.all(color: hexToColor('#BEBEBE'), width: 1.0),
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(25.r),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -88,7 +120,7 @@ class _StoreCommunityState extends State<StoreCommunity> {
                           '${widget.store.totalPosts}',
                           style: TextStyle(
                             color: hexToColor('#343434'),
-                            fontSize: 20.0,
+                            fontSize: 35.sp,
                           ),
                         ),
                         Text(
@@ -97,25 +129,28 @@ class _StoreCommunityState extends State<StoreCommunity> {
                             color: hexToColor('#7D7D7D'),
                             fontFamily: 'Poppins',
                             fontWeight: FontWeight.w700,
-                            fontSize: 14.0,
+                            fontSize: 19.sp,
                           ),
                         ),
                       ],
                     ),
                   ),
                   Spacer(),
-                  Container(
-                    margin: EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: hexToColor('#F5F5F5'),
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_back_ios, color: Colors.black),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                  IconButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        Colors.grey[100],
+                      ),
+                      shape: WidgetStateProperty.all(
+                        CircleBorder(),
                       ),
                     ),
-                  )
+                    icon: Icon(Icons.arrow_back_ios_new,
+                        color: Colors.black),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
                 ],
               ),
             ),
@@ -130,6 +165,7 @@ class _StoreCommunityState extends State<StoreCommunity> {
                     final post = _posts[index];
                     return CommunityPost(
                       post: post,
+                      isStoreOwner: _isStoreOwner,
                     );
                   },
                 ),
@@ -140,28 +176,13 @@ class _StoreCommunityState extends State<StoreCommunity> {
       ),
     );
   }
-
-  String _formatPostTime(Timestamp timestamp) {
-    final now = DateTime.now();
-    final postTime = timestamp.toDate();
-    final difference = now.difference(postTime);
-
-    if (difference.inDays > 0) {
-      return '${difference.inDays}d ago';
-    } else if (difference.inHours > 0) {
-      return '${difference.inHours}h ago';
-    } else if (difference.inMinutes > 0) {
-      return '${difference.inMinutes}m ago';
-    } else {
-      return 'Just now';
-    }
-  }
 }
 
 class CommunityPost extends StatefulWidget {
   final CommunityPostModel post;
+  final bool isStoreOwner;
 
-  CommunityPost({required this.post});
+  CommunityPost({required this.post, required this.isStoreOwner});
 
   @override
   _CommunityPostState createState() => _CommunityPostState();
@@ -248,23 +269,23 @@ class _CommunityPostState extends State<CommunityPost> {
 
   Widget _buildPostContent(String userName, String userProfileImage) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(24.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildUserInfo(userName, userProfileImage),
-          SizedBox(height: 16.0),
+          SizedBox(height: 24.h),
           Text(
             widget.post.content,
             style: TextStyle(
-              color: Colors.black,
+              color: hexToColor('#737373'),
               fontFamily: 'Gotham',
-              fontSize: 12.0,
+              fontSize: 20.sp,
             ),
           ),
-          SizedBox(height: 10),
+          SizedBox(height: 10.h),
           if (widget.post.images.isNotEmpty) _buildImageGallery(),
-          SizedBox(height: 10),
+          SizedBox(height: 10.h),
           _buildInteractionBar(),
         ],
       ),
@@ -276,22 +297,22 @@ class _CommunityPostState extends State<CommunityPost> {
       children: [
         CircleAvatar(
           backgroundImage: CachedNetworkImageProvider(userProfileImage),
-          radius: 20.0,
+          radius: 33.w,
         ),
-        const SizedBox(width: 16.0),
+        SizedBox(width: 22.w),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 userName,
-                style: const TextStyle(fontSize: 18.0),
+                style: TextStyle(fontSize: 30.sp),
               ),
               Text(
                 _formatTimestamp(widget.post.createdAt),
                 style: TextStyle(
-                  color: hexToColor('#9C9C9C'),
-                  fontSize: 10.0,
+                  color: hexToColor('#C1C1C1'),
+                  fontSize: 15.sp,
                 ),
               ),
             ],
@@ -300,11 +321,12 @@ class _CommunityPostState extends State<CommunityPost> {
         GestureDetector(
           onTap: () => _showMoreOptions(),
           child: CircleAvatar(
+            radius: 25.w,
             backgroundColor: hexToColor('#F5F5F5'),
             child: Icon(
               Icons.more_horiz,
               color: hexToColor('#BEBEBE'),
-              size: 20,
+              size: 26.sp,
             ),
           ),
         ),
@@ -344,10 +366,10 @@ class _CommunityPostState extends State<CommunityPost> {
         GestureDetector(
           onTap: _toggleLike,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 6.h),
             decoration: BoxDecoration(
               border: Border.all(color: hexToColor('#BEBEBE')),
-              borderRadius: BorderRadius.circular(50.0),
+              borderRadius: BorderRadius.circular(25.r),
             ),
             child: Row(
               children: [
@@ -360,12 +382,13 @@ class _CommunityPostState extends State<CommunityPost> {
                     _isLiked ? Icons.favorite : Icons.favorite_border,
                     key: ValueKey<bool>(_isLiked),
                     color: _isLiked ? Colors.red : hexToColor('#BEBEBE'),
+                    size: 30.sp,
                   ),
                 ),
-                const SizedBox(width: 8.0),
+                SizedBox(width: 12.w),
                 Text(
                   '$_likeCount',
-                  style: TextStyle(color: hexToColor('#989797'), fontSize: 12.0),
+                  style: TextStyle(color: hexToColor('#989797'), fontSize: 17.sp),
                 ),
               ],
             ),
@@ -373,28 +396,33 @@ class _CommunityPostState extends State<CommunityPost> {
         ),
         Spacer(),
         if (widget.post.productLink?.isNotEmpty ?? false)
-          Chip(
-            backgroundColor: hexToColor('#EDEDED'),
-            side: BorderSide.none,
-            label: Text(
-              '${widget.post.productLink!}',
-              style: TextStyle(
-                color: hexToColor('#B4B4B4'),
-                fontFamily: 'Gotham',
-                fontWeight: FontWeight.w500,
-                fontSize: 12.0,
+          SizedBox(
+            height: 50.h,
+            width: 350.w,
+            child: Chip(
+              backgroundColor: hexToColor('#EDEDED'),
+              side: BorderSide.none,
+              label: Text(
+                '${widget.post.productLink!}',
+                style: TextStyle(
+                  color: hexToColor('#B4B4B4'),
+                  fontFamily: 'Gotham',
+                  fontWeight: FontWeight.w500,
+                  fontSize: 18.sp,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            avatar: Icon(
-              Icons.link_outlined,
-              color: hexToColor('#B4B4B4'),
+              avatar: Icon(
+                Icons.link_outlined,
+                color: hexToColor('#B4B4B4'),
+                size: 24.sp,
+              ),
             ),
           ),
         Spacer(),
         IconButton(
-          icon: Icon(Icons.ios_share_outlined),
+          icon: Icon(Icons.ios_share_outlined, size: 30.sp,),
           onPressed: () => _sharePost(),
         ),
       ],
@@ -416,7 +444,7 @@ class _CommunityPostState extends State<CommunityPost> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => _buildMoreBottomSheet(),
+      builder: (context) => widget.isStoreOwner ? _buildMoreBottomSheet() : _buildReportBottomSheet(),
     );
   }
 
@@ -485,6 +513,34 @@ class _CommunityPostState extends State<CommunityPost> {
                   ),
                 ),
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReportBottomSheet() {
+    return Container(
+      height: 250,
+      width: double.infinity,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircleAvatar(
+            backgroundColor: hexToColor('#2B2B2B'),
+            child: Icon(
+              Icons.report_gmailerrorred,
+              color: hexToColor('#BEBEBE'),
+              size: 20,
+            ),
+          ),
+          SizedBox(height: 20),
+          Text(
+            'Report',
+            style: TextStyle(
+              color: hexToColor('#9B9B9B'),
+              fontSize: 16.0,
             ),
           ),
         ],
