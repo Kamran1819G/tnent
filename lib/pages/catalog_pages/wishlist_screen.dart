@@ -15,11 +15,10 @@ class WishlistScreen extends StatefulWidget {
 }
 
 class _WishlistScreenState extends State<WishlistScreen> {
-  bool selectAllItems = false;
+  bool _allItemsSelected = false;
   bool isLoading = true;
   List<Map<String, dynamic>> wishlistItems = [];
-  double totalPrice = 0.0;
-  Set<String> selectedItems = {};
+  double _totalAmount = 0.0;
 
   @override
   void initState() {
@@ -47,12 +46,12 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
           for (var item in wishlist) {
             Map<String, dynamic> productDetails =
-                await _fetchProductDetails(item['productId']);
+            await _fetchProductDetails(item['productId']);
             updatedWishlistItems.add({
               ...item,
               ...productDetails,
-              'variationDetails': productDetails['variations']
-                  [item['variation']],
+              'quantity': 1,
+              'variationDetails': productDetails['variations'][item['variation']],
               'isSelected': false,
             });
           }
@@ -89,41 +88,79 @@ class _WishlistScreenState extends State<WishlistScreen> {
     };
   }
 
-  void updateTotalPrice() {
-    double newTotal = 0.0;
-    for (var item in wishlistItems) {
-      if (selectedItems
-          .contains('${item['productId']}_${item['variation']}')) {
-        newTotal += item['variationDetails'].price;
+  void _updateSelectionState() {
+    _allItemsSelected = wishlistItems.isNotEmpty &&
+        wishlistItems.every((item) => item['isSelected'] == true);
+    _calculateTotalAmount();
+  }
+
+  void _calculateTotalAmount() {
+    _totalAmount = wishlistItems.where((item) => item['isSelected'] == true).fold(
+        0,
+            (sum, item) => sum + item['variationDetails'].price);
+  }
+
+  void _toggleAllItemsSelection(bool? value) {
+    setState(() {
+      _allItemsSelected = value ?? false;
+      for (var item in wishlistItems) {
+        item['isSelected'] = _allItemsSelected;
       }
+      _calculateTotalAmount();
+    });
+    _updateFirestore();
+  }
+
+  void _updateItemSelection(String productId, String variation, bool isSelected) {
+    setState(() {
+      int index = wishlistItems.indexWhere((item) =>
+      item['productId'] == productId && item['variation'] == variation);
+      if (index != -1) {
+        wishlistItems[index]['isSelected'] = isSelected;
+        _updateSelectionState();
+      }
+    });
+  }
+
+  void _updateFirestore() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        List<Map<String, dynamic>> wishlistData = wishlistItems
+            .map((item) => {
+          'productId': item['productId'],
+          'variation': item['variation'],
+        })
+            .toList();
+
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .update({'wishlist': wishlistData});
+      }
+    } catch (e) {
+      print('Error updating wishlist: $e');
     }
-    setState(() {
-      totalPrice = newTotal;
-    });
   }
 
-  void toggleSelectAll(bool? value) {
+  void _removeFromWishlist(String productId, String variation) {
     setState(() {
-      selectAllItems = value ?? false;
-      if (selectAllItems) {
-        selectedItems = Set.from(wishlistItems
-            .map((item) => '${item['productId']}_${item['variation']}'));
-      } else {
-        selectedItems.clear();
-      }
-      updateTotalPrice();
+      wishlistItems.removeWhere((item) =>
+      item['productId'] == productId && item['variation'] == variation);
+      _updateSelectionState();
     });
+    _updateFirestore();
   }
 
-  void toggleItemSelection(String itemId, bool isSelected) {
-    setState(() {
-      if (isSelected) {
-        selectedItems.add(itemId);
-      } else {
-        selectedItems.remove(itemId);
-      }
-      updateTotalPrice();
-    });
+  void _navigateToCheckout() {
+    List<Map<String, dynamic>> selectedItems =
+    wishlistItems.where((item) => item['isSelected'] == true).toList();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CheckoutScreen(selectedItems: selectedItems),
+      ),
+    );
   }
 
   @override
@@ -138,33 +175,36 @@ class _WishlistScreenState extends State<WishlistScreen> {
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
                 children: [
-                  Text(
-                    'Wishlist'.toUpperCase(),
-                    style: TextStyle(
-                      color: hexToColor('#1E1E1E'),
-                      fontSize: 35.sp,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  Text(
-                    ' •',
-                    style: TextStyle(
-                      fontSize: 35.sp,
-                      color: hexToColor('#42FF00'),
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        'Wishlist'.toUpperCase(),
+                        style: TextStyle(
+                          color: hexToColor('#1E1E1E'),
+                          fontSize: 35.sp,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      Text(
+                        ' •',
+                        style: TextStyle(
+                          fontSize: 35.sp,
+                          color: hexToColor('#42FF00'),
+                        ),
+                      ),
+                    ],
                   ),
                   Spacer(),
                   IconButton(
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
+                      backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
-                      shape: WidgetStateProperty.all(
+                      shape: MaterialStateProperty.all(
                         CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new,
-                        color: Colors.black),
+                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -191,7 +231,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         ),
                       ),
                       Text(
-                        '₹ ${totalPrice.toStringAsFixed(2)}',
+                        '₹ ${_totalAmount.toStringAsFixed(2)}',
                         style: TextStyle(
                           color: hexToColor('#A9A9A9'),
                           fontSize: 26.sp,
@@ -226,8 +266,8 @@ class _WishlistScreenState extends State<WishlistScreen> {
                         ),
                         Checkbox(
                           activeColor: Theme.of(context).primaryColor,
-                          value: selectAllItems,
-                          onChanged: toggleSelectAll,
+                          value: _allItemsSelected,
+                          onChanged: _toggleAllItemsSelection,
                         ),
                       ],
                     ),
@@ -239,71 +279,53 @@ class _WishlistScreenState extends State<WishlistScreen> {
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
                   : ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w),
-                      itemCount: wishlistItems.length,
-                      itemBuilder: (context, index) {
-                        return WishlistItemTile(
-                          item: wishlistItems[index],
-                          isSelected: selectedItems.contains(
-                              '${wishlistItems[index]['productId']}_${wishlistItems[index]['variation']}'),
-                          onSelectionChanged: (isSelected) {
-                            toggleItemSelection(
-                                '${wishlistItems[index]['productId']}_${wishlistItems[index]['variation']}',
-                                isSelected);
-                          },
-                          onRemove: () {
-                            setState(() {
-                              wishlistItems.removeAt(index);
-                              selectedItems.remove(
-                                  '${wishlistItems[index]['productId']}_${wishlistItems[index]['variation']}');
-                              updateTotalPrice();
-                            });
-                            updateUserWishlist();
-                          },
-                        );
-                      },
-                    ),
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                itemCount: wishlistItems.length,
+                itemBuilder: (context, index) {
+                  final item = wishlistItems[index];
+                  return WishlistItemTile(
+                    item: item,
+                    onRemove: _removeFromWishlist,
+                    onUpdateSelection: _updateItemSelection,
+                  );
+                },
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.all(24.w),
+              child: ElevatedButton(
+                child: Text('Buy Selected Items',
+                    style: TextStyle(fontSize: 22.sp)),
+                onPressed: wishlistItems.any((item) => item['isSelected'] == true)
+                    ? _navigateToCheckout
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.r),
+                  ),
+                  backgroundColor: hexToColor('#343434'),
+                  foregroundColor: Colors.white,
+                  minimumSize: Size(double.infinity, 75.h),
+                ),
+              ),
             ),
           ],
         ),
       ),
     );
   }
-
-  Future<void> updateUserWishlist() async {
-    try {
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        List<Map<String, dynamic>> wishlistData = wishlistItems
-            .map((item) => {
-                  'productId': item['productId'],
-                  'variation': item['variation'],
-                })
-            .toList();
-
-        await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .update({'wishlist': wishlistData});
-      }
-    } catch (e) {
-      print('Error updating wishlist: $e');
-    }
-  }
 }
 
 class WishlistItemTile extends StatelessWidget {
   final Map<String, dynamic> item;
-  final bool isSelected;
-  final Function(bool) onSelectionChanged;
-  final VoidCallback onRemove;
+  final Function(String, String) onRemove;
+  final Function(String, String, bool) onUpdateSelection;
 
   const WishlistItemTile({
     Key? key,
     required this.item,
-    required this.isSelected,
-    required this.onSelectionChanged,
     required this.onRemove,
+    required this.onUpdateSelection,
   }) : super(key: key);
 
   @override
@@ -324,6 +346,7 @@ class WishlistItemTile extends StatelessWidget {
         margin: EdgeInsets.symmetric(vertical: 12.h, horizontal: 18.w),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: [
             Container(
               height: 285.h,
@@ -338,99 +361,110 @@ class WishlistItemTile extends StatelessWidget {
                     : null,
               ),
               child: item['productImage'] == null
-                  ? Center(child: Icon(Icons.image_not_supported, size: 50.sp, color: Colors.grey))
+                  ? Center(
+                  child: Icon(Icons.image_not_supported,
+                      size: 50.sp, color: Colors.grey))
                   : null,
             ),
             SizedBox(width: 16.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    item['productName'],
-                    style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontSize: 26.sp,
-                    ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  item['productName'],
+                  style: TextStyle(
+                    color: hexToColor('#343434'),
+                    fontSize: 26.sp,
                   ),
+                ),
+                if (item['variation'] != 'default') ...[
                   SizedBox(height: 8.h),
                   Text(
                     'Variation: ${item['variation']}',
                     style: TextStyle(
-                      color: hexToColor('#737373'),
+                      color: hexToColor('#989898'),
                       fontSize: 18.sp,
                     ),
                   ),
-                  SizedBox(height: 60.h),
-                  Text(
-                    '₹${item['variationDetails'].price.toStringAsFixed(2)}',
-                    style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontSize: 28.sp,
-                    ),
-                  ),
-                  SizedBox(height: 40.h),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: onRemove,
-                        child: Container(
-                          height: 50.h,
-                          width: 105.w,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            border: Border.all(color: hexToColor('#343434')),
-                            borderRadius: BorderRadius.circular(50.r),
-                          ),
-                          child: Text(
-                            'Remove',
-                            style: TextStyle(
-                              color: hexToColor('#737373'),
-                              fontSize: 17.sp,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      GestureDetector(
-                        onTap: () {
-                          // Navigate to Checkout
-                        },
-                        child: Container(
-                          height: 50.h,
-                          width: 105.w,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: hexToColor('#343434'),
-                            borderRadius: BorderRadius.circular(50.r),
-                          ),
-                          child: Text(
-                            'Buy Now',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 17.sp,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Checkbox(
-                        checkColor: Colors.black,
-                        activeColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(color: Colors.black),
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                        value: isSelected,
-                        onChanged: (value) {
-                          onSelectionChanged(value ?? false);
-                        },
-                      ),
-                    ],
-                  )
                 ],
-              ),
+                SizedBox(height: 25.h),
+                Text(
+                  '₹${item['variationDetails'].price.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    color: hexToColor('#343434'),
+                    fontSize: 28.h,
+                  ),
+                ),
+                SizedBox(height: 25.h),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: () => onRemove(item['productId'], item['variation']),
+                      child: Container(
+                        height: 50.h,
+                        width: 105.w,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: hexToColor('#343434')),
+                          borderRadius: BorderRadius.circular(50.r),
+                        ),
+                        child: Text(
+                          'Remove',
+                          style: TextStyle(
+                            color: hexToColor('#737373'),
+                            fontSize: 17.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                CheckoutScreen(selectedItems: [item]),
+                          ),
+                        );
+                      },
+                      child: Container(
+                        height: 50.h,
+                        width: 105.w,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: hexToColor('#343434'),
+                          borderRadius: BorderRadius.circular(50.r),
+                        ),
+                        child: Text(
+                          'Buy Now',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 17.sp,
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Checkbox(
+                      checkColor: Colors.black,
+                      activeColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(color: Colors.black),
+                        borderRadius: BorderRadius.circular(6.r),
+                      ),
+                      value: item['isSelected'] ?? false,
+                      onChanged: (value) {
+                        onUpdateSelection(
+                            item['productId'], item['variation'], value ?? false);
+                      },
+                    ),
+                  ],
+                )
+              ],
             ),
           ],
         ),

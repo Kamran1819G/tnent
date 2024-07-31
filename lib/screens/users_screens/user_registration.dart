@@ -230,12 +230,12 @@ class _UserRegistrationState extends State<UserRegistration> {
                 setState(() {
                   currentPage = page;
                 });
-                if (page == 3) {
+                if (page == 4) {
                   _confettiController.play();
                 }
                 if (page == 4) {
-                  // Start a timer of 8 seconds when the last page is reached
-                  Timer(Duration(seconds: 7), () {
+                  // Start a timer of 5 seconds when the last page is reached
+                  Timer(Duration(seconds: 5), () {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                           builder: (context) =>

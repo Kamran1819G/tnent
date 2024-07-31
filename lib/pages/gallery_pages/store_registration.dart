@@ -327,9 +327,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 if (index == 10) {
                   _confettiController.play();
                 }
-                if (index == 11) {
-                  // Start a timer of 7 seconds when the last page is reached
-                  Timer(Duration(seconds: 7), () {
+                if (index == 10) {
+                  // Start a timer of 5 seconds when the last page is reached
+                  Timer(Duration(seconds: 5), () {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                           builder: (context) =>

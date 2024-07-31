@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -75,6 +76,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       "coverImage": "assets/sahachari_image.png",
     };
   });
+  
 
   List<ProductModel> featuredProducts = List.generate(5, (index) {
     return ProductModel(
@@ -143,6 +145,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       featuredProductIds: [],
     );
   });
+
 
   @override
   void initState() {
@@ -594,9 +597,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ],
           ),
         ),
-
         SizedBox(height: 30.h),
-
         SizedBox(
           height: 200.h,
           child: ListView(
@@ -644,6 +645,43 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ],
           ),
         ),
+
+        SizedBox(height: 50.h),
+
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Special Products',
+                style: TextStyle(
+                  color: hexToColor('#343434'),
+                  fontSize: 35.sp,
+                ),
+              ),
+              SizedBox(height: 30.h),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12.w,
+                  mainAxisSpacing: 12.h,
+                  childAspectRatio: 0.8,
+                ),
+                itemCount: featuredProducts.length,
+                itemBuilder: (context, index) {
+                  return WishlistProductTile(
+                    product: featuredProducts[index],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+
         SizedBox(height: 200.h),
       ],
     );

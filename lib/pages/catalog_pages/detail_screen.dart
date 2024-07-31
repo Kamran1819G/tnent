@@ -1,6 +1,12 @@
+import 'dart:io';
+
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 
 class DetailScreen extends StatefulWidget {
@@ -13,8 +19,11 @@ class DetailScreen extends StatefulWidget {
 }
 
 class _DetailScreenState extends State<DetailScreen> {
+  bool get isOrderCancelled => widget.order['status']?['cancelled'] != null;
 
   void _cancelOrder() async {
+    if (isOrderCancelled) return;
+
     try {
       await FirebaseFirestore.instance.collection('Orders').where('orderId', isEqualTo: widget.order['orderId']).get().then((snapshot) {
         snapshot.docs.forEach((doc) {
@@ -34,6 +43,8 @@ class _DetailScreenState extends State<DetailScreen> {
         };
       });
 
+      await _sendCancellationNotification();
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Order cancelled successfully')),
       );
@@ -42,6 +53,58 @@ class _DetailScreenState extends State<DetailScreen> {
         SnackBar(content: Text('Failed to cancel order: $e')),
       );
     }
+  }
+
+  Future<void> _sendCancellationNotification() async {
+    final firestore = FirebaseFirestore.instance;
+    final user = FirebaseAuth.instance.currentUser!;
+
+    // Store the notification in Firestore
+    await firestore
+        .collection('Users')
+        .doc(user.uid)
+        .collection('notifications')
+        .add({
+      'title': 'Order Cancelled',
+      'body': 'Your order #${widget.order['orderId']} has been cancelled.',
+      'data': {
+        'type': 'general',
+        'status': 'ordercancelled',
+        'productImage': widget.order['productImage'],
+        'productName': widget.order['productName'],
+        'price': widget.order['priceDetails']['price'].toString(),
+        'orderId': widget.order['orderId'],
+      },
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    // Show local notification
+    String bigPicturePath = await _downloadAndSaveFile(
+        widget.order['productImage'], 'cancelledOrderImage_${widget.order['orderId']}');
+
+    await AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: 11,
+        channelKey: 'order_channel',
+        title: 'Order Cancelled',
+        body: 'Your order #${widget.order['orderId']} has been cancelled.',
+        bigPicture: 'file://$bigPicturePath',
+        notificationLayout: NotificationLayout.BigPicture,
+        payload: {
+          'orderId': widget.order['orderId'],
+          'productName': widget.order['productName'],
+        },
+      ),
+    );
+  }
+
+  Future<String> _downloadAndSaveFile(String url, String fileName) async {
+    final Directory directory = await getApplicationDocumentsDirectory();
+    final String filePath = '${directory.path}/$fileName';
+    final http.Response response = await http.get(Uri.parse(url));
+    final File file = File(filePath);
+    await file.writeAsBytes(response.bodyBytes);
+    return filePath;
   }
 
   @override
@@ -406,7 +469,7 @@ class _DetailScreenState extends State<DetailScreen> {
   Widget _buildCancelOrderButton() {
     return Center(
       child: GestureDetector(
-        onTap: _cancelOrder,
+        onTap: isOrderCancelled ? null : _cancelOrder,
         child: Container(
           height: 75.h,
           width: 200.w,
@@ -418,7 +481,7 @@ class _DetailScreenState extends State<DetailScreen> {
           ),
           child: Center(
             child: Text(
-              'Cancel Order',
+                isOrderCancelled ? 'Order Cancelled' : 'Cancel Order',
               style: TextStyle(color: Colors.white, fontFamily: 'Poppins' ,fontSize: 18.sp),
             ),
           ),
