@@ -78,7 +78,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   });
   
 
-  List<ProductModel> featuredProducts = List.generate(5, (index) {
+  /*List<ProductModel> featuredProducts = List.generate(5, (index) {
     return ProductModel(
       productId: 'product123',
       storeId: 'EBJgGaWsnrluCKcaOUOT',
@@ -119,9 +119,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         ),
       },
     );
-  });
+  });*/
 
-  List<StoreModel> featuredStores = List.generate(5, (index) {
+  /*List<StoreModel> featuredStores = List.generate(5, (index) {
     return StoreModel(
       storeId: 'store$index',
       ownerId: 'owner$index',
@@ -145,11 +145,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       featuredProductIds: [],
     );
   });
-
+*/
+  List<StoreModel> featuredStores = [];
+  List<ProductModel> featuredProducts = [];
 
   @override
   void initState() {
     super.initState();
+    _fetchFeaturedStores();
+    _fetchFeaturedProducts();
     setState(() {
       firstName = widget.currentUser.firstName;
       lastName = widget.currentUser.lastName;
@@ -200,6 +204,79 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       return 'Good Evening 🌕';
     }
   }
+
+  Future<void> _fetchFeaturedStores() async {
+    try {
+      // Fetch the featured-store document from the Featured Stores collection
+      final featuredStoreDoc = await FirebaseFirestore.instance
+          .collection('Featured Stores')
+          .doc('featured-stores')
+          .get();
+
+      // Extract the store IDs from the array field
+      final List<String> storeId = List<String>.from(featuredStoreDoc['stores'] ?? []);
+
+      // Fetch the actual store documents using the store IDs
+      if (storeId.isNotEmpty) {
+        final storesSnapshot = await FirebaseFirestore.instance
+            .collection('Stores')
+            .where(FieldPath.documentId, whereIn: storeId)
+            .get();
+
+        setState(() {
+          featuredStores = storesSnapshot.docs
+              .map((doc) => StoreModel.fromFirestore(doc))
+              .toList();
+        });
+      } else {
+        setState(() {
+          featuredStores = [];
+        });
+      }
+    } catch (e) {
+      print('Error fetching featured stores: $e');
+    }
+  }
+
+  Future<void> _fetchFeaturedProducts() async {
+    try {
+      // Fetch the featured-products document from the Featured Products collection
+      final featuredProductDoc = await FirebaseFirestore.instance
+          .collection('Featured Products')
+          .doc('featured-products')
+          .get();
+
+      // Extract the product IDs from the array field
+      final List<String> productIds = List<String>.from(featuredProductDoc['products'] ?? []);
+
+      // Fetch the actual product documents using the product IDs
+      if (productIds.isNotEmpty) {
+        List<ProductModel> products = [];
+
+        for (String productId in productIds) {
+          final productDoc = await FirebaseFirestore.instance
+              .collection('products')
+              .doc(productId)
+              .get();
+
+          if (productDoc.exists) {
+            products.add(ProductModel.fromFirestore(productDoc));
+          }
+        }
+
+        setState(() {
+          featuredProducts = products;
+        });
+      } else {
+        setState(() {
+          featuredProducts = [];
+        });
+      }
+    } catch (e) {
+      print('Error fetching featured products: $e');
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -423,6 +500,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           },
         ),
         SizedBox(height: 30.h),
+
         // Featured Section
         Padding(
           padding: EdgeInsets.only(left: 16.w),

@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confetti/confetti.dart';
@@ -31,6 +32,7 @@ class _UserRegistrationState extends State<UserRegistration> {
   bool _isPhoneNumberUnique = true;
   bool isButtonEnabled = false;
   late UserModel _userModel;
+  String _verificationId ='';
 
   TextEditingController _phoneController = TextEditingController();
   TextEditingController _firstNameController = TextEditingController();
@@ -88,6 +90,7 @@ class _UserRegistrationState extends State<UserRegistration> {
     }
   }
 
+
   bool _validateFields() {
     switch (currentPage) {
       case 0:
@@ -139,6 +142,7 @@ class _UserRegistrationState extends State<UserRegistration> {
         location.length >= 3 &&
         location.length <= 100;
   }
+
 
   void _showValidationError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -209,6 +213,61 @@ class _UserRegistrationState extends State<UserRegistration> {
       return '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
     } else {
       return 'No address available.';
+    }
+  }
+  Future<void> sendOTP(String phoneNumber) async {
+    // Convert phoneNumber to numerical form and add +91 prefix
+    String numericalPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+    numericalPhoneNumber = '+91$numericalPhoneNumber';
+    final url = 'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/$numericalPhoneNumber/AUTOGEN';
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      ).timeout(Duration(seconds: 20));
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['Status'] == 'Success') {
+          _verificationId = responseData['Details'];
+        } else {
+          throw Exception('API returned error: ${responseData['Details']}');
+        }
+      } else {
+        throw Exception('Failed to send OTP: ${response.statusCode}');
+      }
+    } catch (e)
+    {
+      throw e;
+    }
+  }
+
+  Future<bool> verifyOTP(String phoneNumber, String otp) async {
+    // Convert phoneNumber to numerical form and add +91 prefix
+    String numericalPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
+    numericalPhoneNumber = '+91$numericalPhoneNumber';
+    final url = 'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/VERIFY/$_verificationId/$otp';
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      ).timeout(Duration(seconds: 200));
+      if (response.statusCode == 200) {
+
+        final responseData = json.decode(response.body);
+        if (responseData['Status'] == 'Success') {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } catch (e) {
+      return false;
     }
   }
 
@@ -450,7 +509,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                 margin: EdgeInsets.only(bottom: 25.h),
                 child: Center(
                   child: Pinput(
-                    length: 4,
+                    length: 6,
                     controller: _otpController,
                     pinAnimationType: PinAnimationType.fade,
                     onCompleted: (pin) {
@@ -460,7 +519,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                     },
                     onChanged: (value) {
                       setState(() {
-                        isButtonEnabled = value.length == 4;
+                        isButtonEnabled = value.length == 6;
                       });
                     },
                     defaultPinTheme: PinTheme(
@@ -517,11 +576,25 @@ class _UserRegistrationState extends State<UserRegistration> {
               Positioned(
                 bottom: 0,
                 child: GestureDetector(
-                  onTap: () {
-                    _proceedToNextPage();
-                  },
+                  onTap: isButtonEnabled
+                      ? () async {
+                    bool isVerified = await verifyOTP(
+                        _phoneController.text,_otpController.text);
+                    if (isVerified) {
+                      _pageController.jumpToPage(currentPage + 1);
+                    }
+                    else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Invalid OTP. Please try again.')),
+                      );
+                    }
+                    }
+                    : null,
                   child: CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor,
+                    backgroundColor: isButtonEnabled?
+                    Theme.of(context).primaryColor
+                        : Colors.grey,
                     radius: 40.w,
                     child: Icon(
                       Icons.check,
