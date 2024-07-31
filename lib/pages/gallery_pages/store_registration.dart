@@ -65,12 +65,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   final _upiUsernameController = TextEditingController();
   final _upiIdController = TextEditingController();
   final _locationController = TextEditingController();
-  final  _otpController = TextEditingController();
+  final _otpController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 5));
     _storeFeaturesPageController = PageController()
@@ -176,92 +175,63 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   }
 
   Future<void> sendOTP(String phoneNumber) async {
-    debugPrint("sendOTP function called with number: $phoneNumber");
-
-    final apiKey = '7d149616-483e-11ef-8b60-0200cd936042';
-
-    // Convert phoneNumber to numerical form
+    // Convert phoneNumber to numerical form and add +91 prefix
     String numericalPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
-    debugPrint("Numerical phone number: $numericalPhoneNumber");
-
-    // Ensure the phone number starts with the country code (assuming Indian numbers)
-    if (!numericalPhoneNumber.startsWith('91')) {
-      numericalPhoneNumber = '91$numericalPhoneNumber';
-    }
-    debugPrint("Final phone number with country code: $numericalPhoneNumber");
-
-    final url = 'https://2factor.in/API/V1/$apiKey/SMS/$numericalPhoneNumber/AUTOGEN';
-    debugPrint("API URL: $url");
-
+    numericalPhoneNumber = '+91$numericalPhoneNumber';
+    final url = 'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/$numericalPhoneNumber/AUTOGEN';
     try {
-      debugPrint('Attempting to send OTP to: $numericalPhoneNumber');
-      final response = await http.get(Uri.parse(url)).timeout(Duration(seconds: 10));
-      debugPrint('Response received');
-      debugPrint('Response status: ${response.statusCode}');
-      debugPrint('Response body: ${response.body}');
-
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      ).timeout(Duration(seconds: 20));
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
-        debugPrint('Decoded response: $responseData');
         if (responseData['Status'] == 'Success') {
           _verificationId = responseData['Details'];
-          debugPrint('Verification ID: $_verificationId');
         } else {
           throw Exception('API returned error: ${responseData['Details']}');
         }
       } else {
-        debugPrint('Failed to send OTP: ${response.body}');
         throw Exception('Failed to send OTP: ${response.statusCode}');
       }
-    } catch (e) {
-      debugPrint('Error sending OTP: $e');
+    } catch (e)
+    {
       throw e;
     }
   }
 
   Future<bool> verifyOTP(String phoneNumber, String otp) async {
-    debugPrint('Verifying OTP: $otp for phone number: $phoneNumber');
-    final apiKey = '7d149616-483e-11ef-8b60-0200cd936042';
-
-    // Convert phoneNumber to numerical form
+    // Convert phoneNumber to numerical form and add +91 prefix
     String numericalPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
-
-    // Ensure the phone number starts with the country code (assuming Indian numbers)
-    if (!numericalPhoneNumber.startsWith('91')) {
-      numericalPhoneNumber = '91$numericalPhoneNumber';
-    }
-
-    final url = 'https://2factor.in/API/V1/$apiKey/SMS/VERIFY3/$numericalPhoneNumber/$otp';
-    debugPrint('Verification URL: $url');
-
+    numericalPhoneNumber = '+91$numericalPhoneNumber';
+    final url = 'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/VERIFY3/$_verificationId/$otp';
     try {
-      final response = await http.get(Uri.parse(url));
-      debugPrint('Verification response status: ${response.statusCode}');
-      debugPrint('Verification response body: ${response.body}');
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      ).timeout(Duration(seconds: 20));
       if (response.statusCode == 200) {
-        // OTP verified successfully
-        debugPrint('OTP verified successfully');
-        return true;
+        final responseData = json.decode(response.body);
+        if (responseData['Status'] == 'Success') {
+          return true;
+        } else {
+          return false;
+        }
       } else {
-        // Handle error
-        debugPrint('Failed to verify OTP: ${response.body}');
         return false;
       }
     } catch (e) {
-      debugPrint('Error verifying OTP: $e');
       return false;
     }
   }
 
-
-
   void _onCategoryChanged(String category) {
     setState(() {
-      if (selectedCategory == category) {
-        selectedCategory = '';
-      } else {
-        selectedCategory = category;
-      }
+      selectedCategory = category;
     });
   }
 
@@ -451,7 +421,16 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 if (_isStorePhoneUnique) {
                                   debugPrint('Sending OTP');
                                   try {
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (BuildContext context) {
+                                        return Center(child: CircularProgressIndicator());
+                                      },
+                                    );
+
                                     await sendOTP(_phoneController.text);
+                                    Navigator.of(context).pop();
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(content: Text('OTP sent successfully')),
                                     );
@@ -506,7 +485,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             ),
                           ),
                           Text(
-                            'Enter it in the verification code box and click continue',
+                            'Enter the 6-digit code sent to your phone',
                             style: TextStyle(
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
@@ -539,7 +518,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             margin: EdgeInsets.only(bottom: 25.h),
                             child: Center(
                               child: Pinput(
-                                length: 4,
+                                length: 6,
                                 controller: _otpController,
                                 pinAnimationType: PinAnimationType.fade,
                                 onCompleted: (pin) {
@@ -549,55 +528,31 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 },
                                 onChanged: (value) {
                                   setState(() {
-                                    isButtonEnabled = value.length == 4;
+                                    isButtonEnabled = value.length == 6;
                                   });
                                 },
                                 defaultPinTheme: PinTheme(
-                                  width: 50.w,
-                                  height: 50.h,
+                                  width: 56.w,
+                                  height: 56.h,
                                   textStyle: TextStyle(
                                     fontSize: 26.sp,
                                     color: Theme.of(context).primaryColor,
                                   ),
                                   decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: hexToColor('#838383'),
-                                        width: 2,
-                                      ),
-                                    ),
+                                    border: Border.all(color: hexToColor('#838383')),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
                                 focusedPinTheme: PinTheme(
-                                  width: 50.w,
-                                  height: 50.h,
+                                  width: 56.w,
+                                  height: 56.h,
                                   textStyle: TextStyle(
                                     fontSize: 26.sp,
                                     color: Theme.of(context).primaryColor,
                                   ),
                                   decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: Theme.of(context).primaryColor,
-                                        width: 2,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                submittedPinTheme: PinTheme(
-                                  width: 50.w,
-                                  height: 50.h,
-                                  textStyle: TextStyle(
-                                    fontSize: 26.sp,
-                                    color: Theme.of(context).primaryColor,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: Theme.of(context).primaryColor,
-                                        width: 2,
-                                      ),
-                                    ),
+                                    border: Border.all(color: Theme.of(context).primaryColor),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
                               ),
@@ -608,21 +563,16 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             child: GestureDetector(
                               onTap: isButtonEnabled
                                   ? () async {
-                                debugPrint('Verifying OTP...');
-                                 bool isVerified = await verifyOTP(_phoneController.text, _otpController.text);
-                                 if (isVerified) {
-                                   debugPrint('OTP verified successfully');
-                                      _pageController
-                                          .jumpToPage(_currentPageIndex + 1);
-                                    } else {
-                                   debugPrint('Failed to verify OTP');
-                                   ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Failed to verify OTP. Please try again.')),
-                                    );
-                                  }
-                                 }
-                                  : null,
+                                bool isVerified = await verifyOTP(_phoneController.text, _otpController.text);
+                                if (isVerified) {
+                                  _pageController.jumpToPage(_currentPageIndex + 1);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Invalid OTP. Please try again.')),
+                                  );
+                                }
+                              }
+                              : null,
                               child: CircleAvatar(
                                 backgroundColor: isButtonEnabled
                                     ? Theme.of(context).primaryColor
@@ -640,6 +590,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     ),
                   ],
                 ),
+
                 // Page 4: Business Email
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
