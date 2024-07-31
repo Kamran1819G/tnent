@@ -206,15 +206,16 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     // Convert phoneNumber to numerical form and add +91 prefix
     String numericalPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
     numericalPhoneNumber = '+91$numericalPhoneNumber';
-    final url = 'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/VERIFY3/$_verificationId/$otp';
+    final url = 'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/VERIFY/$_verificationId/$otp';
     try {
       final response = await http.get(
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
         },
-      ).timeout(Duration(seconds: 20));
+      ).timeout(Duration(seconds: 200));
       if (response.statusCode == 200) {
+
         final responseData = json.decode(response.body);
         if (responseData['Status'] == 'Success') {
           return true;
@@ -480,12 +481,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           Text(
                             'Verification',
                             style: TextStyle(
-                              fontWeight: FontWeight.w400,
+                              fontWeight: FontWeight.w500,
                               fontSize: 40.sp,
                             ),
                           ),
                           Text(
-                            'Enter the 6-digit code sent to your phone',
+                            'Enter it in the verification code box and click continue',
                             style: TextStyle(
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
@@ -539,8 +540,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     color: Theme.of(context).primaryColor,
                                   ),
                                   decoration: BoxDecoration(
-                                    border: Border.all(color: hexToColor('#838383')),
-                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border(
+                                    bottom: BorderSide(
+                                      color: hexToColor('#838383'),
+                                      width: 2,
+                                  ),
+                                ),
                                   ),
                                 ),
                                 focusedPinTheme: PinTheme(
@@ -551,8 +556,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     color: Theme.of(context).primaryColor,
                                   ),
                                   decoration: BoxDecoration(
-                                    border: Border.all(color: Theme.of(context).primaryColor),
-                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: hexToColor('#838383'),
+                                        width: 2,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
