@@ -427,9 +427,43 @@ class _UserRegistrationState extends State<UserRegistration> {
               Positioned(
                 bottom: 0,
                 child: GestureDetector(
-                  onTap: () {
+                  onTap: () async {
                     if (_isPhoneNumberUnique) {
-                      _proceedToNextPage();
+                      if (_validatePhoneNumber(_phoneController.text)) {
+                        try {
+                          // Show loading indicator
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Sending OTP...'), duration: Duration(seconds: 10)),
+                          );
+
+                          // Send OTP
+                          await sendOTP(_phoneController.text);
+
+                          // Hide loading indicator
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                          // Proceed to next page
+                          _proceedToNextPage();
+                        } catch (e) {
+                          // Hide loading indicator
+                          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                          // Show error message
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to send OTP: $e'),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Please enter a valid phone number'),
+                            backgroundColor: Colors.red,
+                          ),
+                        );
+                      }
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

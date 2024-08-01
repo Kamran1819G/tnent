@@ -5,7 +5,6 @@ import 'package:tnennt/services/firebase/firebase_auth_service.dart';
 import 'package:tnennt/screens/users_screens/reset_password_screen.dart';
 import 'package:tnennt/widget_tree.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../helpers/color_utils.dart';
 
 class SignInScreen extends StatefulWidget {
