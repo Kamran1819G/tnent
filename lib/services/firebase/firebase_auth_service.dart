@@ -21,57 +21,95 @@ class Auth {
     required String email,
     required String password,
   }) async {
-    await _auth.signInWithEmailAndPassword(email: email, password: password);
+    final userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+
+    // Check if the user document exists in Firestore
+    final userDoc = await _firestore
+        .collection('Users')
+        .doc(userCredential.user!.uid)
+        .get();
+    if (!userDoc.exists) {
+      // If user document does not exist, sign out and throw an error
+      await signOut();
+      throw FirebaseAuthException(
+        code: 'user-not-found',
+        message: 'No user found for that email.',
+      );
+    }
   }
 
   Future<void> signInWithGoogle() async {
     final googleSignInAccount = await _googleSignIn.signIn();
+    if (googleSignInAccount == null) {
+      // User cancelled the sign-in process
+      return;
+    }
+
     final googleSignInAuthentication =
-        await googleSignInAccount?.authentication;
+        await googleSignInAccount.authentication;
 
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleSignInAuthentication?.accessToken,
-      idToken: googleSignInAuthentication?.idToken,
+      accessToken: googleSignInAuthentication.accessToken,
+      idToken: googleSignInAuthentication.idToken,
     );
 
-    await _auth.signInWithCredential(credential);
+    final userCredential = await _auth.signInWithCredential(credential);
+
+    // Check if the user document exists in Firestore
+    final userDoc = await _firestore.collection('Users').doc(userCredential.user!.uid).get();
+    if (!userDoc.exists) {
+      // If user document does not exist, sign out and throw an error
+      await signOut();
+      throw FirebaseAuthException(
+        code: 'user-not-found',
+        message: 'No user found for that email.',
+      );
+    }
   }
 
   Future<void> signUpWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
-    await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    await _auth.createUserWithEmailAndPassword(email: email, password: password);
 
     if (currentUser != null && !currentUser!.emailVerified) {
       await currentUser!.sendEmailVerification();
     }
 
     if (currentUser != null) {
-      await _firestore.collection('Users').doc(currentUser!.uid).set({
-        'email': currentUser!.email,
-      });
+      final userDoc = await _firestore.collection('Users').doc(currentUser!.uid).get();
+      if (!userDoc.exists) {
+        await _firestore.collection('Users').doc(currentUser!.uid).set({
+          'email': currentUser!.email,
+        });
+      }
     }
   }
 
   Future<void> signUpWithGoogle() async {
     final googleSignInAccount = await _googleSignIn.signIn();
+    if (googleSignInAccount == null) {
+      // User cancelled the sign-in process
+      return;
+    }
     final googleSignInAuthentication =
-        await googleSignInAccount?.authentication;
+        await googleSignInAccount.authentication;
 
     final credential = GoogleAuthProvider.credential(
-      accessToken: googleSignInAuthentication?.accessToken,
-      idToken: googleSignInAuthentication?.idToken,
+      accessToken: googleSignInAuthentication.accessToken,
+      idToken: googleSignInAuthentication.idToken,
     );
 
-    await _auth.signInWithCredential(credential);
+    final userCredential = await _auth.signInWithCredential(credential);
 
-    if (currentUser != null) {
-      await _firestore.collection('Users').doc(currentUser!.uid).set({
-        'email': currentUser!.email,
+    final userDoc = await _firestore
+        .collection('Users')
+        .doc(userCredential.user!.uid)
+        .get();
+    if (!userDoc.exists) {
+      await _firestore.collection('Users').doc(userCredential.user!.uid).set({
+        'email': userCredential.user!.email,
       });
     }
   }
@@ -80,10 +118,23 @@ class Auth {
     final LoginResult result = await FacebookAuth.instance.login();
     if (result.status == LoginStatus.success) {
       final AccessToken accessToken = result.accessToken!;
-      final OAuthCredential credential =
-          FacebookAuthProvider.credential(accessToken.tokenString);
+      final OAuthCredential credential = FacebookAuthProvider.credential(accessToken.tokenString);
 
-      await _auth.signInWithCredential(credential);
+      final userCredential = await _auth.signInWithCredential(credential);
+
+      // Check if the user document exists in Firestore
+      final userDoc = await _firestore.collection('Users').doc(userCredential.user!.uid).get();
+      if (!userDoc.exists) {
+        // If user document does not exist, sign out and throw an error
+        await signOut();
+        throw FirebaseAuthException(
+          code: 'user-not-found',
+          message: 'No user found for that email.',
+        );
+      }
+    } else {
+      print('Error during Facebook sign in: ${result.message}');
+      // Handle error, show appropriate message to the user
     }
   }
 
@@ -91,16 +142,19 @@ class Auth {
     final LoginResult result = await FacebookAuth.instance.login();
     if (result.status == LoginStatus.success) {
       final AccessToken accessToken = result.accessToken!;
-      final OAuthCredential credential =
-          FacebookAuthProvider.credential(accessToken.tokenString);
+      final OAuthCredential credential = FacebookAuthProvider.credential(accessToken.tokenString);
 
-      await _auth.signInWithCredential(credential);
+      final userCredential = await _auth.signInWithCredential(credential);
 
-      if (currentUser != null) {
-        await _firestore.collection('Users').doc(currentUser!.uid).set({
-          'email': currentUser!.email,
+      final userDoc = await _firestore.collection('Users').doc(userCredential.user!.uid).get();
+      if (!userDoc.exists) {
+        await _firestore.collection('Users').doc(userCredential.user!.uid).set({
+          'email': userCredential.user!.email,
         });
       }
+    } else {
+      print('Error during Facebook sign up: ${result.message}');
+      // Handle error, show appropriate message to the user
     }
   }
 
