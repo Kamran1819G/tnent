@@ -76,7 +76,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       "coverImage": "assets/sahachari_image.png",
     };
   });
-  
 
   /*List<ProductModel> featuredProducts = List.generate(5, (index) {
     return ProductModel(
@@ -214,7 +213,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           .get();
 
       // Extract the store IDs from the array field
-      final List<String> storeId = List<String>.from(featuredStoreDoc['stores'] ?? []);
+      final List<String> storeId =
+          List<String>.from(featuredStoreDoc['stores'] ?? []);
 
       // Fetch the actual store documents using the store IDs
       if (storeId.isNotEmpty) {
@@ -247,7 +247,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           .get();
 
       // Extract the product IDs from the array field
-      final List<String> productIds = List<String>.from(featuredProductDoc['products'] ?? []);
+      final List<String> productIds =
+          List<String>.from(featuredProductDoc['products'] ?? []);
 
       // Fetch the actual product documents using the product IDs
       if (productIds.isNotEmpty) {
@@ -276,7 +277,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       print('Error fetching featured products: $e');
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -460,13 +460,22 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         SizedBox(height: 20.0),
         Container(
           height: 250.h,
-          child: PageView(
-            controller: PageController(viewportFraction: 1),
-            children: [
+          child: CarouselSlider(
+            options: CarouselOptions(
+              height: 250.h,
+              viewportFraction: 1.0,
+              autoPlay: true,
+              enlargeCenterPage: true,
+            ),
+            items: [
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
-                child: Image.asset('assets/store_profile_banner.png',
-                    height: 250.h, width: double.infinity, fit: BoxFit.cover),
+                child: Image.asset(
+                  'assets/store_profile_banner.png',
+                  height: 250.h,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
               ),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
@@ -543,7 +552,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
-            'Featured',
+            'Featured Products',
             style: TextStyle(
               color: hexToColor('#343434'),
               fontSize: 35.sp,
@@ -621,9 +630,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
         Container(
           height: 350.h,
-          child: PageView(
-            controller: PageController(viewportFraction: 1),
-            children: [
+          child: CarouselSlider(
+            options: CarouselOptions(
+              height: 350.h,
+              viewportFraction: 1.0,
+              autoPlay: true,
+              enlargeCenterPage: true,
+            ),
+            items: [
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
                 decoration: BoxDecoration(
