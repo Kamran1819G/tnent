@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:tnennt/models/store_update_model.dart';
@@ -19,10 +20,10 @@ class UpdateScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _UpdateScreenState createState() => _UpdateScreenState();
+  UpdateScreenState createState() => UpdateScreenState();
 }
 
-class _UpdateScreenState extends State<UpdateScreen> {
+class UpdateScreenState extends State<UpdateScreen> {
   late int currentUpdateIndex;
   late Image _storeImage;
   late String _storeName;
@@ -49,7 +50,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
 
   void _startWatching() {
     _timer?.cancel();
-    _timer = Timer.periodic(Duration(milliseconds: 50), (timer) {
+    _timer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
       if (!isPaused) {
         setState(() {
           if (percentWatched[currentUpdateIndex] + 0.01 < 1) {
@@ -113,8 +114,8 @@ class _UpdateScreenState extends State<UpdateScreen> {
             // story
             GestureDetector(
               onTapDown: (details) => _onTapDown(details),
-              child: Image.network(
-                widget.updates[currentUpdateIndex].imageUrl,
+              child: CachedNetworkImage(
+                imageUrl: widget.updates[currentUpdateIndex].imageUrl,
                 fit: BoxFit.cover,
                 height: double.infinity,
                 width: double.infinity,
@@ -123,7 +124,7 @@ class _UpdateScreenState extends State<UpdateScreen> {
 
             // progress bar
             Align(
-              alignment: Alignment(0, -0.95),
+              alignment: const Alignment(0, -0.95),
               child: UpdateBars(
                 percentWatched: percentWatched,
                 length: widget.updates.length,
@@ -131,24 +132,30 @@ class _UpdateScreenState extends State<UpdateScreen> {
             ),
 
             Align(
-              alignment: Alignment(0, -0.95),
+              alignment: const Alignment(0, -0.95),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   mainAxisSize: MainAxisSize.max,
                   children: [
-                    Container(height: 40, width: 40, child: _storeImage),
-                    SizedBox(width: 10),
+                    CircleAvatar(
+                      radius: 25,
+                      backgroundColor: Colors.black,
+                      child: ClipRRect(
+                          borderRadius: BorderRadius.circular(40),
+                          child: _storeImage),
+                    ),
+                    const SizedBox(width: 10),
                     Text(
                       _storeName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.w400,
                       ),
                     ),
-                    Spacer(),
+                    const Spacer(),
                     IconButton(
                       icon: Icon(
                         isPaused ? Icons.play_arrow : Icons.pause,
@@ -157,11 +164,11 @@ class _UpdateScreenState extends State<UpdateScreen> {
                       onPressed: _togglePause,
                     ),
                     Container(
-                      margin: EdgeInsets.all(8.0),
+                      margin: const EdgeInsets.all(8.0),
                       child: CircleAvatar(
                         backgroundColor: Colors.grey[100],
                         child: IconButton(
-                          icon: Icon(Icons.arrow_back_ios_new,
+                          icon: const Icon(Icons.arrow_back_ios_new,
                               color: Colors.black),
                           onPressed: () {
                             Navigator.pop(context);

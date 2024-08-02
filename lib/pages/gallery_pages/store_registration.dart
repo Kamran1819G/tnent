@@ -1334,8 +1334,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               showSnackBar(
                                 context,
                                 'Fetching your current location...',
-                                Colors.red,
-                                const Duration(seconds: 30),
+                                bgColor: Colors.red,
+                                duration: const Duration(seconds: 30),
                               );
 
                               String location = await getCurrentLocation();

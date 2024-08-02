@@ -86,6 +86,7 @@ class _MyAppState extends State<MyApp> {
     return ScreenUtilInit(
       designSize: const Size(642, 1376),
       builder: (_, child) => MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           scaffoldBackgroundColor: Colors.white,
           primaryColor: hexToColor('#094446'),
