@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:tnennt/models/store_model.dart';
 
 import '../../helpers/color_utils.dart';
@@ -119,7 +120,9 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     });
     setState(() {
       isSaving = false;
+      isChanged = false;
     });
+    Navigator.of(context).pop();
 
     showSnackBar(context, 'Store details updated successfully');
   }
@@ -132,7 +135,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
           children: [
             Container(
               height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 children: [
                   Column(
@@ -169,14 +172,14 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                       ),
                     ],
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Container(
-                    margin: EdgeInsets.all(8.0),
+                    margin: const EdgeInsets.all(8.0),
                     child: CircleAvatar(
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
-                        icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        icon: const Icon(Icons.arrow_back_ios_new,
+                            color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -202,7 +205,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                       fit: BoxFit.fill,
                     ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             GestureDetector(
               onTap: () async {
                 pickImage();
@@ -217,7 +220,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -226,7 +229,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                   width: 12,
                   height: 12,
                 ),
-                SizedBox(width: 5),
+                const SizedBox(width: 5),
                 Text(
                   widget.store.website,
                   style: TextStyle(
@@ -238,7 +241,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                 ),
               ],
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -246,13 +249,13 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         "Store Name",
                         style: TextStyle(
                           fontSize: 14,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.9,
                         child: TextField(
@@ -273,20 +276,20 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           keyboardType: TextInputType.text,
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 "Category",
                                 style: TextStyle(
                                   fontSize: 14,
                                 ),
                               ),
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               SizedBox(
                                 width: MediaQuery.of(context).size.width * 0.45,
                                 child: DropdownButtonFormField(
@@ -346,13 +349,13 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 "Phone Number",
                                 style: TextStyle(
                                   fontSize: 14,
                                 ),
                               ),
-                              SizedBox(height: 10),
+                              const SizedBox(height: 10),
                               SizedBox(
                                 width: MediaQuery.of(context).size.width * 0.40,
                                 child: TextField(
@@ -377,14 +380,14 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 20),
-                      Text(
+                      const SizedBox(height: 20),
+                      const Text(
                         "Email Address",
                         style: TextStyle(
                           fontSize: 14,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.9,
                         child: TextField(
@@ -405,14 +408,14 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           keyboardType: TextInputType.emailAddress,
                         ),
                       ),
-                      SizedBox(height: 20),
-                      Text(
+                      const SizedBox(height: 20),
+                      const Text(
                         "Store Location",
                         style: TextStyle(
                           fontSize: 14,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.9,
                         child: TextField(
@@ -433,14 +436,14 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           keyboardType: TextInputType.text,
                         ),
                       ),
-                      SizedBox(height: 20),
-                      Text(
+                      const SizedBox(height: 20),
+                      const Text(
                         "Store UPI",
                         style: TextStyle(
                           fontSize: 14,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       SizedBox(
                         width: MediaQuery.of(context).size.width * 0.9,
                         child: TextField(
@@ -468,16 +471,26 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
             ),
             Container(
               width: double.infinity,
-              margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+              margin:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
               child: CupertinoButton(
                 color: Theme.of(context).primaryColor,
                 disabledColor: Colors.grey,
                 onPressed: isChanged
                     ? () {
-                        updateStoreDetails();
+                        showSnackBarWithAction(
+                          context,
+                          text: "Do you want to update your store details?",
+                          confirmBtnColor: Colors.black,
+                          action: () {
+                            updateStoreDetails();
+                            Navigator.of(context).pop();
+                          },
+                          quickAlertType: QuickAlertType.confirm,
+                        );
                       }
                     : null,
-                child: Text(
+                child: const Text(
                   'Done',
                   style: TextStyle(
                     color: Colors.white,

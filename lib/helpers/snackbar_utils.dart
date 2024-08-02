@@ -33,7 +33,7 @@ void showSnackBar(
     icon: leadIcon,
     backgroundColor: bgColor,
     autoCloseDuration: duration,
-    alignment: Alignment.bottomCenter,
+    alignment: Alignment.topCenter,
   );
 }
 
@@ -43,8 +43,10 @@ void showSnackBarWithAction(BuildContext context,
     String confirmBtnText = 'Yes',
     String cancelBtnText = 'No',
     Color confirmBtnColor = Colors.black,
+    Color bgColor = Colors.white,
     QuickAlertType quickAlertType = QuickAlertType.confirm}) {
   QuickAlert.show(
+    showCancelBtn: true,
     context: context,
     type: quickAlertType,
     text: text,
@@ -52,6 +54,7 @@ void showSnackBarWithAction(BuildContext context,
     cancelBtnText: cancelBtnText,
     confirmBtnColor: confirmBtnColor,
     onConfirmBtnTap: action,
+    backgroundColor: bgColor,
     onCancelBtnTap: () {
       Navigator.of(context).pop();
     },

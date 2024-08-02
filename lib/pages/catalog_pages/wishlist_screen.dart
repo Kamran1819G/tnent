@@ -1,10 +1,14 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
 import '../../helpers/color_utils.dart';
+import '../../helpers/snackbar_utils.dart';
 import 'checkout_screen.dart';
 
 class WishlistScreen extends StatefulWidget {
@@ -46,12 +50,13 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
           for (var item in wishlist) {
             Map<String, dynamic> productDetails =
-            await _fetchProductDetails(item['productId']);
+                await _fetchProductDetails(item['productId']);
             updatedWishlistItems.add({
               ...item,
               ...productDetails,
               'quantity': 1,
-              'variationDetails': productDetails['variations'][item['variation']],
+              'variationDetails': productDetails['variations']
+                  [item['variation']],
               'isSelected': false,
             });
           }
@@ -95,9 +100,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 
   void _calculateTotalAmount() {
-    _totalAmount = wishlistItems.where((item) => item['isSelected'] == true).fold(
-        0,
-            (sum, item) => sum + item['variationDetails'].price);
+    _totalAmount = wishlistItems
+        .where((item) => item['isSelected'] == true)
+        .fold(0, (sum, item) => sum + item['variationDetails'].price);
   }
 
   void _toggleAllItemsSelection(bool? value) {
@@ -111,10 +116,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
     _updateFirestore();
   }
 
-  void _updateItemSelection(String productId, String variation, bool isSelected) {
+  void _updateItemSelection(
+      String productId, String variation, bool isSelected) {
     setState(() {
       int index = wishlistItems.indexWhere((item) =>
-      item['productId'] == productId && item['variation'] == variation);
+          item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
         wishlistItems[index]['isSelected'] = isSelected;
         _updateSelectionState();
@@ -128,9 +134,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
       if (user != null) {
         List<Map<String, dynamic>> wishlistData = wishlistItems
             .map((item) => {
-          'productId': item['productId'],
-          'variation': item['variation'],
-        })
+                  'productId': item['productId'],
+                  'variation': item['variation'],
+                })
             .toList();
 
         await FirebaseFirestore.instance
@@ -146,7 +152,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
   void _removeFromWishlist(String productId, String variation) {
     setState(() {
       wishlistItems.removeWhere((item) =>
-      item['productId'] == productId && item['variation'] == variation);
+          item['productId'] == productId && item['variation'] == variation);
       _updateSelectionState();
     });
     _updateFirestore();
@@ -154,7 +160,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
   void _navigateToCheckout() {
     List<Map<String, dynamic>> selectedItems =
-    wishlistItems.where((item) => item['isSelected'] == true).toList();
+        wishlistItems.where((item) => item['isSelected'] == true).toList();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -194,17 +200,18 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       ),
                     ],
                   ),
-                  Spacer(),
+                  const Spacer(),
                   IconButton(
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
                       shape: MaterialStateProperty.all(
-                        CircleBorder(),
+                        const CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                    icon: const Icon(Icons.arrow_back_ios_new,
+                        color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -277,28 +284,29 @@ class _WishlistScreenState extends State<WishlistScreen> {
             SizedBox(height: 20.h),
             Expanded(
               child: isLoading
-                  ? Center(child: CircularProgressIndicator())
+                  ? const Center(child: CircularProgressIndicator())
                   : ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 12.w),
-                itemCount: wishlistItems.length,
-                itemBuilder: (context, index) {
-                  final item = wishlistItems[index];
-                  return WishlistItemTile(
-                    item: item,
-                    onRemove: _removeFromWishlist,
-                    onUpdateSelection: _updateItemSelection,
-                  );
-                },
-              ),
+                      padding: EdgeInsets.symmetric(horizontal: 12.w),
+                      itemCount: wishlistItems.length,
+                      itemBuilder: (context, index) {
+                        final item = wishlistItems[index];
+                        return WishlistItemTile(
+                          item: item,
+                          onRemove: _removeFromWishlist,
+                          onUpdateSelection: _updateItemSelection,
+                        );
+                      },
+                    ),
             ),
             Padding(
               padding: EdgeInsets.all(24.w),
               child: ElevatedButton(
                 child: Text('Buy Selected Items',
                     style: TextStyle(fontSize: 22.sp)),
-                onPressed: wishlistItems.any((item) => item['isSelected'] == true)
-                    ? _navigateToCheckout
-                    : null,
+                onPressed:
+                    wishlistItems.any((item) => item['isSelected'] == true)
+                        ? _navigateToCheckout
+                        : null,
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18.r),
@@ -355,116 +363,131 @@ class WishlistItemTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8.r),
                 image: item['productImage'] != null
                     ? DecorationImage(
-                  image: NetworkImage(item['productImage']),
-                  fit: BoxFit.cover,
-                )
+                        image: NetworkImage(item['productImage']),
+                        fit: BoxFit.cover,
+                      )
                     : null,
               ),
               child: item['productImage'] == null
                   ? Center(
-                  child: Icon(Icons.image_not_supported,
-                      size: 50.sp, color: Colors.grey))
+                      child: Icon(Icons.image_not_supported,
+                          size: 50.sp, color: Colors.grey))
                   : null,
             ),
             SizedBox(width: 16.w),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  item['productName'],
-                  style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontSize: 26.sp,
-                  ),
-                ),
-                if (item['variation'] != 'default') ...[
-                  SizedBox(height: 8.h),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Text(
-                    'Variation: ${item['variation']}',
+                    item['productName'],
                     style: TextStyle(
-                      color: hexToColor('#989898'),
-                      fontSize: 18.sp,
+                      color: hexToColor('#343434'),
+                      fontSize: 26.sp,
                     ),
                   ),
-                ],
-                SizedBox(height: 25.h),
-                Text(
-                  '₹${item['variationDetails'].price.toStringAsFixed(2)}',
-                  style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontSize: 28.h,
-                  ),
-                ),
-                SizedBox(height: 25.h),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                      onTap: () => onRemove(item['productId'], item['variation']),
-                      child: Container(
-                        height: 50.h,
-                        width: 105.w,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: hexToColor('#343434')),
-                          borderRadius: BorderRadius.circular(50.r),
-                        ),
-                        child: Text(
-                          'Remove',
-                          style: TextStyle(
-                            color: hexToColor('#737373'),
-                            fontSize: 17.sp,
-                          ),
-                        ),
+                  if (item['variation'] != 'default') ...[
+                    SizedBox(height: 8.h),
+                    Text(
+                      'Variation: ${item['variation']}',
+                      style: TextStyle(
+                        color: hexToColor('#989898'),
+                        fontSize: 18.sp,
                       ),
-                    ),
-                    SizedBox(width: 8.w),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                CheckoutScreen(selectedItems: [item]),
-                          ),
-                        );
-                      },
-                      child: Container(
-                        height: 50.h,
-                        width: 105.w,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: hexToColor('#343434'),
-                          borderRadius: BorderRadius.circular(50.r),
-                        ),
-                        child: Text(
-                          'Buy Now',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 17.sp,
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 12.w),
-                    Checkbox(
-                      checkColor: Colors.black,
-                      activeColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black),
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
-                      value: item['isSelected'] ?? false,
-                      onChanged: (value) {
-                        onUpdateSelection(
-                            item['productId'], item['variation'], value ?? false);
-                      },
                     ),
                   ],
-                )
-              ],
+                  SizedBox(height: 25.h),
+                  Text(
+                    '₹${item['variationDetails'].price.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontSize: 28.h,
+                    ),
+                  ),
+                  SizedBox(height: 25.h),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          showSnackBarWithAction(
+                            context,
+                            text:
+                                "Do you want to remove this item from Wishlist?",
+                            confirmBtnColor: Colors.black,
+                            action: () {
+                              onRemove(item['productId'], item['variation']);
+
+                              Navigator.of(context).pop();
+                            },
+                            quickAlertType: QuickAlertType.confirm,
+                          );
+                        },
+                        child: Container(
+                          height: 50.h,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: hexToColor('#343434')),
+                            borderRadius: BorderRadius.circular(50.r),
+                          ),
+                          child: Text(
+                            '  Remove  ',
+                            style: TextStyle(
+                              color: hexToColor('#737373'),
+                              fontSize: 17.sp,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 8.w),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  CheckoutScreen(selectedItems: [item]),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          height: 50.h,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: hexToColor('#343434'),
+                            borderRadius: BorderRadius.circular(50.r),
+                          ),
+                          child: Text(
+                            '   Buy Now   ',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 17.sp,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: 12.w),
+                      Expanded(
+                        child: Checkbox(
+                          checkColor: Colors.black,
+                          activeColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            side: const BorderSide(color: Colors.black),
+                            borderRadius: BorderRadius.circular(6.r),
+                          ),
+                          value: item['isSelected'] ?? false,
+                          onChanged: (value) {
+                            onUpdateSelection(item['productId'],
+                                item['variation'], value ?? false);
+                          },
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
             ),
           ],
         ),

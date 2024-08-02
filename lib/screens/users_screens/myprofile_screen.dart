@@ -8,10 +8,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:tnennt/models/user_model.dart';
 import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
 import 'package:tnennt/screens/webview_screen.dart';
 
+import '../../helpers/snackbar_utils.dart';
 import '../../services/firebase/firebase_auth_service.dart';
 import '../../helpers/color_utils.dart';
 import '../signin_screen.dart';
@@ -49,23 +51,23 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
           future: _userFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else if (!snapshot.hasData) {
-              return Center(child: Text('No user data available'));
+              return const Center(child: Text('No user data available'));
             }
 
             final user = snapshot.data!;
             return SingleChildScrollView(
               child: Column(
                 children: [
-                  SizedBox(height: 20.0),
+                  const SizedBox(height: 20.0),
                   // Profile Card
                   Container(
                     height: 230.h,
                     width: 620.w,
-                    margin: EdgeInsets.symmetric(horizontal: 10),
+                    margin: const EdgeInsets.symmetric(horizontal: 10),
                     decoration: BoxDecoration(
                       color: hexToColor('#2D332F'),
                       borderRadius: BorderRadius.circular(20.r),
@@ -105,7 +107,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            AddProfileImageScreen(),
+                                            const AddProfileImageScreen(),
                                       ),
                                     ).then((_) => setState(() {
                                           _userFuture = fetchUserData();
@@ -128,7 +130,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                               )
                                             : null,
                                       ),
-                                      Positioned(
+                                      const Positioned(
                                         bottom: 8,
                                         right: 0,
                                         child: Icon(
@@ -177,8 +179,8 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 12.w),
                     child: ListTile(
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: 20.0, vertical: 12),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20.0, vertical: 12),
                       tileColor: hexToColor('#EDEDED'),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16.0),
@@ -190,7 +192,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                           color: Theme.of(context).primaryColor,
                           borderRadius: BorderRadius.circular(10.0),
                         ),
-                        child: Icon(CupertinoIcons.location_fill,
+                        child: const Icon(CupertinoIcons.location_fill,
                             color: Colors.white),
                       ),
                       title: Text(
@@ -274,7 +276,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => WebViewScreen(
+                                  builder: (context) => const WebViewScreen(
                                     title: 'Terms of Service',
                                     url:
                                         'https://tnennt-updated.vercel.app/legals',
@@ -291,19 +293,28 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                     alignment: Alignment.center,
                     child: ElevatedButton(
                         onPressed: () {
-                          Auth().signOut();
-                          Navigator.pushReplacement(
+                          showSnackBarWithAction(
                             context,
-                            MaterialPageRoute(
-                                builder: (context) => SignInScreen()),
+                            text: "Do you really want to Sign Out?",
+                            confirmBtnColor: Colors.red,
+                            action: () {
+                              Navigator.of(context).pop();
+                              Auth().signOut();
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => const SignInScreen()),
+                              );
+                            },
+                            quickAlertType: QuickAlertType.warning,
                           );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).primaryColor,
                           foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                               horizontal: 30, vertical: 15),
-                          textStyle: TextStyle(
+                          textStyle: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
@@ -311,7 +322,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             borderRadius: BorderRadius.circular(50.r),
                           ),
                         ),
-                        child: Text('Sign Out')),
+                        child: const Text('Sign Out')),
                   ),
                 ],
               ),
@@ -404,7 +415,7 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
       body: SafeArea(
         child: PageView(
           controller: _pageController,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           onPageChanged: (int page) {
             setState(() {
               _currentPage = page;
@@ -415,11 +426,11 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
               children: [
                 Container(
                   height: 100,
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     children: [
                       Container(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                             horizontal: 16.0, vertical: 8.0),
                         decoration: BoxDecoration(
                           color: hexToColor('#272822'),
@@ -431,7 +442,7 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                             children: [
                               Image.asset('assets/white_tnennt_logo.png',
                                   width: 20, height: 20),
-                              SizedBox(width: 10),
+                              const SizedBox(width: 10),
                               Text(
                                 'Tnennt inc.',
                                 style: TextStyle(
@@ -441,13 +452,13 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                               ),
                             ]),
                       ),
-                      Spacer(),
+                      const Spacer(),
                       Container(
-                        margin: EdgeInsets.all(8.0),
+                        margin: const EdgeInsets.all(8.0),
                         child: CircleAvatar(
                           backgroundColor: Colors.grey[100],
                           child: IconButton(
-                            icon: Icon(Icons.arrow_back_ios_new,
+                            icon: const Icon(Icons.arrow_back_ios_new,
                                 color: Colors.black),
                             onPressed: () {
                               Navigator.pop(context);
@@ -460,20 +471,20 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.2),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
+                      const Text(
                         'Add profile picture',
                         style: TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 26,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 20.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
                         child: Text(
                           'Add a profile photo so that your friend know it’s you',
                           style: TextStyle(
@@ -488,7 +499,7 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Center(
                   child: ElevatedButton(
                     onPressed: () async {
@@ -502,10 +513,10 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                       // Set the button color to black
                       foregroundColor: Colors.white,
                       // Set the text color to white
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 100, vertical: 18),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 100, vertical: 18),
                       // Set the padding
-                      textStyle: TextStyle(
+                      textStyle: const TextStyle(
                         fontSize: 16, // Set the text size
                         fontFamily: 'Gotham',
                         fontWeight: FontWeight.w500, // Set the text weight
@@ -515,7 +526,7 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                             12), // Set the button corner radius
                       ),
                     ),
-                    child: Row(
+                    child: const Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text('Add a picture', style: TextStyle(fontSize: 16)),
@@ -530,11 +541,11 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
               children: [
                 Container(
                   height: 100,
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
                     children: [
                       Container(
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                             horizontal: 16.0, vertical: 8.0),
                         decoration: BoxDecoration(
                           color: hexToColor('#272822'),
@@ -546,7 +557,7 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                             children: [
                               Image.asset('assets/white_tnennt_logo.png',
                                   width: 20, height: 20),
-                              SizedBox(width: 10),
+                              const SizedBox(width: 10),
                               Text(
                                 'Tnennt inc.',
                                 style: TextStyle(
@@ -556,7 +567,7 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                               ),
                             ]),
                       ),
-                      Spacer(),
+                      const Spacer(),
                     ],
                   ),
                 ),
@@ -579,12 +590,12 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                         bottom: 10,
                         right: 10,
                         child: Container(
-                          padding: EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0),
                           decoration: BoxDecoration(
                             color: Theme.of(context).primaryColor,
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.check,
                             color: Colors.white,
                             size: 30.0,
@@ -595,8 +606,8 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                   ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  child: Column(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: const Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
@@ -609,7 +620,7 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                     ],
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () async {
                     await pickImage();
@@ -635,10 +646,10 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).primaryColor,
-                      shape: CircleBorder(),
-                      padding: EdgeInsets.all(16),
+                      shape: const CircleBorder(),
+                      padding: const EdgeInsets.all(16),
                     ),
-                    child: Icon(
+                    child: const Icon(
                       Icons.arrow_forward_ios,
                       color: Colors.white,
                     ),
@@ -658,7 +669,7 @@ class HelpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Help'),
+        title: const Text('Help'),
       ),
       body: Center(
         child: Column(
@@ -734,7 +745,7 @@ class _AppVersionScreenState extends State<AppVersionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('About'),
+        title: const Text('About'),
       ),
       body: Center(
         child: Column(

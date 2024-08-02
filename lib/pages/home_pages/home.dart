@@ -510,29 +510,26 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 height: 125.0,
                 padding: const EdgeInsets.only(left: 8.0),
                 child: ListView.builder(
+                  shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
                   itemCount: updates.length,
                   itemBuilder: (context, index) {
                     return UpdateTile(
                       name: updates[index].storeName,
-                      image: updates[index].imageUrl,
+                      image: updates[index].logoUrl,
                       index: index,
                       updates: updates,
                     );
                   },
                 ),
               ),
-        const SizedBox(height: 20.0),
+        const SizedBox(height: 10.0),
         SizedBox(
           height: 250.h,
           child: PageView(
             controller: PageController(viewportFraction: 1),
             children: [
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 16.w),
-                child: Image.asset('assets/store_profile_banner.png',
-                    height: 250.h, width: double.infinity, fit: BoxFit.cover),
-              ),
+              Image.asset('assets/store_profile_banner.png'),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
                 decoration: BoxDecoration(
@@ -546,7 +543,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ],
           ),
         ),
-        SizedBox(height: 30.h),
+        SizedBox(height: 40.h),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -625,6 +622,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             controller: _tabController,
             children: [
               ListView.builder(
+                shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 itemCount: featuredProducts.length,
                 itemBuilder: (context, index) {
@@ -634,6 +632,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
               ),
               ListView.builder(
+                shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
@@ -643,6 +642,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
               ),
               ListView.builder(
+                shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
@@ -652,6 +652,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
               ),
               ListView.builder(
+                shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
@@ -661,6 +662,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
               ),
               ListView.builder(
+                shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
@@ -670,6 +672,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
               ),
               ListView.builder(
+                shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
@@ -744,6 +747,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         SizedBox(
           height: 200.h,
           child: ListView(
+            shrinkWrap: true,
             scrollDirection: Axis.horizontal,
             children: [
               ...featuredStores.map((store) {

@@ -1,11 +1,14 @@
 import 'dart:io';
 import 'dart:async';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnennt/helpers/snackbar_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_category_model.dart';
 import 'package:tnennt/models/store_model.dart';
@@ -142,7 +145,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
 
     Timestamp now = Timestamp.now();
     Timestamp expiresAt =
-        Timestamp.fromDate(now.toDate().add(Duration(hours: 24)));
+        Timestamp.fromDate(now.toDate().add(const Duration(hours: 24)));
 
     StoreUpdateModel newUpdate = StoreUpdateModel(
       updateId: '', // Firestore will generate this
@@ -327,12 +330,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: 20.0),
+                const SizedBox(height: 20.0),
                 // Profile Card
                 Container(
                   height: 290.h,
                   width: 680.w,
-                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
                   decoration: BoxDecoration(
                     color: hexToColor('#2D332F'),
                     borderRadius: BorderRadius.circular(20.0),
@@ -358,13 +361,13 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                         ),
                       ),
                       Align(
-                        alignment: Alignment(-0.9, -0.5),
+                        alignment: const Alignment(-0.9, -0.5),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Container(
-                              margin: EdgeInsets.only(top: 8),
+                              margin: const EdgeInsets.only(top: 8),
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 16.0),
                               child: ClipRRect(
@@ -453,8 +456,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                         ),
                       ),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        alignment: Alignment(0.9, 0.9),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        alignment: const Alignment(0.9, 0.9),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
@@ -462,7 +465,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                 color: Colors.white, size: 25.sp),
                             SizedBox(width: 16.w),
                             Container(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   horizontal: 12.0, vertical: 8.0),
                               decoration: BoxDecoration(
                                 color: hexToColorWithOpacity('#C0C0C0', 0.2),
@@ -478,7 +481,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                 maxLines: 1,
                               ),
                             ),
-                            Spacer(),
+                            const Spacer(),
                             Text(
                               "Accepting Orders: ",
                               style: TextStyle(
@@ -510,13 +513,13 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                     ],
                   ),
                 ),
-                SizedBox(height: 30.0),
+                const SizedBox(height: 30.0),
                 Expanded(
                   flex: 0,
                   child: GridView.count(
                     padding: EdgeInsets.symmetric(horizontal: 16.w),
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     crossAxisCount: 3,
                     mainAxisSpacing: 10.0,
                     crossAxisSpacing: 10.0,
@@ -573,7 +576,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                     'Product'.toUpperCase(),
                                     style: TextStyle(
                                       color: Colors.black,
-                                      fontSize: 21.sp,
+                                      fontSize: 18.sp,
                                     ),
                                   ),
                                 ],
@@ -604,7 +607,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                     ],
                                   ),
                                   Container(
-                                    padding: EdgeInsets.all(8.0),
+                                    padding: const EdgeInsets.all(8.0),
                                     decoration: BoxDecoration(
                                       color: hexToColor('#0D6A6D'),
                                       borderRadius: BorderRadius.circular(50.r),
@@ -626,7 +629,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ComingSoon(),
+                              builder: (context) => const ComingSoon(),
                             ),
                           );
                         },
@@ -676,7 +679,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                     fit: BoxFit.fill,
                                   ),
                                   Container(
-                                    padding: EdgeInsets.all(8.0),
+                                    padding: const EdgeInsets.all(8.0),
                                     decoration: BoxDecoration(
                                       color: Colors.grey[800],
                                       borderRadius: BorderRadius.circular(50.r),
@@ -745,14 +748,14 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                     'Community'.toUpperCase(),
                                     style: TextStyle(
                                       color: Colors.black,
-                                      fontSize: 21.sp,
+                                      fontSize: 18.sp,
                                     ),
                                   ),
                                   Text(
                                     'Post'.toUpperCase(),
                                     style: TextStyle(
                                       color: Colors.black,
-                                      fontSize: 21.sp,
+                                      fontSize: 18.sp,
                                     ),
                                   ),
                                 ],
@@ -784,7 +787,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                   ),
                                   // right arrow box
                                   Container(
-                                    padding: EdgeInsets.all(8.0),
+                                    padding: const EdgeInsets.all(8.0),
                                     decoration: BoxDecoration(
                                       color: Colors.grey[700],
                                       borderRadius: BorderRadius.circular(50.r),
@@ -915,7 +918,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                               : Container(
                                                   width: 40,
                                                   height: 35.0,
-                                                  padding: EdgeInsets.all(8.0),
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
                                                   decoration: BoxDecoration(
                                                     color: Colors.white,
                                                     borderRadius:
@@ -992,7 +996,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                       crossAxisAlignment:
                                           CrossAxisAlignment.center,
                                       children: [
-                                        CircleAvatar(
+                                        const CircleAvatar(
                                             backgroundColor: Colors.white,
                                             child: Icon(Icons.person_outline,
                                                 color: Colors.black)),
@@ -1011,17 +1015,20 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                                 fontSize: 20.sp,
                                               ),
                                             ),
-                                            SizedBox(
-                                              width: 100,
-                                              child: Text(
-                                                'Orders, Payments & Coupons',
-                                                style: TextStyle(
-                                                  color: hexToColor('#838383'),
-                                                  fontFamily: 'Gotham',
-                                                  fontSize: 14.sp,
-                                                  fontWeight: FontWeight.w500,
+                                            Expanded(
+                                              child: SizedBox(
+                                                width: 100,
+                                                child: Text(
+                                                  'Orders, Payments & Coupons',
+                                                  style: TextStyle(
+                                                    color:
+                                                        hexToColor('#838383'),
+                                                    fontFamily: 'Gotham',
+                                                    fontSize: 14.sp,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                  maxLines: 2,
                                                 ),
-                                                maxLines: 2,
                                               ),
                                             ),
                                           ],
@@ -1053,7 +1060,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                     ),
                                     child: Row(
                                       children: [
-                                        CircleAvatar(
+                                        const CircleAvatar(
                                             backgroundColor: Colors.white,
                                             child: Icon(Icons.settings_outlined,
                                                 color: Colors.black)),
@@ -1092,7 +1099,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                       ),
                     ),
 
-                    SizedBox(height: 20.0),
+                    const SizedBox(height: 20.0),
 
                     // Updates
                     Column(
@@ -1108,7 +1115,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                             ),
                           ),
                         ),
-                        SizedBox(height: 10.0),
+                        const SizedBox(height: 10.0),
                         Container(
                           height: 220.h,
                           child: ListView(
@@ -1131,8 +1138,19 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               ...storeUpdates.map((update) {
                                 return RemovableUpdateTile(
                                   image: update.imageUrl,
-                                  onRemove: () =>
-                                      _deleteStoreUpdate(update.updateId),
+                                  onRemove: () {
+                                    showSnackBarWithAction(
+                                      context,
+                                      text:
+                                          "Do you want to delete this update?",
+                                      confirmBtnColor: Colors.red,
+                                      action: () {
+                                        _deleteStoreUpdate(update.updateId);
+                                        Navigator.of(context).pop();
+                                      },
+                                      quickAlertType: QuickAlertType.warning,
+                                    );
+                                  },
                                   onTap: () => _previewUpdate(update),
                                 );
                               }).toList(),
@@ -1159,12 +1177,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                   fontSize: 24.sp,
                                 ),
                               ),
-                              Spacer(),
+                              const Spacer(),
                               GestureDetector(
                                 onTap: () {
                                   showModalBottomSheet(
                                     backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
+                                    shape: const RoundedRectangleBorder(
                                       borderRadius: BorderRadius.only(
                                         topLeft: Radius.circular(12),
                                         topRight: Radius.circular(12),
@@ -1176,12 +1194,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                   );
                                 },
                                 child: Container(
-                                  padding: EdgeInsets.all(6.0),
+                                  padding: const EdgeInsets.all(6.0),
                                   decoration: BoxDecoration(
                                     color: Theme.of(context).primaryColor,
                                     borderRadius: BorderRadius.circular(6.0),
                                   ),
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.add,
                                     color: Colors.white,
                                     size: 16.0,
@@ -1191,19 +1209,20 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                             ],
                           ),
                         ),
-                        SizedBox(height: 20.0),
+                        const SizedBox(height: 20.0),
                         FeatureProductsListView(
                             featuredProductIds: store.featuredProductIds),
                       ],
                     ),
-                    SizedBox(height: 20.0),
+                    const SizedBox(height: 20.0),
 
                     FutureBuilder<List<StoreCategoryModel>>(
                       future: _fetchCategories(),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
+                          return const Center(
+                              child: CircularProgressIndicator());
                         } else if (snapshot.hasError) {
                           return Center(
                               child: Text('Error: ${snapshot.error}'));
@@ -1230,7 +1249,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
 
   Widget _addFeaturedProductBottomSheet() {
     return Container(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1241,23 +1260,23 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
               fontSize: 18.0,
             ),
           ),
-          SizedBox(height: 20.0),
+          const SizedBox(height: 20.0),
           TextField(
             controller: searchController,
             decoration: InputDecoration(
               hintText: 'Search for a product',
-              prefixIcon: Icon(Icons.search),
+              prefixIcon: const Icon(Icons.search),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8.0),
               ),
             ),
             onChanged: _filterProducts,
           ),
-          SizedBox(height: 20.0),
+          const SizedBox(height: 20.0),
           Expanded(
             child: GridView.builder(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
@@ -1310,13 +1329,13 @@ class _FeatureProductsListViewState extends State<FeatureProductsListView> {
         future: fetchProducts(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             List<ProductModel> featuredProducts = snapshot.data!;
             if (featuredProducts.isEmpty) {
-              return Center(
+              return const Center(
                 child: Text(
                   'No Products in Featured',
                   style: TextStyle(fontSize: 16, color: Colors.grey),
@@ -1330,10 +1349,20 @@ class _FeatureProductsListViewState extends State<FeatureProductsListView> {
                 return RemovableProductTile(
                   product: featuredProducts[index],
                   onRemove: () {
-                    setState(() {
-                      widget.featuredProductIds
-                          .remove(featuredProducts[index].productId);
-                    });
+                    showSnackBarWithAction(
+                      context,
+                      text:
+                          "Do you want to remove this product from 'Featured'?",
+                      confirmBtnColor: Colors.red,
+                      action: () {
+                        setState(() {
+                          widget.featuredProductIds
+                              .remove(featuredProducts[index].productId);
+                        });
+                        Navigator.of(context).pop();
+                      },
+                      quickAlertType: QuickAlertType.warning,
+                    );
                   },
                 );
               },
@@ -1378,13 +1407,13 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
       future: fetchProducts(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return SizedBox.shrink(); // Don't show anything while loading
+          return const SizedBox.shrink(); // Don't show anything while loading
         } else if (snapshot.hasError) {
-          return SizedBox.shrink(); // Don't show anything on error
+          return const SizedBox.shrink(); // Don't show anything on error
         } else {
           List<ProductModel> products = snapshot.data!;
           if (products.isEmpty) {
-            return SizedBox
+            return const SizedBox
                 .shrink(); // Don't show the category if there are no products
           }
           return Column(
@@ -1400,10 +1429,10 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
                   ),
                 ),
               ),
-              SizedBox(height: 10.0),
+              const SizedBox(height: 10.0),
               Container(
                 height: 340.h,
-                margin: EdgeInsets.only(bottom: 50.0),
+                margin: const EdgeInsets.only(bottom: 50.0),
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: products.length,
@@ -1411,10 +1440,20 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
                     return RemovableProductTile(
                       product: products[index],
                       onRemove: () {
-                        setState(() {
-                          widget.category.productIds
-                              .remove(products[index].productId);
-                        });
+                        showSnackBarWithAction(
+                          context,
+                          text:
+                              "Do you want to remove this product from '${widget.category.name}'?",
+                          confirmBtnColor: Colors.red,
+                          action: () {
+                            setState(() {
+                              widget.category.productIds
+                                  .remove(products[index].productId);
+                            });
+                            Navigator.of(context).pop();
+                          },
+                          quickAlertType: QuickAlertType.warning,
+                        );
                       },
                     );
                   },
