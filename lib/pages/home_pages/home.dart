@@ -418,7 +418,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     ),
                   ),
                 ),
-                SizedBox(width: 30.sp),
+                SizedBox(width: 30.w),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
