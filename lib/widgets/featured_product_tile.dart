@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tnennt/models/product_model.dart';
+import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/screens/product_detail_screen.dart';
 import '../helpers/color_utils.dart';
 
@@ -32,9 +33,9 @@ class _FeaturedProductTileState extends State<FeaturedProductTile> {
   void _checkFeaturedStatus() async {
     DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(widget.product.storeId).get();
     if (storeDoc.exists) {
-      List<dynamic> featuredProducts = (storeDoc.data() as Map<String, dynamic>)['featuredProductIds'] ?? [];
+      StoreModel store = StoreModel.fromFirestore(storeDoc);
       setState(() {
-        _isFeatured = featuredProducts.contains(widget.product.productId);
+        _isFeatured = store.featuredProductIds.contains(widget.product.productId);
       });
     }
   }
@@ -43,44 +44,43 @@ class _FeaturedProductTileState extends State<FeaturedProductTile> {
     DocumentReference storeDocRef = _firestore.collection('Stores').doc(widget.product.storeId);
 
     try {
-      if (!_isFeatured) {
-        // Check the current number of featured products
-        DocumentSnapshot storeDoc = await storeDocRef.get();
-        List<dynamic> featuredProducts = (storeDoc.data() as Map<String, dynamic>)['featuredProductIds'] ?? [];
-
-        if (featuredProducts.length >= 5) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Maximum 5 featured products allowed')),
-          );
-          return;
+      await _firestore.runTransaction((transaction) async {
+        DocumentSnapshot storeDoc = await transaction.get(storeDocRef);
+        if (!storeDoc.exists) {
+          throw Exception('Store document does not exist');
         }
-      }
+
+        StoreModel store = StoreModel.fromFirestore(storeDoc);
+        List<String> featuredProductIds = store.featuredProductIds;
+
+        if (!_isFeatured && featuredProductIds.length >= 5) {
+          throw Exception('Maximum 5 featured products allowed');
+        }
+
+        if (_isFeatured) {
+          featuredProductIds.remove(widget.product.productId);
+        } else {
+          featuredProductIds.add(widget.product.productId);
+        }
+
+        transaction.update(storeDocRef, {'featuredProductIds': featuredProductIds});
+      });
 
       setState(() {
         _isFeatured = !_isFeatured;
       });
 
-      if (_isFeatured) {
-        // Add product to featured list
-        await storeDocRef.update({
-          'featuredProductIds': FieldValue.arrayUnion([widget.product.productId])
-        });
-        print('Added to featured products: ${widget.product.productId}');
-      } else {
-        // Remove product from featured list
-        await storeDocRef.update({
-          'featuredProductIds': FieldValue.arrayRemove([widget.product.productId])
-        });
-        print('Removed from featured products: ${widget.product.productId}');
-      }
+      String message = _isFeatured
+          ? 'Added to featured products: ${widget.product.productId}'
+          : 'Removed from featured products: ${widget.product.productId}';
+      print(message);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Product Added to Featured Products')),
+      );
     } catch (e) {
       print('Error updating featured products: $e');
-      // Revert the UI state if the operation failed
-      setState(() {
-        _isFeatured = !_isFeatured;
-      });
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update featured products')),
+        SnackBar(content: Text('Failed to update featured products: ${e.toString()}')),
       );
     }
   }

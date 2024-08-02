@@ -54,6 +54,15 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
       final storeRef = FirebaseFirestore.instance.collection('Stores').doc(widget.storeId);
       batch.update(storeRef, {'totalProducts': FieldValue.increment(-1)});
 
+      // Check if product is in featured products array and remove it
+      final storeDoc = await storeRef.get();
+      final storeData = storeDoc.data();
+      if (storeData != null && storeData['featuredProductIds'].contains(product.productId)) {
+        batch.update(storeRef, {
+          'featuredProductIds': FieldValue.arrayRemove([product.productId]),
+        });
+      }
+
       // Remove product reference from category
       final categoryQuerySnapshot = await FirebaseFirestore.instance
           .collection('Stores')
