@@ -624,9 +624,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 SizedBox(width: 12.w),
                                 GestureDetector(
                                   onTap: () async {
-                                    await Share.share(
-                                      'Check out this product from ${store.name} ! -> https://tnennt.store ',
-                                    );
+                                    final String productUrl = 'https://tnennt.com/product/${widget.product.productId}';
+                                    final String shareMessage = 'Check out this product from ${store.name}! $productUrl';
+                                    await Share.share(shareMessage);
                                   },
                                   child: CircleAvatar(
                                     radius: 30.w,

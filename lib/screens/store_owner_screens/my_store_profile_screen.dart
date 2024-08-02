@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_category_model.dart';
@@ -459,15 +460,22 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Icon(Icons.ios_share,
-                                color: Colors.white, size: 25.sp),
+                            IconButton(
+                                onPressed: () async{
+                                  final String shareMessage =
+                                      'Check out ${widget.store.name} on Tnennt! ${widget.store.website}';
+                                  await Share.share(shareMessage);
+                                },
+                                icon: Icon(Icons.ios_share,
+                                    color: Colors.white, size: 25.sp)),
                             SizedBox(width: 16.w),
                             Container(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: 12.0, vertical: 8.0),
+                              height: 45.h,
+                              width: 205.w,
+                              alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: hexToColorWithOpacity('#C0C0C0', 0.2),
-                                borderRadius: BorderRadius.circular(20.0),
+                                borderRadius: BorderRadius.circular(20.r),
                               ),
                               child: Text(
                                 '$storeLocation',
