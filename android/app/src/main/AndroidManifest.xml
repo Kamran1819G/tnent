@@ -17,7 +17,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
-        android:label="Tnennt Inc."
+        android:label="Tnennt"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
