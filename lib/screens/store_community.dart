@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:tnennt/models/community_post_model.dart';
 import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/helpers/color_utils.dart';
@@ -52,7 +53,8 @@ class _StoreCommunityState extends State<StoreCommunity> {
     if (user == null) return;
 
     try {
-      DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user.uid).get();
+      DocumentSnapshot userDoc =
+          await _firestore.collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
         String? userStoreId = userDoc.get('storeId') as String?;
         if (userStoreId == widget.store.storeId) {
@@ -63,7 +65,8 @@ class _StoreCommunityState extends State<StoreCommunity> {
         }
       }
 
-      DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(widget.store.storeId).get();
+      DocumentSnapshot storeDoc =
+          await _firestore.collection('Stores').doc(widget.store.storeId).get();
       if (storeDoc.exists) {
         String? ownerId = storeDoc.get('ownerId') as String?;
         setState(() {
@@ -74,7 +77,6 @@ class _StoreCommunityState extends State<StoreCommunity> {
       print('Error checking store ownership: $e');
     }
   }
-
 
   Future<List<CommunityPostModel>> fetchPostsByStore(StoreModel store) async {
     try {
@@ -109,7 +111,8 @@ class _StoreCommunityState extends State<StoreCommunity> {
                     height: 100.h,
                     width: 160.w,
                     decoration: BoxDecoration(
-                      border: Border.all(color: hexToColor('#BEBEBE'), width: 1.0),
+                      border:
+                          Border.all(color: hexToColor('#BEBEBE'), width: 1.0),
                       borderRadius: BorderRadius.circular(25.r),
                     ),
                     child: Column(
@@ -145,8 +148,7 @@ class _StoreCommunityState extends State<StoreCommunity> {
                         CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new,
-                        color: Colors.black),
+                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -157,22 +159,49 @@ class _StoreCommunityState extends State<StoreCommunity> {
             Expanded(
               child: _isLoading
                   ? Center(child: CircularProgressIndicator())
-                  : RefreshIndicator(
-                onRefresh: _fetchPosts,
-                child: ListView.builder(
-                  itemCount: _posts.length,
-                  itemBuilder: (context, index) {
-                    final post = _posts[index];
-                    return CommunityPost(
-                      post: post,
-                      isStoreOwner: _isStoreOwner,
-                    );
-                  },
-                ),
-              ),
+                  : _posts.isEmpty
+                      ? _buildNoPostsFound()
+                      : RefreshIndicator(
+                          onRefresh: _fetchPosts,
+                          child: ListView.builder(
+                            itemCount: _posts.length,
+                            itemBuilder: (context, index) {
+                              final post = _posts[index];
+                              return CommunityPost(
+                                post: post,
+                                isStoreOwner: _isStoreOwner,
+                              );
+                            },
+                          ),
+                        ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildNoPostsFound() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'No posts found',
+            style: TextStyle(
+              fontSize: 30.sp,
+              color: hexToColor('#737373'),
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            'Create a new post to get started',
+            style: TextStyle(
+              fontSize: 20.sp,
+              color: hexToColor('#989898'),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -198,7 +227,8 @@ class _CommunityPostState extends State<CommunityPost> {
   @override
   void initState() {
     super.initState();
-    _storeFuture = _firestore.collection('Stores').doc(widget.post.storeId).get();
+    _storeFuture =
+        _firestore.collection('Stores').doc(widget.post.storeId).get();
     _likeCount = widget.post.likes;
     _checkIfLiked();
   }
@@ -234,7 +264,8 @@ class _CommunityPostState extends State<CommunityPost> {
         .collection('likedPosts')
         .doc(widget.post.postId);
 
-    final postRef = _firestore.collection('communityPosts').doc(widget.post.postId);
+    final postRef =
+        _firestore.collection('communityPosts').doc(widget.post.postId);
 
     if (_isLiked) {
       await userLikedPostRef.set({});
@@ -243,6 +274,13 @@ class _CommunityPostState extends State<CommunityPost> {
       await userLikedPostRef.delete();
       await postRef.update({'likes': FieldValue.increment(-1)});
     }
+  }
+
+  Future<void> _sharePost() async {
+    final String postUrl = 'https://tnennt.com/post/${widget.post.postId}';
+    final String shareText = 'Check out this post: $postUrl';
+
+    await Share.share(shareText);
   }
 
   @override
@@ -260,7 +298,8 @@ class _CommunityPostState extends State<CommunityPost> {
 
         final storeData = snapshot.data!.data() as Map<String, dynamic>;
         final userName = storeData['name'] ?? 'Unknown User';
-        final userProfileImage = storeData['profileImage'] ?? 'https://via.placeholder.com/150';
+        final userProfileImage =
+            storeData['profileImage'] ?? 'https://via.placeholder.com/150';
 
         return _buildPostContent(userName, userProfileImage);
       },
@@ -349,7 +388,8 @@ class _CommunityPostState extends State<CommunityPost> {
                 child: CachedNetworkImage(
                   imageUrl: widget.post.images[index],
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                  placeholder: (context, url) =>
+                      Center(child: CircularProgressIndicator()),
                   errorWidget: (context, url, error) => Icon(Icons.error),
                 ),
               ),
@@ -375,7 +415,8 @@ class _CommunityPostState extends State<CommunityPost> {
               children: [
                 AnimatedSwitcher(
                   duration: Duration(milliseconds: 300),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
                     return ScaleTransition(scale: animation, child: child);
                   },
                   child: Icon(
@@ -388,41 +429,19 @@ class _CommunityPostState extends State<CommunityPost> {
                 SizedBox(width: 12.w),
                 Text(
                   '$_likeCount',
-                  style: TextStyle(color: hexToColor('#989797'), fontSize: 17.sp),
+                  style:
+                      TextStyle(color: hexToColor('#989797'), fontSize: 17.sp),
                 ),
               ],
             ),
           ),
         ),
         Spacer(),
-        if (widget.post.productLink?.isNotEmpty ?? false)
-          SizedBox(
-            height: 50.h,
-            width: 350.w,
-            child: Chip(
-              backgroundColor: hexToColor('#EDEDED'),
-              side: BorderSide.none,
-              label: Text(
-                '${widget.post.productLink!}',
-                style: TextStyle(
-                  color: hexToColor('#B4B4B4'),
-                  fontFamily: 'Gotham',
-                  fontWeight: FontWeight.w500,
-                  fontSize: 18.sp,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              avatar: Icon(
-                Icons.link_outlined,
-                color: hexToColor('#B4B4B4'),
-                size: 24.sp,
-              ),
-            ),
-          ),
-        Spacer(),
         IconButton(
-          icon: Icon(Icons.ios_share_outlined, size: 30.sp,),
+          icon: Icon(
+            Icons.ios_share_outlined,
+            size: 30.sp,
+          ),
           onPressed: () => _sharePost(),
         ),
       ],
@@ -444,7 +463,9 @@ class _CommunityPostState extends State<CommunityPost> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => widget.isStoreOwner ? _buildMoreBottomSheet() : _buildReportBottomSheet(),
+      builder: (context) => widget.isStoreOwner
+          ? _buildMoreBottomSheet()
+          : _buildReportBottomSheet(),
     );
   }
 
@@ -489,7 +510,8 @@ class _CommunityPostState extends State<CommunityPost> {
           ),
           GestureDetector(
             onTap: () async {
-              await CommunityPostModel.deletePost(widget.post.postId, widget.post.storeId);
+              await CommunityPostModel.deletePost(
+                  widget.post.postId, widget.post.storeId);
               Navigator.pop(context);
             },
             child: Column(
@@ -546,10 +568,6 @@ class _CommunityPostState extends State<CommunityPost> {
         ],
       ),
     );
-  }
-
-  void _sharePost() {
-    // Implement share functionality
   }
 
   Widget _buildLoadingPlaceholder() {
@@ -653,7 +671,6 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
   void initState() {
     super.initState();
     _captionController.text = widget.post.content;
-    _productLinkController.text = widget.post.productLink ?? '';
     _images = List.from(widget.post.images);
   }
 
@@ -692,7 +709,7 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
         final fileName =
             '${DateTime.now().millisecondsSinceEpoch}_${user!.uid}.jpg';
         final Reference storageRef =
-        storage.ref().child('community_posts/$fileName');
+            storage.ref().child('community_posts/$fileName');
 
         try {
           await storageRef.putFile(image);
@@ -728,9 +745,6 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
         images: imageUrls,
         likes: widget.post.likes,
         createdAt: widget.post.createdAt,
-        productLink: _productLinkController.text.isNotEmpty
-            ? _productLinkController.text
-            : null,
       );
 
       await CommunityPostModel.updatePost(updatedPost);
@@ -809,7 +823,7 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
                     Text(
                       'Add Image',
                       style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                     ),
                     SizedBox(height: 10),
                     Row(
@@ -846,23 +860,24 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
                                 scrollDirection: Axis.horizontal,
                                 physics: NeverScrollableScrollPhysics(),
                                 itemCount:
-                                _images.length > 3 ? 3 : _images.length,
+                                    _images.length > 3 ? 3 : _images.length,
                                 itemBuilder: (context, index) {
                                   return Stack(
                                     children: [
                                       Container(
                                         width: 75,
                                         margin:
-                                        const EdgeInsets.only(right: 10),
+                                            const EdgeInsets.only(right: 10),
                                         decoration: BoxDecoration(
                                           border: Border.all(
                                               color: hexToColor('#848484')),
                                           borderRadius:
-                                          BorderRadius.circular(12),
+                                              BorderRadius.circular(12),
                                           image: DecorationImage(
                                             image: _images[index] is File
                                                 ? FileImage(_images[index])
-                                                : NetworkImage(_images[index]) as ImageProvider,
+                                                : NetworkImage(_images[index])
+                                                    as ImageProvider,
                                             fit: BoxFit.cover,
                                           ),
                                         ),
@@ -925,7 +940,7 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
                     Text(
                       'Caption',
                       style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                     ),
                     SizedBox(height: 20),
                     TextField(
@@ -958,45 +973,6 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
-              // Product Link
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Product Link',
-                      style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-                    ),
-                    SizedBox(height: 10),
-                    TextField(
-                      controller: _productLinkController,
-                      textAlign: TextAlign.start,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.add_link,
-                          color: hexToColor('#848484'),
-                        ),
-                        hintText: 'Paste the product link...',
-                        hintStyle: TextStyle(
-                          color: hexToColor('#989898'),
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16.0,
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: hexToColor('#848484'),
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
               SizedBox(height: 100),
               Center(
                 child: ElevatedButton(
@@ -1005,7 +981,7 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
                     backgroundColor: hexToColor('#2D332F'),
                     foregroundColor: Colors.white,
                     padding:
-                    EdgeInsets.symmetric(horizontal: 100, vertical: 18),
+                        EdgeInsets.symmetric(horizontal: 100, vertical: 18),
                     textStyle: TextStyle(
                       fontSize: 16,
                       fontFamily: 'Gotham',
