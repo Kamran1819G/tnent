@@ -25,6 +25,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
       _ordersStream = FirebaseFirestore.instance
           .collection('Orders')
           .where('userId', isEqualTo: user.uid)
+          .orderBy('orderAt', descending: true)
           .snapshots();
     }
   }
@@ -32,7 +33,8 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
   void _calculateTotalAmount(List<QueryDocumentSnapshot> orders) {
     double total = 0.0;
     for (var order in orders) {
-      total += (order['priceDetails']['price'] as num).toDouble() * (order['quantity'] as num).toDouble();
+      total += (order['priceDetails']['price'] as num).toDouble() *
+          (order['quantity'] as num).toDouble();
     }
     setState(() {
       _totalAmount = total;
@@ -81,8 +83,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                         CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new,
-                        color: Colors.black),
+                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -136,7 +137,8 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                     padding: EdgeInsets.symmetric(horizontal: 12.w),
                     itemCount: orders.length,
                     itemBuilder: (context, index) {
-                      final order = orders[index].data() as Map<String, dynamic>;
+                      final order =
+                          orders[index].data() as Map<String, dynamic>;
                       return PurchaseItemTile(
                         order: order,
                       );
@@ -164,7 +166,6 @@ class PurchaseItemTile extends StatefulWidget {
 }
 
 class _PurchaseItemTileState extends State<PurchaseItemTile> {
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -180,13 +181,15 @@ class _PurchaseItemTileState extends State<PurchaseItemTile> {
               borderRadius: BorderRadius.circular(8.r),
               image: widget.order['productImage'] != null
                   ? DecorationImage(
-                image: NetworkImage(widget.order['productImage']),
-                fit: BoxFit.cover,
-              )
+                      image: NetworkImage(widget.order['productImage']),
+                      fit: BoxFit.cover,
+                    )
                   : null,
             ),
             child: widget.order['productImage'] == null
-                ? Center(child: Icon(Icons.image_not_supported, size: 50.sp, color: Colors.grey))
+                ? Center(
+                    child: Icon(Icons.image_not_supported,
+                        size: 50.sp, color: Colors.grey))
                 : null,
           ),
           SizedBox(width: 16.w),
