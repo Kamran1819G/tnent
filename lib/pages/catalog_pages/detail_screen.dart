@@ -69,7 +69,7 @@ class _DetailScreenState extends State<DetailScreen> {
       'body': 'Your order #${widget.order['orderId']} has been cancelled.',
       'data': {
         'type': 'general',
-        'status': 'ordercancelled',
+        'status': 'cancelled',
         'productImage': widget.order['productImage'],
         'productName': widget.order['productName'],
         'price': widget.order['priceDetails']['price'].toString(),
