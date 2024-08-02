@@ -10,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/models/community_post_model.dart';
 import 'package:tnennt/widgets/full_screen_image_view.dart';
 import '../../helpers/color_utils.dart';
+import '../../helpers/snackbar_utils.dart';
 
 class Community extends StatefulWidget {
   const Community({Key? key}) : super(key: key);
@@ -87,7 +88,8 @@ class _CommunityState extends State<Community> {
                     child: CircleAvatar(
                       backgroundColor: hexToColor('#F5F5F5'),
                       child: IconButton(
-                        icon: Icon(Icons.create_outlined, color: Colors.black, size: 30.sp),
+                        icon: Icon(Icons.create_outlined,
+                            color: Colors.black, size: 30.sp),
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -120,10 +122,9 @@ class _CommunityState extends State<Community> {
                         snapshot.data![index].data() as Map<String, dynamic>;
                     final postId = snapshot.data![index].id;
                     return CommunityPost(
-                      post: CommunityPostModel.fromFirestore(
-                        snapshot.data![index],
-                      )
-                    );
+                        post: CommunityPostModel.fromFirestore(
+                      snapshot.data![index],
+                    ));
                   },
                 );
               },
@@ -154,7 +155,8 @@ class _CommunityPostState extends State<CommunityPost> {
   @override
   void initState() {
     super.initState();
-    _storeFuture = _firestore.collection('Stores').doc(widget.post.storeId).get();
+    _storeFuture =
+        _firestore.collection('Stores').doc(widget.post.storeId).get();
     _likeCount = widget.post.likes;
     _checkIfLiked();
   }
@@ -190,7 +192,8 @@ class _CommunityPostState extends State<CommunityPost> {
         .collection('likedPosts')
         .doc(widget.post.postId);
 
-    final postRef = _firestore.collection('communityPosts').doc(widget.post.postId);
+    final postRef =
+        _firestore.collection('communityPosts').doc(widget.post.postId);
 
     if (_isLiked) {
       await userLikedPostRef.set({});
@@ -216,7 +219,8 @@ class _CommunityPostState extends State<CommunityPost> {
 
         final storeData = snapshot.data!.data() as Map<String, dynamic>;
         final userName = storeData['name'] ?? 'Unknown User';
-        final userProfileImage = storeData['profileImage'] ?? 'https://via.placeholder.com/150';
+        final userProfileImage =
+            storeData['profileImage'] ?? 'https://via.placeholder.com/150';
 
         return _buildPostContent(userName, userProfileImage);
       },
@@ -305,7 +309,8 @@ class _CommunityPostState extends State<CommunityPost> {
                 child: CachedNetworkImage(
                   imageUrl: widget.post.images[index],
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                  placeholder: (context, url) =>
+                      Center(child: CircularProgressIndicator()),
                   errorWidget: (context, url, error) => Icon(Icons.error),
                 ),
               ),
@@ -331,7 +336,8 @@ class _CommunityPostState extends State<CommunityPost> {
               children: [
                 AnimatedSwitcher(
                   duration: Duration(milliseconds: 300),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
                     return ScaleTransition(scale: animation, child: child);
                   },
                   child: Icon(
@@ -344,7 +350,8 @@ class _CommunityPostState extends State<CommunityPost> {
                 SizedBox(width: 12.w),
                 Text(
                   '$_likeCount',
-                  style: TextStyle(color: hexToColor('#989797'), fontSize: 17.sp),
+                  style:
+                      TextStyle(color: hexToColor('#989797'), fontSize: 17.sp),
                 ),
               ],
             ),
@@ -378,7 +385,10 @@ class _CommunityPostState extends State<CommunityPost> {
           ),
         Spacer(),
         IconButton(
-          icon: Icon(Icons.ios_share_outlined, size: 30.sp,),
+          icon: Icon(
+            Icons.ios_share_outlined,
+            size: 30.sp,
+          ),
           onPressed: () => _sharePost(),
         ),
       ],
@@ -553,12 +563,8 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
           _images.add(file);
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                'The selected image is too large. Please select an image smaller than 500 KB.'),
-          ),
-        );
+        showSnackBar(context,
+            'The selected image is too large. Please select an image smaller than 500 KB.');
       }
     }
   }
@@ -612,14 +618,11 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
 
       await CommunityPostModel.createPost(post, widget.storeId);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Post created successfully!')),
-      );
+      showSnackBar(context, 'Post created successfully!');
+
       Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error creating post: $e')),
-      );
+      showSnackBar(context, 'Error creating post: $e');
     } finally {
       setState(() {
         _isLoading = false;

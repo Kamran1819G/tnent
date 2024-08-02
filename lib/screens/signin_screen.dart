@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tnennt/helpers/snackbar_utils.dart';
 import 'package:tnennt/screens/signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:tnennt/services/firebase/firebase_auth_service.dart';
@@ -36,19 +37,7 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() {
         errorMessage = e.message;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            errorMessage!,
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
+      showSnackBar(context, errorMessage);
     }
   }
 
@@ -65,99 +54,88 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() {
         errorMessage = e.message;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            errorMessage!,
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'Poppins',
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
+
+      showSnackBar(context, errorMessage);
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              height: 100.h,
-              margin: EdgeInsets.only(left: 20.w, top: 20.h),
-              child: Row(
-                children: [
-                  Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.0.h),
-                    decoration: BoxDecoration(
-                      color: hexToColor('#272822'),
-                      borderRadius: BorderRadius.circular(50.r),
-                    ),
-                    child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Image.asset('assets/white_tnennt_logo.png',
-                              width: 30.w, height: 30.w),
-                          SizedBox(width: 10),
-                          Text(
-                            'Tnennt inc.',
-                            style: TextStyle(
-                              color: hexToColor('#E6E6E6'),
-                              fontSize: 16.0.sp,
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 100.h,
+                margin: EdgeInsets.only(left: 20.w, top: 20.h),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 16.w, vertical: 12.0.h),
+                      decoration: BoxDecoration(
+                        color: hexToColor('#272822'),
+                        borderRadius: BorderRadius.circular(50.r),
+                      ),
+                      child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset('assets/white_tnennt_logo.png',
+                                width: 30.w, height: 30.w),
+                            SizedBox(width: 10),
+                            Text(
+                              'Tnennt inc.',
+                              style: TextStyle(
+                                color: hexToColor('#E6E6E6'),
+                                fontSize: 16.0.sp,
+                              ),
                             ),
-                          ),
-                        ]),
-                  ),
-                  Spacer(),
-                ],
-              ),
-            ),
-            SizedBox(height: 200.h),
-            Container(
-              padding: EdgeInsets.only(left: 40.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Sign In',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: 40.sp,
+                          ]),
                     ),
-                  ),
-                  Text(
-                    'Enter the following details ',
-                    style: TextStyle(
-                      color: hexToColor('#636363'),
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 30.sp,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 50.h),
-            Container(
-              margin: EdgeInsets.only(left: 32.w),
-              width: 520.w,
-              child: TextField(
-                controller: emailController,
-                style: TextStyle(
-                  fontFamily: 'Gotham',
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
+                    Spacer(),
+                  ],
                 ),
-                decoration: InputDecoration(
+              ),
+              SizedBox(height: 200.h),
+              Container(
+                padding: EdgeInsets.only(left: 40.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Sign In',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w500,
+                        fontSize: 40.sp,
+                      ),
+                    ),
+                    Text(
+                      'Enter the following details ',
+                      style: TextStyle(
+                        color: hexToColor('#636363'),
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 30.sp,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 50.h),
+              Container(
+                margin: EdgeInsets.only(left: 32.w),
+                width: 520.w,
+                child: TextField(
+                  controller: emailController,
+                  style: TextStyle(
+                    fontFamily: 'Gotham',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                  decoration: InputDecoration(
                     label: Text('Email'),
                     labelStyle: TextStyle(
                       color: hexToColor('#545454'),
@@ -174,24 +152,24 @@ class _SignInScreenState extends State<SignInScreen> {
                         width: 1.0,
                       ),
                     ),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
                 ),
-                keyboardType: TextInputType.emailAddress,
               ),
-            ),
-            SizedBox(height: 16.h),
-            Container(
-              margin: EdgeInsets.only(left: 32.w),
-              width: 520.w,
-              child: TextField(
-                controller: passwordController,
-                cursorColor: Theme.of(context).primaryColor,
-                style: TextStyle(
-                  fontFamily: 'Gotham',
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
-                obscureText: !passwordVisible,
-                decoration: InputDecoration(
+              SizedBox(height: 16.h),
+              Container(
+                margin: EdgeInsets.only(left: 32.w),
+                width: 520.w,
+                child: TextField(
+                  controller: passwordController,
+                  cursorColor: Theme.of(context).primaryColor,
+                  style: TextStyle(
+                    fontFamily: 'Gotham',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                  ),
+                  obscureText: !passwordVisible,
+                  decoration: InputDecoration(
                     label: Text('Password'),
                     labelStyle: TextStyle(
                       color: hexToColor('#545454'),
@@ -204,36 +182,34 @@ class _SignInScreenState extends State<SignInScreen> {
                         });
                       },
                       child: Icon(
-                        passwordVisible
-                            ? Icons.lock_open
-                            : Icons.lock_outline,
+                        passwordVisible ? Icons.lock_open : Icons.lock_outline,
                       ),
                     ),
                     suffixIconColor: Theme.of(context).primaryColor,
-                  fillColor: hexToColorWithOpacity('#D9D9D9', 0.2),
-                  filled: true,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20.r),
-                    borderSide: BorderSide(
-                      color: hexToColor('#838383'),
-                      width: 1.0,
+                    fillColor: hexToColorWithOpacity('#D9D9D9', 0.2),
+                    filled: true,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20.r),
+                      borderSide: BorderSide(
+                        color: hexToColor('#838383'),
+                        width: 1.0,
+                      ),
                     ),
                   ),
+                  keyboardType: TextInputType.visiblePassword,
                 ),
-                keyboardType: TextInputType.visiblePassword,
               ),
-            ),
-            SizedBox(height: 10.h),
-            GestureDetector(
-              onTap: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ResetPasswordScreen(),
-                  ),
-                );
+              SizedBox(height: 10.h),
+              GestureDetector(
+                onTap: () async {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ResetPasswordScreen(),
+                    ),
+                  );
                 },
-              child: Container(
+                child: Container(
                   padding: EdgeInsets.only(left: 50.w),
                   child: Text(
                     'Forgot Password?',
@@ -243,155 +219,155 @@ class _SignInScreenState extends State<SignInScreen> {
                       fontWeight: FontWeight.w500,
                       fontSize: 18.sp,
                     ),
-                  ),),
-            ),
-            SizedBox(height: 10.h),
-            Container(
-                padding: EdgeInsets.only(left: 470.w),
-                child: CircleAvatar(
-                  backgroundColor: Theme.of(context).primaryColor,
-                  radius: 40.w,
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_forward),
-                    onPressed: () {
-                      signInWithEmailAndPassword();
-                    },
-                    color: Colors.white,
                   ),
-                )),
-            SizedBox(height: 200.h),
-            // Create google and apple sign in buttons
-            Center(
-              child: Text(
-                'Or Sign In With',
-                style: TextStyle(
-                  color: hexToColor('#636363'),
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w500,
-                  fontSize: 23.sp,
                 ),
               ),
-            ),
-            SizedBox(height: 20.h),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 75.h,
-                      margin: EdgeInsets.only(right: 10),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          signInWithGoogle();
-
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.black,
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
+              SizedBox(height: 10.h),
+              Container(
+                  padding: EdgeInsets.only(left: 470.w),
+                  child: CircleAvatar(
+                    backgroundColor: Theme.of(context).primaryColor,
+                    radius: 40.w,
+                    child: IconButton(
+                      icon: Icon(Icons.arrow_forward),
+                      onPressed: () {
+                        signInWithEmailAndPassword();
+                      },
+                      color: Colors.white,
+                    ),
+                  )),
+              SizedBox(height: 200.h),
+              // Create google and apple sign in buttons
+              Center(
+                child: Text(
+                  'Or Sign In With',
+                  style: TextStyle(
+                    color: hexToColor('#636363'),
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 23.sp,
+                  ),
+                ),
+              ),
+              SizedBox(height: 20.h),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 75.h,
+                        margin: EdgeInsets.only(right: 10),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            signInWithGoogle();
+                          },
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.black,
+                            backgroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
                           ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'assets/google.png',
-                              width: 30.w,
-                              height: 30.h,
-                            ),
-                            SizedBox(width: 16.w),
-                            Text(
-                              'Google',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 24.sp,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/google.png',
+                                width: 30.w,
+                                height: 30.h,
                               ),
-                            ),
-                          ],
+                              SizedBox(width: 16.w),
+                              Text(
+                                'Google',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 24.sp,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      height: 75.h,
-                      margin: EdgeInsets.only(left: 10),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                        },
-                        style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.white,
-                          backgroundColor: Colors.blue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                    Expanded(
+                      child: Container(
+                        height: 75.h,
+                        margin: EdgeInsets.only(left: 10),
+                        child: ElevatedButton(
+                          onPressed: () async {},
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Image.asset(
+                                'assets/facebook.png',
+                                width: 30.w,
+                                height: 30.h,
+                              ),
+                              SizedBox(width: 16.w),
+                              Text(
+                                'Facebook',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 24.sp,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              'assets/facebook.png',
-                              width: 30.w,
-                              height: 30.h,
-                            ),
-                            SizedBox(width: 16.w),
-                            Text(
-                              'Facebook',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 24.sp,
-                              ),
-                            ),
-                          ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 100.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'New Here?',
+                    style: TextStyle(
+                      color: hexToColor('#636363'),
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w400,
+                      fontSize: 27.sp,
+                    ),
+                  ),
+                  SizedBox(width: 5),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SignUpScreen(),
                         ),
+                      );
+                    },
+                    child: Text(
+                      'Sign Up',
+                      style: TextStyle(
+                        color: hexToColor('#636363'),
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 27.sp,
                       ),
                     ),
                   ),
                 ],
-              ),
-            ),
-            SizedBox(height: 100.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'New Here?',
-                  style: TextStyle(
-                    color: hexToColor('#636363'),
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w400,
-                    fontSize: 27.sp,
-                  ),
-                ),
-                SizedBox(width: 5),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SignUpScreen(),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    'Sign Up',
-                    style: TextStyle(
-                      color: hexToColor('#636363'),
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 27.sp,
-                    ),
-                  ),
-                ),
-              ],
-            )
-          ],
+              )
+            ],
+          ),
         ),
       ),
     );

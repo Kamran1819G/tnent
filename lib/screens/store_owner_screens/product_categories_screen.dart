@@ -9,13 +9,16 @@ import 'package:tnennt/screens/store_owner_screens/add_product_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/all_products_screen.dart';
 import 'package:tnennt/screens/store_owner_screens/category_products_screen.dart';
 
+import '../../helpers/snackbar_utils.dart';
+
 class ProductCategoriesScreen extends StatefulWidget {
   final String storeId;
 
   ProductCategoriesScreen({required this.storeId});
 
   @override
-  State<ProductCategoriesScreen> createState() => _ProductCategoriesScreenState();
+  State<ProductCategoriesScreen> createState() =>
+      _ProductCategoriesScreenState();
 }
 
 class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
@@ -124,9 +127,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
       _toggleSelectionMode();
     } catch (e) {
       print('Error deleting categories: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to delete categories. Please try again.')),
-      );
+      showSnackBar(context, 'Failed to delete categories. Please try again.');
     }
   }
 
@@ -147,14 +148,16 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                       padding: EdgeInsets.only(left: 16, right: 8),
                       child: Row(
                         children: [
-                          Image.asset('assets/black_tnennt_logo.png', width: 30, height: 30),
+                          Image.asset('assets/black_tnennt_logo.png',
+                              width: 30, height: 30),
                           Spacer(),
                           Container(
                             margin: EdgeInsets.all(8.0),
                             child: CircleAvatar(
                               backgroundColor: Colors.grey[100],
                               child: IconButton(
-                                icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                                icon: Icon(Icons.arrow_back_ios_new,
+                                    color: Colors.black),
                                 onPressed: () {
                                   Navigator.pop(context);
                                 },
@@ -174,7 +177,8 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                             width: 400.w,
                             child: Text(
                               'Choose Your Personalized Category',
-                              style: TextStyle(fontSize: 32.sp, color: Colors.black),
+                              style: TextStyle(
+                                  fontSize: 32.sp, color: Colors.black),
                             ),
                           ),
                           SizedBox(height: 12.h),
@@ -193,7 +197,8 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => AllProductsScreen(storeId: widget.storeId),
+                                  builder: (context) => AllProductsScreen(
+                                      storeId: widget.storeId),
                                 ),
                               );
                             },
@@ -283,8 +288,10 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                                 ),
                                 GestureDetector(
                                   onTap: () {
-                                    if (_newCategoryController.text.isNotEmpty) {
-                                      _addNewCategory(_newCategoryController.text);
+                                    if (_newCategoryController
+                                        .text.isNotEmpty) {
+                                      _addNewCategory(
+                                          _newCategoryController.text);
                                       _newCategoryController.clear();
                                     }
                                   },
@@ -324,8 +331,10 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                             TextButton(
                               onPressed: _deleteSelectedCategories,
                               style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(Colors.red),
-                                foregroundColor: MaterialStateProperty.all(Colors.white),
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.red),
+                                foregroundColor:
+                                    MaterialStateProperty.all(Colors.white),
                               ),
                               child: Text('Delete'),
                             ),
@@ -333,8 +342,10 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                             TextButton(
                               onPressed: _toggleSelectionMode,
                               style: ButtonStyle(
-                                backgroundColor: MaterialStateProperty.all(Colors.grey),
-                                foregroundColor: MaterialStateProperty.all(Colors.white),
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.grey),
+                                foregroundColor:
+                                    MaterialStateProperty.all(Colors.white),
                               ),
                               child: Text('Cancel'),
                             ),
@@ -366,11 +377,12 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                     childAspectRatio: 1.1,
                   ),
                   delegate: SliverChildBuilderDelegate(
-                        (context, index) => CategoryTile(
+                    (context, index) => CategoryTile(
                       category: categories[index],
                       storeId: widget.storeId,
                       isSelectionMode: isSelectionMode,
-                      isSelected: selectedCategories.contains(categories[index]),
+                      isSelected:
+                          selectedCategories.contains(categories[index]),
                       onTap: () {
                         if (isSelectionMode) {
                           _toggleCategorySelection(categories[index]);
@@ -488,7 +500,8 @@ class CategoryTile extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => AddProductScreen(category: category, storeId: storeId),
+                          builder: (context) => AddProductScreen(
+                              category: category, storeId: storeId),
                         ),
                       );
                     },

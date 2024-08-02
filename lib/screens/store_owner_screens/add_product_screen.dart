@@ -134,8 +134,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
   }
 
   void _navigateToOptionalsScreen() {
-    if (_nameController.text.isEmpty || _descriptionController.text.isEmpty || _images.isEmpty || selectedCategory == null) {
-      _showSnackBar('Please fill in all required fields and add at least one image');
+    if (_nameController.text.isEmpty ||
+        _descriptionController.text.isEmpty ||
+        _images.isEmpty ||
+        selectedCategory == null) {
+      _showSnackBar(
+          'Please fill in all required fields and add at least one image');
       return;
     }
 
@@ -275,15 +279,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   Spacer(),
                   IconButton(
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
+                      backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
-                      shape: WidgetStateProperty.all(
+                      shape: MaterialStateProperty.all(
                         CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new,
-                        color: Colors.black),
+                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -359,7 +362,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                     right: 10),
                                                 decoration: BoxDecoration(
                                                   borderRadius:
-                                                      BorderRadius.circular(22.r),
+                                                      BorderRadius.circular(
+                                                          22.r),
                                                   image: DecorationImage(
                                                     image: FileImage(
                                                         _images[index]),
@@ -528,7 +532,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               ),
                               SizedBox(height: 20.h),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(
                                     width: 190.w,
@@ -554,10 +559,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           color: Theme.of(context).primaryColor,
                                           size: 30.sp,
                                         ),
-                                        prefixIconConstraints: BoxConstraints(minWidth: 30),
+                                        prefixIconConstraints:
+                                            BoxConstraints(minWidth: 30),
                                         border: OutlineInputBorder(
-                                          borderSide: BorderSide(color: hexToColor('#848484')),
-                                          borderRadius: BorderRadius.circular(18.r),
+                                          borderSide: BorderSide(
+                                              color: hexToColor('#848484')),
+                                          borderRadius:
+                                              BorderRadius.circular(18.r),
                                         ),
                                       ),
                                       validator: (value) {
@@ -567,8 +575,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           });
                                           return null; // Allow empty discount (0%)
                                         }
-                                        final double? discount = double.tryParse(value);
-                                        if (discount == null || discount < 0 || discount > 100) {
+                                        final double? discount =
+                                            double.tryParse(value);
+                                        if (discount == null ||
+                                            discount < 0 ||
+                                            discount > 100) {
                                           return 'Please enter a valid discount (0-100)';
                                         }
                                         return null;
@@ -600,17 +611,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           color: Theme.of(context).primaryColor,
                                           size: 30.sp,
                                         ),
-                                        prefixIconConstraints: BoxConstraints(minWidth: 30),
+                                        prefixIconConstraints:
+                                            BoxConstraints(minWidth: 30),
                                         border: OutlineInputBorder(
-                                          borderSide: BorderSide(color: hexToColor('#848484')),
-                                          borderRadius: BorderRadius.circular(18.r),
+                                          borderSide: BorderSide(
+                                              color: hexToColor('#848484')),
+                                          borderRadius:
+                                              BorderRadius.circular(18.r),
                                         ),
                                       ),
                                       validator: (value) {
                                         if (value == null || value.isEmpty) {
                                           return 'Please enter the MRP';
                                         }
-                                        final double? mrp = double.tryParse(value);
+                                        final double? mrp =
+                                            double.tryParse(value);
                                         if (mrp == null || mrp <= 0) {
                                           return 'Please enter a valid MRP';
                                         }
@@ -643,10 +658,13 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           color: Theme.of(context).primaryColor,
                                           size: 30.sp,
                                         ),
-                                        prefixIconConstraints: BoxConstraints(minWidth: 30),
+                                        prefixIconConstraints:
+                                            BoxConstraints(minWidth: 30),
                                         border: OutlineInputBorder(
-                                          borderSide: BorderSide(color: hexToColor('#848484')),
-                                          borderRadius: BorderRadius.circular(18.r),
+                                          borderSide: BorderSide(
+                                              color: hexToColor('#848484')),
+                                          borderRadius:
+                                              BorderRadius.circular(18.r),
                                         ),
                                       ),
                                     ),
@@ -825,12 +843,16 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   padding: EdgeInsets.symmetric(
                                       horizontal: 75, vertical: 16),
                                   shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(50.r)),
+                                      borderRadius:
+                                          BorderRadius.circular(50.r)),
                                 ),
                                 child: Text(
                                   isMultiOptionCategory ? 'Next' : 'List Item',
                                   style: TextStyle(
-                                      color: Colors.white, fontSize: 25.sp,fontFamily: 'Gotham' ,fontWeight: FontWeight.w500),
+                                      color: Colors.white,
+                                      fontSize: 25.sp,
+                                      fontFamily: 'Gotham',
+                                      fontWeight: FontWeight.w500),
                                 ),
                               ),
                       ),

@@ -233,15 +233,14 @@ class _OptionalsScreenState extends State<OptionalsScreen>
                   Spacer(),
                   IconButton(
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
+                      backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
-                      shape: WidgetStateProperty.all(
+                      shape: MaterialStateProperty.all(
                         CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new,
-                        color: Colors.black),
+                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -453,7 +452,6 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
     return isValid;
   }
 
-
   Future<void> saveDataToFirebase() async {
     if (!validateAllFields()) {
       showSnackBar(context, 'Please fill all the fields');
@@ -549,8 +547,8 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
                       child: CircleAvatar(
                         backgroundColor: Colors.grey[100],
                         child: IconButton(
-                          icon:
-                              Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                          icon: Icon(Icons.arrow_back_ios_new,
+                              color: Colors.black),
                           onPressed: () {
                             Navigator.pop(context);
                           },
@@ -820,7 +818,8 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                           ),
                           prefixIconConstraints: BoxConstraints(minWidth: 30),
                           border: OutlineInputBorder(
-                            borderSide: BorderSide(color: hexToColor('#848484')),
+                            borderSide:
+                                BorderSide(color: hexToColor('#848484')),
                             borderRadius: BorderRadius.circular(18.r),
                           ),
                         ),
@@ -832,7 +831,9 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                             return null; // Allow empty discount (0%)
                           }
                           final double? discount = double.tryParse(value);
-                          if (discount == null || discount < 0 || discount > 100) {
+                          if (discount == null ||
+                              discount < 0 ||
+                              discount > 100) {
                             return 'Please enter a valid discount (0-100)';
                           }
                           return null;
@@ -866,7 +867,8 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                           ),
                           prefixIconConstraints: BoxConstraints(minWidth: 30),
                           border: OutlineInputBorder(
-                            borderSide: BorderSide(color: hexToColor('#848484')),
+                            borderSide:
+                                BorderSide(color: hexToColor('#848484')),
                             borderRadius: BorderRadius.circular(18.r),
                           ),
                         ),
@@ -909,7 +911,8 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                           ),
                           prefixIconConstraints: BoxConstraints(minWidth: 30),
                           border: OutlineInputBorder(
-                            borderSide: BorderSide(color: hexToColor('#848484')),
+                            borderSide:
+                                BorderSide(color: hexToColor('#848484')),
                             borderRadius: BorderRadius.circular(18.r),
                           ),
                         ),
@@ -942,8 +945,7 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                             borderSide: BorderSide(
                               color: hexToColor('#848484'),
                             ),
-                            borderRadius:
-                            BorderRadius.circular(20.r),
+                            borderRadius: BorderRadius.circular(20.r),
                           ),
                           contentPadding: EdgeInsets.symmetric(
                             horizontal: 20,
@@ -954,10 +956,8 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                           if (value == null || value.isEmpty) {
                             return 'Please enter the stock quantity';
                           }
-                          final int? stockQuantity =
-                          int.tryParse(value);
-                          if (stockQuantity == null ||
-                              stockQuantity < 0) {
+                          final int? stockQuantity = int.tryParse(value);
+                          if (stockQuantity == null || stockQuantity < 0) {
                             return 'Please enter a valid stock quantity';
                           }
                           return null;

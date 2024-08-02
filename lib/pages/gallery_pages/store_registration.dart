@@ -17,9 +17,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../helpers/snackbar_utils.dart';
 
-class StoreRegistration extends StatefulWidget
-{
+class StoreRegistration extends StatefulWidget {
   const StoreRegistration({super.key});
   @override
   State<StoreRegistration> createState() => _StoreRegistrationState();
@@ -106,7 +106,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         name: _nameController.text,
         phone: _phoneController.text,
         email: _emailController.text,
-        logoUrl: "https://firebasestorage.googleapis.com/v0/b/tnennt-1e1f2.appspot.com/o/Don't%20Delete%2Fblack_tnennt_logo.png?alt=media&token=7880c411-c4dc-4615-b800-f55193f23721",
+        logoUrl:
+            "https://firebasestorage.googleapis.com/v0/b/tnennt-1e1f2.appspot.com/o/Don't%20Delete%2Fblack_tnennt_logo.png?alt=media&token=7880c411-c4dc-4615-b800-f55193f23721",
         website: '${_websiteController.text}.tnennt.com',
         upiUsername: _upiUsernameController.text,
         upiId: _upiIdController.text,
@@ -136,20 +137,17 @@ class _StoreRegistrationState extends State<StoreRegistration> {
           .update({'storeId': newStore.storeId});
 
       // Show success message
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Store registered successfully')),
-      );
+      showSnackBar(context, 'Store registered successfully');
     } catch (e) {
       // Handle any errors
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error registering store: $e')),
-      );
+      showSnackBar(context, 'Error registering store: $e');
     }
   }
 
   Future<void> _validateStoreDomain(String domain) async {
     final storeRef = FirebaseFirestore.instance.collection('Stores');
-    final querySnapshot = await storeRef.where('website', isEqualTo: '$domain.tnennt.com').get();
+    final querySnapshot =
+        await storeRef.where('website', isEqualTo: '$domain.tnennt.com').get();
 
     setState(() {
       _isStoreDomainUnique = querySnapshot.docs.isEmpty;
@@ -178,14 +176,15 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     // Convert phoneNumber to numerical form and add +91 prefix
     String numericalPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
     numericalPhoneNumber = '+91$numericalPhoneNumber';
-    final url = 'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/$numericalPhoneNumber/AUTOGEN';
+    final url =
+        'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/$numericalPhoneNumber/AUTOGEN';
     try {
       final response = await http.get(
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
         },
-      ).timeout(Duration(seconds: 20));
+      ).timeout(const Duration(seconds: 20));
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         if (responseData['Status'] == 'Success') {
@@ -196,8 +195,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
       } else {
         throw Exception('Failed to send OTP: ${response.statusCode}');
       }
-    } catch (e)
-    {
+    } catch (e) {
       throw e;
     }
   }
@@ -206,16 +204,16 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     // Convert phoneNumber to numerical form and add +91 prefix
     String numericalPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
     numericalPhoneNumber = '+91$numericalPhoneNumber';
-    final url = 'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/VERIFY/$_verificationId/$otp';
+    final url =
+        'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/VERIFY/$_verificationId/$otp';
     try {
       final response = await http.get(
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
         },
-      ).timeout(Duration(seconds: 200));
+      ).timeout(const Duration(seconds: 200));
       if (response.statusCode == 200) {
-
         final responseData = json.decode(response.body);
         if (responseData['Status'] == 'Success') {
           return true;
@@ -241,8 +239,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
       print('Selected category: $selectedCategory');
       _pageController.jumpToPage(_currentPageIndex + 1);
     } else {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Please select a category')));
+      showSnackBar(context, 'Please select a category');
     }
   }
 
@@ -270,10 +267,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     }
 
     // Get the current position
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
 
     // Get the address from the coordinates
-    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+    List<Placemark> placemarks =
+        await placemarkFromCoordinates(position.latitude, position.longitude);
 
     if (placemarks.isNotEmpty) {
       Placemark place = placemarks[0];
@@ -300,16 +299,16 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 }
                 if (index == 10) {
                   // Start a timer of 5 seconds when the last page is reached
-                  Timer(Duration(seconds: 5), () {
+                  Timer(const Duration(seconds: 5), () {
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                           builder: (context) =>
-                              WidgetTree()), // Navigate to the Home screen
+                              const WidgetTree()), // Navigate to the Home screen
                     );
                   });
                 }
               },
-              physics: NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               children: <Widget>[
                 // Page 1: e-Store Features
                 _buildStoreFeatures(),
@@ -384,7 +383,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     letterSpacing: 2,
                                   ),
                                 ),
-                                SizedBox(width: 8),
+                                const SizedBox(width: 8),
                                 Expanded(
                                   child: TextField(
                                     controller: _phoneController,
@@ -426,34 +425,35 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                       context: context,
                                       barrierDismissible: false,
                                       builder: (BuildContext context) {
-                                        return Center(child: CircularProgressIndicator());
+                                        return const Center(
+                                            child: CircularProgressIndicator());
                                       },
                                     );
 
                                     await sendOTP(_phoneController.text);
+
+                                    if (!context.mounted) return;
                                     Navigator.of(context).pop();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('OTP sent successfully')),
-                                    );
-                                    _pageController.jumpToPage(_currentPageIndex + 1);
+                                    showSnackBar(
+                                        context, 'OTP sent successfully');
+
+                                    _pageController
+                                        .jumpToPage(_currentPageIndex + 1);
                                   } catch (e) {
                                     debugPrint('Error in on tap : $e');
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text('Failed to send OTP. Please try again.')),
-                                    );
+
+                                    showSnackBar(context,
+                                        'Failed to send OTP. Please try again.');
                                   }
                                 } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text('This phone number is already registered'),
-                                    ),
-                                  );
+                                  showSnackBar(context,
+                                      'This phone number is already registered');
                                 }
                               },
                               child: CircleAvatar(
                                 backgroundColor: Theme.of(context).primaryColor,
                                 radius: 40.w,
-                                child: Icon(
+                                child: const Icon(
                                   Icons.check,
                                   color: Colors.white,
                                 ),
@@ -541,11 +541,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                   ),
                                   decoration: BoxDecoration(
                                     border: Border(
-                                    bottom: BorderSide(
-                                      color: hexToColor('#838383'),
-                                      width: 2,
-                                  ),
-                                ),
+                                      bottom: BorderSide(
+                                        color: hexToColor('#838383'),
+                                        width: 2,
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 focusedPinTheme: PinTheme(
@@ -572,22 +572,28 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             child: GestureDetector(
                               onTap: isButtonEnabled
                                   ? () async {
-                                bool isVerified = await verifyOTP(_phoneController.text, _otpController.text);
-                                if (isVerified) {
-                                  _pageController.jumpToPage(_currentPageIndex + 1);
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Invalid OTP. Please try again.')),
-                                  );
-                                }
-                              }
-                              : null,
+                                      bool isVerified = await verifyOTP(
+                                          _phoneController.text,
+                                          _otpController.text);
+                                      if (isVerified) {
+                                        _pageController
+                                            .jumpToPage(_currentPageIndex + 1);
+                                      } else {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Invalid OTP. Please try again.')),
+                                        );
+                                      }
+                                    }
+                                  : null,
                               child: CircleAvatar(
                                 backgroundColor: isButtonEnabled
                                     ? Theme.of(context).primaryColor
                                     : Colors.grey,
                                 radius: 40.w,
-                                child: Icon(
+                                child: const Icon(
                                   Icons.arrow_forward,
                                   color: Colors.white,
                                 ),
@@ -643,14 +649,14 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           fontSize: 24.sp,
                         ),
                         decoration: InputDecoration(
-                          label: Text('Email'),
+                          label: const Text('Email'),
                           labelStyle: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 24.sp,
                           ),
                           filled: true,
                           fillColor: hexToColor('#F5F5F5'),
-                          suffixIcon: Icon(Icons.email_outlined),
+                          suffixIcon: const Icon(Icons.email_outlined),
                           suffixIconColor: Theme.of(context).primaryColor,
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20.sp),
@@ -667,9 +673,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         },
                       ),
                     ),
-                    if(!_isStoreEmailUnique)...[
-                    SizedBox(height: 20.h),
-                    Container(
+                    if (!_isStoreEmailUnique) ...[
+                      SizedBox(height: 20.h),
+                      Container(
                         margin: EdgeInsets.only(left: 45.w),
                         child: Row(
                           children: [
@@ -694,7 +700,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             ),
                           ],
                         ),
-                    ),
+                      ),
                     ],
                     SizedBox(height: 550.h),
                     Container(
@@ -729,7 +735,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (context) => WebViewScreen(
+                                        builder: (context) => const WebViewScreen(
                                             url:
                                                 'https://tnennt-updated.vercel.app/legals',
                                             title: 'Terms and Conditions')));
@@ -746,19 +752,15 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             ),
                           ],
                         )),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Center(
                       child: GestureDetector(
                         onTap: () {
                           if (_termsAccepted && _isStoreEmailUnique) {
                             _pageController.jumpToPage(_currentPageIndex + 1);
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    'Please accept the terms and conditions and provide a unique email'),
-                              ),
-                            );
+                            showSnackBar(context,
+                                'Please accept the terms and conditions and provide a unique email');
                           }
                         },
                         child: Container(
@@ -821,7 +823,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           fontSize: 24.sp,
                         ),
                         decoration: InputDecoration(
-                          label: Text('Store Name'),
+                          label: const Text('Store Name'),
                           labelStyle: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 24.sp,
@@ -911,7 +913,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           fontSize: 24.sp,
                         ),
                         decoration: InputDecoration(
-                          label: Text('Store Name'),
+                          label: const Text('Store Name'),
                           labelStyle: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 24.sp,
@@ -946,17 +948,23 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         child: Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor: _isStoreDomainUnique ? Theme.of(context).primaryColor : Colors.red,
+                              backgroundColor: _isStoreDomainUnique
+                                  ? Theme.of(context).primaryColor
+                                  : Colors.red,
                               radius: 12.w,
                               child: Icon(
-                                _isStoreDomainUnique ? Icons.check : Icons.close,
+                                _isStoreDomainUnique
+                                    ? Icons.check
+                                    : Icons.close,
                                 color: Colors.white,
                                 size: 16.sp,
                               ),
                             ),
                             SizedBox(width: 12.w),
                             Text(
-                                _isStoreDomainUnique ? 'This domain is available' : 'This domain is not available',
+                              _isStoreDomainUnique
+                                  ? 'This domain is available'
+                                  : 'This domain is not available',
                               style: TextStyle(
                                 color: hexToColor('#636363'),
                                 fontFamily: 'Poppins',
@@ -969,9 +977,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     SizedBox(height: 600.h),
                     Center(
                       child: GestureDetector(
-                        onTap: _isStoreDomainUnique ? () {
-                            _pageController.jumpToPage(_currentPageIndex + 1);
-                          } : null,
+                        onTap: _isStoreDomainUnique
+                            ? () {
+                                _pageController
+                                    .jumpToPage(_currentPageIndex + 1);
+                              }
+                            : null,
                         child: Container(
                           height: 95.h,
                           width: 480.w,
@@ -1020,7 +1031,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 50),
+                    const SizedBox(height: 50),
                     Expanded(
                       child: GridView.builder(
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -1029,7 +1040,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           mainAxisSpacing: 16.h,
                           childAspectRatio: 3.5,
                         ),
-                        physics: BouncingScrollPhysics(),
+                        physics: const BouncingScrollPhysics(),
                         padding: EdgeInsets.symmetric(horizontal: 24.w),
                         itemCount: categories.length,
                         itemBuilder: (context, index) {
@@ -1161,7 +1172,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           fontSize: 24.sp,
                         ),
                         decoration: InputDecoration(
-                          label: Text('Username'),
+                          label: const Text('Username'),
                           labelStyle: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 24.sp,
@@ -1192,7 +1203,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           fontSize: 24.sp,
                         ),
                         decoration: InputDecoration(
-                          label: Text('UPI ID'),
+                          label: const Text('UPI ID'),
                           labelStyle: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 24.sp,
@@ -1304,7 +1315,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           fontSize: 24.sp,
                         ),
                         decoration: InputDecoration(
-                          label: Text('Location'),
+                          label: const Text('Location'),
                           labelStyle: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 24.sp,
@@ -1314,23 +1325,26 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             width: 25.w,
                             height: 25.h,
                           ),
-                          prefixIconConstraints: BoxConstraints(
+                          prefixIconConstraints: const BoxConstraints(
                             minWidth: 40,
                           ),
                           suffixIcon: IconButton(
-                            icon: Icon(Icons.my_location),
+                            icon: const Icon(Icons.my_location),
                             onPressed: () async {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Fetching your current location...'),
-                                  duration: Duration(seconds: 30),
-                                ),
+                              showSnackBar(
+                                context,
+                                'Fetching your current location...',
+                                Colors.red,
+                                const Duration(seconds: 30),
                               );
+
                               String location = await getCurrentLocation();
                               setState(() {
                                 _locationController.text = location;
                               });
-                              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
                             },
                           ),
                           suffixIconColor: Theme.of(context).primaryColor,
@@ -1734,17 +1748,17 @@ class _StoreRegistrationState extends State<StoreRegistration> {
               ],
             ),
           ),
-          Spacer(),
+          const Spacer(),
           IconButton(
             style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(
+              backgroundColor: MaterialStateProperty.all(
                 Colors.grey[100],
               ),
-              shape: WidgetStateProperty.all(
-                CircleBorder(),
+              shape: MaterialStateProperty.all(
+                const CircleBorder(),
               ),
             ),
-            icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
             onPressed: () {
               if (currentPage == 0 || currentPage > 9) {
                 Navigator.pop(context);
@@ -1861,22 +1875,22 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 ],
               ),
             ),
-            Spacer(),
+            const Spacer(),
             IconButton(
               style: ButtonStyle(
-                backgroundColor: WidgetStateProperty.all(
+                backgroundColor: MaterialStateProperty.all(
                   Colors.grey[100],
                 ),
-                shape: WidgetStateProperty.all(
-                  CircleBorder(),
+                shape: MaterialStateProperty.all(
+                  const CircleBorder(),
                 ),
               ),
-              icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+              icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
               onPressed: () {
                 if (_storeFeaturesPageController.hasClients &&
                     _featuresCurrentPageIndex > 0) {
                   _storeFeaturesPageController.previousPage(
-                    duration: Duration(milliseconds: 300),
+                    duration: const Duration(milliseconds: 300),
                     curve: Curves.easeInOutBack,
                   );
                 } else {
@@ -1923,7 +1937,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
             if (_storeFeaturesPageController.hasClients) {
               if (_featuresCurrentPageIndex < 4) {
                 _storeFeaturesPageController.nextPage(
-                  duration: Duration(milliseconds: 100),
+                  duration: const Duration(milliseconds: 100),
                   curve: Curves.easeIn,
                 );
               } else {

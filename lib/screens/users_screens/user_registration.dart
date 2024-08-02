@@ -17,6 +17,8 @@ import 'package:tnennt/widget_tree.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
+import '../../helpers/snackbar_utils.dart';
+
 class UserRegistration extends StatefulWidget {
   UserRegistration({Key? key}) : super(key: key);
 
@@ -32,7 +34,7 @@ class _UserRegistrationState extends State<UserRegistration> {
   bool _isPhoneNumberUnique = true;
   bool isButtonEnabled = false;
   late UserModel _userModel;
-  String _verificationId ='';
+  String _verificationId = '';
 
   TextEditingController _phoneController = TextEditingController();
   TextEditingController _firstNameController = TextEditingController();
@@ -77,19 +79,9 @@ class _UserRegistrationState extends State<UserRegistration> {
         _userModel = updatedUser;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(
-          'Error: $e',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
-        ),
-        backgroundColor: Colors.red,
-      ));
+      showSnackBar(context, 'Error: $e');
     }
   }
-
 
   bool _validateFields() {
     switch (currentPage) {
@@ -107,7 +99,7 @@ class _UserRegistrationState extends State<UserRegistration> {
     }
   }
 
-  Future<void> _validatePhoneNumberUnique(String phone) async{
+  Future<void> _validatePhoneNumberUnique(String phone) async {
     final querySnapshot = await FirebaseFirestore.instance
         .collection('Users')
         .where('phoneNumber', isEqualTo: phone)
@@ -143,14 +135,8 @@ class _UserRegistrationState extends State<UserRegistration> {
         location.length <= 100;
   }
 
-
   void _showValidationError(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
-    );
+    showSnackBar(context, message);
   }
 
   void _proceedToNextPage() {
@@ -203,10 +189,12 @@ class _UserRegistrationState extends State<UserRegistration> {
     }
 
     // Get the current position
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
 
     // Get the address from the coordinates
-    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+    List<Placemark> placemarks =
+        await placemarkFromCoordinates(position.latitude, position.longitude);
 
     if (placemarks.isNotEmpty) {
       Placemark place = placemarks[0];
@@ -215,11 +203,13 @@ class _UserRegistrationState extends State<UserRegistration> {
       return 'No address available.';
     }
   }
+
   Future<void> sendOTP(String phoneNumber) async {
     // Convert phoneNumber to numerical form and add +91 prefix
     String numericalPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
     numericalPhoneNumber = '+91$numericalPhoneNumber';
-    final url = 'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/$numericalPhoneNumber/AUTOGEN';
+    final url =
+        'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/$numericalPhoneNumber/AUTOGEN';
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -237,8 +227,7 @@ class _UserRegistrationState extends State<UserRegistration> {
       } else {
         throw Exception('Failed to send OTP: ${response.statusCode}');
       }
-    } catch (e)
-    {
+    } catch (e) {
       throw e;
     }
   }
@@ -247,7 +236,8 @@ class _UserRegistrationState extends State<UserRegistration> {
     // Convert phoneNumber to numerical form and add +91 prefix
     String numericalPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
     numericalPhoneNumber = '+91$numericalPhoneNumber';
-    final url = 'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/VERIFY/$_verificationId/$otp';
+    final url =
+        'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/VERIFY/$_verificationId/$otp';
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -256,7 +246,6 @@ class _UserRegistrationState extends State<UserRegistration> {
         },
       ).timeout(Duration(seconds: 200));
       if (response.statusCode == 200) {
-
         final responseData = json.decode(response.body);
         if (responseData['Status'] == 'Success') {
           return true;
@@ -296,9 +285,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                   // Start a timer of 5 seconds when the last page is reached
                   Timer(Duration(seconds: 5), () {
                     Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              WidgetTree()),
+                      MaterialPageRoute(builder: (context) => WidgetTree()),
                     );
                   });
                 }
@@ -431,12 +418,7 @@ class _UserRegistrationState extends State<UserRegistration> {
                     if (_isPhoneNumberUnique) {
                       _proceedToNextPage();
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Phone number already exists'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
+                      showSnackBar(context, 'Phone number already exists');
                     }
                   },
                   child: CircleAvatar(
@@ -578,22 +560,19 @@ class _UserRegistrationState extends State<UserRegistration> {
                 child: GestureDetector(
                   onTap: isButtonEnabled
                       ? () async {
-                    bool isVerified = await verifyOTP(
-                        _phoneController.text,_otpController.text);
-                    if (isVerified) {
-                      _pageController.jumpToPage(currentPage + 1);
-                    }
-                    else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Invalid OTP. Please try again.')),
-                      );
-                    }
-                    }
-                    : null,
+                          bool isVerified = await verifyOTP(
+                              _phoneController.text, _otpController.text);
+                          if (isVerified) {
+                            _pageController.jumpToPage(currentPage + 1);
+                          } else {
+                            showSnackBar(
+                                context, 'Invalid OTP. Please try again.');
+                          }
+                        }
+                      : null,
                   child: CircleAvatar(
-                    backgroundColor: isButtonEnabled?
-                    Theme.of(context).primaryColor
+                    backgroundColor: isButtonEnabled
+                        ? Theme.of(context).primaryColor
                         : Colors.grey,
                     radius: 40.w,
                     child: Icon(
@@ -783,12 +762,8 @@ class _UserRegistrationState extends State<UserRegistration> {
               suffixIcon: IconButton(
                 icon: Icon(Icons.my_location),
                 onPressed: () async {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Fetching your current location...'),
-                      duration: Duration(seconds: 30),
-                    ),
-                  );
+                  showSnackBar(context, 'Fetching your current location...');
+
                   String location = await getCurrentLocation();
                   setState(() {
                     _locationController.text = location;
@@ -820,13 +795,8 @@ class _UserRegistrationState extends State<UserRegistration> {
                 await addUserDetails();
                 _pageController.jumpToPage(currentPage + 1);
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content:
-                        Text('Please fill in all required fields correctly.'),
-                    backgroundColor: Colors.red,
-                  ),
-                );
+                showSnackBar(
+                    context, 'Please fill in all required fields correctly.');
               }
             },
             child: Container(
@@ -958,10 +928,10 @@ class _UserRegistrationState extends State<UserRegistration> {
           Spacer(),
           IconButton(
             style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(
+              backgroundColor: MaterialStateProperty.all(
                 Colors.grey[100],
               ),
-              shape: WidgetStateProperty.all(
+              shape: MaterialStateProperty.all(
                 CircleBorder(),
               ),
             ),

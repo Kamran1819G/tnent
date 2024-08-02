@@ -141,7 +141,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     String imageUrl = await _uploadImage(image);
 
     Timestamp now = Timestamp.now();
-    Timestamp expiresAt = Timestamp.fromDate(now.toDate().add(Duration(hours: 24)));
+    Timestamp expiresAt =
+        Timestamp.fromDate(now.toDate().add(Duration(hours: 24)));
 
     StoreUpdateModel newUpdate = StoreUpdateModel(
       updateId: '', // Firestore will generate this
@@ -173,9 +174,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
 
   Future<String> _uploadImage(XFile image) async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    Reference firebaseStorageRef = FirebaseStorage.instance
-        .ref()
-        .child('store_updates/$fileName');
+    Reference firebaseStorageRef =
+        FirebaseStorage.instance.ref().child('store_updates/$fileName');
     UploadTask uploadTask = firebaseStorageRef.putFile(File(image.path));
     TaskSnapshot taskSnapshot = await uploadTask;
     String url = await taskSnapshot.ref.getDownloadURL();
@@ -227,7 +227,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
       ),
     );
   }
-
 
   Future<void> _loadProducts() async {
     allProducts = await _fetchProducts();
@@ -492,10 +491,11 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                             Switch(
                                 value: isActive,
                                 activeColor: hexToColor('#41FA00'),
-                                trackOutlineColor: WidgetStateColor.resolveWith(
-                                    (states) => Colors.grey),
+                                trackOutlineColor:
+                                    MaterialStateColor.resolveWith(
+                                        (states) => Colors.grey),
                                 trackOutlineWidth:
-                                    WidgetStateProperty.resolveWith(
+                                    MaterialStateProperty.resolveWith(
                                         (states) => 1.0),
                                 activeTrackColor: Colors.transparent,
                                 inactiveTrackColor: Colors.transparent,
@@ -973,7 +973,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
-                                            OrderAndPaysScreen(storeId: widget.store.storeId),
+                                            OrderAndPaysScreen(
+                                                storeId: widget.store.storeId),
                                       ),
                                     );
                                   },
@@ -1130,7 +1131,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               ...storeUpdates.map((update) {
                                 return RemovableUpdateTile(
                                   image: update.imageUrl,
-                                  onRemove: () => _deleteStoreUpdate(update.updateId),
+                                  onRemove: () =>
+                                      _deleteStoreUpdate(update.updateId),
                                   onTap: () => _previewUpdate(update),
                                 );
                               }).toList(),
@@ -1382,7 +1384,8 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
         } else {
           List<ProductModel> products = snapshot.data!;
           if (products.isEmpty) {
-            return SizedBox.shrink(); // Don't show the category if there are no products
+            return SizedBox
+                .shrink(); // Don't show the category if there are no products
           }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

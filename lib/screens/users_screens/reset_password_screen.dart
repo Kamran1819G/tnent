@@ -66,10 +66,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       Spacer(),
                       IconButton(
                         style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all(
+                          backgroundColor: MaterialStateProperty.all(
                             Colors.grey[100],
                           ),
-                          shape: WidgetStateProperty.all(
+                          shape: MaterialStateProperty.all(
                             CircleBorder(),
                           ),
                         ),
@@ -188,15 +188,15 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       Spacer(),
                       IconButton(
                         style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all(
+                          backgroundColor: MaterialStateProperty.all(
                             Colors.grey[100],
                           ),
-                          shape: WidgetStateProperty.all(
+                          shape: MaterialStateProperty.all(
                             CircleBorder(),
                           ),
                         ),
                         icon:
-                        Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           _pageController.jumpToPage(_currentPage - 1);
                         },
@@ -237,26 +237,25 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 SizedBox(height: 50.h),
                 Center(
                   child: GestureDetector(
-                    onTap: () {
-                      _pageController.jumpToPage(_currentPage + 1);
-                    },
-                    child: Container(
-                      width: 345.w,
-                      height: 95.h,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).primaryColor,
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: Text(
-                        'Verify email',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 27.sp,
+                      onTap: () {
+                        _pageController.jumpToPage(_currentPage + 1);
+                      },
+                      child: Container(
+                        width: 345.w,
+                        height: 95.h,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor,
+                          borderRadius: BorderRadius.circular(20.r),
                         ),
-                      ),
-                    )
-                  ),
+                        child: Text(
+                          'Verify email',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 27.sp,
+                          ),
+                        ),
+                      )),
                 ),
               ],
             ),

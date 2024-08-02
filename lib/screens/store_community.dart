@@ -13,6 +13,8 @@ import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/widgets/full_screen_image_view.dart';
 
+import '../helpers/snackbar_utils.dart';
+
 class StoreCommunity extends StatefulWidget {
   final StoreModel store;
 
@@ -52,7 +54,8 @@ class _StoreCommunityState extends State<StoreCommunity> {
     if (user == null) return;
 
     try {
-      DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user.uid).get();
+      DocumentSnapshot userDoc =
+          await _firestore.collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
         String? userStoreId = userDoc.get('storeId') as String?;
         if (userStoreId == widget.store.storeId) {
@@ -63,7 +66,8 @@ class _StoreCommunityState extends State<StoreCommunity> {
         }
       }
 
-      DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(widget.store.storeId).get();
+      DocumentSnapshot storeDoc =
+          await _firestore.collection('Stores').doc(widget.store.storeId).get();
       if (storeDoc.exists) {
         String? ownerId = storeDoc.get('ownerId') as String?;
         setState(() {
@@ -74,7 +78,6 @@ class _StoreCommunityState extends State<StoreCommunity> {
       print('Error checking store ownership: $e');
     }
   }
-
 
   Future<List<CommunityPostModel>> fetchPostsByStore(StoreModel store) async {
     try {
@@ -109,7 +112,8 @@ class _StoreCommunityState extends State<StoreCommunity> {
                     height: 100.h,
                     width: 160.w,
                     decoration: BoxDecoration(
-                      border: Border.all(color: hexToColor('#BEBEBE'), width: 1.0),
+                      border:
+                          Border.all(color: hexToColor('#BEBEBE'), width: 1.0),
                       borderRadius: BorderRadius.circular(25.r),
                     ),
                     child: Column(
@@ -138,15 +142,14 @@ class _StoreCommunityState extends State<StoreCommunity> {
                   Spacer(),
                   IconButton(
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
+                      backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
-                      shape: WidgetStateProperty.all(
+                      shape: MaterialStateProperty.all(
                         CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new,
-                        color: Colors.black),
+                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -158,18 +161,18 @@ class _StoreCommunityState extends State<StoreCommunity> {
               child: _isLoading
                   ? Center(child: CircularProgressIndicator())
                   : RefreshIndicator(
-                onRefresh: _fetchPosts,
-                child: ListView.builder(
-                  itemCount: _posts.length,
-                  itemBuilder: (context, index) {
-                    final post = _posts[index];
-                    return CommunityPost(
-                      post: post,
-                      isStoreOwner: _isStoreOwner,
-                    );
-                  },
-                ),
-              ),
+                      onRefresh: _fetchPosts,
+                      child: ListView.builder(
+                        itemCount: _posts.length,
+                        itemBuilder: (context, index) {
+                          final post = _posts[index];
+                          return CommunityPost(
+                            post: post,
+                            isStoreOwner: _isStoreOwner,
+                          );
+                        },
+                      ),
+                    ),
             ),
           ],
         ),
@@ -198,7 +201,8 @@ class _CommunityPostState extends State<CommunityPost> {
   @override
   void initState() {
     super.initState();
-    _storeFuture = _firestore.collection('Stores').doc(widget.post.storeId).get();
+    _storeFuture =
+        _firestore.collection('Stores').doc(widget.post.storeId).get();
     _likeCount = widget.post.likes;
     _checkIfLiked();
   }
@@ -234,7 +238,8 @@ class _CommunityPostState extends State<CommunityPost> {
         .collection('likedPosts')
         .doc(widget.post.postId);
 
-    final postRef = _firestore.collection('communityPosts').doc(widget.post.postId);
+    final postRef =
+        _firestore.collection('communityPosts').doc(widget.post.postId);
 
     if (_isLiked) {
       await userLikedPostRef.set({});
@@ -260,7 +265,8 @@ class _CommunityPostState extends State<CommunityPost> {
 
         final storeData = snapshot.data!.data() as Map<String, dynamic>;
         final userName = storeData['name'] ?? 'Unknown User';
-        final userProfileImage = storeData['profileImage'] ?? 'https://via.placeholder.com/150';
+        final userProfileImage =
+            storeData['profileImage'] ?? 'https://via.placeholder.com/150';
 
         return _buildPostContent(userName, userProfileImage);
       },
@@ -349,7 +355,8 @@ class _CommunityPostState extends State<CommunityPost> {
                 child: CachedNetworkImage(
                   imageUrl: widget.post.images[index],
                   fit: BoxFit.cover,
-                  placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                  placeholder: (context, url) =>
+                      Center(child: CircularProgressIndicator()),
                   errorWidget: (context, url, error) => Icon(Icons.error),
                 ),
               ),
@@ -375,7 +382,8 @@ class _CommunityPostState extends State<CommunityPost> {
               children: [
                 AnimatedSwitcher(
                   duration: Duration(milliseconds: 300),
-                  transitionBuilder: (Widget child, Animation<double> animation) {
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
                     return ScaleTransition(scale: animation, child: child);
                   },
                   child: Icon(
@@ -388,7 +396,8 @@ class _CommunityPostState extends State<CommunityPost> {
                 SizedBox(width: 12.w),
                 Text(
                   '$_likeCount',
-                  style: TextStyle(color: hexToColor('#989797'), fontSize: 17.sp),
+                  style:
+                      TextStyle(color: hexToColor('#989797'), fontSize: 17.sp),
                 ),
               ],
             ),
@@ -422,7 +431,10 @@ class _CommunityPostState extends State<CommunityPost> {
           ),
         Spacer(),
         IconButton(
-          icon: Icon(Icons.ios_share_outlined, size: 30.sp,),
+          icon: Icon(
+            Icons.ios_share_outlined,
+            size: 30.sp,
+          ),
           onPressed: () => _sharePost(),
         ),
       ],
@@ -444,7 +456,9 @@ class _CommunityPostState extends State<CommunityPost> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      builder: (context) => widget.isStoreOwner ? _buildMoreBottomSheet() : _buildReportBottomSheet(),
+      builder: (context) => widget.isStoreOwner
+          ? _buildMoreBottomSheet()
+          : _buildReportBottomSheet(),
     );
   }
 
@@ -489,7 +503,8 @@ class _CommunityPostState extends State<CommunityPost> {
           ),
           GestureDetector(
             onTap: () async {
-              await CommunityPostModel.deletePost(widget.post.postId, widget.post.storeId);
+              await CommunityPostModel.deletePost(
+                  widget.post.postId, widget.post.storeId);
               Navigator.pop(context);
             },
             child: Column(
@@ -672,12 +687,8 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
           _images.add(file);
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                'The selected image is too large. Please select an image smaller than 500 KB.'),
-          ),
-        );
+        showSnackBar(context,
+            'The selected image is too large. Please select an image smaller than 500 KB.');
       }
     }
   }
@@ -692,7 +703,7 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
         final fileName =
             '${DateTime.now().millisecondsSinceEpoch}_${user!.uid}.jpg';
         final Reference storageRef =
-        storage.ref().child('community_posts/$fileName');
+            storage.ref().child('community_posts/$fileName');
 
         try {
           await storageRef.putFile(image);
@@ -735,14 +746,11 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
 
       await CommunityPostModel.updatePost(updatedPost);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Post updated successfully!')),
-      );
+      showSnackBar(context, 'Post updated successfully!');
+
       Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating post: $e')),
-      );
+      showSnackBar(context, 'Error updating post: $e');
     } finally {
       setState(() {
         _isLoading = false;
@@ -809,7 +817,7 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
                     Text(
                       'Add Image',
                       style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                     ),
                     SizedBox(height: 10),
                     Row(
@@ -846,23 +854,24 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
                                 scrollDirection: Axis.horizontal,
                                 physics: NeverScrollableScrollPhysics(),
                                 itemCount:
-                                _images.length > 3 ? 3 : _images.length,
+                                    _images.length > 3 ? 3 : _images.length,
                                 itemBuilder: (context, index) {
                                   return Stack(
                                     children: [
                                       Container(
                                         width: 75,
                                         margin:
-                                        const EdgeInsets.only(right: 10),
+                                            const EdgeInsets.only(right: 10),
                                         decoration: BoxDecoration(
                                           border: Border.all(
                                               color: hexToColor('#848484')),
                                           borderRadius:
-                                          BorderRadius.circular(12),
+                                              BorderRadius.circular(12),
                                           image: DecorationImage(
                                             image: _images[index] is File
                                                 ? FileImage(_images[index])
-                                                : NetworkImage(_images[index]) as ImageProvider,
+                                                : NetworkImage(_images[index])
+                                                    as ImageProvider,
                                             fit: BoxFit.cover,
                                           ),
                                         ),
@@ -925,7 +934,7 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
                     Text(
                       'Caption',
                       style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                     ),
                     SizedBox(height: 20),
                     TextField(
@@ -968,7 +977,7 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
                     Text(
                       'Product Link',
                       style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                     ),
                     SizedBox(height: 10),
                     TextField(
@@ -1005,7 +1014,7 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
                     backgroundColor: hexToColor('#2D332F'),
                     foregroundColor: Colors.white,
                     padding:
-                    EdgeInsets.symmetric(horizontal: 100, vertical: 18),
+                        EdgeInsets.symmetric(horizontal: 100, vertical: 18),
                     textStyle: TextStyle(
                       fontSize: 16,
                       fontFamily: 'Gotham',

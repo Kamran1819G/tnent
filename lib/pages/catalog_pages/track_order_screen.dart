@@ -61,15 +61,14 @@ class TrackOrderScreen extends StatelessWidget {
           Spacer(),
           IconButton(
             style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(
+              backgroundColor: MaterialStateProperty.all(
                 Colors.grey[100],
               ),
-              shape: WidgetStateProperty.all(
+              shape: MaterialStateProperty.all(
                 CircleBorder(),
               ),
             ),
-            icon: Icon(Icons.arrow_back_ios_new,
-                color: Colors.black),
+            icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -103,9 +102,7 @@ class TrackOrderScreen extends StatelessWidget {
             children: [
               Text(
                 order['productName'],
-                style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontSize: 24.sp),
+                style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
               ),
               SizedBox(height: 12.h),
               Row(
@@ -113,8 +110,7 @@ class TrackOrderScreen extends StatelessWidget {
                   Text(
                     'Order ID:',
                     style: TextStyle(
-                        color: hexToColor('#878787'),
-                        fontSize: 17.sp),
+                        color: hexToColor('#878787'), fontSize: 17.sp),
                   ),
                   SizedBox(width: 8.w),
                   Text(
@@ -130,9 +126,7 @@ class TrackOrderScreen extends StatelessWidget {
               SizedBox(height: 60.h),
               Text(
                 '₹ ${order['priceDetails']['price']}',
-                style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontSize: 22.sp),
+                style: TextStyle(color: hexToColor('#343434'), fontSize: 22.sp),
               ),
             ],
           ),
@@ -167,9 +161,7 @@ class TrackOrderScreen extends StatelessWidget {
             children: [
               Text(
                 'Provided Middlemen:',
-                style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontSize: 24.sp),
+                style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
               ),
               SizedBox(height: 16.h),
               Text(
@@ -221,7 +213,8 @@ class TrackOrderScreen extends StatelessWidget {
   String _formatTimestamp(dynamic timestamp) {
     if (timestamp == null) return '';
     // Implement your timestamp formatting logic here
-    return DateFormat('jm').format((timestamp as Timestamp).toDate()); // Placeholder
+    return DateFormat('jm')
+        .format((timestamp as Timestamp).toDate()); // Placeholder
   }
 }
 
@@ -247,12 +240,14 @@ class OrderStatusItem extends StatelessWidget {
   final OrderStatus status;
   final bool isLast;
 
-  const OrderStatusItem({Key? key, required this.status, this.isLast = false}) : super(key: key);
+  const OrderStatusItem({Key? key, required this.status, this.isLast = false})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final bool isCompleted = status.time.isNotEmpty;
-    final Color timelineColor = isCompleted ? Theme.of(context).primaryColor : Colors.grey;
+    final Color timelineColor =
+        isCompleted ? Theme.of(context).primaryColor : Colors.grey;
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 18.w),
@@ -262,7 +257,9 @@ class OrderStatusItem extends StatelessWidget {
           Column(
             children: [
               Icon(
-                isCompleted ? CupertinoIcons.checkmark_alt_circle_fill : Icons.radio_button_unchecked,
+                isCompleted
+                    ? CupertinoIcons.checkmark_alt_circle_fill
+                    : Icons.radio_button_unchecked,
                 color: timelineColor,
               ),
               if (!isLast)
@@ -288,7 +285,7 @@ class OrderStatusItem extends StatelessWidget {
                 if (status.time.isNotEmpty) ...[
                   SizedBox(height: 4.h),
                   Row(
-                    children:[
+                    children: [
                       Text(
                         'Time: ',
                         style: TextStyle(
@@ -310,7 +307,7 @@ class OrderStatusItem extends StatelessWidget {
                     ],
                   ),
                 ],
-                if(status.description.isNotEmpty) ...[
+                if (status.description.isNotEmpty) ...[
                   SizedBox(height: 4.h),
                   Text(
                     status.description,

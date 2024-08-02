@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/models/store_model.dart';
 
 import '../../helpers/color_utils.dart';
+import '../../helpers/snackbar_utils.dart';
 
 class StoreSettingsScreen extends StatefulWidget {
   final StoreModel store;
@@ -89,7 +90,8 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
 
   Future<void> uploadImage() async {
     FirebaseStorage storage = FirebaseStorage.instance;
-    Reference ref = storage.ref().child('store_logos/${widget.store.storeId}.jpg');
+    Reference ref =
+        storage.ref().child('store_logos/${widget.store.storeId}.jpg');
     UploadTask uploadTask = ref.putFile(storeImage!);
     TaskSnapshot taskSnapshot = await uploadTask;
     uploadedImageUrl = await taskSnapshot.ref.getDownloadURL();
@@ -99,7 +101,9 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     setState(() {
       isSaving = true;
     });
-    final storeDoc = FirebaseFirestore.instance.collection('Stores').doc(widget.store.storeId);
+    final storeDoc = FirebaseFirestore.instance
+        .collection('Stores')
+        .doc(widget.store.storeId);
     if (storeImage != null) {
       await uploadImage();
     }
@@ -110,16 +114,14 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
       'location': storeLocationController.text,
       'upiId': storeUPIController.text,
       'category': selectedCategory,
-      'logoUrl': uploadedImageUrl.isNotEmpty ? uploadedImageUrl : widget.store.logoUrl,
+      'logoUrl':
+          uploadedImageUrl.isNotEmpty ? uploadedImageUrl : widget.store.logoUrl,
     });
     setState(() {
       isSaving = false;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Store details updated successfully'),
-      ),
-    );
+
+    showSnackBar(context, 'Store details updated successfully');
   }
 
   @override
@@ -173,7 +175,8 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                     child: CircleAvatar(
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
-                        icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        icon:
+                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -191,13 +194,13 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
               ),
               child: (storeImage != null)
                   ? Image.file(
-                storeImage!,
-                fit: BoxFit.fill,
-              )
+                      storeImage!,
+                      fit: BoxFit.fill,
+                    )
                   : Image.network(
-                widget.store.logoUrl,
-                fit: BoxFit.fill,
-              ),
+                      widget.store.logoUrl,
+                      fit: BoxFit.fill,
+                    ),
             ),
             SizedBox(height: 10),
             GestureDetector(
@@ -322,7 +325,8 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                                     "Watches",
                                     "Musicals",
                                     "Sports"
-                                  ].map<DropdownMenuItem<String>>((String value) {
+                                  ].map<DropdownMenuItem<String>>(
+                                      (String value) {
                                     return DropdownMenuItem<String>(
                                       value: value,
                                       child: Text(
@@ -468,9 +472,11 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
               child: CupertinoButton(
                 color: Theme.of(context).primaryColor,
                 disabledColor: Colors.grey,
-                onPressed: isChanged ? () {
-                  updateStoreDetails();
-                } : null,
+                onPressed: isChanged
+                    ? () {
+                        updateStoreDetails();
+                      }
+                    : null,
                 child: Text(
                   'Done',
                   style: TextStyle(

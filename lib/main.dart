@@ -15,9 +15,8 @@ import 'firebase_options.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final PermissionHandlerService _permissionHandler =
-      PermissionHandlerService();
-  await _permissionHandler.requestMultiplePermissions();
+  final PermissionHandlerService permissionHandler = PermissionHandlerService();
+  await permissionHandler.requestMultiplePermissions();
 
   await AwesomeNotifications().initialize(
     null, // null means it will use the default app icon
@@ -26,8 +25,8 @@ Future<void> main() async {
         channelKey: 'basic_channel',
         channelName: 'Basic Notifications',
         channelDescription: 'Notification channel for basic notifications',
-        defaultColor: Color(0xFF9D50DD),
-        ledColor: Color(0xFF9D50DD),
+        defaultColor: const Color(0xFF9D50DD),
+        ledColor: const Color(0xFF9D50DD),
         importance: NotificationImportance.High,
         channelShowBadge: true,
       ),
@@ -35,8 +34,8 @@ Future<void> main() async {
         channelKey: 'order_channel',
         channelName: 'Order Notifications',
         channelDescription: 'Notification channel for order notifications',
-        defaultColor: Color(0xFF9D50DD),
-        ledColor: Color(0xFF9D50DD),
+        defaultColor: const Color(0xFF9D50DD),
+        ledColor: const Color(0xFF9D50DD),
         importance: NotificationImportance.High,
         channelShowBadge: true,
       )
@@ -71,9 +70,12 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     AwesomeNotifications().setListeners(
       onActionReceivedMethod: NotificationController.onActionReceivedMethod,
-      onNotificationCreatedMethod: NotificationController.onNotificationCreatedMethod,
-      onNotificationDisplayedMethod: NotificationController.onNotificationDisplayedMethod,
-      onDismissActionReceivedMethod: NotificationController.onDismissActionReceivedMethod,
+      onNotificationCreatedMethod:
+          NotificationController.onNotificationCreatedMethod,
+      onNotificationDisplayedMethod:
+          NotificationController.onNotificationDisplayedMethod,
+      onDismissActionReceivedMethod:
+          NotificationController.onDismissActionReceivedMethod,
     );
     super.initState();
   }
@@ -82,14 +84,15 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     return ScreenUtilInit(
-      designSize: Size(642, 1376),
+      designSize: const Size(642, 1376),
       builder: (_, child) => MaterialApp(
         theme: ThemeData(
           scaffoldBackgroundColor: Colors.white,
           primaryColor: hexToColor('#094446'),
           fontFamily: 'Gotham Black',
         ),
-        home: widget.onboarding! ? WidgetTree() : OnboardingScreen(),
+        home:
+            widget.onboarding! ? const WidgetTree() : const OnboardingScreen(),
       ),
     );
   }
