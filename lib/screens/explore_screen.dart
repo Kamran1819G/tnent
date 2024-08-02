@@ -5,6 +5,7 @@ import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/product_model.dart';
 import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/screens/notification_screen.dart';
+import 'package:tnennt/screens/users_screens/storeprofile_screen.dart';
 import 'package:tnennt/widgets/wishlist_product_tile.dart';
 
 class ExploreScreen extends StatefulWidget {
@@ -302,7 +303,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             if (stores.isNotEmpty) ...[
                               SliverToBoxAdapter(
                                 child: Padding(
-                                  padding: EdgeInsets.only(left: 20.w, bottom: 20.h),
+                                  padding: EdgeInsets.only(left: 20.w, top: 20.h, bottom: 20.h),
                                   child: Text(
                                     'Stores',
                                     style: TextStyle(
@@ -321,7 +322,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             if (products.isNotEmpty) ...[
                               SliverToBoxAdapter(
                                 child: Padding(
-                                  padding: EdgeInsets.only(left: 20.w, bottom: 20.h),
+                                  padding: EdgeInsets.only(left: 20.w, top: 20.h, bottom: 20.h),
                                   child: Text(
                                     'Products',
                                     style: TextStyle(
@@ -440,32 +441,44 @@ class StoreTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 600.w,
-      margin: EdgeInsets.only(left: 33.w, bottom: 20.h),
-      child: Row(
-        children: [
-          Container(
-            height: 90.h,
-            width: 90.w,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18.r),
-              image: DecorationImage(
-                image: NetworkImage(store.logoUrl),
-                fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StoreProfileScreen(
+              store: store,
+            ),
+          ),
+        );
+      },
+      child: Container(
+        width: 600.w,
+        margin: EdgeInsets.only(left: 33.w, bottom: 20.h),
+        child: Row(
+          children: [
+            Container(
+              height: 90.h,
+              width: 90.w,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18.r),
+                image: DecorationImage(
+                  image: NetworkImage(store.logoUrl),
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
-          ),
-          SizedBox(width: 20.w),
-          Text(
-            store.name,
-            style: TextStyle(
-              fontSize: 30.sp,
+            SizedBox(width: 20.w),
+            Text(
+              store.name,
+              style: TextStyle(
+                fontSize: 30.sp,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
