@@ -16,7 +16,6 @@ import 'package:tnennt/screens/store_owner_screens/my_store_profile_screen.dart'
 import 'package:tnennt/screens/webview_screen.dart';
 
 class Gallery extends StatefulWidget {
-
   const Gallery({Key? key}) : super(key: key);
 
   @override
@@ -37,7 +36,6 @@ class _GalleryState extends State<Gallery> {
   void initialize() async {
     await _checkStoreRegistration();
   }
-
 
   Future<void> _checkStoreRegistration() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -110,7 +108,10 @@ class _GalleryState extends State<Gallery> {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => WebViewScreen(url: 'https://tnennt-updated.vercel.app/contact', title: 'Contact Us')));
+                              builder: (context) => WebViewScreen(
+                                  url:
+                                      'https://tnennt-updated.vercel.app/contact',
+                                  title: 'Contact Us')));
                     },
                     child: Container(
                       height: 55.h,
@@ -152,13 +153,16 @@ class _GalleryState extends State<Gallery> {
                     ),
                     SizedBox(height: 10.0),
                     GestureDetector(
-                      onTap: () {
+                      onTap: () async {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MyStoreProfileScreen(
-                                      store: store,
-                                    )));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyStoreProfileScreen(
+                              store: store,
+                            ),
+                          ),
+                        );
+                        await _checkStoreRegistration();
                       },
                       child: Container(
                         height: 180.h,

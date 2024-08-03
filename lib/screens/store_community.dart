@@ -120,7 +120,7 @@ class _StoreCommunityState extends State<StoreCommunity> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          '${widget.store.totalPosts}',
+                          _posts.length.toString(),
                           style: TextStyle(
                             color: hexToColor('#343434'),
                             fontSize: 35.sp,

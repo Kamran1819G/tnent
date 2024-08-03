@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tnennt/models/store_model.dart';
 
@@ -89,7 +90,8 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
 
   Future<void> uploadImage() async {
     FirebaseStorage storage = FirebaseStorage.instance;
-    Reference ref = storage.ref().child('store_logos/${widget.store.storeId}.jpg');
+    Reference ref =
+        storage.ref().child('store_logos/${widget.store.storeId}.jpg');
     UploadTask uploadTask = ref.putFile(storeImage!);
     TaskSnapshot taskSnapshot = await uploadTask;
     uploadedImageUrl = await taskSnapshot.ref.getDownloadURL();
@@ -99,7 +101,9 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     setState(() {
       isSaving = true;
     });
-    final storeDoc = FirebaseFirestore.instance.collection('Stores').doc(widget.store.storeId);
+    final storeDoc = FirebaseFirestore.instance
+        .collection('Stores')
+        .doc(widget.store.storeId);
     if (storeImage != null) {
       await uploadImage();
     }
@@ -110,7 +114,8 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
       'location': storeLocationController.text,
       'upiId': storeUPIController.text,
       'category': selectedCategory,
-      'logoUrl': uploadedImageUrl.isNotEmpty ? uploadedImageUrl : widget.store.logoUrl,
+      'logoUrl':
+          uploadedImageUrl.isNotEmpty ? uploadedImageUrl : widget.store.logoUrl,
     });
     setState(() {
       isSaving = false;
@@ -129,8 +134,9 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
         child: Column(
           children: [
             Container(
-              height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              height: 100.h,
+              margin: EdgeInsets.only(top: 20.h, bottom: 20.h),
+              padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
                 children: [
                   Column(
@@ -143,14 +149,14 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                             'Settings'.toUpperCase(),
                             style: TextStyle(
                               color: hexToColor('#1E1E1E'),
-                              fontSize: 24.0,
+                              fontSize: 35.sp,
                               letterSpacing: 1.5,
                             ),
                           ),
                           Text(
                             ' •',
                             style: TextStyle(
-                              fontSize: 28.0,
+                              fontSize: 35.sp,
                               color: hexToColor('#42FF00'),
                             ),
                           ),
@@ -162,106 +168,110 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           color: hexToColor('#9C9C9C'),
                           fontWeight: FontWeight.w500,
                           fontFamily: 'Gotham',
-                          fontSize: 12.0,
+                          fontSize: 20.sp,
                         ),
                       ),
                     ],
                   ),
                   Spacer(),
-                  Container(
-                    margin: EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey[100],
-                      child: IconButton(
-                        icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                  IconButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStateProperty.all(
+                        Colors.grey[100],
+                      ),
+                      shape: WidgetStateProperty.all(
+                        CircleBorder(),
                       ),
                     ),
+                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
                   ),
                 ],
               ),
             ),
             Container(
-              height: 100,
-              width: 100,
+              height: 115.h,
+              width: 115.w,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(17.r),
               ),
               child: (storeImage != null)
                   ? Image.file(
-                storeImage!,
-                fit: BoxFit.fill,
-              )
+                      storeImage!,
+                      fit: BoxFit.fill,
+                    )
                   : Image.network(
-                widget.store.logoUrl,
-                fit: BoxFit.fill,
-              ),
+                      widget.store.logoUrl,
+                      fit: BoxFit.fill,
+                    ),
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 20.h),
             GestureDetector(
               onTap: () async {
                 pickImage();
               },
               child: Text(
-                "Change Image",
+                "Change Logo",
                 style: TextStyle(
                   color: hexToColor("#757575"),
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w500,
-                  fontSize: 14,
+                  fontSize: 22.sp,
                 ),
               ),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 30.h),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Image.asset(
                   'assets/icons/globe.png',
-                  width: 12,
-                  height: 12,
+                  width: 16.w,
+                  height: 16.h,
                 ),
                 SizedBox(width: 5),
                 Text(
                   widget.store.website,
                   style: TextStyle(
                     color: Theme.of(context).primaryColor,
-                    fontSize: 12,
+                    fontSize: 16.sp,
                     fontFamily: 'Poppins',
                     fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 40),
+            SizedBox(height: 50.h),
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: EdgeInsets.symmetric(horizontal: 23.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "Store Name",
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 23.sp,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.9,
+                        width: 580.w,
+                        height: 90.h,
                         child: TextField(
                           controller: storeNameController,
                           style: TextStyle(
                             color: hexToColor("#6A6A6A"),
                             fontFamily: 'Gotham',
                             fontWeight: FontWeight.w500,
+                            fontSize: 22.sp,
                           ),
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(19.r),
                               borderSide: BorderSide(
                                 color: hexToColor("#848484"),
                               ),
@@ -270,7 +280,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           keyboardType: TextInputType.text,
                         ),
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 30.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -280,20 +290,28 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                               Text(
                                 "Category",
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 23.sp,
                                 ),
                               ),
-                              SizedBox(height: 10),
+                              SizedBox(height: 10.h),
                               SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.45,
+                                width: 280.w,
+                                height: 90.h,
                                 child: DropdownButtonFormField(
                                   icon: Icon(
                                     Icons.arrow_forward_ios,
                                     color: hexToColor("#848484"),
+                                    size: 20.sp,
+                                  ),
+                                  style: TextStyle(
+                                    color: hexToColor("#6A6A6A"),
+                                    fontFamily: 'Gotham',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 22.sp,
                                   ),
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(19.r),
                                       borderSide: BorderSide(
                                         color: hexToColor("#848484"),
                                       ),
@@ -322,7 +340,8 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                                     "Watches",
                                     "Musicals",
                                     "Sports"
-                                  ].map<DropdownMenuItem<String>>((String value) {
+                                  ].map<DropdownMenuItem<String>>(
+                                      (String value) {
                                     return DropdownMenuItem<String>(
                                       value: value,
                                       child: Text(
@@ -331,6 +350,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                                           color: hexToColor("#6A6A6A"),
                                           fontFamily: 'Gotham',
                                           fontWeight: FontWeight.w500,
+                                          fontSize: 22.sp,
                                         ),
                                       ),
                                     );
@@ -345,22 +365,24 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                               Text(
                                 "Phone Number",
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 23.sp,
                                 ),
                               ),
-                              SizedBox(height: 10),
+                              SizedBox(height: 10.h),
                               SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.40,
+                                width: 280.w,
+                                height: 90.h,
                                 child: TextField(
                                   controller: storePhoneNumberController,
                                   style: TextStyle(
                                     color: hexToColor("#6A6A6A"),
                                     fontFamily: 'Gotham',
                                     fontWeight: FontWeight.w500,
+                                    fontSize: 22.sp,
                                   ),
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(10),
+                                      borderRadius: BorderRadius.circular(19.r),
                                       borderSide: BorderSide(
                                         color: hexToColor("#848484"),
                                       ),
@@ -373,26 +395,28 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 30.h),
                       Text(
                         "Email Address",
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 23.sp,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.9,
+                        width: 580.w,
+                        height: 90.h,
                         child: TextField(
                           controller: storeEmailController,
                           style: TextStyle(
                             color: hexToColor("#6A6A6A"),
                             fontFamily: 'Gotham',
                             fontWeight: FontWeight.w500,
+                            fontSize: 22.sp,
                           ),
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(19.r),
                               borderSide: BorderSide(
                                 color: hexToColor("#848484"),
                               ),
@@ -401,26 +425,28 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           keyboardType: TextInputType.emailAddress,
                         ),
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 30.h),
                       Text(
                         "Store Location",
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 23.sp,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.9,
+                        width: 580.w,
+                        height: 90.h,
                         child: TextField(
                           controller: storeLocationController,
                           style: TextStyle(
                             color: hexToColor("#6A6A6A"),
                             fontFamily: 'Gotham',
                             fontWeight: FontWeight.w500,
+                            fontSize: 22.sp,
                           ),
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(19.r),
                               borderSide: BorderSide(
                                 color: hexToColor("#848484"),
                               ),
@@ -429,26 +455,27 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           keyboardType: TextInputType.text,
                         ),
                       ),
-                      SizedBox(height: 20),
+                      SizedBox(height: 30.h),
                       Text(
                         "Store UPI",
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 23.sp,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      SizedBox(height: 10.h),
                       SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.9,
+                        width: 580.w,
                         child: TextField(
                           controller: storeUPIController,
                           style: TextStyle(
                             color: hexToColor("#6A6A6A"),
                             fontFamily: 'Gotham',
                             fontWeight: FontWeight.w500,
+                            fontSize: 22.sp,
                           ),
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(19.r),
                               borderSide: BorderSide(
                                 color: hexToColor("#848484"),
                               ),
@@ -462,22 +489,32 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                 ),
               ),
             ),
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-              child: CupertinoButton(
-                color: Theme.of(context).primaryColor,
-                disabledColor: Colors.grey,
-                onPressed: isChanged ? () {
-                  updateStoreDetails();
-                } : null,
-                child: Text(
-                  'Done',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontFamily: 'Poppins',
-                    fontWeight: FontWeight.w500,
+            Center(
+              child: GestureDetector(
+                onTap: isChanged
+                    ? () {
+                        updateStoreDetails();
+                      }
+                    : null,
+                child: Container(
+                  width: 470.w,
+                  height: 100.h,
+                  margin: EdgeInsets.symmetric(vertical: 10.h),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: isChanged
+                        ? Theme.of(context).primaryColor
+                        : Colors.grey,
+                    borderRadius: BorderRadius.circular(50.r),
+                  ),
+                  child: Text(
+                    'Done',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 25.sp,
+                      fontFamily: 'Gotham',
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ),

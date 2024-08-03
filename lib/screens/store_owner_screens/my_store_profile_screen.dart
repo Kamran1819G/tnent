@@ -142,7 +142,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     String imageUrl = await _uploadImage(image);
 
     Timestamp now = Timestamp.now();
-    Timestamp expiresAt = Timestamp.fromDate(now.toDate().add(Duration(hours: 24)));
+    Timestamp expiresAt =
+        Timestamp.fromDate(now.toDate().add(Duration(hours: 24)));
 
     StoreUpdateModel newUpdate = StoreUpdateModel(
       updateId: '', // Firestore will generate this
@@ -174,9 +175,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
 
   Future<String> _uploadImage(XFile image) async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    Reference firebaseStorageRef = FirebaseStorage.instance
-        .ref()
-        .child('store_updates/$fileName');
+    Reference firebaseStorageRef =
+        FirebaseStorage.instance.ref().child('store_updates/$fileName');
     UploadTask uploadTask = firebaseStorageRef.putFile(File(image.path));
     TaskSnapshot taskSnapshot = await uploadTask;
     String url = await taskSnapshot.ref.getDownloadURL();
@@ -228,7 +228,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
       ),
     );
   }
-
 
   Future<void> _loadProducts() async {
     allProducts = await _fetchProducts();
@@ -322,912 +321,901 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 20.0),
-                // Profile Card
-                Container(
-                  height: 290.h,
-                  width: 680.w,
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: hexToColor('#2D332F'),
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        right: 16.0,
-                        top: 16.0,
-                        child: CircleAvatar(
-                          backgroundColor: hexToColor('#F5F5F5'),
-                          radius: 30.w,
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.arrow_back_ios_new,
-                              color: Colors.black,
-                              size: 24.sp,
-                            ),
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 20.0),
+              // Profile Card
+              Container(
+                height: 290.h,
+                width: 680.w,
+                margin: EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  color: hexToColor('#2D332F'),
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: 16.0,
+                      top: 16.0,
+                      child: CircleAvatar(
+                        backgroundColor: hexToColor('#F5F5F5'),
+                        radius: 30.w,
+                        child: IconButton(
+                          icon: Icon(
+                            Icons.arrow_back_ios_new,
+                            color: Colors.black,
+                            size: 24.sp,
                           ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
                         ),
                       ),
-                      Align(
-                        alignment: Alignment(-0.9, -0.5),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              margin: EdgeInsets.only(top: 8),
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(18.r),
-                                child: Image.network(
-                                  logoUrl,
-                                  height: 130.h,
-                                  width: 130.w,
-                                  fit: BoxFit.cover,
-                                ),
+                    ),
+                    Align(
+                      alignment: Alignment(-0.9, -0.5),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(top: 8),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(18.r),
+                              child: Image.network(
+                                logoUrl,
+                                height: 130.h,
+                                width: 130.w,
+                                fit: BoxFit.cover,
                               ),
                             ),
+                          ),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                                height: 30.h,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  border:
+                                      Border.all(color: hexToColor('#DEFF98')),
+                                  borderRadius: BorderRadius.circular(50.r),
+                                ),
+                                child: Text(
+                                  '$storeCategory',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 13.sp,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 12.h),
+                              SizedBox(
+                                width: 400.w,
+                                child: RichText(
+                                  text: TextSpan(children: [
+                                    TextSpan(
+                                      text: storeName,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Gotham Black',
+                                        fontSize: 36.sp,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: '•',
+                                      style: TextStyle(
+                                        fontFamily: 'Gotham Black',
+                                        fontSize: 36.sp,
+                                        color: hexToColor('#42FF00'),
+                                      ),
+                                    ),
+                                  ]),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              SizedBox(height: 16.h),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Image.asset(
+                                    'assets/icons/blue_globe.png',
+                                    height: 16.w,
+                                    width: 16.w,
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  Text(
+                                    storeWebsite,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Poppins',
+                                        fontSize: 16.sp),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      alignment: Alignment(0.9, 0.9),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          IconButton(
+                              onPressed: () async {
+                                final String shareMessage =
+                                    'Check out ${widget.store.name} on Tnennt! ${widget.store.website}';
+                                await Share.share(shareMessage);
+                              },
+                              icon: Icon(Icons.ios_share,
+                                  color: Colors.white, size: 25.sp)),
+                          SizedBox(width: 16.w),
+                          Container(
+                            height: 45.h,
+                            width: 205.w,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: hexToColorWithOpacity('#C0C0C0', 0.2),
+                              borderRadius: BorderRadius.circular(20.r),
+                            ),
+                            child: Text(
+                              '$storeLocation',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'Poppins',
+                                  fontSize: 17.sp),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ),
+                          Spacer(),
+                          Text(
+                            "Accepting Orders: ",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontFamily: 'Gotham',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14.sp,
+                            ),
+                          ),
+                          Switch(
+                              value: isActive,
+                              activeColor: hexToColor('#41FA00'),
+                              trackOutlineColor: WidgetStateColor.resolveWith(
+                                  (states) => Colors.grey),
+                              trackOutlineWidth:
+                                  WidgetStateProperty.resolveWith(
+                                      (states) => 1.0),
+                              activeTrackColor: Colors.transparent,
+                              inactiveTrackColor: Colors.transparent,
+                              onChanged: (value) {
+                                setState(() {
+                                  isActive = value;
+                                });
+                              })
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 30.0),
+              Expanded(
+                flex: 0,
+                child: GridView.count(
+                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  crossAxisCount: 3,
+                  mainAxisSpacing: 10.0,
+                  crossAxisSpacing: 10.0,
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductCategoriesScreen(
+                              storeId: store.storeId,
+                            ),
+                          ),
+                        );
+                        await _refresh();
+                      },
+                      child: Container(
+                        height: 180.h,
+                        width: 180.w,
+                        padding: EdgeInsets.all(16.w),
+                        decoration: BoxDecoration(
+                          color: hexToColor('#DDF1EF'),
+                          borderRadius: BorderRadius.circular(22.r),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
                             Column(
-                              mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  padding:
-                                      EdgeInsets.symmetric(horizontal: 12.w),
-                                  height: 30.h,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: Colors.transparent,
-                                    border: Border.all(
-                                        color: hexToColor('#DEFF98')),
-                                    borderRadius: BorderRadius.circular(50.r),
-                                  ),
-                                  child: Text(
-                                    '$storeCategory',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 13.sp,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 12.h),
-                                SizedBox(
-                                  width: 400.w,
-                                  child: RichText(
-                                    text: TextSpan(children: [
+                                RichText(
+                                  text: TextSpan(
+                                    children: [
                                       TextSpan(
-                                        text: storeName,
+                                        text: 'List'.toUpperCase(),
                                         style: TextStyle(
-                                          color: Colors.white,
+                                          color: Colors.black,
                                           fontFamily: 'Gotham Black',
-                                          fontSize: 36.sp,
+                                          fontSize: 21.sp,
                                         ),
                                       ),
                                       TextSpan(
-                                        text: '•',
+                                        text: ' •',
                                         style: TextStyle(
                                           fontFamily: 'Gotham Black',
-                                          fontSize: 36.sp,
-                                          color: hexToColor('#42FF00'),
+                                          fontSize: 21.sp,
+                                          color: Colors.red,
                                         ),
                                       ),
-                                    ]),
-                                    overflow: TextOverflow.ellipsis,
+                                    ],
                                   ),
                                 ),
-                                SizedBox(height: 16.h),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                Text(
+                                  'Product'.toUpperCase(),
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 21.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Image.asset(
-                                      'assets/icons/blue_globe.png',
-                                      height: 16.w,
-                                      width: 16.w,
-                                    ),
-                                    SizedBox(width: 8.w),
                                     Text(
-                                      storeWebsite,
+                                      '$totalProducts',
                                       style: TextStyle(
-                                          color: Colors.white,
-                                          fontFamily: 'Poppins',
-                                          fontSize: 16.sp),
+                                        color: Colors.black,
+                                        fontSize: 24.sp,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Products'.toUpperCase(),
+                                      style: TextStyle(
+                                        color: hexToColor('#7D7D7D'),
+                                        fontSize: 12.sp,
+                                      ),
                                     ),
                                   ],
-                                )
+                                ),
+                                Container(
+                                  padding: EdgeInsets.all(8.0),
+                                  decoration: BoxDecoration(
+                                    color: hexToColor('#0D6A6D'),
+                                    borderRadius: BorderRadius.circular(50.r),
+                                  ),
+                                  child: Icon(
+                                    Icons.add,
+                                    color: Colors.white,
+                                    size: 22.sp,
+                                  ),
+                                ),
                               ],
                             ),
                           ],
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
-                        alignment: Alignment(0.9, 0.9),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            IconButton(
-                                onPressed: () async{
-                                  final String shareMessage =
-                                      'Check out ${widget.store.name} on Tnennt! ${widget.store.website}';
-                                  await Share.share(shareMessage);
-                                },
-                                icon: Icon(Icons.ios_share,
-                                    color: Colors.white, size: 25.sp)),
-                            SizedBox(width: 16.w),
-                            Container(
-                              height: 45.h,
-                              width: 205.w,
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: hexToColorWithOpacity('#C0C0C0', 0.2),
-                                borderRadius: BorderRadius.circular(20.r),
-                              ),
-                              child: Text(
-                                '$storeLocation',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Poppins',
-                                    fontSize: 17.sp),
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1,
-                              ),
-                            ),
-                            Spacer(),
-                            Text(
-                              "Accepting Orders: ",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14.sp,
-                              ),
-                            ),
-                            Switch(
-                                value: isActive,
-                                activeColor: hexToColor('#41FA00'),
-                                trackOutlineColor: WidgetStateColor.resolveWith(
-                                    (states) => Colors.grey),
-                                trackOutlineWidth:
-                                    WidgetStateProperty.resolveWith(
-                                        (states) => 1.0),
-                                activeTrackColor: Colors.transparent,
-                                inactiveTrackColor: Colors.transparent,
-                                onChanged: (value) {
-                                  setState(() {
-                                    isActive = value;
-                                  });
-                                })
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 30.0),
-                Expanded(
-                  flex: 0,
-                  child: GridView.count(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    crossAxisCount: 3,
-                    mainAxisSpacing: 10.0,
-                    crossAxisSpacing: 10.0,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ProductCategoriesScreen(
-                                storeId: store.storeId,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          height: 180.h,
-                          width: 180.w,
-                          padding: EdgeInsets.all(16.w),
-                          decoration: BoxDecoration(
-                            color: hexToColor('#DDF1EF'),
-                            borderRadius: BorderRadius.circular(22.r),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ComingSoon(),
                           ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                        );
+                      },
+                      child: Container(
+                        height: 180.h,
+                        width: 180.w,
+                        padding: EdgeInsets.all(16.w),
+                        decoration: BoxDecoration(
+                          color: hexToColor('#EAE6F6'),
+                          borderRadius: BorderRadius.circular(22.r),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            RichText(
+                              text: TextSpan(
                                 children: [
-                                  RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: 'List'.toUpperCase(),
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontFamily: 'Gotham Black',
-                                            fontSize: 21.sp,
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: ' •',
-                                          style: TextStyle(
-                                            fontFamily: 'Gotham Black',
-                                            fontSize: 21.sp,
-                                            color: Colors.red,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Text(
-                                    'Product'.toUpperCase(),
+                                  TextSpan(
+                                    text: 'Analytics'.toUpperCase(),
                                     style: TextStyle(
                                       color: Colors.black,
+                                      fontFamily: 'Gotham Black',
                                       fontSize: 21.sp,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: ' •',
+                                    style: TextStyle(
+                                      fontFamily: 'Gotham Black',
+                                      fontSize: 21.sp,
+                                      color: Colors.green,
                                     ),
                                   ),
                                 ],
                               ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Image.asset(
+                                  'assets/icons/analytics.png',
+                                  height: 60.h,
+                                  width: 80.w,
+                                  fit: BoxFit.fill,
+                                ),
+                                Container(
+                                  padding: EdgeInsets.all(8.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[800],
+                                    borderRadius: BorderRadius.circular(50.r),
+                                  ),
+                                  child: Icon(
+                                    Icons.arrow_forward_ios,
+                                    color: Colors.white,
+                                    size: 22.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => StoreCommunity(
+                              store: store,
+                            ),
+                          ),
+                        );
+                        await _refresh();
+                      },
+                      child: Container(
+                        height: 180.h,
+                        width: 180.w,
+                        padding: EdgeInsets.all(16.w),
+                        decoration: BoxDecoration(
+                          color: hexToColor('#EFEFEF'),
+                          borderRadius: BorderRadius.circular(22.r),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                RichText(
+                                  text: TextSpan(
                                     children: [
-                                      Text(
-                                        '$totalProducts',
+                                      TextSpan(
+                                        text: 'Store'.toUpperCase(),
                                         style: TextStyle(
                                           color: Colors.black,
-                                          fontSize: 24.sp,
+                                          fontFamily: 'Gotham Black',
+                                          fontSize: 21.sp,
                                         ),
                                       ),
-                                      Text(
-                                        'Products'.toUpperCase(),
+                                      TextSpan(
+                                        text: ' •',
                                         style: TextStyle(
-                                          color: hexToColor('#7D7D7D'),
-                                          fontSize: 12.sp,
+                                          fontFamily: 'Gotham Black',
+                                          fontSize: 21.sp,
+                                          color: Colors.red,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  Container(
-                                    padding: EdgeInsets.all(8.0),
-                                    decoration: BoxDecoration(
-                                      color: hexToColor('#0D6A6D'),
-                                      borderRadius: BorderRadius.circular(50.r),
-                                    ),
-                                    child: Icon(
-                                      Icons.add,
-                                      color: Colors.white,
-                                      size: 22.sp,
-                                    ),
+                                ),
+                                Text(
+                                  'Community'.toUpperCase(),
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 21.sp,
                                   ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => ComingSoon(),
+                                ),
+                                Text(
+                                  'Post'.toUpperCase(),
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 21.sp,
+                                  ),
+                                ),
+                              ],
                             ),
-                          );
-                        },
-                        child: Container(
-                          height: 180.h,
-                          width: 180.w,
-                          padding: EdgeInsets.all(16.w),
-                          decoration: BoxDecoration(
-                            color: hexToColor('#EAE6F6'),
-                            borderRadius: BorderRadius.circular(22.r),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              RichText(
-                                text: TextSpan(
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    TextSpan(
-                                      text: 'Analytics'.toUpperCase(),
+                                    Text(
+                                      '$totalPosts',
                                       style: TextStyle(
                                         color: Colors.black,
-                                        fontFamily: 'Gotham Black',
-                                        fontSize: 21.sp,
+                                        fontSize: 24.sp,
                                       ),
                                     ),
-                                    TextSpan(
-                                      text: ' •',
+                                    Text(
+                                      'Posts'.toUpperCase(),
                                       style: TextStyle(
-                                        fontFamily: 'Gotham Black',
-                                        fontSize: 21.sp,
-                                        color: Colors.green,
+                                        color: Colors.grey[700],
+                                        fontSize: 12.sp,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                // right arrow box
+                                Container(
+                                  padding: EdgeInsets.all(8.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[700],
+                                    borderRadius: BorderRadius.circular(50.r),
+                                  ),
+                                  child: Icon(
+                                    Icons.arrow_forward_ios,
+                                    color: Colors.white,
+                                    size: 22.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 20.h),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: 300.w,
+                          height: 240.h,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12.w, vertical: 16.h),
+                          decoration: BoxDecoration(
+                            color: hexToColor('#F3F3F3'),
+                            borderRadius: BorderRadius.circular(30.0),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                height: 105.h,
+                                width: 260.w,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(50.r),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Store Engagement',
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 17.sp,
+                                      ),
+                                    ),
+                                    Text(
+                                      '$storeEngagement',
+                                      style: TextStyle(
+                                        color: Theme.of(context).primaryColor,
+                                        fontSize: 32.sp,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
+                              SizedBox(height: 15.h),
                               Row(
                                 mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.end,
+                                    MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  Image.asset(
-                                    'assets/icons/analytics.png',
-                                    height: 60.h,
-                                    width: 80.w,
-                                    fit: BoxFit.fill,
+                                  AnimatedBuilder(
+                                    animation: _animation,
+                                    builder: (context, child) {
+                                      return GestureDetector(
+                                        onTap: _toggleExpansion,
+                                        child: isExpanded
+                                            ? Container(
+                                                width: isExpanded
+                                                    ? (_animation.value * 80.w +
+                                                        90.w)
+                                                    : 80.w,
+                                                height: 55.h,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          50.r),
+                                                ),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    GestureDetector(
+                                                      onTap: () =>
+                                                          _selectFlag(true),
+                                                      child: Image.asset(
+                                                          'assets/green-flag.png',
+                                                          height: 36.h,
+                                                          width: 36.w),
+                                                    ),
+                                                    if (isExpanded)
+                                                      SizedBox(
+                                                          width:
+                                                              _animation.value *
+                                                                  35.w),
+                                                    if (isExpanded)
+                                                      GestureDetector(
+                                                        onTap: () =>
+                                                            _selectFlag(false),
+                                                        child: Image.asset(
+                                                            'assets/red-flag.png',
+                                                            height: 36.h,
+                                                            width: 36.w),
+                                                      ),
+                                                  ],
+                                                ),
+                                              )
+                                            : Container(
+                                                width: 40,
+                                                height: 35.0,
+                                                padding: EdgeInsets.all(8.0),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          50.0),
+                                                ),
+                                                child: Image.asset(
+                                                    isGreenFlag
+                                                        ? 'assets/green-flag.png'
+                                                        : 'assets/red-flag.png',
+                                                    height: 20.0,
+                                                    width: 20.0),
+                                              ),
+                                      );
+                                    },
                                   ),
-                                  Container(
-                                    padding: EdgeInsets.all(8.0),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[800],
-                                      borderRadius: BorderRadius.circular(50.r),
-                                    ),
-                                    child: Icon(
-                                      Icons.arrow_forward_ios,
-                                      color: Colors.white,
-                                      size: 22.sp,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => StoreCommunity(
-                                store: store,
-                              ),
-                            ),
-                          );
-                        },
-                        child: Container(
-                          height: 180.h,
-                          width: 180.w,
-                          padding: EdgeInsets.all(16.w),
-                          decoration: BoxDecoration(
-                            color: hexToColor('#EFEFEF'),
-                            borderRadius: BorderRadius.circular(22.r),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  RichText(
-                                    text: TextSpan(
+                                  if (!isExpanded)
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        TextSpan(
-                                          text: 'Store'.toUpperCase(),
+                                        Text(
+                                          isGreenFlag
+                                              ? 'Good Reviews'
+                                              : 'Bad Reviews',
                                           style: TextStyle(
-                                            color: Colors.black,
-                                            fontFamily: 'Gotham Black',
-                                            fontSize: 21.sp,
+                                            color: hexToColor('#272822'),
+                                            fontFamily: 'Poppins',
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 20.sp,
                                           ),
                                         ),
-                                        TextSpan(
-                                          text: ' •',
+                                        Text(
+                                          isGreenFlag
+                                              ? '$greenFlags/$totalFlags'
+                                              : '$redFlags/$totalFlags',
                                           style: TextStyle(
-                                            fontFamily: 'Gotham Black',
-                                            fontSize: 21.sp,
-                                            color: Colors.red,
+                                            color: hexToColor('#838383'),
+                                            fontSize: 18.sp,
                                           ),
                                         ),
                                       ],
                                     ),
-                                  ),
-                                  Text(
-                                    'Community'.toUpperCase(),
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 21.sp,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Post'.toUpperCase(),
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 21.sp,
-                                    ),
-                                  ),
                                 ],
-                              ),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '$totalPosts',
-                                        style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 24.sp,
-                                        ),
-                                      ),
-                                      Text(
-                                        'Posts'.toUpperCase(),
-                                        style: TextStyle(
-                                          color: Colors.grey[700],
-                                          fontSize: 12.sp,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  // right arrow box
-                                  Container(
-                                    padding: EdgeInsets.all(8.0),
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey[700],
-                                      borderRadius: BorderRadius.circular(50.r),
-                                    ),
-                                    child: Icon(
-                                      Icons.arrow_forward_ios,
-                                      color: Colors.white,
-                                      size: 22.sp,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              )
                             ],
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            width: 300.w,
-                            height: 240.h,
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12.w, vertical: 16.h),
-                            decoration: BoxDecoration(
-                              color: hexToColor('#F3F3F3'),
-                              borderRadius: BorderRadius.circular(30.0),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  height: 105.h,
-                                  width: 260.w,
+                        Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => OrderAndPaysScreen(
+                                          storeId: widget.store.storeId),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 16.w, vertical: 18.h),
+                                  height: 112.h,
+                                  width: 300.w,
                                   alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                    color: Colors.white,
+                                    color: hexToColor('#F3F3F3'),
                                     borderRadius: BorderRadius.circular(50.r),
                                   ),
-                                  child: Column(
+                                  child: Row(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                        CrossAxisAlignment.center,
                                     children: [
-                                      Text(
-                                        'Store Engagement',
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontWeight: FontWeight.w700,
-                                          fontSize: 17.sp,
-                                        ),
-                                      ),
-                                      Text(
-                                        '$storeEngagement',
-                                        style: TextStyle(
-                                          color: Theme.of(context).primaryColor,
-                                          fontSize: 32.sp,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(height: 15.h),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  children: [
-                                    AnimatedBuilder(
-                                      animation: _animation,
-                                      builder: (context, child) {
-                                        return GestureDetector(
-                                          onTap: _toggleExpansion,
-                                          child: isExpanded
-                                              ? Container(
-                                                  width: isExpanded
-                                                      ? (_animation.value *
-                                                              80.w +
-                                                          90.w)
-                                                      : 80.w,
-                                                  height: 55.h,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            50.r),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    children: [
-                                                      GestureDetector(
-                                                        onTap: () =>
-                                                            _selectFlag(true),
-                                                        child: Image.asset(
-                                                            'assets/green-flag.png',
-                                                            height: 36.h,
-                                                            width: 36.w),
-                                                      ),
-                                                      if (isExpanded)
-                                                        SizedBox(
-                                                            width: _animation
-                                                                    .value *
-                                                                35.w),
-                                                      if (isExpanded)
-                                                        GestureDetector(
-                                                          onTap: () =>
-                                                              _selectFlag(
-                                                                  false),
-                                                          child: Image.asset(
-                                                              'assets/red-flag.png',
-                                                              height: 36.h,
-                                                              width: 36.w),
-                                                        ),
-                                                    ],
-                                                  ),
-                                                )
-                                              : Container(
-                                                  width: 40,
-                                                  height: 35.0,
-                                                  padding: EdgeInsets.all(8.0),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            50.0),
-                                                  ),
-                                                  child: Image.asset(
-                                                      isGreenFlag
-                                                          ? 'assets/green-flag.png'
-                                                          : 'assets/red-flag.png',
-                                                      height: 20.0,
-                                                      width: 20.0),
-                                                ),
-                                        );
-                                      },
-                                    ),
-                                    if (!isExpanded)
+                                      CircleAvatar(
+                                          backgroundColor: Colors.white,
+                                          child: Icon(Icons.person_outline,
+                                              color: Colors.black)),
+                                      SizedBox(width: 16.w),
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            isGreenFlag
-                                                ? 'Good Reviews'
-                                                : 'Bad Reviews',
+                                            'Orders & Pays',
                                             style: TextStyle(
-                                              color: hexToColor('#272822'),
                                               fontFamily: 'Poppins',
                                               fontWeight: FontWeight.w600,
                                               fontSize: 20.sp,
                                             ),
                                           ),
-                                          Text(
-                                            isGreenFlag
-                                                ? '$greenFlags/$totalFlags'
-                                                : '$redFlags/$totalFlags',
-                                            style: TextStyle(
-                                              color: hexToColor('#838383'),
-                                              fontSize: 18.sp,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                          Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            OrderAndPaysScreen(storeId: widget.store.storeId),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 16.w, vertical: 18.h),
-                                    height: 112.h,
-                                    width: 300.w,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: hexToColor('#F3F3F3'),
-                                      borderRadius: BorderRadius.circular(50.r),
-                                    ),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        CircleAvatar(
-                                            backgroundColor: Colors.white,
-                                            child: Icon(Icons.person_outline,
-                                                color: Colors.black)),
-                                        SizedBox(width: 16.w),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              'Orders & Pays',
-                                              style: TextStyle(
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 20.sp,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width: 100,
-                                              child: Text(
-                                                'Orders, Payments & Coupons',
-                                                style: TextStyle(
-                                                  color: hexToColor('#838383'),
-                                                  fontFamily: 'Gotham',
-                                                  fontSize: 14.sp,
-                                                  fontWeight: FontWeight.w500,
-                                                ),
-                                                maxLines: 2,
-                                              ),
-                                            ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 16.h),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            StoreSettingsScreen(store: store),
-                                      ),
-                                    );
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 16.w, vertical: 18.h),
-                                    height: 112.h,
-                                    width: 300.w,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: hexToColor('#F3F3F3'),
-                                      borderRadius: BorderRadius.circular(50.r),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        CircleAvatar(
-                                            backgroundColor: Colors.white,
-                                            child: Icon(Icons.settings_outlined,
-                                                color: Colors.black)),
-                                        SizedBox(width: 16.w),
-                                        Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              'My Settings',
-                                              style: TextStyle(
-                                                fontFamily: 'Poppins',
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 20.sp,
-                                              ),
-                                            ),
-                                            Text(
-                                              'Store Settings',
+                                          SizedBox(
+                                            width: 100,
+                                            child: Text(
+                                              'Orders, Payments & Coupons',
                                               style: TextStyle(
                                                 color: hexToColor('#838383'),
                                                 fontFamily: 'Gotham',
                                                 fontSize: 14.sp,
                                                 fontWeight: FontWeight.w500,
                                               ),
+                                              maxLines: 2,
                                             ),
-                                          ],
-                                        )
-                                      ],
-                                    ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
                                   ),
-                                )
-                              ])
-                        ],
-                      ),
-                    ),
-
-                    SizedBox(height: 20.0),
-
-                    // Updates
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(left: 25.w),
-                          child: Text(
-                            'Updates',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontSize: 24.sp,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 10.0),
-                        Container(
-                          height: 220.h,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: [
-                              GestureDetector(
-                                onTap: _addStoreUpdate,
-                                child: Container(
-                                    margin: EdgeInsets.only(left: 24.w),
-                                    height: 72.h,
-                                    width: 72.w,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: hexToColor('#EBEBEB'),
-                                    ),
-                                    child: Icon(Icons.add,
-                                        size: 40.sp,
-                                        color: hexToColor('#B5B5B5'))),
-                              ),
-                              ...storeUpdates.map((update) {
-                                return RemovableUpdateTile(
-                                  image: update.imageUrl,
-                                  onRemove: () => _deleteStoreUpdate(update.updateId),
-                                  onTap: () => _previewUpdate(update),
-                                );
-                              }).toList(),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 50.h),
-                    // Featured Products
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Featured Products Section
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Row(
-                            children: [
-                              Text(
-                                'Featured',
-                                style: TextStyle(
-                                  color: hexToColor('#343434'),
-                                  fontSize: 24.sp,
                                 ),
                               ),
-                              Spacer(),
+                              SizedBox(height: 16.h),
                               GestureDetector(
-                                onTap: () {
-                                  showModalBottomSheet(
-                                    backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(12),
-                                        topRight: Radius.circular(12),
-                                      ),
+                                onTap: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          StoreSettingsScreen(store: store),
                                     ),
-                                    context: context,
-                                    builder: (context) =>
-                                        _addFeaturedProductBottomSheet(),
                                   );
+                                  _refresh();
                                 },
                                 child: Container(
-                                  padding: EdgeInsets.all(6.0),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 16.w, vertical: 18.h),
+                                  height: 112.h,
+                                  width: 300.w,
+                                  alignment: Alignment.center,
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).primaryColor,
-                                    borderRadius: BorderRadius.circular(6.0),
+                                    color: hexToColor('#F3F3F3'),
+                                    borderRadius: BorderRadius.circular(50.r),
                                   ),
-                                  child: Icon(
-                                    Icons.add,
-                                    color: Colors.white,
-                                    size: 16.0,
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                          backgroundColor: Colors.white,
+                                          child: Icon(Icons.settings_outlined,
+                                              color: Colors.black)),
+                                      SizedBox(width: 16.w),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'My Settings',
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins',
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 20.sp,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Store Settings',
+                                            style: TextStyle(
+                                              color: hexToColor('#838383'),
+                                              fontFamily: 'Gotham',
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      )
+                                    ],
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 20.0),
-                        FeatureProductsListView(
-                            featuredProductIds: store.featuredProductIds),
+                              )
+                            ])
                       ],
                     ),
-                    SizedBox(height: 20.0),
+                  ),
 
-                    FutureBuilder<List<StoreCategoryModel>>(
-                      future: _fetchCategories(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return Center(child: CircularProgressIndicator());
-                        } else if (snapshot.hasError) {
-                          return Center(
-                              child: Text('Error: ${snapshot.error}'));
-                        } else {
-                          List<StoreCategoryModel> categories = snapshot.data!;
-                          return Column(
-                            children: categories
-                                .map((category) => CategoryProductsListView(
-                                    category: category))
-                                .toList(),
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
+                  SizedBox(height: 20.0),
+
+                  // Updates
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(left: 25.w),
+                        child: Text(
+                          'Updates',
+                          style: TextStyle(
+                            color: hexToColor('#343434'),
+                            fontSize: 24.sp,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10.0),
+                      Container(
+                        height: 220.h,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            GestureDetector(
+                              onTap: _addStoreUpdate,
+                              child: Container(
+                                  margin: EdgeInsets.only(left: 24.w),
+                                  height: 72.h,
+                                  width: 72.w,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: hexToColor('#EBEBEB'),
+                                  ),
+                                  child: Icon(Icons.add,
+                                      size: 40.sp,
+                                      color: hexToColor('#B5B5B5'))),
+                            ),
+                            ...storeUpdates.map((update) {
+                              return RemovableUpdateTile(
+                                image: update.imageUrl,
+                                onRemove: () =>
+                                    _deleteStoreUpdate(update.updateId),
+                                onTap: () => _previewUpdate(update),
+                              );
+                            }).toList(),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 50.h),
+                  // Featured Products
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Featured Products Section
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          children: [
+                            Text(
+                              'Featured',
+                              style: TextStyle(
+                                color: hexToColor('#343434'),
+                                fontSize: 24.sp,
+                              ),
+                            ),
+                            Spacer(),
+                            GestureDetector(
+                              onTap: () {
+                                showModalBottomSheet(
+                                  backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(12),
+                                      topRight: Radius.circular(12),
+                                    ),
+                                  ),
+                                  context: context,
+                                  builder: (context) =>
+                                      _addFeaturedProductBottomSheet(),
+                                );
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(6.0),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).primaryColor,
+                                  borderRadius: BorderRadius.circular(6.0),
+                                ),
+                                child: Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                  size: 16.0,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 20.0),
+                      FeatureProductsListView(
+                          featuredProductIds: store.featuredProductIds),
+                    ],
+                  ),
+                  SizedBox(height: 20.0),
+
+                  FutureBuilder<List<StoreCategoryModel>>(
+                    future: _fetchCategories(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      } else {
+                        List<StoreCategoryModel> categories = snapshot.data!;
+                        return Column(
+                          children: categories
+                              .map((category) =>
+                                  CategoryProductsListView(category: category))
+                              .toList(),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -1390,7 +1378,8 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
         } else {
           List<ProductModel> products = snapshot.data!;
           if (products.isEmpty) {
-            return SizedBox.shrink(); // Don't show the category if there are no products
+            return SizedBox
+                .shrink(); // Don't show the category if there are no products
           }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
