@@ -9,6 +9,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:pinput/pinput.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:tnennt/controllers/otp_controller.dart';
 import 'package:tnennt/helpers/color_utils.dart';
 import 'package:tnennt/models/store_model.dart';
 import 'package:tnennt/screens/webview_screen.dart';
@@ -26,12 +27,14 @@ class StoreRegistration extends StatefulWidget {
 }
 
 class _StoreRegistrationState extends State<StoreRegistration> {
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   late final PageController _storeFeaturesPageController;
   int _featuresCurrentPageIndex = 0;
   int _currentPageIndex = 0;
   late ConfettiController _confettiController;
-  String _verificationId = '';
+
+  final OTPController otpController = OTPController();
+  String? sessionIdReceived;
 
   bool _termsAccepted = false;
   bool isButtonEnabled = false;
@@ -170,62 +173,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     setState(() {
       _isStorePhoneUnique = querySnapshot.docs.isEmpty;
     });
-  }
-
-  Future<void> sendOTP(String phoneNumber) async {
-    // Convert phoneNumber to numerical form and add +91 prefix
-    String numericalPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
-    numericalPhoneNumber = '+91$numericalPhoneNumber';
-    final url =
-        'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/$numericalPhoneNumber/AUTOGEN';
-    try {
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 20));
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        if (responseData['Status'] == 'Success') {
-          _verificationId = responseData['Details'];
-        } else {
-          throw Exception('API returned error: ${responseData['Details']}');
-        }
-      } else {
-        throw Exception('Failed to send OTP: ${response.statusCode}');
-      }
-    } catch (e) {
-      throw e;
-    }
-  }
-
-  Future<bool> verifyOTP(String phoneNumber, String otp) async {
-    // Convert phoneNumber to numerical form and add +91 prefix
-    String numericalPhoneNumber = phoneNumber.replaceAll(RegExp(r'[^\d]'), '');
-    numericalPhoneNumber = '+91$numericalPhoneNumber';
-    final url =
-        'https://2factor.in/API/V1/7d149616-483e-11ef-8b60-0200cd936042/SMS/VERIFY/$_verificationId/$otp';
-    try {
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      ).timeout(const Duration(seconds: 200));
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        if (responseData['Status'] == 'Success') {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        return false;
-      }
-    } catch (e) {
-      return false;
-    }
   }
 
   void _onCategoryChanged(String category) {
@@ -430,7 +377,10 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                       },
                                     );
 
-                                    await sendOTP(_phoneController.text);
+                                    sessionIdReceived =
+                                        await otpController.sendOtp(
+                                            _phoneController.text.trim(),
+                                            context);
 
                                     if (!context.mounted) return;
                                     Navigator.of(context).pop();
@@ -572,9 +522,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             child: GestureDetector(
                               onTap: isButtonEnabled
                                   ? () async {
-                                      bool isVerified = await verifyOTP(
-                                          _phoneController.text,
-                                          _otpController.text);
+                                      bool isVerified =
+                                          await otpController.verifyOtp(
+                                        sessionIdReceived!,
+                                        _otpController.text,
+                                        context,
+                                      );
+
                                       if (isVerified) {
                                         _pageController
                                             .jumpToPage(_currentPageIndex + 1);

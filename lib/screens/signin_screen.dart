@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:tnennt/helpers/snackbar_utils.dart';
 import 'package:tnennt/screens/signup_screen.dart';
@@ -30,7 +32,7 @@ class _SignInScreenState extends State<SignInScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => WidgetTree(),
+          builder: (context) => const WidgetTree(),
         ),
       );
     } on FirebaseAuthException catch (e) {
@@ -47,7 +49,7 @@ class _SignInScreenState extends State<SignInScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => WidgetTree(),
+          builder: (context) => const WidgetTree(),
         ),
       );
     } on FirebaseAuthException catch (e) {
@@ -85,7 +87,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           children: [
                             Image.asset('assets/white_tnennt_logo.png',
                                 width: 30.w, height: 30.w),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             Text(
                               'Tnennt inc.',
                               style: TextStyle(
@@ -95,7 +97,7 @@ class _SignInScreenState extends State<SignInScreen> {
                             ),
                           ]),
                     ),
-                    Spacer(),
+                    const Spacer(),
                   ],
                 ),
               ),
@@ -130,18 +132,18 @@ class _SignInScreenState extends State<SignInScreen> {
                 width: 520.w,
                 child: TextField(
                   controller: emailController,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Gotham',
                     fontWeight: FontWeight.w500,
                     fontSize: 16,
                   ),
                   decoration: InputDecoration(
-                    label: Text('Email'),
+                    label: const Text('Email'),
                     labelStyle: TextStyle(
                       color: hexToColor('#545454'),
                       fontSize: 16,
                     ),
-                    suffixIcon: Icon(Icons.email_outlined),
+                    suffixIcon: const Icon(Icons.email_outlined),
                     suffixIconColor: Theme.of(context).primaryColor,
                     fillColor: hexToColorWithOpacity('#D9D9D9', 0.2),
                     filled: true,
@@ -163,14 +165,14 @@ class _SignInScreenState extends State<SignInScreen> {
                 child: TextField(
                   controller: passwordController,
                   cursorColor: Theme.of(context).primaryColor,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Gotham',
                     fontWeight: FontWeight.w500,
                     fontSize: 16,
                   ),
                   obscureText: !passwordVisible,
                   decoration: InputDecoration(
-                    label: Text('Password'),
+                    label: const Text('Password'),
                     labelStyle: TextStyle(
                       color: hexToColor('#545454'),
                       fontSize: 16,
@@ -205,7 +207,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ResetPasswordScreen(),
+                      builder: (context) => const ResetPasswordScreen(),
                     ),
                   );
                 },
@@ -229,7 +231,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     backgroundColor: Theme.of(context).primaryColor,
                     radius: 40.w,
                     child: IconButton(
-                      icon: Icon(Icons.arrow_forward),
+                      icon: const Icon(Icons.arrow_forward),
                       onPressed: () {
                         signInWithEmailAndPassword();
                       },
@@ -251,13 +253,13 @@ class _SignInScreenState extends State<SignInScreen> {
               ),
               SizedBox(height: 20.h),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   children: [
                     Expanded(
                       child: Container(
                         height: 75.h,
-                        margin: EdgeInsets.only(right: 10),
+                        margin: const EdgeInsets.only(right: 10),
                         child: ElevatedButton(
                           onPressed: () {
                             signInWithGoogle();
@@ -295,7 +297,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     Expanded(
                       child: Container(
                         height: 75.h,
-                        margin: EdgeInsets.only(left: 10),
+                        margin: const EdgeInsets.only(left: 10),
                         child: ElevatedButton(
                           onPressed: () async {},
                           style: ElevatedButton.styleFrom(
@@ -344,13 +346,13 @@ class _SignInScreenState extends State<SignInScreen> {
                       fontSize: 27.sp,
                     ),
                   ),
-                  SizedBox(width: 5),
+                  const SizedBox(width: 5),
                   GestureDetector(
                     onTap: () {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SignUpScreen(),
+                          builder: (context) => const SignUpScreen(),
                         ),
                       );
                     },

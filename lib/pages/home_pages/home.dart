@@ -284,6 +284,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     List<StoreUpdateModel> fetchedUpdates = await _fetchAndPopulateUpdates();
     setState(() {
       updates = fetchedUpdates;
+      sortInGroupedupdates();
     });
   }
 
@@ -313,12 +314,26 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         List<String> followerIds = List<String>.from(storeDoc['followerIds']);
         if (followerIds.contains(currentUserId)) {
           final storeUpdateModel = StoreUpdateModel.fromFirestore(doc);
+          // Handling the logic that 2/more updates from same store dont show individually in home page
+
           updates.add(storeUpdateModel);
         }
       }
     }
 
     return updates;
+  }
+
+  Map<String, List<StoreUpdateModel>> groupedUpdates = {};
+
+  void sortInGroupedupdates() {
+    for (var update in updates) {
+      if (groupedUpdates.containsKey(update.storeName)) {
+        groupedUpdates[update.storeName]!.add(update);
+      } else {
+        groupedUpdates[update.storeName] = [update];
+      }
+    }
   }
 
   @override
@@ -504,23 +519,32 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
         ),
         // Updates Section
-        updates.isEmpty
+
+        groupedUpdates.isEmpty
             ? Container()
             : Container(
                 height: 125.0,
                 padding: const EdgeInsets.only(left: 8.0),
-                child: ListView.builder(
+                child: ListView(
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
-                  itemCount: updates.length,
-                  itemBuilder: (context, index) {
+                  children: groupedUpdates.entries.map((e) {
+                    String storeName = e.key;
+                    List<StoreUpdateModel> individualStoreUpdates = e.value;
+                    int indexClicked = 0;
+
+                    for (int i = 0; i < updates.length; i++) {
+                      if (updates[i] == individualStoreUpdates[0]) {
+                        indexClicked = i;
+                      }
+                    }
                     return UpdateTile(
-                      name: updates[index].storeName,
-                      image: updates[index].logoUrl,
-                      index: index,
+                      name: storeName,
+                      image: individualStoreUpdates[0].logoUrl,
+                      index: indexClicked,
                       updates: updates,
                     );
-                  },
+                  }).toList(),
                 ),
               ),
         const SizedBox(height: 10.0),
