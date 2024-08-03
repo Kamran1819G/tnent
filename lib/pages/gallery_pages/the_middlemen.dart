@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_stack/flutter_image_stack.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnent/helpers/color_utils.dart';
 
 class TheMiddlemen extends StatefulWidget {
   const TheMiddlemen({super.key});
@@ -230,7 +230,7 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                 ),
               ),
               SizedBox(height: 16.0),
-              Image.asset('assets/black_tnennt_logo.png', width: 75),
+              Image.asset('assets/black_tnent_logo.png', width: 75),
               SizedBox(height: 16),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),

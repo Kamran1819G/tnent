@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/screens/product_detail_screen.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/screens/product_detail_screen.dart';
 import '../helpers/color_utils.dart';
 
 class FeaturedProductTile extends StatefulWidget {

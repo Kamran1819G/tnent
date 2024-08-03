@@ -4,14 +4,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/helpers/text_utils.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
-import 'package:tnennt/screens/users_screens/storeprofile_screen.dart';
-import 'package:tnennt/widgets/wishlist_product_tile.dart';
-import 'package:tnennt/pages/catalog_pages/cart_screen.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/helpers/text_utils.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/pages/catalog_pages/checkout_screen.dart';
+import 'package:tnent/screens/users_screens/storeprofile_screen.dart';
+import 'package:tnent/widgets/wishlist_product_tile.dart';
+import 'package:tnent/pages/catalog_pages/cart_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:convert';
@@ -624,7 +624,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 SizedBox(width: 12.w),
                                 GestureDetector(
                                   onTap: () async {
-                                    final String productUrl = 'https://tnennt.com/product/${widget.product.productId}';
+                                    final String productUrl = 'https://tnent.com/product/${widget.product.productId}';
                                     final String shareMessage = 'Check out this product from ${store.name}! $productUrl';
                                     await Share.share(shareMessage);
                                   },
@@ -954,7 +954,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Image.asset(
-                                  'assets/black_tnennt_logo.png',
+                                  'assets/black_tnent_logo.png',
                                   width: 40.w,
                                   height: 40.h,
                                 ),

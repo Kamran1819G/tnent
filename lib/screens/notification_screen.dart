@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:tnennt/widgets/notification/order_update_notification.dart';
-import 'package:tnennt/widgets/notification/store_connection_notification.dart';
+import 'package:tnent/widgets/notification/order_update_notification.dart';
+import 'package:tnent/widgets/notification/store_connection_notification.dart';
 
 import '../helpers/color_utils.dart';
 

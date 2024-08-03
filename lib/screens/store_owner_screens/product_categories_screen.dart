@@ -3,11 +3,11 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/store_category_model.dart';
-import 'package:tnennt/screens/store_owner_screens/add_product_screen.dart';
-import 'package:tnennt/screens/store_owner_screens/all_products_screen.dart';
-import 'package:tnennt/screens/store_owner_screens/category_products_screen.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/models/store_category_model.dart';
+import 'package:tnent/screens/store_owner_screens/add_product_screen.dart';
+import 'package:tnent/screens/store_owner_screens/all_products_screen.dart';
+import 'package:tnent/screens/store_owner_screens/category_products_screen.dart';
 
 class ProductCategoriesScreen extends StatefulWidget {
   final String storeId;
@@ -147,7 +147,7 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                     padding: EdgeInsets.only(left: 16, right: 8),
                     child: Row(
                       children: [
-                        Image.asset('assets/black_tnennt_logo.png',
+                        Image.asset('assets/black_tnent_logo.png',
                             width: 30, height: 30),
                         Spacer(),
                         Container(

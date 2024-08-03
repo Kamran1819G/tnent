@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:tnennt/models/store_update_model.dart';
+import 'package:tnent/models/store_update_model.dart';
 import '../helpers/color_utils.dart';
 
 class UpdateScreen extends StatefulWidget {

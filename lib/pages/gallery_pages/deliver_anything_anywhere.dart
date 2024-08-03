@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/pages/delivery_service_pages/deliver_from_me.dart';
-import 'package:tnennt/pages/delivery_service_pages/deliver_to_me.dart';
-import 'package:tnennt/pages/delivery_service_pages/deliver_product.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/pages/delivery_service_pages/deliver_from_me.dart';
+import 'package:tnent/pages/delivery_service_pages/deliver_to_me.dart';
+import 'package:tnent/pages/delivery_service_pages/deliver_product.dart';
 
 class DeliverAnythingAnywhere extends StatefulWidget {
   const DeliverAnythingAnywhere({Key? key}) : super(key: key);
@@ -79,7 +79,7 @@ class HeaderAppBar extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
         children: [
-          Image.asset('assets/black_tnennt_logo.png', width: 30, height: 30),
+          Image.asset('assets/black_tnent_logo.png', width: 30, height: 30),
           Spacer(),
           IconButton(
             icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),

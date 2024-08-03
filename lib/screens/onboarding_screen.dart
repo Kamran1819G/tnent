@@ -1,10 +1,11 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/widget_tree.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/widget_tree.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -78,48 +79,52 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 15),
+            padding: EdgeInsets.symmetric(horizontal: 24.w),
             alignment: Alignment(0, -0.9),
             child: Row(
-              mainAxisSize: MainAxisSize.max,
               children: [
                 Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  height: 55.h,
+                  width: 150.w,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: hexToColor('#272822'),
-                    borderRadius: BorderRadius.circular(20.0),
+                    borderRadius: BorderRadius.circular(50.r),
                   ),
                   child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset('assets/white_tnennt_logo.png',
-                            width: 20, height: 20),
-                        SizedBox(width: 10),
+                        Image.asset('assets/white_tnent_logo.png',
+                            width: 24.w, height: 24.h),
+                        SizedBox(width: 8.w),
                         Text(
-                          'Tnennt inc.',
+                          'Tnent.',
                           style: TextStyle(
                             color: hexToColor('#E6E6E6'),
-                            fontSize: 14.0,
+                            fontSize: 16.sp,
                           ),
                         ),
                       ]),
                 ),
                 Spacer(),
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  height: 35.h,
+                  width: 66.w,
+                  alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(50.r),
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
                         '${currentPage.toInt() + 1}/',
                         // Current page number
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 18.sp,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w600,
                           color: hexToColor('#272822'),
@@ -128,7 +133,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       Text(
                         '4', // Total number of pages
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 18.sp,
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w600,
                           color: hexToColor('#272822'),
@@ -145,10 +150,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             child: onLastPage
                 ? ElevatedButton(
                     onPressed: () async {
-                      final  prefs = await SharedPreferences.getInstance();
+                      final prefs = await SharedPreferences.getInstance();
                       prefs.setBool('onboarding', true);
 
-                      if(!mounted) return;
+                      if (!mounted) return;
                       Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -174,7 +179,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Get Started', style: TextStyle(fontSize: 16)),
+                        Text('Get Started', style: TextStyle(fontSize: 25.sp)),
                         SizedBox(width: 40),
                         ShaderMask(
                           shaderCallback: (Rect bounds) {
@@ -189,7 +194,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             children: List.generate(
                               arrowIconCount,
                               (index) =>
-                                  Icon(Icons.arrow_forward_ios, size: 18),
+                                  Icon(Icons.arrow_forward_ios, size: 24.sp),
                             ),
                           ),
                         ),
@@ -224,7 +229,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('Get Started', style: TextStyle(fontSize: 16)),
+                        Text('Get Started', style: TextStyle(fontSize: 25.sp)),
                         SizedBox(width: 40),
                         ShaderMask(
                           shaderCallback: (Rect bounds) {
@@ -239,7 +244,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             children: List.generate(
                               arrowIconCount,
                               (index) =>
-                                  Icon(Icons.arrow_forward_ios, size: 18),
+                                  Icon(Icons.arrow_forward_ios, size: 24.sp),
                             ),
                           ),
                         ),

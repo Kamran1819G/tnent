@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/pages/catalog_pages/checkout_screen.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({Key? key}) : super(key: key);

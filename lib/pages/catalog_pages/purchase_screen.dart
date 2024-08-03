@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tnennt/pages/catalog_pages/track_order_screen.dart';
+import 'package:tnent/pages/catalog_pages/track_order_screen.dart';
 import '../../helpers/color_utils.dart';
 import 'detail_screen.dart';
 

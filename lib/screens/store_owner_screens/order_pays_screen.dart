@@ -3,10 +3,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/screens/coming_soon.dart';
-import 'package:tnennt/screens/store_owner_screens/create_coupon_screen.dart';
-import 'package:tnennt/screens/store_owner_screens/payments_screen.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/screens/coming_soon.dart';
+import 'package:tnent/screens/store_owner_screens/create_coupon_screen.dart';
+import 'package:tnent/screens/store_owner_screens/payments_screen.dart';
 
 class OrderAndPaysScreen extends StatefulWidget {
   final String storeId;

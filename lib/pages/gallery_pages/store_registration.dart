@@ -9,10 +9,10 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:pinput/pinput.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/screens/webview_screen.dart';
-import 'package:tnennt/widget_tree.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/screens/webview_screen.dart';
+import 'package:tnent/widget_tree.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -106,8 +106,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         name: _nameController.text,
         phone: _phoneController.text,
         email: _emailController.text,
-        logoUrl: "https://firebasestorage.googleapis.com/v0/b/tnennt-1e1f2.appspot.com/o/Don't%20Delete%2Fblack_tnennt_logo.png?alt=media&token=7880c411-c4dc-4615-b800-f55193f23721",
-        website: '${_websiteController.text}.tnennt.com',
+        logoUrl: "https://firebasestorage.googleapis.com/v0/b/tnent-1e1f2.appspot.com/o/Don't%20Delete%2Fblack_tnent_logo.png?alt=media&token=7880c411-c4dc-4615-b800-f55193f23721",
+        website: '${_websiteController.text}.tnent.com',
         upiUsername: _upiUsernameController.text,
         upiId: _upiIdController.text,
         location: _locationController.text,
@@ -149,7 +149,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
 
   Future<void> _validateStoreDomain(String domain) async {
     final storeRef = FirebaseFirestore.instance.collection('Stores');
-    final querySnapshot = await storeRef.where('website', isEqualTo: '$domain.tnennt.com').get();
+    final querySnapshot = await storeRef.where('website', isEqualTo: '$domain.tnent.com').get();
 
     setState(() {
       _isStoreDomainUnique = querySnapshot.docs.isEmpty;
@@ -731,7 +731,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     MaterialPageRoute(
                                         builder: (context) => WebViewScreen(
                                             url:
-                                                'https://tnennt-updated.vercel.app/legals',
+                                                'https://tnent-updated.vercel.app/legals',
                                             title: 'Terms and Conditions')));
                               },
                               child: Text(
@@ -916,7 +916,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             color: Theme.of(context).primaryColor,
                             fontSize: 24.sp,
                           ),
-                          suffixText: '.tnennt.com',
+                          suffixText: '.tnent.com',
                           suffixStyle: TextStyle(
                             color: hexToColor('#636363'),
                             fontFamily: 'Gotham',
@@ -1578,7 +1578,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           ),
                         ),
                         Text(
-                          'Join Our Tnennt Community',
+                          'Join Our Tnent Community',
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontFamily: 'Poppins',
@@ -1687,7 +1687,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           ),
                         ),
                         Text(
-                          'Join Our Tnennt Community',
+                          'Join Our Tnent Community',
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontFamily: 'Poppins',
@@ -1723,11 +1723,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
             ),
             child: Row(
               children: [
-                Image.asset('assets/white_tnennt_logo.png',
+                Image.asset('assets/white_tnent_logo.png',
                     width: 30.w, height: 30.w),
                 SizedBox(width: 16.w),
                 Text(
-                  'Tnennt inc.',
+                  'Tnent inc.',
                   style:
                       TextStyle(color: hexToColor('#E6E6E6'), fontSize: 16.sp),
                 ),
@@ -1850,11 +1850,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
               ),
               child: Row(
                 children: [
-                  Image.asset('assets/white_tnennt_logo.png',
+                  Image.asset('assets/white_tnent_logo.png',
                       width: 30.w, height: 30.w),
                   SizedBox(width: 16.w),
                   Text(
-                    'Tnennt inc.',
+                    'Tnent inc.',
                     style: TextStyle(
                         color: hexToColor('#E6E6E6'), fontSize: 16.sp),
                   ),

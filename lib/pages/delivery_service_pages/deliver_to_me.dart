@@ -23,7 +23,7 @@ class _DeliverToMeState extends State<DeliverToMe> {
                 padding: EdgeInsets.only(left: 16, right: 8),
                 child: Row(
                   children: [
-                    Image.asset('assets/black_tnennt_logo.png',
+                    Image.asset('assets/black_tnent_logo.png',
                         width: 30, height: 30),
                     Spacer(),
                     Container(

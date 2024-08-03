@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:tnennt/models/user_model.dart';
-import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
-import 'package:tnennt/screens/webview_screen.dart';
+import 'package:tnent/models/user_model.dart';
+import 'package:tnent/pages/catalog_pages/checkout_screen.dart';
+import 'package:tnent/screens/webview_screen.dart';
 
 import '../../services/firebase/firebase_auth_service.dart';
 import '../../helpers/color_utils.dart';
@@ -277,7 +277,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                   builder: (context) => WebViewScreen(
                                     title: 'Terms of Service',
                                     url:
-                                        'https://tnennt-updated.vercel.app/legals',
+                                        'https://tnent-updated.vercel.app/legals',
                                   ),
                                 ),
                               );
@@ -429,11 +429,11 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Image.asset('assets/white_tnennt_logo.png',
+                              Image.asset('assets/white_tnent_logo.png',
                                   width: 20, height: 20),
                               SizedBox(width: 10),
                               Text(
-                                'Tnennt inc.',
+                                'Tnent inc.',
                                 style: TextStyle(
                                   color: hexToColor('#E6E6E6'),
                                   fontSize: 14.0,
@@ -544,11 +544,11 @@ class _AddProfileImageScreenState extends State<AddProfileImageScreen> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Image.asset('assets/white_tnennt_logo.png',
+                              Image.asset('assets/white_tnent_logo.png',
                                   width: 20, height: 20),
                               SizedBox(width: 10),
                               Text(
-                                'Tnennt inc.',
+                                'Tnent inc.',
                                 style: TextStyle(
                                   color: hexToColor('#E6E6E6'),
                                   fontSize: 14.0,
@@ -671,7 +671,7 @@ class HelpScreen extends StatelessWidget {
             ),
             SizedBox(height: 8.h),
             Text(
-              'tnenntofficial@gmail.com',
+              'tnentofficial@gmail.com',
               style: TextStyle(
                   fontSize: 24.sp,
                   fontFamily: 'Gotham',

@@ -51,7 +51,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyB2Rm9fbtD-J6W6uaOwdttRK3GQwPklC6A',
-    appId: '1:950564714045:android:b4f849ae8ccb5f9ca39c54',
+    appId: '1:950564714045:android:e7d30a109958444fa39c54',
     messagingSenderId: '950564714045',
     projectId: 'tnennt-1e1f2',
     storageBucket: 'tnennt-1e1f2.appspot.com',
@@ -59,13 +59,13 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyD-PhHgJFYQ8Ndwbyv7TAWLmg0FNlEPjvg',
-    appId: '1:950564714045:ios:3cf0100fd441a174a39c54',
+    appId: '1:950564714045:ios:00439150f874a534a39c54',
     messagingSenderId: '950564714045',
     projectId: 'tnennt-1e1f2',
     storageBucket: 'tnennt-1e1f2.appspot.com',
     androidClientId: '950564714045-5nuorc4ghg3e9859gnbmlukj99fsakm5.apps.googleusercontent.com',
-    iosClientId: '950564714045-8b8fggqc5g0rkrlspqnrnari117qhbvn.apps.googleusercontent.com',
-    iosBundleId: 'com.tnennt.tnennt',
+    iosClientId: '950564714045-fq5s9nh6rp287996fmajlgk096qv1mcc.apps.googleusercontent.com',
+    iosBundleId: 'com.tnent.tnent',
   );
 
 }

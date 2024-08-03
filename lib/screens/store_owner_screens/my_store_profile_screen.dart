@@ -6,21 +6,21 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/models/store_category_model.dart';
-import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/models/store_update_model.dart';
-import 'package:tnennt/screens/coming_soon.dart';
-import 'package:tnennt/screens/store_community.dart';
-import 'package:tnennt/screens/store_owner_screens/analytics_screen.dart';
-import 'package:tnennt/screens/store_owner_screens/order_pays_screen.dart';
-import 'package:tnennt/screens/store_owner_screens/product_categories_screen.dart';
-import 'package:tnennt/screens/store_owner_screens/store_settings_screen.dart';
-import 'package:tnennt/screens/update_screen.dart';
-import 'package:tnennt/widgets/featured_product_tile.dart';
-import 'package:tnennt/widgets/removable_product_tile.dart';
-import 'package:tnennt/widgets/removable_update_tile.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/models/store_category_model.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/models/store_update_model.dart';
+import 'package:tnent/screens/coming_soon.dart';
+import 'package:tnent/screens/store_community.dart';
+import 'package:tnent/screens/store_owner_screens/analytics_screen.dart';
+import 'package:tnent/screens/store_owner_screens/order_pays_screen.dart';
+import 'package:tnent/screens/store_owner_screens/product_categories_screen.dart';
+import 'package:tnent/screens/store_owner_screens/store_settings_screen.dart';
+import 'package:tnent/screens/update_screen.dart';
+import 'package:tnent/widgets/featured_product_tile.dart';
+import 'package:tnent/widgets/removable_product_tile.dart';
+import 'package:tnent/widgets/removable_update_tile.dart';
 
 class MyStoreProfileScreen extends StatefulWidget {
   StoreModel store;
@@ -459,7 +459,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                           IconButton(
                               onPressed: () async {
                                 final String shareMessage =
-                                    'Check out ${widget.store.name} on Tnennt! ${widget.store.website}';
+                                    'Check out ${widget.store.name} on Tnent! ${widget.store.website}';
                                 await Share.share(shareMessage);
                               },
                               icon: Icon(Icons.ios_share,

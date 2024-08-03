@@ -20,7 +20,7 @@ class _SplashScreenState extends State<SplashScreen> {
           text: TextSpan(
             children: [
               TextSpan(
-                text: 'Tnennt',
+                text: 'Tnent',
                 style: TextStyle(
                   color: hexToColor('#2D332F'),
                   fontFamily: 'Gotham Black',

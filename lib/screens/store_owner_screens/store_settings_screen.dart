@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:tnennt/models/store_model.dart';
+import 'package:tnent/models/store_model.dart';
 
 import '../../helpers/color_utils.dart';
 

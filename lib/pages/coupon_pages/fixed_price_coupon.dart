@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:intl/intl.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/pages/coupon_pages/share_coupon.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/pages/coupon_pages/share_coupon.dart';
 
 class FixedPriceCoupon extends StatefulWidget {
   const FixedPriceCoupon({super.key});

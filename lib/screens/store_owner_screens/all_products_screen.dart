@@ -1,9 +1,9 @@
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/screens/product_detail_screen.dart';
-import 'package:tnennt/models/product_model.dart'; // Ensure you have this model
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/screens/product_detail_screen.dart';
+import 'package:tnent/models/product_model.dart'; // Ensure you have this model
 
 class AllProductsScreen extends StatefulWidget {
   final String storeId;

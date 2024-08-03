@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:tnennt/pages/delivery_service_pages/set_pickup_date_time.dart';
+import 'package:tnent/pages/delivery_service_pages/set_pickup_date_time.dart';
 import '../../helpers/color_utils.dart';
 
 class UploadAndVerifyDocument extends StatefulWidget {
@@ -96,7 +96,7 @@ class _AppBarWidget extends StatelessWidget {
             padding: EdgeInsets.only(left: 16, right: 8),
             child: Row(
               children: [
-                Image.asset('assets/black_tnennt_logo.png',
+                Image.asset('assets/black_tnent_logo.png',
                     width: 30, height: 30),
                 Spacer(),
                 Container(

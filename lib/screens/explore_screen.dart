@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/screens/notification_screen.dart';
-import 'package:tnennt/screens/users_screens/storeprofile_screen.dart';
-import 'package:tnennt/widgets/wishlist_product_tile.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/screens/notification_screen.dart';
+import 'package:tnent/screens/users_screens/storeprofile_screen.dart';
+import 'package:tnent/widgets/wishlist_product_tile.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});

@@ -43,17 +43,17 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:950564714045:android:b4f849ae8ccb5f9ca39c54",
+        "mobilesdk_app_id": "1:950564714045:android:e7d30a109958444fa39c54",
         "android_client_info": {
-          "package_name": "com.tnennt.tnennt"
+          "package_name": "com.tnent.tnent"
         }
       },
       "oauth_client": [
         {
-          "client_id": "950564714045-5nuorc4ghg3e9859gnbmlukj99fsakm5.apps.googleusercontent.com",
+          "client_id": "950564714045-7t5taupgl2r1r5dmib8sq0ldbabstnm5.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.tnennt.tnennt",
+            "package_name": "com.tnent.tnent",
             "certificate_hash": "35a22cd03730c32390ed6686a908b9988db49164"
           }
         },

@@ -3,8 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tnennt/services/firebase/firebase_auth_service.dart';
-import 'package:tnennt/screens/signin_screen.dart';
+import 'package:tnent/services/firebase/firebase_auth_service.dart';
+import 'package:tnent/screens/signin_screen.dart';
 
 import '../../helpers/color_utils.dart';
 
@@ -51,11 +51,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         ),
                         child: Row(
                           children: [
-                            Image.asset('assets/white_tnennt_logo.png',
+                            Image.asset('assets/white_tnent_logo.png',
                                 width: 30.w, height: 30.w),
                             SizedBox(width: 16.w),
                             Text(
-                              'Tnennt inc.',
+                              'Tnent inc.',
                               style: TextStyle(
                                   color: hexToColor('#E6E6E6'),
                                   fontSize: 16.sp),
@@ -173,11 +173,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         ),
                         child: Row(
                           children: [
-                            Image.asset('assets/white_tnennt_logo.png',
+                            Image.asset('assets/white_tnent_logo.png',
                                 width: 30.w, height: 30.w),
                             SizedBox(width: 16.w),
                             Text(
-                              'Tnennt inc.',
+                              'Tnent inc.',
                               style: TextStyle(
                                   color: hexToColor('#E6E6E6'),
                                   fontSize: 16.sp),
@@ -278,11 +278,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                         ),
                         child: Row(
                           children: [
-                            Image.asset('assets/white_tnennt_logo.png',
+                            Image.asset('assets/white_tnent_logo.png',
                                 width: 30.w, height: 30.w),
                             SizedBox(width: 16.w),
                             Text(
-                              'Tnennt inc.',
+                              'Tnent inc.',
                               style: TextStyle(
                                   color: hexToColor('#E6E6E6'),
                                   fontSize: 16.sp),

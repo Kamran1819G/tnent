@@ -4,12 +4,12 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:tnennt/models/store_category_model.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/models/store_update_model.dart';
-import 'package:tnennt/screens/store_community.dart';
-import 'package:tnennt/widgets/wishlist_product_tile.dart';
+import 'package:tnent/models/store_category_model.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/models/store_update_model.dart';
+import 'package:tnent/screens/store_community.dart';
+import 'package:tnent/widgets/wishlist_product_tile.dart';
 import '../../helpers/color_utils.dart';
 import '../../models/user_model.dart';
 import '../../widgets/update_tile.dart';
@@ -481,7 +481,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                           IconButton(
                               onPressed: () async{
                                 final String shareMessage =
-                                    'Check out ${widget.store.name} on Tnennt! ${widget.store.website}';
+                                    'Check out ${widget.store.name} on Tnent! ${widget.store.website}';
                                 await Share.share(shareMessage);
                               },
                               icon: Icon(Icons.ios_share,

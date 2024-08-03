@@ -8,10 +8,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:tnennt/models/community_post_model.dart';
-import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/screens/users_screens/storeprofile_screen.dart';
-import 'package:tnennt/widgets/full_screen_image_view.dart';
+import 'package:tnent/models/community_post_model.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/screens/users_screens/storeprofile_screen.dart';
+import 'package:tnent/widgets/full_screen_image_view.dart';
 import '../../helpers/color_utils.dart';
 
 class Community extends StatefulWidget {
@@ -219,7 +219,7 @@ class _CommunityPostState extends State<CommunityPost> {
   }
 
   Future<void> _sharePost() async {
-    final String postUrl = 'https://tnennt.com/post/${widget.post.postId}';
+    final String postUrl = 'https://tnent.com/post/${widget.post.postId}';
     final String shareText = 'Check out this post: $postUrl';
 
     await Share.share(shareText);
