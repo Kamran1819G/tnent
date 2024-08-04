@@ -20,7 +20,7 @@ class OrderUpdateNotification extends StatelessWidget {
     this.productName,
     required this.orderId,
     required this.time,
-    this.price,
+    this.price, required Null Function() onAccept, required Null Function() onReject,
   });
 
   @override

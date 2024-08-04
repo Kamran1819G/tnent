@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -36,11 +37,19 @@ class _CommunityState extends State<Community> {
   Future<void> _checkUserStoreId() async {
     final user = _auth.currentUser;
     if (user != null) {
-      final userDoc = await _firestore.collection('Users').doc(user.uid).get();
-      setState(() {
-        storeId = userDoc.data()?['storeId'] ?? '';
-        _hasStoreId = storeId.isNotEmpty;
-      });
+      final userDoc = await _firestore.collection('Users').doc(user.uid).get(GetOptions(source: Source.cache));
+      if (!userDoc.exists) {
+        final serverDoc = await _firestore.collection('Users').doc(user.uid).get(GetOptions(source: Source.server));
+        setState(() {
+          storeId = serverDoc.data()?['storeId'] ?? '';
+          _hasStoreId = storeId.isNotEmpty;
+        });
+      } else {
+        setState(() {
+          storeId = userDoc.data()?['storeId'] ?? '';
+          _hasStoreId = storeId.isNotEmpty;
+        });
+      }
     }
   }
 
@@ -545,39 +554,56 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
           _images.add(file);
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                'The selected image is too large. Please select an image smaller than 500 KB.'),
-          ),
+        // Compress the image
+        final String targetPath = file.path.replaceAll('.jpg', '_compressed.jpg');
+        final result = await FlutterImageCompress.compressAndGetFile(
+          file.path,
+          targetPath,
+          quality: 70,
+          minWidth: 1024,
+          minHeight: 1024,
         );
+
+        if (result != null) {
+          final int compressedSize = await result.length();
+          if (compressedSize <= maxSizeInBytes) {
+            setState(() {
+              _images.add(File(result.path));
+            });
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                    'The image is still too large after compression. Please select a smaller image.'),
+              ),
+            );
+          }
+        }
       }
     }
   }
 
   Future<List<String>> _uploadImages() async {
-    List<String> imageUrls = [];
     final storage = FirebaseStorage.instance;
     final user = FirebaseAuth.instance.currentUser;
 
-    for (var image in _images) {
-      final fileName =
-          '${DateTime.now().millisecondsSinceEpoch}_${user!.uid}.jpg';
-      final Reference storageRef =
-          storage.ref().child('community_posts/$fileName');
+    List<Future<String>> uploadFutures = _images.map((image) async {
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${user!.uid}.jpg';
+      final Reference storageRef = storage.ref().child('community_posts/$fileName');
 
       try {
         await storageRef.putFile(image);
-        final String downloadUrl = await storageRef.getDownloadURL();
-        imageUrls.add(downloadUrl);
+        return await storageRef.getDownloadURL();
       } catch (e) {
         print('Error uploading image: $e');
-        // You might want to handle this error more gracefully
+        return '';
       }
-    }
+    }).toList();
 
-    return imageUrls;
+    List<String> imageUrls = await Future.wait(uploadFutures);
+    return imageUrls.where((url) => url.isNotEmpty).toList();
   }
+
 
   Future<void> _createPost() async {
     setState(() {

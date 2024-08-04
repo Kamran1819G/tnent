@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -5,16 +6,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tnent/helpers/color_utils.dart';
-import 'package:tnent/helpers/text_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/pages/catalog_pages/checkout_screen.dart';
 import 'package:tnent/screens/users_screens/storeprofile_screen.dart';
 import 'package:tnent/widgets/wishlist_product_tile.dart';
-import 'package:tnent/pages/catalog_pages/cart_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
@@ -194,7 +190,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     DocumentSnapshot storeDoc = await FirebaseFirestore.instance
         .collection('Stores')
         .doc(widget.product.storeId)
-        .get();
+        .get(GetOptions(source: Source.cache));
     return StoreModel.fromFirestore(storeDoc);
   }
 
@@ -472,9 +468,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 margin: EdgeInsets.symmetric(horizontal: 12.w),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8.r),
-                                  child: Image.network(
-                                    widget.product.imageUrls[0],
+                                  child: CachedNetworkImage(
+                                    imageUrl: widget.product.imageUrls[0],
                                     fit: BoxFit.cover,
+                                    placeholder: (context, url) => Image.asset(
+                                      'assets/placeholder_image.png', // Add a placeholder image
+                                      fit: BoxFit.cover,
+                                    ),
+                                    errorWidget: (context, url, error) => Icon(Icons.error),
                                   ),
                                 ),
                               ),
@@ -490,10 +491,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   height: 490.h,
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8.r),
-                                    child: Image.network(
-                                      widget.product.imageUrls[index],
-                                      fit: BoxFit.cover,
-                                    ),
+                                      child: CachedNetworkImage(
+                                        imageUrl: widget.product.imageUrls[index],
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                                        errorWidget: (context, url, error) => Icon(Icons.error),
+                                      )
                                   ),
                                 );
                               },

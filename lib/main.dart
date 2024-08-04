@@ -16,7 +16,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final PermissionHandlerService _permissionHandler =
-      PermissionHandlerService();
+  PermissionHandlerService();
   await _permissionHandler.requestMultiplePermissions();
 
   await AwesomeNotifications().initialize(
@@ -44,7 +44,7 @@ Future<void> main() async {
   );
 
   bool isNotificationAllowed =
-      await AwesomeNotifications().isNotificationAllowed();
+  await AwesomeNotifications().isNotificationAllowed();
   if (!isNotificationAllowed) {
     await AwesomeNotifications().requestPermissionToSendNotifications();
   }
@@ -72,11 +72,11 @@ class _MyAppState extends State<MyApp> {
     AwesomeNotifications().setListeners(
       onActionReceivedMethod: NotificationController.onActionReceivedMethod,
       onNotificationCreatedMethod:
-          NotificationController.onNotificationCreatedMethod,
+      NotificationController.onNotificationCreatedMethod,
       onNotificationDisplayedMethod:
-          NotificationController.onNotificationDisplayedMethod,
+      NotificationController.onNotificationDisplayedMethod,
       onDismissActionReceivedMethod:
-          NotificationController.onDismissActionReceivedMethod,
+      NotificationController.onDismissActionReceivedMethod,
     );
     super.initState();
   }

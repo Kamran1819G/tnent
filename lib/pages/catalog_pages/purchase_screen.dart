@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -140,6 +141,7 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                       final order =
                           orders[index].data() as Map<String, dynamic>;
                       return PurchaseItemTile(
+
                         order: order,
                       );
                     },
@@ -179,20 +181,15 @@ class _PurchaseItemTileState extends State<PurchaseItemTile> {
             width: 255.w,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.r),
-              image: widget.order['productImage'] != null
-                  ? DecorationImage(
-                      image: NetworkImage(widget.order['productImage']),
-                      fit: BoxFit.cover,
-                    )
-                  : null,
             ),
-            child: widget.order['productImage'] == null
-                ? Center(
-                    child: Icon(Icons.image_not_supported,
-                        size: 50.sp, color: Colors.grey))
-                : null,
+        child: CachedNetworkImage(
+          imageUrl: widget.order['productImage'] ?? '',
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+          errorWidget: (context, url, error) => Icon(Icons.image_not_supported, size: 50.sp, color: Colors.grey),
+        ),
           ),
-          SizedBox(width: 16.w),
+        SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
