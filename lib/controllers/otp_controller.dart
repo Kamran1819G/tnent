@@ -5,8 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-
-import 'package:tnennt/helpers/snackbar_utils.dart';
+import 'package:tnent/helpers/snackbar_utils.dart';
 
 class OTPController {
   String? apiKey;

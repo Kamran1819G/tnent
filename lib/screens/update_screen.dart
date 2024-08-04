@@ -20,7 +20,7 @@ class UpdateScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  UpdateScreenState createState() => UpdateScreenState();
+  _UpdateScreenState createState() => _UpdateScreenState();
 }
 
 

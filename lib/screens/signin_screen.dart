@@ -84,11 +84,11 @@ class _SignInScreenState extends State<SignInScreen> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image.asset('assets/white_tnennt_logo.png',
+                            Image.asset('assets/white_tnent_logo.png',
                                 width: 30.w, height: 30.w),
                             const SizedBox(width: 10),
                             Text(
-                              'Tnennt inc.',
+                              'Tnent inc.',
                               style: TextStyle(
                                 color: hexToColor('#E6E6E6'),
                                 fontSize: 16.0.sp,

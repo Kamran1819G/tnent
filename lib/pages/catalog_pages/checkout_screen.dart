@@ -15,12 +15,12 @@ import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 
 // import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/pages/catalog_pages/purchase_screen.dart';
-import 'package:tnennt/pages/catalog_pages/store_coupon_screen.dart';
-import 'package:tnennt/screens/home_screen.dart';
-
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/pages/catalog_pages/purchase_screen.dart';
+import 'package:tnent/pages/catalog_pages/store_coupon_screen.dart';
+import 'package:tnent/screens/home_screen.dart';
+import 'package:tnent/helpers/color_utils.dart';
 import '../../helpers/snackbar_utils.dart';
 
 class CheckoutScreen extends StatefulWidget {

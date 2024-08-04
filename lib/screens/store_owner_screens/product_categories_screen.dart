@@ -163,11 +163,11 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                           child: CircleAvatar(
                             backgroundColor: Colors.grey[100],
                             child: IconButton(
-                              icon: Icon(Icons.arrow_back_ios_new,
-                                  color: Colors.black),
-                              onPressed: () {
-                                Navigator.pop(context);
-                            ),
+                                icon: Icon(Icons.arrow_back_ios_new,
+                                    color: Colors.black),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                }),
                           ),
                         ),
                       ],
@@ -332,29 +332,28 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                               fontSize: 24.sp,
                               color: Colors.black,
                             ),
-                            const Spacer(),
-                            TextButton(
-                              onPressed: _deleteSelectedCategories,
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all(Colors.red),
-                                foregroundColor:
-                                    MaterialStateProperty.all(Colors.white),
-                              ),
-                              child: const Text('Delete'),
+                          ),
+                          const Spacer(),
+                          TextButton(
+                            onPressed: _deleteSelectedCategories,
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.red),
+                              foregroundColor:
+                                  MaterialStateProperty.all(Colors.white),
                             ),
-                            SizedBox(width: 12.w),
-                            TextButton(
-                              onPressed: _toggleSelectionMode,
-                              style: ButtonStyle(
-                                backgroundColor:
-                                    MaterialStateProperty.all(Colors.grey),
-                                foregroundColor:
-                                    MaterialStateProperty.all(Colors.white),
-                              ),
-                              child: const Text('Cancel'),
+                            child: const Text('Delete'),
+                          ),
+                          SizedBox(width: 12.w),
+                          TextButton(
+                            onPressed: _toggleSelectionMode,
+                            style: ButtonStyle(
+                              backgroundColor:
+                                  MaterialStateProperty.all(Colors.grey),
+                              foregroundColor:
+                                  MaterialStateProperty.all(Colors.white),
                             ),
-                            child: Text('Cancel'),
+                            child: const Text('Cancel'),
                           ),
                         ],
                       ),

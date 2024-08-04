@@ -252,7 +252,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         "Store Name",
                         style: TextStyle(
                           fontSize: 23.sp,
@@ -288,7 +288,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 "Category",
                                 style: TextStyle(
                                   fontSize: 23.sp,
@@ -363,7 +363,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              Text(
                                 "Phone Number",
                                 style: TextStyle(
                                   fontSize: 23.sp,

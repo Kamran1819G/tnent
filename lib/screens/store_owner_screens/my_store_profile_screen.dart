@@ -149,7 +149,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
         Timestamp.fromDate(now.toDate().add(const Duration(hours: 24)));
 
     StoreUpdateModel newUpdate = StoreUpdateModel(
-      updateId: '', // Firestore will generate this
+      updateId: '',
+      // Firestore will generate this
       storeId: store.storeId,
       storeName: store.name,
       logoUrl: store.logoUrl,
@@ -1092,7 +1093,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                     ),
                   ),
 
-                    const SizedBox(height: 20.0),
+                  const SizedBox(height: 20.0),
 
                   // Updates
                   Column(
@@ -1107,47 +1108,46 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                             fontSize: 24.sp,
                           ),
                         ),
-                        const SizedBox(height: 10.0),
-                        Container(
-                          height: 220.h,
-                          child: ListView(
-                            scrollDirection: Axis.horizontal,
-                            children: [
-                              GestureDetector(
-                                onTap: _addStoreUpdate,
-                                child: Container(
-                                    margin: EdgeInsets.only(left: 24.w),
-                                    height: 72.h,
-                                    width: 72.w,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: hexToColor('#EBEBEB'),
-                                    ),
-                                    child: Icon(Icons.add,
-                                        size: 40.sp,
-                                        color: hexToColor('#B5B5B5'))),
-                              ),
-                              ...storeUpdates.map((update) {
-                                return RemovableUpdateTile(
-                                  image: update.imageUrl,
-                                  onRemove: () {
-                                    showSnackBarWithAction(
-                                      context,
-                                      text:
-                                          "Do you want to delete this update?",
-                                      confirmBtnColor: Colors.red,
-                                      action: () {
-                                        _deleteStoreUpdate(update.updateId);
-                                        Navigator.of(context).pop();
-                                      },
-                                      quickAlertType: QuickAlertType.warning,
-                                    );
-                                  },
-                                  onTap: () => _previewUpdate(update),
-                                );
-                              }).toList(),
-                            ],
-                          ),
+                      ),
+                      const SizedBox(height: 10.0),
+                      Container(
+                        height: 220.h,
+                        child: ListView(
+                          scrollDirection: Axis.horizontal,
+                          children: [
+                            GestureDetector(
+                              onTap: _addStoreUpdate,
+                              child: Container(
+                                  margin: EdgeInsets.only(left: 24.w),
+                                  height: 72.h,
+                                  width: 72.w,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: hexToColor('#EBEBEB'),
+                                  ),
+                                  child: Icon(Icons.add,
+                                      size: 40.sp,
+                                      color: hexToColor('#B5B5B5'))),
+                            ),
+                            ...storeUpdates.map((update) {
+                              return RemovableUpdateTile(
+                                image: update.imageUrl,
+                                onRemove: () {
+                                  showSnackBarWithAction(
+                                    context,
+                                    text: "Do you want to delete this update?",
+                                    confirmBtnColor: Colors.red,
+                                    action: () {
+                                      _deleteStoreUpdate(update.updateId);
+                                      Navigator.of(context).pop();
+                                    },
+                                    quickAlertType: QuickAlertType.warning,
+                                  );
+                                },
+                                onTap: () => _previewUpdate(update),
+                              );
+                            }).toList(),
+                          ],
                         ),
                       ),
                     ],
@@ -1402,7 +1402,8 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
         } else {
           List<ProductModel> products = snapshot.data!;
           if (products.isEmpty) {
-            return const SizedBox.shrink(); // Don't show the category if there are no products
+            return const SizedBox
+                .shrink(); // Don't show the category if there are no products
           }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
