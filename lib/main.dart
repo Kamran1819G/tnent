@@ -92,7 +92,7 @@ class _MyAppState extends State<MyApp> {
           primaryColor: hexToColor('#094446'),
           fontFamily: 'Gotham Black',
         ),
-        home: false ? WidgetTree() : OnboardingScreen(),
+        home: widget.onboarding! ? WidgetTree() : OnboardingScreen(),
       ),
     );
   }
