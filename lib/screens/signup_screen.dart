@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:tnennt/screens/signin_screen.dart';
-import 'package:tnennt/services/firebase/firebase_auth_service.dart';
-import 'package:tnennt/screens/users_screens/user_registration.dart';
+import 'package:tnent/screens/signin_screen.dart';
+import 'package:tnent/services/firebase/firebase_auth_service.dart';
+import 'package:tnent/screens/users_screens/user_registration.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../helpers/color_utils.dart';
 import '../helpers/snackbar_utils.dart';

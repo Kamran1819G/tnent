@@ -77,7 +77,7 @@ class _SetPickupDateTimeState extends State<SetPickupDateTime> {
                   padding: EdgeInsets.only(left: 16, right: 8),
                   child: Row(
                     children: [
-                      Image.asset('assets/black_tnennt_logo.png',
+                      Image.asset('assets/black_tnent_logo.png',
                           width: 30, height: 30),
                       Spacer(),
                       Container(

@@ -1,15 +1,17 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/store_category_model.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/screens/store_owner_screens/optionals_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
+
+import '../../helpers/color_utils.dart';
+import '../../models/product_model.dart';
+import '../../models/store_category_model.dart';
+import 'optionals_screen.dart';
 
 class AddProductScreen extends StatefulWidget {
   final StoreCategoryModel category;
@@ -78,9 +80,32 @@ class _AddProductScreenState extends State<AddProductScreen> {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
+      File compressedImage = await compressImage(File(image.path));
       setState(() {
-        _images.add(File(image.path));
+        _images.add(compressedImage);
       });
+    }
+  }
+
+  Future<File> compressImage(File file) async {
+    final filePath = file.absolute.path;
+    final lastIndex = filePath.lastIndexOf(RegExp(r'.jp'));
+    final splitted = filePath.substring(0, (lastIndex));
+    final outPath = "${splitted}_compressed.jpg";
+
+    final result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      outPath,
+      quality: 70,
+      minWidth: 1024,
+      minHeight: 1024,
+    );
+
+    if (result != null) {
+      return File(result.path);
+    } else {
+      // If compression fails, return the original file
+      return file;
     }
   }
 
@@ -124,6 +149,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
       });
       _showSnackBar('Your product has been listed successfully');
       _clearForm();
+      Navigator.pop(context);
     } catch (e) {
       print('Error adding product: $e');
       _showSnackBar('Error adding product. Please try again.');
@@ -176,7 +202,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     String skuBase = productName.substring(0, 3).toUpperCase();
     String skuAttributes = attributes.entries
         .map((entry) =>
-            '${entry.key.substring(0, 1).toUpperCase()}${entry.value.toString().substring(0, 1).toUpperCase()}')
+    '${entry.key.substring(0, 1).toUpperCase()}${entry.value.toString().substring(0, 1).toUpperCase()}')
         .join('-');
     return '$skuBase-$skuAttributes-${DateTime.now().millisecondsSinceEpoch}';
   }
@@ -702,7 +728,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               ),
                               decoration: InputDecoration(
                                 floatingLabelBehavior:
-                                    FloatingLabelBehavior.always,
+                                FloatingLabelBehavior.always,
                                 labelText: 'Description',
                                 labelStyle: TextStyle(
                                   color: hexToColor('#545454'),
@@ -772,7 +798,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                             color: hexToColor('#848484'),
                                           ),
                                           borderRadius:
-                                              BorderRadius.circular(18),
+                                          BorderRadius.circular(18),
                                         ),
                                         contentPadding: EdgeInsets.symmetric(
                                           horizontal: 20,
@@ -784,7 +810,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           return 'Please enter the stock quantity';
                                         }
                                         final int? stockQuantity =
-                                            int.tryParse(value);
+                                        int.tryParse(value);
                                         if (stockQuantity == null ||
                                             stockQuantity < 0) {
                                           return 'Please enter a valid stock quantity';
@@ -831,30 +857,30 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       Center(
                         child: isSubmitting
                             ? CircularProgressIndicator(
-                                valueColor: AlwaysStoppedAnimation<Color>(
-                                    hexToColor('#2B2B2B')),
-                              )
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              hexToColor('#2B2B2B')),
+                        )
                             : ElevatedButton(
-                                onPressed: isMultiOptionCategory
-                                    ? _navigateToOptionalsScreen
-                                    : _addSingleVariantProduct,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: hexToColor('#2B2B2B'),
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 75, vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(50.r)),
-                                ),
-                                child: Text(
-                                  isMultiOptionCategory ? 'Next' : 'List Item',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 25.sp,
-                                      fontFamily: 'Gotham',
-                                      fontWeight: FontWeight.w500),
-                                ),
-                              ),
+                          onPressed: isMultiOptionCategory
+                              ? _navigateToOptionalsScreen
+                              : _addSingleVariantProduct,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: hexToColor('#2B2B2B'),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 75, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                BorderRadius.circular(50.r)),
+                          ),
+                          child: Text(
+                            isMultiOptionCategory ? 'Next' : 'List Item',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 25.sp,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500),
+                          ),
+                        ),
                       ),
                       SizedBox(height: 30),
                     ],

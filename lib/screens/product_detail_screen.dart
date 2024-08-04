@@ -1,20 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/helpers/text_utils.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/pages/catalog_pages/checkout_screen.dart';
-import 'package:tnennt/screens/users_screens/storeprofile_screen.dart';
-import 'package:tnennt/widgets/wishlist_product_tile.dart';
-import 'package:tnennt/pages/catalog_pages/cart_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:convert';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/pages/catalog_pages/checkout_screen.dart';
+import 'package:tnent/screens/users_screens/storeprofile_screen.dart';
+import 'package:tnent/widgets/wishlist_product_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
@@ -195,7 +191,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     DocumentSnapshot storeDoc = await FirebaseFirestore.instance
         .collection('Stores')
         .doc(widget.product.storeId)
-        .get();
+        .get(GetOptions(source: Source.cache));
     return StoreModel.fromFirestore(storeDoc);
   }
 
@@ -462,41 +458,41 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             width: 620.w,
                             child: widget.product.imageUrls.length == 1
                                 ? Center(
-                                    child: Container(
-                                      width: 445.w,
-                                      height: 490.h,
-                                      margin: EdgeInsets.symmetric(
-                                          horizontal: 12.w),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.r),
-                                        child: Image.network(
-                                          widget.product.imageUrls[0],
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
+                              child: Container(
+                                width: 445.w,
+                                height: 490.h,
+                                margin: EdgeInsets.symmetric(horizontal: 12.w),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  child: CachedNetworkImage(
+                                    imageUrl: widget.product.imageUrls[0],
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) => Image.asset(
+                                      'assets/placeholder_image.png', // Add a placeholder image
+                                      fit: BoxFit.cover,
                                     ),
-                                  )
+                                    errorWidget: (context, url, error) => Icon(Icons.error),
+                                  ),
+                                ),
+                              ),
+                            )
                                 : ListView.builder(
-                                    controller: imagesController,
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: widget.product.imageUrls.length,
-                                    itemBuilder: (context, index) {
-                                      return Container(
-                                        margin: EdgeInsets.symmetric(
-                                            horizontal: 12.w),
-                                        width: 445.w,
-                                        height: 490.h,
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8.r),
-                                          child: Image.network(
-                                            widget.product.imageUrls[index],
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      );
-                                    },
+                              controller: imagesController,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: widget.product.imageUrls.length,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 12.w),
+                                  width: 445.w,
+                                  height: 490.h,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.r),
+                                      child: CachedNetworkImage(
+                                        imageUrl: widget.product.imageUrls[index],
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                                        errorWidget: (context, url, error) => Icon(Icons.error),
+                                      )
                                   ),
                           ),
                           SizedBox(height: 30.h),
@@ -625,9 +621,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 SizedBox(width: 12.w),
                                 GestureDetector(
                                   onTap: () async {
-                                    await Share.share(
-                                      'Check out this product from ${store.name} ! -> https://tnennt.store ',
-                                    );
+                                    final String productUrl = 'https://tnent.com/product/${widget.product.productId}';
+                                    final String shareMessage = 'Check out this product from ${store.name}! $productUrl';
+                                    await Share.share(shareMessage);
                                   },
                                   child: CircleAvatar(
                                     radius: 30.w,
@@ -956,7 +952,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Image.asset(
-                                  'assets/black_tnennt_logo.png',
+                                  'assets/black_tnent_logo.png',
                                   width: 40.w,
                                   height: 40.h,
                                 ),

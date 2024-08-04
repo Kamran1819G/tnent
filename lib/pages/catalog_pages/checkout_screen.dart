@@ -1581,6 +1581,8 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                           Icons.check,
                                           color: Colors.white,
                                           size: 20.sp,
+                
+                                        
                                         ),
                                       ),
                                     ],
@@ -1597,6 +1599,10 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                 ],
                               ),
                             ),
+                            
+                            
+                            
+                            
                           ],
                         ),
                       ],
@@ -2339,3 +2345,4 @@ class _TransactionScreenState extends State<TransactionScreen> {
     );
   }
 }
+

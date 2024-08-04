@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:tnennt/services/firebase/firebase_auth_service.dart';
-import 'package:tnennt/screens/home_screen.dart';
-import 'package:tnennt/screens/signin_screen.dart';
+import 'package:tnent/services/firebase/firebase_auth_service.dart';
+import 'package:tnent/screens/home_screen.dart';
+import 'package:tnent/screens/signin_screen.dart';
 
 class WidgetTree extends StatefulWidget {
   const WidgetTree({super.key});

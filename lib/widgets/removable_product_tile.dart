@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/screens/product_detail_screen.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/screens/product_detail_screen.dart';
 
 class RemovableProductTile extends StatelessWidget {
   final ProductModel product;

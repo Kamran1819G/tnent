@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnent/helpers/color_utils.dart';
 
 
 class DeliverFromMe extends StatefulWidget {
@@ -23,7 +23,7 @@ class _DeliverFromMeState extends State<DeliverFromMe> {
                 padding: EdgeInsets.only(left: 16, right: 8),
                 child: Row(
                   children: [
-                    Image.asset('assets/black_tnennt_logo.png',
+                    Image.asset('assets/black_tnent_logo.png',
                         width: 30, height: 30),
                     Spacer(),
                     Container(

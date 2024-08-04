@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/pages/coupon_pages/fixed_price_coupon.dart';
-import 'package:tnennt/pages/coupon_pages/my_coupons.dart';
-import 'package:tnennt/pages/coupon_pages/percentage_coupon.dart';
-import 'package:tnennt/screens/coming_soon.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/pages/coupon_pages/fixed_price_coupon.dart';
+import 'package:tnent/pages/coupon_pages/my_coupons.dart';
+import 'package:tnent/pages/coupon_pages/percentage_coupon.dart';
+import 'package:tnent/screens/coming_soon.dart';
 
 class CreateCouponScreen extends StatefulWidget {
   const CreateCouponScreen({super.key});
@@ -38,11 +38,11 @@ class _CreateCouponScreenState extends State<CreateCouponScreen> {
                     ),
                     child: Row(
                       children: [
-                        Image.asset('assets/white_tnennt_logo.png',
+                        Image.asset('assets/white_tnent_logo.png',
                             width: 30.w, height: 30.w),
                         SizedBox(width: 16.w),
                         Text(
-                          'Tnennt inc.',
+                          'Tnent inc.',
                           style: TextStyle(
                               color: hexToColor('#E6E6E6'), fontSize: 16.sp),
                         ),

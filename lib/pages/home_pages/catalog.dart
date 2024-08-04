@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tnennt/models/user_model.dart';
-import 'package:tnennt/pages/catalog_pages/purchase_screen.dart';
-import 'package:tnennt/pages/catalog_pages/wishlist_screen.dart';
-import 'package:tnennt/screens/notification_screen.dart';
-import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
+import 'package:tnent/models/user_model.dart';
+import 'package:tnent/pages/catalog_pages/purchase_screen.dart';
+import 'package:tnent/pages/catalog_pages/wishlist_screen.dart';
+import 'package:tnent/screens/notification_screen.dart';
+import 'package:tnent/screens/users_screens/myprofile_screen.dart';
 
 import '../../helpers/color_utils.dart';
 
@@ -319,7 +319,7 @@ class _CatalogState extends State<Catalog> {
                         ),
                       ),
                       Text(
-                        'Let Team Tnennt. Cook ',
+                        'Let Team Tnent. Cook ',
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontWeight: FontWeight.w600,

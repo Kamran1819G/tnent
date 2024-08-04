@@ -14,32 +14,31 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: 'Tnennt',
-                  style: TextStyle(
-                    color: hexToColor('#2D332F'),
-                    fontFamily: 'Gotham Black',
-                    fontSize: 50.sp,
-                  ),
+        body: SafeArea(
+      child: Center(
+        child: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: 'Tnent',
+                style: TextStyle(
+                  color: hexToColor('#2D332F'),
+                  fontFamily: 'Gotham Black',
+                  fontSize: 50.sp,
                 ),
-                TextSpan(
-                  text: ' •',
-                  style: TextStyle(
-                    fontFamily: 'Gotham Black',
-                    fontSize: 40.sp,
-                    color: hexToColor('#42FF00'),
-                  ),
+              ),
+              TextSpan(
+                text: '•',
+                style: TextStyle(
+                  fontFamily: 'Gotham Black',
+                  fontSize: 50.sp,
+                  color: hexToColor('#42FF00'),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-      )
-    );
+      ),
+    ));
   }
 }

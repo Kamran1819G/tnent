@@ -4,11 +4,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'package:tnennt/models/community_post_model.dart';
-import 'package:tnennt/widgets/full_screen_image_view.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:tnent/models/community_post_model.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/screens/users_screens/storeprofile_screen.dart';
+import 'package:tnent/widgets/full_screen_image_view.dart';
 import '../../helpers/color_utils.dart';
 import '../../helpers/snackbar_utils.dart';
 
@@ -34,11 +38,19 @@ class _CommunityState extends State<Community> {
   Future<void> _checkUserStoreId() async {
     final user = _auth.currentUser;
     if (user != null) {
-      final userDoc = await _firestore.collection('Users').doc(user.uid).get();
-      setState(() {
-        storeId = userDoc.data()?['storeId'] ?? '';
-        _hasStoreId = storeId.isNotEmpty;
-      });
+      final userDoc = await _firestore.collection('Users').doc(user.uid).get(GetOptions(source: Source.cache));
+      if (!userDoc.exists) {
+        final serverDoc = await _firestore.collection('Users').doc(user.uid).get(GetOptions(source: Source.server));
+        setState(() {
+          storeId = serverDoc.data()?['storeId'] ?? '';
+          _hasStoreId = storeId.isNotEmpty;
+        });
+      } else {
+        setState(() {
+          storeId = userDoc.data()?['storeId'] ?? '';
+          _hasStoreId = storeId.isNotEmpty;
+        });
+      }
     }
   }
 
@@ -148,17 +160,21 @@ class CommunityPost extends StatefulWidget {
 class _CommunityPostState extends State<CommunityPost> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  late Future<DocumentSnapshot> _storeFuture;
+  late Future<StoreModel> _storeFuture;
   bool _isLiked = false;
   int _likeCount = 0;
 
   @override
   void initState() {
     super.initState();
-    _storeFuture =
-        _firestore.collection('Stores').doc(widget.post.storeId).get();
+    _storeFuture = _getStoreData();
     _likeCount = widget.post.likes;
     _checkIfLiked();
+  }
+
+  Future<StoreModel> _getStoreData() async {
+    DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(widget.post.storeId).get();
+    return StoreModel.fromFirestore(storeDoc);
   }
 
   Future<void> _checkIfLiked() async {
@@ -204,36 +220,51 @@ class _CommunityPostState extends State<CommunityPost> {
     }
   }
 
+  void _navigateToStoreProfile(BuildContext context, StoreModel store) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => StoreProfileScreen(store: store),
+      ),
+    );
+  }
+
+  Future<void> _sharePost() async {
+    final String postUrl = 'https://tnent.com/post/${widget.post.postId}';
+    final String shareText = 'Check out this post: $postUrl';
+
+    await Share.share(shareText);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<DocumentSnapshot>(
+    return FutureBuilder<StoreModel>(
       future: _storeFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return _buildLoadingPlaceholder();
         }
 
-        if (!snapshot.hasData || !snapshot.data!.exists) {
+        if (!snapshot.hasData) {
           return _buildLoadingPlaceholder();
         }
 
-        final storeData = snapshot.data!.data() as Map<String, dynamic>;
-        final userName = storeData['name'] ?? 'Unknown User';
-        final userProfileImage =
-            storeData['profileImage'] ?? 'https://via.placeholder.com/150';
-
-        return _buildPostContent(userName, userProfileImage);
+        final store = snapshot.data!;
+        return _buildPostContent(store);
       },
     );
   }
 
-  Widget _buildPostContent(String userName, String userProfileImage) {
+  Widget _buildPostContent(StoreModel store) {
     return Container(
       padding: EdgeInsets.all(24.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildUserInfo(userName, userProfileImage),
+          GestureDetector(
+            onTap: () => _navigateToStoreProfile(context, store),
+            child: _buildUserInfo(store),
+          ),
           SizedBox(height: 24.h),
           Text(
             widget.post.content,
@@ -251,12 +282,11 @@ class _CommunityPostState extends State<CommunityPost> {
       ),
     );
   }
-
-  Widget _buildUserInfo(String userName, String userProfileImage) {
+  Widget _buildUserInfo(StoreModel store) {
     return Row(
       children: [
         CircleAvatar(
-          backgroundImage: CachedNetworkImageProvider(userProfileImage),
+          backgroundImage: CachedNetworkImageProvider(store.logoUrl),
           radius: 33.w,
         ),
         SizedBox(width: 22.w),
@@ -265,7 +295,7 @@ class _CommunityPostState extends State<CommunityPost> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                userName,
+                store.name,
                 style: TextStyle(fontSize: 30.sp),
               ),
               Text(
@@ -358,32 +388,6 @@ class _CommunityPostState extends State<CommunityPost> {
           ),
         ),
         Spacer(),
-        if (widget.post.productLink?.isNotEmpty ?? false)
-          SizedBox(
-            height: 50.h,
-            width: 350.w,
-            child: Chip(
-              backgroundColor: hexToColor('#EDEDED'),
-              side: BorderSide.none,
-              label: Text(
-                '${widget.post.productLink!}',
-                style: TextStyle(
-                  color: hexToColor('#B4B4B4'),
-                  fontFamily: 'Gotham',
-                  fontWeight: FontWeight.w500,
-                  fontSize: 18.sp,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              avatar: Icon(
-                Icons.link_outlined,
-                color: hexToColor('#B4B4B4'),
-                size: 24.sp,
-              ),
-            ),
-          ),
-        Spacer(),
         IconButton(
           icon: Icon(
             Icons.ios_share_outlined,
@@ -440,10 +444,6 @@ class _CommunityPostState extends State<CommunityPost> {
         ],
       ),
     );
-  }
-
-  void _sharePost() {
-    // Implement share functionality
   }
 
   Widget _buildLoadingPlaceholder() {
@@ -540,7 +540,6 @@ class CreateCommunityPost extends StatefulWidget {
 class _CreateCommunityPostState extends State<CreateCommunityPost> {
   List<File> _images = [];
   final TextEditingController _captionController = TextEditingController();
-  final TextEditingController _productLinkController = TextEditingController();
   bool _isLoading = false;
 
   @override
@@ -563,35 +562,52 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
           _images.add(file);
         });
       } else {
-        showSnackBar(context,
+        // Compress the image
+        final String targetPath = file.path.replaceAll('.jpg', '_compressed.jpg');
+        final result = await FlutterImageCompress.compressAndGetFile(
+          file.path,
+          targetPath,
+          quality: 70,
+          minWidth: 1024,
+          minHeight: 1024,
+        );
+
+        if (result != null) {
+          final int compressedSize = await result.length();
+          if (compressedSize <= maxSizeInBytes) {
+            setState(() {
+              _images.add(File(result.path));
+            });
+          } else {
+            showSnackBar(context,
             'The selected image is too large. Please select an image smaller than 500 KB.');
+          }
+        }
       }
     }
   }
 
   Future<List<String>> _uploadImages() async {
-    List<String> imageUrls = [];
     final storage = FirebaseStorage.instance;
     final user = FirebaseAuth.instance.currentUser;
 
-    for (var image in _images) {
-      final fileName =
-          '${DateTime.now().millisecondsSinceEpoch}_${user!.uid}.jpg';
-      final Reference storageRef =
-          storage.ref().child('community_posts/$fileName');
+    List<Future<String>> uploadFutures = _images.map((image) async {
+      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${user!.uid}.jpg';
+      final Reference storageRef = storage.ref().child('community_posts/$fileName');
 
       try {
         await storageRef.putFile(image);
-        final String downloadUrl = await storageRef.getDownloadURL();
-        imageUrls.add(downloadUrl);
+        return await storageRef.getDownloadURL();
       } catch (e) {
         print('Error uploading image: $e');
-        // You might want to handle this error more gracefully
+        return '';
       }
-    }
+    }).toList();
 
-    return imageUrls;
+    List<String> imageUrls = await Future.wait(uploadFutures);
+    return imageUrls.where((url) => url.isNotEmpty).toList();
   }
+
 
   Future<void> _createPost() async {
     setState(() {
@@ -611,9 +627,6 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
         images: imageUrls,
         likes: 0,
         createdAt: Timestamp.now(),
-        productLink: _productLinkController.text.isNotEmpty
-            ? _productLinkController.text
-            : null,
       );
 
       await CommunityPostModel.createPost(post, widget.storeId);
@@ -819,45 +832,6 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                           fontSize: 16.0,
                         ),
                         hintText: 'Write a caption...',
-                        hintStyle: TextStyle(
-                          color: hexToColor('#989898'),
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16.0,
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: hexToColor('#848484'),
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-              // Product Link
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Product Link',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-                    ),
-                    SizedBox(height: 10),
-                    TextField(
-                      controller: _productLinkController,
-                      textAlign: TextAlign.start,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.add_link,
-                          color: hexToColor('#848484'),
-                        ),
-                        hintText: 'Paste the product link...',
                         hintStyle: TextStyle(
                           color: hexToColor('#989898'),
                           fontFamily: 'Gotham',

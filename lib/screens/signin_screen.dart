@@ -1,14 +1,13 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:tnennt/helpers/snackbar_utils.dart';
-import 'package:tnennt/screens/signup_screen.dart';
+import 'package:tnent/helpers/snackbar_utils.dart';
+import 'package:tnent/screens/signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:tnennt/services/firebase/firebase_auth_service.dart';
-import 'package:tnennt/screens/users_screens/reset_password_screen.dart';
-import 'package:tnennt/widget_tree.dart';
+import 'package:tnent/services/firebase/firebase_auth_service.dart';
+import 'package:tnent/screens/users_screens/reset_password_screen.dart';
+import 'package:tnent/widget_tree.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../helpers/color_utils.dart';
 
 class SignInScreen extends StatefulWidget {

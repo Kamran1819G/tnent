@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tnennt/widgets/removable_product_tile.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/store_category_model.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/helpers/text_utils.dart';
+import 'package:tnent/widgets/removable_product_tile.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/models/store_category_model.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/helpers/text_utils.dart';
 
 class CategoryProductsScreen extends StatefulWidget {
   final StoreCategoryModel category;
@@ -91,7 +91,7 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
               padding: EdgeInsets.only(left: 16, right: 8),
               child: Row(
                 children: [
-                  Image.asset('assets/black_tnennt_logo.png', width: 30, height: 30),
+                  Image.asset('assets/black_tnent_logo.png', width: 30, height: 30),
                   Spacer(),
                   Container(
                     margin: EdgeInsets.all(8.0),

@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnent/helpers/color_utils.dart';
 
 class MyCoupons extends StatefulWidget
 {

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnent/helpers/color_utils.dart';
 
 import '../../helpers/snackbar_utils.dart';
 
@@ -71,7 +71,7 @@ class _DetailScreenState extends State<DetailScreen> {
       'body': 'Your order #${widget.order['orderId']} has been cancelled.',
       'data': {
         'type': 'general',
-        'status': 'ordercancelled',
+        'status': 'cancelled',
         'productImage': widget.order['productImage'],
         'productName': widget.order['productName'],
         'price': widget.order['priceDetails']['price'].toString(),

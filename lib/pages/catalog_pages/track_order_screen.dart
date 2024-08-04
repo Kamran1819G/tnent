@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnent/helpers/color_utils.dart';
 
 class TrackOrderScreen extends StatelessWidget {
   final Map<String, dynamic> order;

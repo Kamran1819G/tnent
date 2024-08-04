@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnent/helpers/color_utils.dart';
 
 enum NotificationType { cancelled, delivered, refunded, orderplaced }
 
@@ -20,7 +20,7 @@ class OrderUpdateNotification extends StatelessWidget {
     this.productName,
     required this.orderId,
     required this.time,
-    this.price,
+    this.price, required Null Function() onAccept, required Null Function() onReject,
   });
 
   @override

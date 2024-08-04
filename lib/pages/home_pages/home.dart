@@ -9,20 +9,20 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quickalert/models/quickalert_type.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/helpers/snackbar_utils.dart';
-import 'package:tnennt/models/store_category_model.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/models/store_update_model.dart';
-import 'package:tnennt/models/user_model.dart';
-import 'package:tnennt/pages/catalog_pages/cart_screen.dart';
-import 'package:tnennt/screens/explore_screen.dart';
-import 'package:tnennt/screens/notification_screen.dart';
-import 'package:tnennt/screens/stores_screen.dart';
-import 'package:tnennt/screens/update_screen.dart';
-import 'package:tnennt/screens/users_screens/myprofile_screen.dart';
-import 'package:tnennt/widgets/wishlist_product_tile.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/helpers/snackbar_utils.dart';
+import 'package:tnent/models/store_category_model.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/models/store_update_model.dart';
+import 'package:tnent/models/user_model.dart';
+import 'package:tnent/pages/catalog_pages/cart_screen.dart';
+import 'package:tnent/screens/explore_screen.dart';
+import 'package:tnent/screens/notification_screen.dart';
+import 'package:tnent/screens/stores_screen.dart';
+import 'package:tnent/screens/update_screen.dart';
+import 'package:tnent/screens/users_screens/myprofile_screen.dart';
+import 'package:tnent/widgets/wishlist_product_tile.dart';
 import 'package:toastification/toastification.dart';
 import '../../screens/users_screens/storeprofile_screen.dart';
 
@@ -77,74 +77,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   List<StoreUpdateModel> updates = [];
 
-  /*List<ProductModel> featuredProducts = List.generate(5, (index) {
-    return ProductModel(
-      productId: 'product123',
-      storeId: 'EBJgGaWsnrluCKcaOUOT',
-      name: 'Premium Cotton T-Shirt',
-      description: 'A high-quality, comfortable cotton t-shirt',
-      productCategory: 'T-Shirts',
-      storeCategory: 'Apparel',
-      imageUrls: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-      isAvailable: true,
-      createdAt: Timestamp.now(),
-      greenFlags: 0,
-      redFlags: 0,
-      variations: {
-        'S': ProductVariant(
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 50,
-          sku: 'TS-S',
-        ),
-        'M': ProductVariant(
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 100,
-          sku: 'TS-M',
-        ),
-        'L': ProductVariant(
-          price: 26.99,
-          mrp: 31.99,
-          discount: 15.63,
-          stockQuantity: 75,
-          sku: 'TS-L',
-        ),
-      },
-    );
-  });*/
-
-  /*List<StoreModel> featuredStores = List.generate(5, (index) {
-    return StoreModel(
-      storeId: 'store$index',
-      ownerId: 'owner$index',
-      name: 'Store Name $index',
-      logoUrl: 'https://via.placeholder.com/150',
-      phone: '123-456-789$index',
-      email: 'store$index@example.com',
-      website: 'https://example.com/store$index',
-      upiUsername: 'upiUser$index',
-      upiId: 'upiId$index',
-      location: 'Location $index',
-      category: 'Category $index',
-      isActive: index % 2 == 0,
-      createdAt: Timestamp.now(),
-      totalProducts: index * 10,
-      totalPosts: index * 5,
-      storeEngagement: index * 20,
-      greenFlags: index * 2,
-      redFlags: index,
-      followerIds: [],
-      featuredProductIds: [],
-    );
-  });
-*/
   List<StoreModel> featuredStores = [];
   List<ProductModel> featuredProducts = [];
 
@@ -208,7 +140,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   Future<void> _fetchFeaturedStores() async {
     try {
-      // Fetch the featured-store document from the Featured Stores collection
       final featuredStoreDoc = await FirebaseFirestore.instance
           .collection('Featured Stores')
           .doc('featured-stores')
@@ -246,7 +177,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       final featuredProductDoc = await FirebaseFirestore.instance
           .collection('Featured Products')
           .doc('featured-products')
-          .get();
+          .get(GetOptions(source: Source.cache));
 
       // Extract the product IDs from the array field
       final List<String> productIds =
@@ -260,7 +191,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           final productDoc = await FirebaseFirestore.instance
               .collection('products')
               .doc(productId)
-              .get();
+              .get(GetOptions(source: Source.cache));
 
           if (productDoc.exists) {
             products.add(ProductModel.fromFirestore(productDoc));
@@ -491,7 +422,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     ),
                   ),
                 ),
-                SizedBox(width: 30.sp),
+                SizedBox(width: 30.w),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -550,10 +481,23 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         const SizedBox(height: 10.0),
         SizedBox(
           height: 250.h,
-          child: PageView(
-            controller: PageController(viewportFraction: 1),
-            children: [
-              Image.asset('assets/store_profile_banner.png'),
+          child: CarouselSlider(
+            options: CarouselOptions(
+              height: 250.h,
+              viewportFraction: 1.0,
+              autoPlay: true,
+              enlargeCenterPage: true,
+            ),
+            items: [
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 16.w),
+                child: Image.asset(
+                  'assets/store_profile_banner.png',
+                  height: 250.h,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
                 decoration: BoxDecoration(
@@ -629,7 +573,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
-            'Featured',
+            'Featured Products',
             style: TextStyle(
               color: hexToColor('#343434'),
               fontSize: 35.sp,
@@ -713,9 +657,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
         SizedBox(
           height: 350.h,
-          child: PageView(
-            controller: PageController(viewportFraction: 1),
-            children: [
+          child: CarouselSlider(
+            options: CarouselOptions(
+              height: 350.h,
+              viewportFraction: 1.0,
+              autoPlay: true,
+              enlargeCenterPage: true,
+            ),
+            items: [
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
                 decoration: BoxDecoration(
@@ -886,11 +835,13 @@ class StoreTile extends StatelessWidget {
           children: [
             ClipRRect(
                 borderRadius: BorderRadius.circular(23.r),
-                child: Image.network(
-                  store.logoUrl,
+                child: CachedNetworkImage(
+                  imageUrl: store.logoUrl,
                   fit: BoxFit.fill,
                   height: 120.h,
                   width: 120.w,
+                  placeholder: (context, url) => CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
                 )),
             SizedBox(height: 8.h),
             Text(

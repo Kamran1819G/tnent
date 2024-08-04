@@ -8,7 +8,6 @@ class CommunityPostModel {
   final List<String> images;
   int likes;
   final Timestamp createdAt;
-  final String? productLink;
 
   CommunityPostModel({
     required this.postId,
@@ -17,7 +16,6 @@ class CommunityPostModel {
     required this.images,
     required this.likes,
     required this.createdAt,
-    this.productLink,
   });
 
   factory CommunityPostModel.fromFirestore(DocumentSnapshot doc) {
@@ -30,7 +28,6 @@ class CommunityPostModel {
       images: List<String>.from(data['images'] ?? []),
       likes: data['likes'] ?? 0,
       createdAt: data['createdAt'] ?? Timestamp.now(),
-      productLink: data['productLink'],
     );
   }
 
@@ -41,16 +38,12 @@ class CommunityPostModel {
       'images': images,
       'likes': likes,
       'createdAt': createdAt,
-      'productLink': productLink,
     };
   }
 
   static Future<void> createPost(CommunityPostModel post, String storeId) async {
     try {
-      // Add the post to the 'communityPosts' collection
       await FirebaseFirestore.instance.collection('communityPosts').add(post.toFirestore());
-
-      // Increment the totalPosts field in the 'Stores' collection
       await FirebaseFirestore.instance
           .collection('Stores')
           .doc(storeId)
@@ -68,7 +61,6 @@ class CommunityPostModel {
       await postRef.update({
         'content': post.content,
         'images': post.images,
-        'productLink': post.productLink,
         // Note: We're not updating 'likes' or 'createdAt' here,
         // as these should typically remain unchanged during an edit
       });

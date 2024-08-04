@@ -6,14 +6,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/pages/gallery_pages/deliver_anything_anywhere.dart';
-import 'package:tnennt/pages/delivery_service_pages/deliver_product.dart';
-import 'package:tnennt/pages/gallery_pages/store_registration.dart';
-import 'package:tnennt/pages/gallery_pages/the_middlemen.dart';
-import 'package:tnennt/screens/store_owner_screens/my_store_profile_screen.dart';
-import 'package:tnennt/screens/webview_screen.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/pages/gallery_pages/store_registration.dart';
+import 'package:tnent/pages/gallery_pages/the_middlemen.dart';
+import 'package:tnent/screens/store_owner_screens/my_store_profile_screen.dart';
+import 'package:tnent/screens/webview_screen.dart';
 
 class Gallery extends StatefulWidget {
   const Gallery({Key? key}) : super(key: key);
@@ -110,7 +108,7 @@ class _GalleryState extends State<Gallery> {
                           MaterialPageRoute(
                               builder: (context) => WebViewScreen(
                                   url:
-                                      'https://tnennt-updated.vercel.app/contact',
+                                      'https://tnent-updated.vercel.app/contact',
                                   title: 'Contact Us')));
                     },
                     child: Container(
@@ -153,13 +151,16 @@ class _GalleryState extends State<Gallery> {
                     ),
                     SizedBox(height: 10.0),
                     GestureDetector(
-                      onTap: () {
+                      onTap: () async {
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MyStoreProfileScreen(
-                                      store: store,
-                                    )));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyStoreProfileScreen(
+                              store: store,
+                            ),
+                          ),
+                        );
+                        await _checkStoreRegistration();
                       },
                       child: Container(
                         height: 180.h,

@@ -5,12 +5,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnent/helpers/color_utils.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:tnennt/helpers/snackbar_utils.dart';
-import 'package:tnennt/models/product_model.dart';
+import 'package:tnent/helpers/snackbar_utils.dart';
+import 'package:tnent/models/product_model.dart';
 import 'package:uuid/uuid.dart';
 
 class OptionalsScreen extends StatefulWidget {
@@ -513,9 +513,11 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
         'productIds': FieldValue.arrayUnion([productId])
       });
       showSnackBar(context, 'Product added successfully');
-      Navigator.pop(context);
-      Navigator.pop(context);
-      Navigator.pop(context);
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+      }
     } catch (e) {
       print('Error saving data: $e');
       showSnackBar(context, 'Error saving data. Please try again.');
@@ -539,7 +541,7 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
                 padding: EdgeInsets.only(left: 16, right: 8),
                 child: Row(
                   children: [
-                    Image.asset('assets/black_tnennt_logo.png',
+                    Image.asset('assets/black_tnent_logo.png',
                         width: 30, height: 30),
                     Spacer(),
                     Container(

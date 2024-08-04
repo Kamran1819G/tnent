@@ -3,12 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:tnennt/models/store_category_model.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/models/store_update_model.dart';
-import 'package:tnennt/screens/store_community.dart';
-import 'package:tnennt/widgets/wishlist_product_tile.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:tnent/models/store_category_model.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/models/store_update_model.dart';
+import 'package:tnent/screens/store_community.dart';
+import 'package:tnent/widgets/wishlist_product_tile.dart';
 import '../../helpers/color_utils.dart';
 import '../../models/user_model.dart';
 import '../../widgets/update_tile.dart';
@@ -34,7 +35,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
   late int redFlags;
   UserModel? currentUser;
 
-
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -45,7 +45,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
       "coverImage": "assets/sahachari_image.png",
     };
   });
-
 
   Future<List<StoreCategoryModel>> fetchCategories() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -58,6 +57,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
         .map((doc) => StoreCategoryModel.fromFirestore(doc))
         .toList();
   }
+
   List<StoreUpdateModel> storeUpdates = [];
 
   @override
@@ -121,7 +121,11 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
     final firestore = FirebaseFirestore.instance;
 
     // Store the notification in Firestore
-    await firestore.collection('Users').doc(widget.store.ownerId).collection('notifications').add({
+    await firestore
+        .collection('Users')
+        .doc(widget.store.ownerId)
+        .collection('notifications')
+        .add({
       'title': 'New Follower',
       'body': '${currentUser!.firstName} started following your store.',
       'data': {
@@ -138,38 +142,39 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
       data: {
         'type': 'store',
         'name': currentUser!.firstName,
-        'image': currentUser!.photoURL.toString(), // You can update this with the actual image path
+        'image': currentUser!.photoURL.toString(),
+        // You can update this with the actual image path
       },
     );
   }
 
   Future<void> _fetchUserDetails() async {
-    User? user  = FirebaseAuth.instance.currentUser!;
+    User? user = FirebaseAuth.instance.currentUser!;
 
-      DocumentSnapshot doc = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(user.uid)
-          .get();
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(user.uid)
+        .get();
 
-        setState(() {
-          currentUser = UserModel.fromFirestore(doc);
-        });
+    setState(() {
+      currentUser = UserModel.fromFirestore(doc);
+    });
   }
 
   Future<void> checkUserVote() async {
-      DocumentSnapshot voteDoc = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(userId)
-          .collection('storeVotes')
-          .doc(widget.store.storeId)
-          .get();
+    DocumentSnapshot voteDoc = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(userId)
+        .collection('storeVotes')
+        .doc(widget.store.storeId)
+        .get();
 
-      if (voteDoc.exists) {
-        Map<String, dynamic> data = voteDoc.data() as Map<String, dynamic>;
-        setState(() {
-          userVote = data['greenFlag'] ? 'green' : 'red';
-        });
-      }
+    if (voteDoc.exists) {
+      Map<String, dynamic> data = voteDoc.data() as Map<String, dynamic>;
+      setState(() {
+        userVote = data['greenFlag'] ? 'green' : 'red';
+      });
+    }
   }
 
   void listenToFlagChanges() {
@@ -188,7 +193,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
   }
 
   Future<void> handleVote(String voteType) async {
-
     await handleStoreVote(userId, widget.store.storeId, voteType);
 
     setState(() {
@@ -202,16 +206,19 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
     });
   }
 
-  Future<void> handleStoreVote(String userId, String storeId, String voteType) async {
+  Future<void> handleStoreVote(
+      String userId, String storeId, String voteType) async {
     final userVoteRef = FirebaseFirestore.instance
         .collection("Users")
         .doc(userId)
         .collection("storeVotes")
         .doc(storeId);
-    final storeRef = FirebaseFirestore.instance.collection("Stores").doc(storeId);
+    final storeRef =
+        FirebaseFirestore.instance.collection("Stores").doc(storeId);
 
     try {
-      return await FirebaseFirestore.instance.runTransaction((transaction) async {
+      return await FirebaseFirestore.instance
+          .runTransaction((transaction) async {
         final voteDoc = await transaction.get(userVoteRef);
         final storeDoc = await transaction.get(storeRef);
 
@@ -223,19 +230,23 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
           final previousVote = voteDoc.data() as Map<String, dynamic>;
           // If the previous vote is the same as the new vote, remove the vote
           if (previousVote['greenFlag'] == true && voteType == 'greenFlag') {
-            transaction.update(storeRef, {'greenFlags': FieldValue.increment(-1)});
+            transaction
+                .update(storeRef, {'greenFlags': FieldValue.increment(-1)});
             transaction.delete(userVoteRef);
             return;
           } else if (previousVote['redFlag'] == true && voteType == 'redFlag') {
-            transaction.update(storeRef, {'redFlags': FieldValue.increment(-1)});
+            transaction
+                .update(storeRef, {'redFlags': FieldValue.increment(-1)});
             transaction.delete(userVoteRef);
             return;
           }
           // If changing the vote type, decrement the old vote
           if (previousVote['greenFlag'] == true && voteType != 'greenFlag') {
-            transaction.update(storeRef, {'greenFlags': FieldValue.increment(-1)});
+            transaction
+                .update(storeRef, {'greenFlags': FieldValue.increment(-1)});
           } else if (previousVote['redFlag'] == true && voteType != 'redFlag') {
-            transaction.update(storeRef, {'redFlags': FieldValue.increment(-1)});
+            transaction
+                .update(storeRef, {'redFlags': FieldValue.increment(-1)});
           }
         }
 
@@ -246,10 +257,13 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
           transaction.update(storeRef, {'redFlags': FieldValue.increment(1)});
         }
 
-        transaction.set(userVoteRef, {
-          'greenFlag': voteType == 'greenFlag',
-          'redFlag': voteType == 'redFlag'
-        }, SetOptions(merge: true));
+        transaction.set(
+            userVoteRef,
+            {
+              'greenFlag': voteType == 'greenFlag',
+              'redFlag': voteType == 'redFlag'
+            },
+            SetOptions(merge: true));
       });
     } catch (error) {
       print('Error recording vote: $error');
@@ -268,9 +282,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
     DocumentReference storeRef = FirebaseFirestore.instance
         .collection('Stores')
         .doc(widget.store.storeId);
-    DocumentReference userRef = FirebaseFirestore.instance
-        .collection('Users')
-        .doc(userId);
+    DocumentReference userRef =
+        FirebaseFirestore.instance.collection('Users').doc(userId);
 
     return FirebaseFirestore.instance.runTransaction((transaction) async {
       DocumentSnapshot storeDoc = await transaction.get(storeRef);
@@ -326,7 +339,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
       }
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -466,11 +478,19 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          Icon(Icons.ios_share, color: Colors.white, size: 25.sp),
+                          IconButton(
+                              onPressed: () async{
+                                final String shareMessage =
+                                    'Check out ${widget.store.name} on Tnent! ${widget.store.website}';
+                                await Share.share(shareMessage);
+                              },
+                              icon: Icon(Icons.ios_share,
+                                  color: Colors.white, size: 25.sp)),
                           SizedBox(width: 10.0),
                           Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12.0, vertical: 8.0),
+                            height: 45.h,
+                            width: 205.w,
+                            alignment: Alignment.center,
                             decoration: BoxDecoration(
                               color: hexToColorWithOpacity('#C0C0C0', 0.2),
                               borderRadius: BorderRadius.circular(20.0),
@@ -487,12 +507,13 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                           ),
                           Spacer(),
                           Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12.0, vertical: 6.0),
+                            width: 110.w,
+                            height: 75.h,
+                            alignment: Alignment.center,
                             decoration: BoxDecoration(
                               border:
                                   Border.all(color: Colors.white, width: 0.5),
-                              borderRadius: BorderRadius.circular(12.0),
+                              borderRadius: BorderRadius.circular(10.r),
                             ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -500,7 +521,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                 Text(
                                   '0',
                                   style: TextStyle(
-                                      color: Colors.white, fontSize: 16.0),
+                                      color: Colors.white, fontSize: 24.sp),
                                 ),
                                 Text(
                                   'Customers',
@@ -508,7 +529,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                       color: Colors.white,
                                       fontFamily: 'Poppins',
                                       fontWeight: FontWeight.w700,
-                                      fontSize: 8.0),
+                                      fontSize: 12.sp),
                                 ),
                               ],
                             ),
@@ -884,45 +905,44 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
           onTap: _toggleExpansion,
           child: isExpanded
               ? Container(
-            width: isExpanded ? (_animation.value * 60 + 40) : 40,
-            height: 40.0,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(50.0),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: () => handleVote('greenFlag'),
-                  child: Image.asset('assets/green-flag.png',
-                      height: 18.0, width: 18.0),
-                ),
-                if (isExpanded) SizedBox(width: _animation.value * 25),
-                if (isExpanded)
-                  GestureDetector(
-                    onTap: () => handleVote('redFlag'),
-                    child: Image.asset('assets/red-flag.png',
-                        height: 18.0, width: 18.0),
+                  width: isExpanded ? (_animation.value * 60 + 40) : 40,
+                  height: 40.0,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(50.0),
                   ),
-              ],
-            ),
-          )
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () => handleVote('greenFlag'),
+                        child: Image.asset('assets/green-flag.png',
+                            height: 18.0, width: 18.0),
+                      ),
+                      if (isExpanded) SizedBox(width: _animation.value * 25),
+                      if (isExpanded)
+                        GestureDetector(
+                          onTap: () => handleVote('redFlag'),
+                          child: Image.asset('assets/red-flag.png',
+                              height: 18.0, width: 18.0),
+                        ),
+                    ],
+                  ),
+                )
               : Container(
-            width: 40,
-            height: 35.0,
-            padding: EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(50.0),
-            ),
-            child: Image.asset(flagImage, height: 18.0, width: 18.0),
-          ),
+                  width: 40,
+                  height: 35.0,
+                  padding: EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(50.0),
+                  ),
+                  child: Image.asset(flagImage, height: 18.0, width: 18.0),
+                ),
         );
       },
     );
   }
-
 }
 
 class FeatureProductsListView extends StatefulWidget {
@@ -1026,7 +1046,8 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
         } else {
           List<ProductModel> products = snapshot.data!;
           if (products.isEmpty) {
-            return SizedBox.shrink(); // Don't show the category if there are no products
+            return SizedBox
+                .shrink(); // Don't show the category if there are no products
           }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,

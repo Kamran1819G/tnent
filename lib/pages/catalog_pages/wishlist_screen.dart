@@ -1,12 +1,13 @@
 import 'package:flutter/cupertino.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:quickalert/quickalert.dart';
-import 'package:tnennt/models/product_model.dart';
-import 'package:tnennt/screens/product_detail_screen.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/screens/product_detail_screen.dart';
 import '../../helpers/color_utils.dart';
 import '../../helpers/snackbar_utils.dart';
 import 'checkout_screen.dart';
@@ -79,7 +80,14 @@ class _WishlistScreenState extends State<WishlistScreen> {
     DocumentSnapshot productDoc = await FirebaseFirestore.instance
         .collection('products')
         .doc(productId)
-        .get();
+        .get(GetOptions(source: Source.cache));
+
+    if (!productDoc.exists) {
+      productDoc = await FirebaseFirestore.instance
+          .collection('products')
+          .doc(productId)
+          .get(GetOptions(source: Source.server));
+    }
 
     if (!productDoc.exists) {
       return {};
@@ -286,17 +294,18 @@ class _WishlistScreenState extends State<WishlistScreen> {
               child: isLoading
                   ? const Center(child: CircularProgressIndicator())
                   : ListView.builder(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w),
-                      itemCount: wishlistItems.length,
-                      itemBuilder: (context, index) {
-                        final item = wishlistItems[index];
-                        return WishlistItemTile(
-                          item: item,
-                          onRemove: _removeFromWishlist,
-                          onUpdateSelection: _updateItemSelection,
-                        );
-                      },
-                    ),
+                padding: EdgeInsets.symmetric(horizontal: 12.w),
+                itemCount: wishlistItems.length,
+                itemBuilder: (context, index) {
+                  final item = wishlistItems[index];
+                  return WishlistItemTile(
+                    key: ValueKey(item['productId'] + item['variation']),
+                    item: item,
+                    onRemove: _removeFromWishlist,
+                    onUpdateSelection: _updateItemSelection,
+                  );
+                },
+              ),
             ),
             Padding(
               padding: EdgeInsets.all(24.w),
@@ -361,18 +370,13 @@ class WishlistItemTile extends StatelessWidget {
               width: 255.w,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8.r),
-                image: item['productImage'] != null
-                    ? DecorationImage(
-                        image: NetworkImage(item['productImage']),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
               ),
-              child: item['productImage'] == null
-                  ? Center(
-                      child: Icon(Icons.image_not_supported,
-                          size: 50.sp, color: Colors.grey))
-                  : null,
+              child: CachedNetworkImage(
+                imageUrl: item['productImage'] ?? '',
+                fit: BoxFit.cover,
+                placeholder: (context, url) => Center(),
+                errorWidget: (context, url, error) => Icon(Icons.image_not_supported, size: 50.sp, color: Colors.grey),
+              ),
             ),
             SizedBox(width: 16.w),
             Expanded(

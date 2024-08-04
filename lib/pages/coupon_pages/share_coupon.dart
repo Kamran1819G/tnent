@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:tnennt/helpers/color_utils.dart';
+import 'package:tnent/helpers/color_utils.dart';
 
 class ShareCoupon extends StatefulWidget {
   final Uint8List imageBytes;
@@ -40,11 +40,11 @@ class _ShareCouponState extends State<ShareCoupon> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Image.asset('assets/white_tnennt_logo.png',
+                            Image.asset('assets/white_tnent_logo.png',
                                 width: 20, height: 20),
                             SizedBox(width: 10),
                             Text(
-                              'Tnennt inc.',
+                              'Tnent inc.',
                               style: TextStyle(
                                 color: hexToColor('#E6E6E6'),
                                 fontSize: 14.0,
@@ -100,8 +100,8 @@ class _ShareCouponState extends State<ShareCoupon> {
           await file.writeAsBytes(widget.imageBytes);
           await Share.shareXFiles(
             [XFile(file.path)],
-            text: 'Check out this coupon from Tnennt inc. !',
-            subject: 'Coupon from Tnennt inc.',
+            text: 'Check out this coupon from Tnent inc. !',
+            subject: 'Coupon from Tnent inc.',
           );
         },
         child: Column(

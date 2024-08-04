@@ -6,10 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pinput/pinput.dart';
-import 'package:tnennt/controllers/otp_controller.dart';
-import 'package:tnennt/models/user_model.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/widget_tree.dart';
+import 'package:tnent/controllers/otp_controller.dart';
+import 'package:tnent/models/user_model.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/widget_tree.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -830,7 +830,7 @@ class _UserRegistrationState extends State<UserRegistration> {
               ),
             ),
             Text(
-              'Join Our Tnennt Community',
+              'Join Our Tnent Community',
               style: TextStyle(
                 color: Theme.of(context).primaryColor,
                 fontFamily: 'Poppins',
@@ -860,11 +860,11 @@ class _UserRegistrationState extends State<UserRegistration> {
             ),
             child: Row(
               children: [
-                Image.asset('assets/white_tnennt_logo.png',
+                Image.asset('assets/white_tnent_logo.png',
                     width: 30.w, height: 30.w),
                 SizedBox(width: 16.w),
                 Text(
-                  'Tnennt inc.',
+                  'Tnent inc.',
                   style:
                       TextStyle(color: hexToColor('#E6E6E6'), fontSize: 16.sp),
                 ),

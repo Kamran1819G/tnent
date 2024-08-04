@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tnennt/models/location_details_model.dart';
-import 'package:tnennt/pages/delivery_service_pages/upload_and_verify_document.dart';
+import 'package:tnent/models/location_details_model.dart';
+import 'package:tnent/pages/delivery_service_pages/upload_and_verify_document.dart';
 import '../../helpers/color_utils.dart';
 
 class DeliverProduct extends StatefulWidget {
@@ -66,7 +66,7 @@ class _DeliverProductState extends State<DeliverProduct> {
                     padding: EdgeInsets.only(left: 16, right: 8),
                     child: Row(
                       children: [
-                        Image.asset('assets/black_tnennt_logo.png',
+                        Image.asset('assets/black_tnent_logo.png',
                             width: 30, height: 30),
                         Spacer(),
                         Container(
@@ -631,7 +631,7 @@ class _EnterLocationDetailsState extends State<EnterLocationDetails> {
                 padding: EdgeInsets.only(left: 16, right: 8),
                 child: Row(
                   children: [
-                    Image.asset('assets/black_tnennt_logo.png',
+                    Image.asset('assets/black_tnent_logo.png',
                         width: 30, height: 30),
                     Spacer(),
                     Container(

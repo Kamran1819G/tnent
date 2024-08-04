@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:tnennt/models/store_update_model.dart';
+import 'package:tnent/models/store_update_model.dart';
 import '../helpers/color_utils.dart';
 
 class UpdateScreen extends StatefulWidget {
@@ -23,12 +23,14 @@ class UpdateScreen extends StatefulWidget {
   UpdateScreenState createState() => UpdateScreenState();
 }
 
-class UpdateScreenState extends State<UpdateScreen> {
+
+class _UpdateScreenState extends State<UpdateScreen> with SingleTickerProviderStateMixin {
   late int currentUpdateIndex;
   late Image _storeImage;
   late String _storeName;
   bool isPaused = false;
   Timer? _timer;
+  late AnimationController _animationController;
 
   List<double> percentWatched = [];
 
@@ -40,6 +42,11 @@ class UpdateScreenState extends State<UpdateScreen> {
     _storeImage = widget.storeImage;
     _storeName = widget.storeName;
 
+    _animationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 5000),
+    );
+
     // initially, all stories haven't been watched yet
     for (int i = 0; i < widget.updates.length; i++) {
       percentWatched.add(0);
@@ -49,59 +56,81 @@ class UpdateScreenState extends State<UpdateScreen> {
   }
 
   void _startWatching() {
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
-      if (!isPaused) {
-        setState(() {
-          if (percentWatched[currentUpdateIndex] + 0.01 < 1) {
-            percentWatched[currentUpdateIndex] += 0.01;
-          } else {
-            percentWatched[currentUpdateIndex] = 1;
-            timer.cancel();
-
-            if (currentUpdateIndex < widget.updates.length - 1) {
-              currentUpdateIndex++;
-              _startWatching();
-            } else {
-              Navigator.pop(context);
-            }
-          }
-        });
+    _animationController.forward(from: percentWatched[currentUpdateIndex]);
+    _animationController.addListener(() {
+      setState(() {
+        percentWatched[currentUpdateIndex] = _animationController.value;
+      });
+    });
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _nextStory();
       }
     });
   }
 
-  void _togglePause() {
+  void _nextStory() {
+    if (currentUpdateIndex < widget.updates.length - 1) {
+      setState(() {
+        currentUpdateIndex++;
+        _startWatching();
+      });
+    } else {
+      Navigator.pop(context);
+    }
+  }
+
+  void _previousStory() {
+    if (currentUpdateIndex > 0) {
+      setState(() {
+        percentWatched[currentUpdateIndex - 1] = 0;
+        currentUpdateIndex--;
+        _startWatching();
+      });
+    }
+  }
+
+  void _togglePause(bool pause) {
     setState(() {
-      isPaused = !isPaused;
+      if (pause) {
+        _animationController.stop();
+      } else {
+        _animationController.forward();
+      }
+      isPaused = pause;
     });
   }
 
   void _onTapDown(TapDownDetails details) {
-    if (isPaused) return; // Don't change stories when paused
-
     final double screenWidth = MediaQuery.of(context).size.width;
     final double dx = details.globalPosition.dx;
 
-    if (dx < screenWidth / 2) {
-      setState(() {
-        if (currentUpdateIndex > 0) {
-          percentWatched[currentUpdateIndex - 1] = 0;
-          percentWatched[currentUpdateIndex] = 0;
-          currentUpdateIndex--;
-          _startWatching();
-        }
-      });
-    } else {
-      setState(() {
-        if (currentUpdateIndex < widget.updates.length - 1) {
-          percentWatched[currentUpdateIndex] = 1;
-          currentUpdateIndex++;
-          _startWatching();
-        } else {
-          percentWatched[currentUpdateIndex] = 1;
-        }
-      });
+    if (dx < screenWidth / 3) {
+      _previousStory();
+    } else if (dx > 2 * screenWidth / 3) {
+      _nextStory();
+    }
+  }
+
+  void _onLongPressStart(LongPressStartDetails details) {
+    _togglePause(true);
+  }
+
+  void _onLongPressEnd(LongPressEndDetails details) {
+    _togglePause(false);
+  }
+
+  void _onHorizontalDragEnd(DragEndDetails details) {
+    if (details.primaryVelocity! > 0) {
+      _previousStory();
+    } else if (details.primaryVelocity! < 0) {
+      _nextStory();
+    }
+  }
+
+  void _onVerticalDragEnd(DragEndDetails details) {
+    if (details.primaryVelocity! > 0) {
+      Navigator.pop(context);
     }
   }
 
@@ -109,81 +138,76 @@ class UpdateScreenState extends State<UpdateScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: [
-            // story
-            GestureDetector(
-              onTapDown: (details) => _onTapDown(details),
-              child: CachedNetworkImage(
-                imageUrl: widget.updates[currentUpdateIndex].imageUrl,
+        child: GestureDetector(
+          onTapDown: _onTapDown,
+          onLongPressStart: _onLongPressStart,
+          onLongPressEnd: _onLongPressEnd,
+          onHorizontalDragEnd: _onHorizontalDragEnd,
+          onVerticalDragEnd: _onVerticalDragEnd,
+          child: Stack(
+            children: [
+              // story
+              Image.network(
+                widget.updates[currentUpdateIndex].imageUrl,
                 fit: BoxFit.cover,
                 height: double.infinity,
                 width: double.infinity,
               ),
-            ),
 
-            // progress bar
-            Align(
-              alignment: const Alignment(0, -0.95),
-              child: UpdateBars(
-                percentWatched: percentWatched,
-                length: widget.updates.length,
-              ),
-            ),
-
-            Align(
-              alignment: const Alignment(0, -0.95),
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    CircleAvatar(
-                      radius: 25,
-                      backgroundColor: Colors.black,
-                      child: ClipRRect(
-                          borderRadius: BorderRadius.circular(40),
-                          child: _storeImage),
-                    ),
-                    const SizedBox(width: 10),
-                    Text(
-                      _storeName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
-                    const Spacer(),
-                    IconButton(
-                      icon: Icon(
-                        isPaused ? Icons.play_arrow : Icons.pause,
-                        color: Colors.white,
-                      ),
-                      onPressed: _togglePause,
-                    ),
-                    Container(
-                      margin: const EdgeInsets.all(8.0),
-                      child: CircleAvatar(
-                        backgroundColor: Colors.grey[100],
-                        child: IconButton(
-                          icon: const Icon(Icons.arrow_back_ios_new,
-                              color: Colors.black),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
+              // progress bar
+              Align(
+                alignment: Alignment(0, -0.95),
+                child: UpdateBars(
+                  percentWatched: percentWatched,
+                  length: widget.updates.length,
                 ),
               ),
-            ),
-          ],
+              Align(
+                alignment: Alignment(0, -0.95),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Container(height: 40, width: 40, child: _storeImage),
+                      SizedBox(width: 10),
+                      Text(
+                        _storeName,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      Spacer(),
+                      Container(
+                        margin: EdgeInsets.all(8.0),
+                        child: CircleAvatar(
+                          backgroundColor: Colors.grey[100],
+                          child: IconButton(
+                            icon: Icon(Icons.close, color: Colors.black),
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 }
 

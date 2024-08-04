@@ -8,10 +8,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:tnennt/models/community_post_model.dart';
-import 'package:tnennt/models/store_model.dart';
-import 'package:tnennt/helpers/color_utils.dart';
-import 'package:tnennt/widgets/full_screen_image_view.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:tnent/models/community_post_model.dart';
+import 'package:tnent/models/store_model.dart';
+import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/widgets/full_screen_image_view.dart';
 
 import '../helpers/snackbar_utils.dart';
 
@@ -121,7 +122,7 @@ class _StoreCommunityState extends State<StoreCommunity> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          '${widget.store.totalPosts}',
+                          _posts.length.toString(),
                           style: TextStyle(
                             color: hexToColor('#343434'),
                             fontSize: 35.sp,
@@ -160,22 +161,49 @@ class _StoreCommunityState extends State<StoreCommunity> {
             Expanded(
               child: _isLoading
                   ? Center(child: CircularProgressIndicator())
-                  : RefreshIndicator(
-                      onRefresh: _fetchPosts,
-                      child: ListView.builder(
-                        itemCount: _posts.length,
-                        itemBuilder: (context, index) {
-                          final post = _posts[index];
-                          return CommunityPost(
-                            post: post,
-                            isStoreOwner: _isStoreOwner,
-                          );
-                        },
-                      ),
-                    ),
+                  : _posts.isEmpty
+                      ? _buildNoPostsFound()
+                      : RefreshIndicator(
+                          onRefresh: _fetchPosts,
+                          child: ListView.builder(
+                            itemCount: _posts.length,
+                            itemBuilder: (context, index) {
+                              final post = _posts[index];
+                              return CommunityPost(
+                                post: post,
+                                isStoreOwner: _isStoreOwner,
+                              );
+                            },
+                          ),
+                        ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildNoPostsFound() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            'No posts found',
+            style: TextStyle(
+              fontSize: 30.sp,
+              color: hexToColor('#737373'),
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Text(
+            'Create a new post to get started',
+            style: TextStyle(
+              fontSize: 20.sp,
+              color: hexToColor('#989898'),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -248,6 +276,13 @@ class _CommunityPostState extends State<CommunityPost> {
       await userLikedPostRef.delete();
       await postRef.update({'likes': FieldValue.increment(-1)});
     }
+  }
+
+  Future<void> _sharePost() async {
+    final String postUrl = 'https://tnent.com/post/${widget.post.postId}';
+    final String shareText = 'Check out this post: $postUrl';
+
+    await Share.share(shareText);
   }
 
   @override
@@ -404,32 +439,6 @@ class _CommunityPostState extends State<CommunityPost> {
           ),
         ),
         Spacer(),
-        if (widget.post.productLink?.isNotEmpty ?? false)
-          SizedBox(
-            height: 50.h,
-            width: 350.w,
-            child: Chip(
-              backgroundColor: hexToColor('#EDEDED'),
-              side: BorderSide.none,
-              label: Text(
-                '${widget.post.productLink!}',
-                style: TextStyle(
-                  color: hexToColor('#B4B4B4'),
-                  fontFamily: 'Gotham',
-                  fontWeight: FontWeight.w500,
-                  fontSize: 18.sp,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-              avatar: Icon(
-                Icons.link_outlined,
-                color: hexToColor('#B4B4B4'),
-                size: 24.sp,
-              ),
-            ),
-          ),
-        Spacer(),
         IconButton(
           icon: Icon(
             Icons.ios_share_outlined,
@@ -563,10 +572,6 @@ class _CommunityPostState extends State<CommunityPost> {
     );
   }
 
-  void _sharePost() {
-    // Implement share functionality
-  }
-
   Widget _buildLoadingPlaceholder() {
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -668,7 +673,6 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
   void initState() {
     super.initState();
     _captionController.text = widget.post.content;
-    _productLinkController.text = widget.post.productLink ?? '';
     _images = List.from(widget.post.images);
   }
 
@@ -739,9 +743,6 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
         images: imageUrls,
         likes: widget.post.likes,
         createdAt: widget.post.createdAt,
-        productLink: _productLinkController.text.isNotEmpty
-            ? _productLinkController.text
-            : null,
       );
 
       await CommunityPostModel.updatePost(updatedPost);
@@ -950,45 +951,6 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
                           fontSize: 16.0,
                         ),
                         hintText: 'Write a caption...',
-                        hintStyle: TextStyle(
-                          color: hexToColor('#989898'),
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 16.0,
-                        ),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: hexToColor('#848484'),
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 20),
-              // Product Link
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Product Link',
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-                    ),
-                    SizedBox(height: 10),
-                    TextField(
-                      controller: _productLinkController,
-                      textAlign: TextAlign.start,
-                      decoration: InputDecoration(
-                        prefixIcon: Icon(
-                          Icons.add_link,
-                          color: hexToColor('#848484'),
-                        ),
-                        hintText: 'Paste the product link...',
                         hintStyle: TextStyle(
                           color: hexToColor('#989898'),
                           fontFamily: 'Gotham',
