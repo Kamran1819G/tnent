@@ -43,7 +43,7 @@ Future<void> main() async {
   );
 
   bool isNotificationAllowed =
-  await AwesomeNotifications().isNotificationAllowed();
+      await AwesomeNotifications().isNotificationAllowed();
   if (!isNotificationAllowed) {
     await AwesomeNotifications().requestPermissionToSendNotifications();
   }

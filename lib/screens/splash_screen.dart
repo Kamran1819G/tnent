@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import 'helpers/color_utils.dart';
+import '../helpers/color_utils.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -28,7 +28,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
               ),
               TextSpan(
-                text: '•',
+                text: ' •',
                 style: TextStyle(
                   fontFamily: 'Gotham Black',
                   fontSize: 50.sp,

@@ -10,7 +10,7 @@ import 'package:tnent/pages/home_pages/gallery.dart';
 import 'package:tnent/pages/home_pages/home.dart';
 import 'package:tnent/models/user_model.dart';
 import 'package:tnent/screens/users_screens/user_registration.dart';
-import 'package:tnent/splash_screen.dart';
+import 'package:tnent/screens/splash_screen.dart';
 
 import '../helpers/snackbar_utils.dart';
 import '../models/store_model.dart';

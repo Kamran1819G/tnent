@@ -35,44 +35,36 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               });
             },
             children: <Widget>[
-              Container(
-                color: Colors.blueGrey,
-                child: Center(
-                  child: Text('Page 1'),
-                ),
-              ),
-              Container(
-                color: Colors.green,
-                child: Center(
-                  child: Text('Page 2'),
-                ),
-              ),
-              Container(
-                color: Colors.deepPurple,
-                child: Center(
-                  child: Text('Page 3'),
-                ),
-              ),
-              Container(
-                color: Colors.black,
-                child: Center(
-                  child: Text('Page 4', style: TextStyle(color: Colors.white)),
-                ),
-              ),
+              _buildAppFeaturePage(
+                  'Lorem Ipsum',
+                  'Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem',
+                  'assets/discount_shopping.png'),
+              _buildAppFeaturePage(
+                  'Lorem Ipsum',
+                  'Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem',
+                  'assets/instant_shipping.png'),
+              _buildAppFeaturePage(
+                  'Lorem Ipsum',
+                  'Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem',
+                  'assets/middleman_delivery.png'),
+              _buildAppFeaturePage(
+                  'Create Your Own e-Store',
+                  'Make your own digital store and start selling online',
+                  'assets/create_your_own_e-store.png'),
             ],
           ),
           onLastPage
               ? SizedBox()
               : Container(
-                  alignment: Alignment(0, 0.7),
+                  alignment: Alignment(0, 0.75),
                   child: SmoothPageIndicator(
                     controller: _pageController,
                     count: 4,
                     effect: ExpandingDotsEffect(
-                      dotColor: Colors.white,
-                      activeDotColor: Colors.white,
-                      dotHeight: 8,
-                      dotWidth: 8,
+                      dotColor: hexToColor('#7C7C7C'),
+                      activeDotColor: hexToColor('#7C7C7C'),
+                      dotHeight: 12.h,
+                      dotWidth: 12.w,
                       spacing: 10,
                       expansionFactor: 5,
                     ),
@@ -145,115 +137,97 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ],
             ),
           ),
-          Container(
-            alignment: Alignment(0, 0.85),
-            child: onLastPage
-                ? ElevatedButton(
-                    onPressed: () async {
-                      final prefs = await SharedPreferences.getInstance();
-                      prefs.setBool('onboarding', true);
+          Align(
+            alignment: Alignment(0, 0.95),
+            child: GestureDetector(
+              onTap: () async {
+                if (onLastPage) {
+                  final prefs = await SharedPreferences.getInstance();
+                  prefs.setBool('onboarding', true);
 
-                      if (!mounted) return;
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => WidgetTree()));
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      // Set the button color to black
-                      foregroundColor: Colors.black,
-                      // Set the text color to white
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 50, vertical: 16),
-                      // Set the padding
-                      textStyle: TextStyle(
-                        fontSize: 16, // Set the text size
-                        fontWeight: FontWeight.bold, // Set the text weight
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            30), // Set the button corner radius
-                      ),
+                  if (!mounted) return;
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => WidgetTree()));
+                } else {
+                  _pageController.nextPage(
+                    duration: Duration(milliseconds: 500),
+                    curve: Curves.ease,
+                  );
+                }
+              },
+              child: Container(
+                width: 500.w,
+                height: 100.h,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: hexToColor('#272727'),
+                  borderRadius: BorderRadius.circular(50.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Get Started',
+                      style: TextStyle(
+                          fontSize: 25.sp,
+                          color: Colors.white,
+                          fontFamily: 'Gotham',
+                          fontWeight: FontWeight.w500),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('Get Started', style: TextStyle(fontSize: 25.sp)),
-                        SizedBox(width: 40),
-                        ShaderMask(
-                          shaderCallback: (Rect bounds) {
-                            return LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [Colors.white, Colors.black],
-                              stops: [0.0, 1.0],
-                            ).createShader(bounds);
-                          },
-                          child: Row(
-                            children: List.generate(
-                              arrowIconCount,
-                              (index) =>
-                                  Icon(Icons.arrow_forward_ios, size: 24.sp),
-                            ),
-                          ),
+                    SizedBox(width: 40.w),
+                    Row(
+                      children: List.generate(
+                        arrowIconCount,
+                        (index) => Icon(
+                          Icons.arrow_forward_ios,
+                          size: 25.sp,
+                          color: Colors.white,
                         ),
-                      ],
-                    ),
-                  )
-                : ElevatedButton(
-                    onPressed: () {
-                      _pageController.nextPage(
-                        duration: Duration(milliseconds: 500),
-                        curve: Curves.ease,
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      maximumSize: Size(300, 50),
-                      backgroundColor: Colors.black,
-                      // Set the button color to black
-                      foregroundColor: Colors.white,
-                      // Set the text color to white
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 50, vertical: 16),
-                      // Set the padding
-                      textStyle: TextStyle(
-                        fontSize: 16, // Set the text size
-                        fontWeight: FontWeight.bold, // Set the text weight
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                            30), // Set the button corner radius
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text('Get Started', style: TextStyle(fontSize: 25.sp)),
-                        SizedBox(width: 40),
-                        ShaderMask(
-                          shaderCallback: (Rect bounds) {
-                            return LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [Colors.black, Colors.white],
-                              stops: [0.0, 1.0],
-                            ).createShader(bounds);
-                          },
-                          child: Row(
-                            children: List.generate(
-                              arrowIconCount,
-                              (index) =>
-                                  Icon(Icons.arrow_forward_ios, size: 24.sp),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAppFeaturePage(String title, String subtitle, String imagePath) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset(
+          imagePath,
+          width: 600.w,
+          height: 600.h,
+          fit: BoxFit.contain,
+        ),
+        SizedBox(height: 50.h),
+        Text(
+          title,
+          style: TextStyle(color: hexToColor('#1E1E1E'), fontSize: 35.sp),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 20.h),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 26.w),
+          child: Text(
+            subtitle,
+            style: TextStyle(
+              color: hexToColor('#858585'),
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w500,
+              fontSize: 23.sp,
+            ),
+            maxLines: 2,
+            textAlign: TextAlign.center,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
