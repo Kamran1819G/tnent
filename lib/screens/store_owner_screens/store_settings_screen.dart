@@ -7,9 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:tnent/models/store_model.dart';
 
 import '../../helpers/color_utils.dart';
+import '../../helpers/snackbar_utils.dart';
 
 class StoreSettingsScreen extends StatefulWidget {
   final StoreModel store;
@@ -119,12 +121,11 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     });
     setState(() {
       isSaving = false;
+      isChanged = false;
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Store details updated successfully'),
-      ),
-    );
+    Navigator.of(context).pop();
+
+    showSnackBar(context, 'Store details updated successfully');
   }
 
   @override
@@ -231,7 +232,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                   width: 16.w,
                   height: 16.h,
                 ),
-                SizedBox(width: 5),
+                const SizedBox(width: 5),
                 Text(
                   widget.store.website,
                   style: TextStyle(
@@ -251,7 +252,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         "Store Name",
                         style: TextStyle(
                           fontSize: 23.sp,
@@ -287,7 +288,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 "Category",
                                 style: TextStyle(
                                   fontSize: 23.sp,
@@ -362,7 +363,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              const Text(
                                 "Phone Number",
                                 style: TextStyle(
                                   fontSize: 23.sp,

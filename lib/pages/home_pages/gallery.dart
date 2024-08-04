@@ -252,11 +252,11 @@ class _GalleryState extends State<Gallery> {
                             Switch(
                               value: isActive,
                               activeColor: hexToColor('#41FA00'),
-                              trackOutlineColor: WidgetStateColor.resolveWith(
+                              trackOutlineColor: MaterialStateColor.resolveWith(
                                 (states) => Colors.grey,
                               ),
                               trackOutlineWidth:
-                                  WidgetStateProperty.resolveWith(
+                                  MaterialStateProperty.resolveWith(
                                 (states) => 1.0,
                               ),
                               activeTrackColor: Colors.transparent,

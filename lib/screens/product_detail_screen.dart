@@ -15,6 +15,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 
+import '../helpers/snackbar_utils.dart';
+
 class ProductDetailScreen extends StatefulWidget {
   ProductModel product;
 
@@ -139,9 +141,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Future<void> _addReview(String review) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please log in to add a review')),
-      );
+      showSnackBar(context, 'Please log in to add a review');
+
       return;
     }
 
@@ -286,9 +287,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Future<void> handleVote(String voteType) async {
     User? user = _auth.currentUser;
     if (user == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please log in to vote')),
-      );
+      showSnackBar(context, 'Please log in to vote');
+
       return;
     }
 
@@ -304,9 +304,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         _firestore.collection('products').doc(productId);
 
     Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Vote recorded successfully')),
-    );
+    showSnackBar(context, 'Vote recorded successfully');
 
     try {
       await _firestore.runTransaction((transaction) async {
@@ -382,9 +380,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       });
     } catch (error) {
       print('Error recording vote: $error');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to record vote. Please try again.')),
-      );
+      showSnackBar(context, 'Failed to record vote. Please try again.');
     }
   }
 
@@ -439,10 +435,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             Spacer(),
                             IconButton(
                               style: ButtonStyle(
-                                backgroundColor: WidgetStateProperty.all(
+                                backgroundColor: MaterialStateProperty.all(
                                   Colors.grey[100],
                                 ),
-                                shape: WidgetStateProperty.all(
+                                shape: MaterialStateProperty.all(
                                   CircleBorder(),
                                 ),
                               ),
@@ -498,9 +494,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         errorWidget: (context, url, error) => Icon(Icons.error),
                                       )
                                   ),
-                                );
-                              },
-                            ),
                           ),
                           SizedBox(height: 30.h),
                           Container(
@@ -547,7 +540,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 children: [
                                   Container(
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(6.r),
+                                        borderRadius:
+                                            BorderRadius.circular(6.r),
                                       ),
                                       child: Image.network(
                                         store.logoUrl,
@@ -703,7 +697,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             ),
                                           ),
                                           SizedBox(width: 10.w),
-                                          if(_selectedVariant.discount > 0)
+                                          if (_selectedVariant.discount > 0)
                                             Text(
                                               '${_selectedVariant.discount}% Off',
                                               style: TextStyle(
@@ -729,7 +723,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   Spacer(),
                                   GestureDetector(
                                     onTap: () async {
-                                      if(_selectedVariant.stockQuantity > 0 && store.isActive) {
+                                      if (_selectedVariant.stockQuantity > 0 &&
+                                          store.isActive) {
                                         String userId = FirebaseAuth
                                                 .instance.currentUser?.uid ??
                                             '';
@@ -812,14 +807,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                     'Failed to update cart. Please try again.')),
                                           );
                                         }
-                                      }
-                                      else{
+                                      } else {
                                         ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            SnackBar(
-                                                content: Text(
-                                                    'Product is out of stock or store is inactive')),
-                                          );
+                                            .showSnackBar(
+                                          SnackBar(
+                                              content: Text(
+                                                  'Product is out of stock or store is inactive')),
+                                        );
                                       }
                                     },
                                     child: Container(
@@ -827,7 +821,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       width: 95.w,
                                       decoration: BoxDecoration(
                                         color: Theme.of(context).primaryColor,
-                                        borderRadius: BorderRadius.circular(12.r),
+                                        borderRadius:
+                                            BorderRadius.circular(12.r),
                                       ),
                                       child: Icon(Icons.add_shopping_cart,
                                           color: Colors.white, size: 35.sp),
@@ -1024,23 +1019,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           'variationDetails': _selectedVariant
                         };
 
-                        if (_selectedVariant.stockQuantity > 0 && store.isActive) {
+                        if (_selectedVariant.stockQuantity > 0 &&
+                            store.isActive) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => CheckoutScreen(selectedItems: [item]),
+                              builder: (context) =>
+                                  CheckoutScreen(selectedItems: [item]),
                             ),
                           );
                         } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Product is out of stock or store is inactive')),
-                          );
+                          showSnackBar(context,
+                              'Product is out of stock or store is inactive');
                         }
                       },
-                      child: Text(
-                        'Buy Now',
-                        style: TextStyle(fontSize: 28.sp),
-                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: hexToColor('#343434'),
                         foregroundColor: Colors.white,
@@ -1050,6 +1042,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16.r),
                         ),
+                      ),
+                      child: Text(
+                        'Buy Now',
+                        style: TextStyle(fontSize: 28.sp),
                       ),
                     ),
                   ),
@@ -1061,10 +1057,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Widget _buildVariationSelector() {
-    List<String> variations = widget.product.variations.keys.where((variation) => variation.toLowerCase() != 'default').toList();
+    List<String> variations = widget.product.variations.keys
+        .where((variation) => variation.toLowerCase() != 'default')
+        .toList();
 
     if (variations.isEmpty) {
-      return SizedBox.shrink(); // Don't show any chips if only default variation exists
+      return SizedBox
+          .shrink(); // Don't show any chips if only default variation exists
     }
     return Wrap(
       spacing: 8.0,
@@ -1215,8 +1214,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   SizedBox(height: 20.h),
                   Text(
                     '${_product.redFlags}',
-                    style:
-                        TextStyle(color: hexToColor('#9C9C9C'), fontSize: 24.sp),
+                    style: TextStyle(
+                        color: hexToColor('#9C9C9C'), fontSize: 24.sp),
                   ),
                 ],
               ),
@@ -1240,8 +1239,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   SizedBox(height: 20.h),
                   Text(
                     '${_product.greenFlags}',
-                    style:
-                        TextStyle(color: hexToColor('#9C9C9C'), fontSize: 24.sp),
+                    style: TextStyle(
+                        color: hexToColor('#9C9C9C'), fontSize: 24.sp),
                   ),
                 ],
               ),

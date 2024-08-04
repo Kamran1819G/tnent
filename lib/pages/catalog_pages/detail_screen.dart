@@ -9,6 +9,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tnent/helpers/color_utils.dart';
 
+import '../../helpers/snackbar_utils.dart';
+
 class DetailScreen extends StatefulWidget {
   final Map<String, dynamic> order;
 
@@ -25,7 +27,11 @@ class _DetailScreenState extends State<DetailScreen> {
     if (isOrderCancelled) return;
 
     try {
-      await FirebaseFirestore.instance.collection('Orders').where('orderId', isEqualTo: widget.order['orderId']).get().then((snapshot) {
+      await FirebaseFirestore.instance
+          .collection('Orders')
+          .where('orderId', isEqualTo: widget.order['orderId'])
+          .get()
+          .then((snapshot) {
         snapshot.docs.forEach((doc) {
           doc.reference.update({
             'status.cancelled': {
@@ -45,13 +51,9 @@ class _DetailScreenState extends State<DetailScreen> {
 
       await _sendCancellationNotification();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Order cancelled successfully')),
-      );
+      showSnackBar(context, 'Order cancelled successfully');
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to cancel order: $e')),
-      );
+      showSnackBar(context, 'Failed to cancel order: $e');
     }
   }
 
@@ -80,7 +82,8 @@ class _DetailScreenState extends State<DetailScreen> {
 
     // Show local notification
     String bigPicturePath = await _downloadAndSaveFile(
-        widget.order['productImage'], 'cancelledOrderImage_${widget.order['orderId']}');
+        widget.order['productImage'],
+        'cancelledOrderImage_${widget.order['orderId']}');
 
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
@@ -171,15 +174,14 @@ class _DetailScreenState extends State<DetailScreen> {
           Spacer(),
           IconButton(
             style: ButtonStyle(
-              backgroundColor: WidgetStateProperty.all(
+              backgroundColor: MaterialStateProperty.all(
                 Colors.grey[100],
               ),
-              shape: WidgetStateProperty.all(
+              shape: MaterialStateProperty.all(
                 CircleBorder(),
               ),
             ),
-            icon: Icon(Icons.arrow_back_ios_new,
-                color: Colors.black),
+            icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -220,12 +222,14 @@ class _DetailScreenState extends State<DetailScreen> {
                 children: [
                   Text(
                     'Order ID:',
-                    style: TextStyle(color: hexToColor('#878787'), fontSize: 17.sp),
+                    style: TextStyle(
+                        color: hexToColor('#878787'), fontSize: 17.sp),
                   ),
                   SizedBox(width: 8.0),
                   Text(
                     widget.order['orderId'],
-                    style: TextStyle(color: hexToColor('#A9A9A9'), fontSize: 17.sp),
+                    style: TextStyle(
+                        color: hexToColor('#A9A9A9'), fontSize: 17.sp),
                   ),
                 ],
               ),
@@ -296,7 +300,8 @@ class _DetailScreenState extends State<DetailScreen> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(100.r),
                     image: DecorationImage(
-                      image: NetworkImage(widget.order['providedMiddleman']['image']),
+                      image: NetworkImage(
+                          widget.order['providedMiddleman']['image']),
                       fit: BoxFit.fill,
                     ),
                   ),
@@ -323,9 +328,11 @@ class _DetailScreenState extends State<DetailScreen> {
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             child: Column(
               children: [
-                _buildAmountRow('Subtotal', widget.order['priceDetails']['price']),
+                _buildAmountRow(
+                    'Subtotal', widget.order['priceDetails']['price']),
                 _buildAmountRow('MRP', widget.order['priceDetails']['mrp']),
-                _buildAmountRow('Discount', '- ${widget.order['priceDetails']['discount']}'),
+                _buildAmountRow('Discount',
+                    '- ${widget.order['priceDetails']['discount']}'),
               ],
             ),
           ),
@@ -393,8 +400,10 @@ class _DetailScreenState extends State<DetailScreen> {
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             child: Column(
               children: [
-                _buildDetailRow('Payment Mode', widget.order['payment']['method']),
-                _buildDetailRow('Payment Status', widget.order['payment']['status']),
+                _buildDetailRow(
+                    'Payment Mode', widget.order['payment']['method']),
+                _buildDetailRow(
+                    'Payment Status', widget.order['payment']['status']),
               ],
             ),
           ),
@@ -481,8 +490,9 @@ class _DetailScreenState extends State<DetailScreen> {
           ),
           child: Center(
             child: Text(
-                isOrderCancelled ? 'Order Cancelled' : 'Cancel Order',
-              style: TextStyle(color: Colors.white, fontFamily: 'Poppins' ,fontSize: 18.sp),
+              isOrderCancelled ? 'Order Cancelled' : 'Cancel Order',
+              style: TextStyle(
+                  color: Colors.white, fontFamily: 'Poppins', fontSize: 18.sp),
             ),
           ),
         ),

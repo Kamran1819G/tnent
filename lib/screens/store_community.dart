@@ -14,6 +14,8 @@ import 'package:tnent/models/store_model.dart';
 import 'package:tnent/helpers/color_utils.dart';
 import 'package:tnent/widgets/full_screen_image_view.dart';
 
+import '../helpers/snackbar_utils.dart';
+
 class StoreCommunity extends StatefulWidget {
   final StoreModel store;
 
@@ -141,10 +143,10 @@ class _StoreCommunityState extends State<StoreCommunity> {
                   Spacer(),
                   IconButton(
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
+                      backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
-                      shape: WidgetStateProperty.all(
+                      shape: MaterialStateProperty.all(
                         CircleBorder(),
                       ),
                     ),
@@ -689,12 +691,8 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
           _images.add(file);
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-                'The selected image is too large. Please select an image smaller than 500 KB.'),
-          ),
-        );
+        showSnackBar(context,
+            'The selected image is too large. Please select an image smaller than 500 KB.');
       }
     }
   }
@@ -749,14 +747,11 @@ class _EditCommunityPostState extends State<EditCommunityPost> {
 
       await CommunityPostModel.updatePost(updatedPost);
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Post updated successfully!')),
-      );
+      showSnackBar(context, 'Post updated successfully!');
+
       Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating post: $e')),
-      );
+      showSnackBar(context, 'Error updating post: $e');
     } finally {
       setState(() {
         _isLoading = false;

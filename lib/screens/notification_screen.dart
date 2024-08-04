@@ -41,25 +41,27 @@ class _NotificationScreenState extends State<NotificationScreen>
           .orderBy('timestamp', descending: true)
           .get();
 
-      groupedGeneralNotifications = _groupNotifications(
-          snapshots.docs.where((doc) => doc.data()['data']['type'] != 'store').toList()
-      );
-      groupedStoreNotifications = _groupNotifications(
-          snapshots.docs.where((doc) => doc.data()['data']['type'] == 'store').toList()
-      );
+      groupedGeneralNotifications = _groupNotifications(snapshots.docs
+          .where((doc) => doc.data()['data']['type'] != 'store')
+          .toList());
+      groupedStoreNotifications = _groupNotifications(snapshots.docs
+          .where((doc) => doc.data()['data']['type'] == 'store')
+          .toList());
 
       setState(() {});
     }
   }
 
-  Map<String, List<QueryDocumentSnapshot>> _groupNotifications(List<QueryDocumentSnapshot> notifications) {
+  Map<String, List<QueryDocumentSnapshot>> _groupNotifications(
+      List<QueryDocumentSnapshot> notifications) {
     Map<String, List<QueryDocumentSnapshot>> grouped = {};
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = today.subtract(Duration(days: 1));
 
     for (var notification in notifications) {
-      final timestamp = (notification.data() as Map<String, dynamic>)['timestamp'] as Timestamp;
+      final timestamp = (notification.data()
+          as Map<String, dynamic>)['timestamp'] as Timestamp;
       final date = timestamp.toDate();
       final notificationDate = DateTime(date.year, date.month, date.day);
 
@@ -132,10 +134,10 @@ class _NotificationScreenState extends State<NotificationScreen>
                         Spacer(),
                         IconButton(
                           style: ButtonStyle(
-                            backgroundColor: WidgetStateProperty.all(
+                            backgroundColor: MaterialStateProperty.all(
                               Colors.grey[100],
                             ),
-                            shape: WidgetStateProperty.all(
+                            shape: MaterialStateProperty.all(
                               CircleBorder(),
                             ),
                           ),
@@ -149,7 +151,7 @@ class _NotificationScreenState extends State<NotificationScreen>
                     ),
                   ),
                   Container(
-                    padding:EdgeInsets.only(left: 12.w),
+                    padding: EdgeInsets.only(left: 12.w),
                     child: Wrap(
                       children: List.generate(2, (index) {
                         return Container(
@@ -193,9 +195,11 @@ class _NotificationScreenState extends State<NotificationScreen>
                 controller: _tabController,
                 physics: NeverScrollableScrollPhysics(),
                 children: [
-                  _buildNotificationList(groupedGeneralNotifications, isGeneralTab: true),
+                  _buildNotificationList(groupedGeneralNotifications,
+                      isGeneralTab: true),
                   if (isStoreOwner)
-                    _buildNotificationList(groupedStoreNotifications, isGeneralTab: false),
+                    _buildNotificationList(groupedStoreNotifications,
+                        isGeneralTab: false),
                 ],
               ),
             )
@@ -205,7 +209,9 @@ class _NotificationScreenState extends State<NotificationScreen>
     );
   }
 
-  Widget _buildNotificationList(Map<String, List<QueryDocumentSnapshot>> groupedNotifications, {required bool isGeneralTab}) {
+  Widget _buildNotificationList(
+      Map<String, List<QueryDocumentSnapshot>> groupedNotifications,
+      {required bool isGeneralTab}) {
     return ListView.builder(
       itemCount: groupedNotifications.length,
       itemBuilder: (context, index) {
@@ -237,7 +243,8 @@ class _NotificationScreenState extends State<NotificationScreen>
                 return StoreConnectionNotification(
                   name: data['data']['name'],
                   image: data['data']['image'],
-                  time: DateFormat('jm').format((data['timestamp'] as Timestamp).toDate()),
+                  time: DateFormat('jm')
+                      .format((data['timestamp'] as Timestamp).toDate()),
                 );
               }
             }).toList(),

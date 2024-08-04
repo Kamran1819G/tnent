@@ -305,10 +305,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   Spacer(),
                   IconButton(
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
+                      backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
-                      shape: WidgetStateProperty.all(
+                      shape: MaterialStateProperty.all(
                         CircleBorder(),
                       ),
                     ),
@@ -388,8 +388,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                     right: 10),
                                                 decoration: BoxDecoration(
                                                   borderRadius:
-                                                  BorderRadius.circular(
-                                                      22.r),
+                                                      BorderRadius.circular(
+                                                          22.r),
                                                   image: DecorationImage(
                                                     image: FileImage(
                                                         _images[index]),
@@ -559,7 +559,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               SizedBox(height: 20.h),
                               Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(
                                     width: 190.w,
@@ -586,12 +586,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           size: 30.sp,
                                         ),
                                         prefixIconConstraints:
-                                        BoxConstraints(minWidth: 30),
+                                            BoxConstraints(minWidth: 30),
                                         border: OutlineInputBorder(
                                           borderSide: BorderSide(
                                               color: hexToColor('#848484')),
                                           borderRadius:
-                                          BorderRadius.circular(18.r),
+                                              BorderRadius.circular(18.r),
                                         ),
                                       ),
                                       validator: (value) {
@@ -602,7 +602,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           return null; // Allow empty discount (0%)
                                         }
                                         final double? discount =
-                                        double.tryParse(value);
+                                            double.tryParse(value);
                                         if (discount == null ||
                                             discount < 0 ||
                                             discount > 100) {
@@ -638,12 +638,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           size: 30.sp,
                                         ),
                                         prefixIconConstraints:
-                                        BoxConstraints(minWidth: 30),
+                                            BoxConstraints(minWidth: 30),
                                         border: OutlineInputBorder(
                                           borderSide: BorderSide(
                                               color: hexToColor('#848484')),
                                           borderRadius:
-                                          BorderRadius.circular(18.r),
+                                              BorderRadius.circular(18.r),
                                         ),
                                       ),
                                       validator: (value) {
@@ -651,7 +651,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           return 'Please enter the MRP';
                                         }
                                         final double? mrp =
-                                        double.tryParse(value);
+                                            double.tryParse(value);
                                         if (mrp == null || mrp <= 0) {
                                           return 'Please enter a valid MRP';
                                         }
@@ -685,12 +685,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           size: 30.sp,
                                         ),
                                         prefixIconConstraints:
-                                        BoxConstraints(minWidth: 30),
+                                            BoxConstraints(minWidth: 30),
                                         border: OutlineInputBorder(
                                           borderSide: BorderSide(
                                               color: hexToColor('#848484')),
                                           borderRadius:
-                                          BorderRadius.circular(18.r),
+                                              BorderRadius.circular(18.r),
                                         ),
                                       ),
                                     ),

@@ -3,11 +3,13 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:tnent/helpers/color_utils.dart';
 import 'package:tnent/models/store_category_model.dart';
 import 'package:tnent/screens/store_owner_screens/add_product_screen.dart';
 import 'package:tnent/screens/store_owner_screens/all_products_screen.dart';
 import 'package:tnent/screens/store_owner_screens/category_products_screen.dart';
+import '../../helpers/snackbar_utils.dart';
 
 class ProductCategoriesScreen extends StatefulWidget {
   final String storeId;
@@ -96,40 +98,46 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
   }
 
   Future<void> _deleteSelectedCategories() async {
-    try {
-      for (StoreCategoryModel category in selectedCategories) {
-        // Delete category document
-        await _firestore
-            .collection('Stores')
-            .doc(widget.storeId)
-            .collection('categories')
-            .doc(category.id)
-            .delete();
+    showSnackBarWithAction(
+      context,
+      text: "Do you really want to delete the category(s)?",
+      confirmBtnColor: Colors.red,
+      action: () async {
+        try {
+          for (StoreCategoryModel category in selectedCategories) {
+            // Delete category document
+            await _firestore
+                .collection('Stores')
+                .doc(widget.storeId)
+                .collection('categories')
+                .doc(category.id)
+                .delete();
 
-        // Remove category from products
-        QuerySnapshot productsSnapshot = await _firestore
-            .collection('products')
-            .where('storeId', isEqualTo: widget.storeId)
-            .where('storeCategory', isEqualTo: category.id)
-            .get();
+            // Remove category from products
+            QuerySnapshot productsSnapshot = await _firestore
+                .collection('products')
+                .where('storeId', isEqualTo: widget.storeId)
+                .where('storeCategory', isEqualTo: category.id)
+                .get();
 
-        WriteBatch batch = _firestore.batch();
-        for (DocumentSnapshot doc in productsSnapshot.docs) {
-          batch.update(doc.reference, {'storeCategory': ''});
+            WriteBatch batch = _firestore.batch();
+            for (DocumentSnapshot doc in productsSnapshot.docs) {
+              batch.update(doc.reference, {'storeCategory': ''});
+            }
+            await batch.commit();
+          }
+          // Refresh the category list
+          await _refreshCategories();
+          _toggleSelectionMode();
+        } catch (e) {
+          print('Error deleting categories: $e');
+          showSnackBar(
+              context, 'Failed to delete categories. Please try again.');
         }
-        await batch.commit();
-      }
-
-      // Refresh the category list
-      await _refreshCategories();
-      _toggleSelectionMode();
-    } catch (e) {
-      print('Error deleting categories: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text('Failed to delete categories. Please try again.')),
-      );
-    }
+        Navigator.of(context).pop();
+      },
+      quickAlertType: QuickAlertType.warning,
+    );
   }
 
   @override
@@ -159,7 +167,6 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                                   color: Colors.black),
                               onPressed: () {
                                 Navigator.pop(context);
-                              },
                             ),
                           ),
                         ),
@@ -325,26 +332,27 @@ class _ProductCategoriesScreenState extends State<ProductCategoriesScreen> {
                               fontSize: 24.sp,
                               color: Colors.black,
                             ),
-                          ),
-                          Spacer(),
-                          TextButton(
-                            onPressed: _deleteSelectedCategories,
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all(Colors.red),
-                              foregroundColor:
-                                  MaterialStateProperty.all(Colors.white),
+                            const Spacer(),
+                            TextButton(
+                              onPressed: _deleteSelectedCategories,
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.red),
+                                foregroundColor:
+                                    MaterialStateProperty.all(Colors.white),
+                              ),
+                              child: const Text('Delete'),
                             ),
-                            child: Text('Delete'),
-                          ),
-                          SizedBox(width: 12.w),
-                          TextButton(
-                            onPressed: _toggleSelectionMode,
-                            style: ButtonStyle(
-                              backgroundColor:
-                                  MaterialStateProperty.all(Colors.grey),
-                              foregroundColor:
-                                  MaterialStateProperty.all(Colors.white),
+                            SizedBox(width: 12.w),
+                            TextButton(
+                              onPressed: _toggleSelectionMode,
+                              style: ButtonStyle(
+                                backgroundColor:
+                                    MaterialStateProperty.all(Colors.grey),
+                                foregroundColor:
+                                    MaterialStateProperty.all(Colors.white),
+                              ),
+                              child: const Text('Cancel'),
                             ),
                             child: Text('Cancel'),
                           ),
@@ -424,12 +432,12 @@ class CategoryTile extends StatelessWidget {
   final VoidCallback onLongPress;
 
   static final List<Color> colorList = [
-    Color(0xFFDDF1EF),
-    Color(0xFFFFF0E6),
-    Color(0xFFE6F3FF),
-    Color(0xFFF0E6FF),
-    Color(0xFFE6FFEA),
-    Color(0xFFFFE6E6),
+    const Color(0xFFDDF1EF),
+    const Color(0xFFFFF0E6),
+    const Color(0xFFE6F3FF),
+    const Color(0xFFF0E6FF),
+    const Color(0xFFE6FFEA),
+    const Color(0xFFFFE6E6),
   ];
 
   CategoryTile({

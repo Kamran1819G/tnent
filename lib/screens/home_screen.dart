@@ -12,6 +12,7 @@ import 'package:tnent/models/user_model.dart';
 import 'package:tnent/screens/users_screens/user_registration.dart';
 import 'package:tnent/splash_screen.dart';
 
+import '../helpers/snackbar_utils.dart';
 import '../models/store_model.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -57,8 +58,10 @@ class _HomeScreenState extends State<HomeScreen> {
         currentUser = UserModel.fromFirestore(userDoc);
 
         // Check if user registration is complete
-        if (currentUser!.phoneNumber == null || currentUser!.phoneNumber!.isEmpty ||
-            currentUser!.firstName.isEmpty || currentUser!.lastName.isEmpty) {
+        if (currentUser!.phoneNumber == null ||
+            currentUser!.phoneNumber!.isEmpty ||
+            currentUser!.firstName.isEmpty ||
+            currentUser!.lastName.isEmpty) {
           // Redirect to Registration Page
           if (mounted) {
             Navigator.pushReplacement(
@@ -74,16 +77,12 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         // Handle the case where the user document does not exist
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('User document does not exist')),
-          );
+          showSnackBar(context, 'User document does not exist');
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error fetching data: ${e.toString()}')),
-        );
+        showSnackBar(context, 'Error fetching data: ${e.toString()}');
       }
     }
   }

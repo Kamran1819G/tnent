@@ -8,7 +8,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quickalert/models/quickalert_type.dart';
 import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/helpers/snackbar_utils.dart';
 import 'package:tnent/models/store_category_model.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
@@ -18,8 +20,10 @@ import 'package:tnent/pages/catalog_pages/cart_screen.dart';
 import 'package:tnent/screens/explore_screen.dart';
 import 'package:tnent/screens/notification_screen.dart';
 import 'package:tnent/screens/stores_screen.dart';
+import 'package:tnent/screens/update_screen.dart';
 import 'package:tnent/screens/users_screens/myprofile_screen.dart';
 import 'package:tnent/widgets/wishlist_product_tile.dart';
+import 'package:toastification/toastification.dart';
 import '../../screens/users_screens/storeprofile_screen.dart';
 
 class Home extends StatefulWidget {
@@ -71,12 +75,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     },
   ];
 
-  List<dynamic> updates = List.generate(5, (index) {
-    return {
-      "name": "Sahachari",
-      "coverImage": "assets/sahachari_image.png",
-    };
-  });
+  List<StoreUpdateModel> updates = [];
 
   List<StoreModel> featuredStores = [];
   List<ProductModel> featuredProducts = [];
@@ -86,6 +85,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     super.initState();
     _fetchFeaturedStores();
     _fetchFeaturedProducts();
+    _fetchUpdates();
+
     setState(() {
       firstName = widget.currentUser.firstName;
       lastName = widget.currentUser.lastName;
@@ -142,25 +143,28 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       final featuredStoreDoc = await FirebaseFirestore.instance
           .collection('Featured Stores')
           .doc('featured-stores')
-          .get(GetOptions(source: Source.serverAndCache));
+          .get();
 
-      final List<String> storeIds = List<String>.from(featuredStoreDoc['stores'] ?? []);
+      // Extract the store IDs from the array field
+      final List<String> storeId =
+          List<String>.from(featuredStoreDoc['stores'] ?? []);
 
-      if (storeIds.isNotEmpty) {
-        const int pageSize = 10;
-        for (int i = 0; i < storeIds.length; i += pageSize) {
-          final chunk = storeIds.sublist(i, min(i + pageSize, storeIds.length));
-          final storesSnapshot = await FirebaseFirestore.instance
-              .collection('Stores')
-              .where(FieldPath.documentId, whereIn: chunk)
-              .get(GetOptions(source: Source.serverAndCache));
+      // Fetch the actual store documents using the store IDs
+      if (storeId.isNotEmpty) {
+        final storesSnapshot = await FirebaseFirestore.instance
+            .collection('Stores')
+            .where(FieldPath.documentId, whereIn: storeId)
+            .get();
 
-          setState(() {
-            featuredStores.addAll(storesSnapshot.docs
-                .map((doc) => StoreModel.fromFirestore(doc))
-                .toList());
-          });
-        }
+        setState(() {
+          featuredStores = storesSnapshot.docs
+              .map((doc) => StoreModel.fromFirestore(doc))
+              .toList();
+        });
+      } else {
+        setState(() {
+          featuredStores = [];
+        });
       }
     } catch (e) {
       print('Error fetching featured stores: $e');
@@ -207,6 +211,62 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     }
   }
 
+  void _fetchUpdates() async {
+    List<StoreUpdateModel> fetchedUpdates = await _fetchAndPopulateUpdates();
+    setState(() {
+      updates = fetchedUpdates;
+      sortInGroupedupdates();
+    });
+  }
+
+  Future<List<StoreUpdateModel>> _fetchAndPopulateUpdates() async {
+    final now = DateTime.now();
+    final oneDayAgo = now.subtract(const Duration(hours: 24));
+    final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('storeUpdates')
+        .where('createdAt', isGreaterThanOrEqualTo: oneDayAgo)
+        .get();
+
+    List<StoreUpdateModel> updates = [];
+
+    for (var doc in snapshot.docs) {
+      final createdAt = (doc['createdAt'] as Timestamp).toDate();
+      final expiresAt = (doc['expiresAt'] as Timestamp).toDate();
+      final storeId = doc['storeId'];
+
+      if (now.isBefore(expiresAt) && createdAt.isAfter(oneDayAgo)) {
+        DocumentSnapshot storeDoc = await FirebaseFirestore.instance
+            .collection('Stores')
+            .doc(storeId)
+            .get();
+
+        List<String> followerIds = List<String>.from(storeDoc['followerIds']);
+        if (followerIds.contains(currentUserId)) {
+          final storeUpdateModel = StoreUpdateModel.fromFirestore(doc);
+          // Handling the logic that 2/more updates from same store dont show individually in home page
+
+          updates.add(storeUpdateModel);
+        }
+      }
+    }
+
+    return updates;
+  }
+
+  Map<String, List<StoreUpdateModel>> groupedUpdates = {};
+
+  void sortInGroupedupdates() {
+    for (var update in updates) {
+      if (groupedUpdates.containsKey(update.storeName)) {
+        groupedUpdates[update.storeName]!.add(update);
+      } else {
+        groupedUpdates[update.storeName] = [update];
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -229,26 +289,41 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     SizedBox(height: 12.h),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.5,
-                      child: RichText(
-                        text: TextSpan(children: [
-                          TextSpan(
-                            text: '$firstName $lastName',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'Gotham Black',
-                              fontSize: 35.sp,
+                      child: GestureDetector(
+                        onTap: () {
+                          showSnackBar(
+                            context,
+                            'Welcome $firstName',
+                            toastificationType: ToastificationType.info,
+                            toastificationStyle: ToastificationStyle.simple,
+                            leadIcon: const Icon(
+                              Icons.person_4_rounded,
+                              color: Colors.white,
                             ),
-                          ),
-                          TextSpan(
-                            text: ' •',
-                            style: TextStyle(
-                              fontFamily: 'Gotham Black',
-                              fontSize: 35.sp,
-                              color: hexToColor('#42FF00'),
+                            bgColor: Colors.green,
+                          );
+                        },
+                        child: RichText(
+                          text: TextSpan(children: [
+                            TextSpan(
+                              text: '$firstName $lastName',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Gotham Black',
+                                fontSize: 35.sp,
+                              ),
                             ),
-                          ),
-                        ]),
-                        overflow: TextOverflow.ellipsis,
+                            TextSpan(
+                              text: ' •',
+                              style: TextStyle(
+                                fontFamily: 'Gotham Black',
+                                fontSize: 35.sp,
+                                color: hexToColor('#42FF00'),
+                              ),
+                            ),
+                          ]),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
                     )
                   ],
@@ -257,7 +332,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               GestureDetector(
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return CartScreen();
+                    return const CartScreen();
                   }));
                 },
                 child: Icon(
@@ -272,7 +347,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => NotificationScreen()));
+                            builder: (context) => const NotificationScreen()));
                     setState(() {
                       isNewNotification = false;
                     });
@@ -296,7 +371,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => MyProfileScreen()));
+                          builder: (context) => const MyProfileScreen()));
                 },
                 child: widget.currentUser.photoURL != null
                     ? CircleAvatar(
@@ -307,8 +382,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     : CircleAvatar(
                         radius: 30.0,
                         backgroundColor: Theme.of(context).primaryColor,
-                        child:
-                            Icon(Icons.person, color: Colors.white, size: 30.0),
+                        child: const Icon(Icons.person,
+                            color: Colors.white, size: 30.0),
                       ),
               ),
             ],
@@ -317,7 +392,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         GestureDetector(
           onTap: () {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => ExploreScreen()));
+                MaterialPageRoute(builder: (context) => const ExploreScreen()));
           },
           child: Container(
             margin: EdgeInsets.all(28.w),
@@ -358,12 +433,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                         fontSize: 24.sp,
                       ),
                     ),
-                    Text(
-                      'clothings, electronics, groceries & more...',
-                      style: TextStyle(
-                        color: hexToColor('#989898'),
-                        fontFamily: 'Gotham',
-                        fontSize: 14.sp,
+                    Expanded(
+                      child: Text(
+                        'clothings, electronics, groceries & more...',
+                        style: TextStyle(
+                          color: hexToColor('#989898'),
+                          fontFamily: 'Gotham',
+                          fontSize: 14.sp,
+                        ),
                       ),
                     ),
                   ],
@@ -373,21 +450,36 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           ),
         ),
         // Updates Section
-        /*Container(
-          height: 125.0,
-          padding: EdgeInsets.only(left: 8.0),
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: updates.length,
-            itemBuilder: (context, index) {
-              return UpdateTile(
-                  name: updates[index]["name"],
-                  image: updates[index]["coverImage"]);
-            },
-          ),
-        ),*/
-        SizedBox(height: 20.0),
-        Container(
+
+        groupedUpdates.isEmpty
+            ? Container()
+            : Container(
+                height: 125.0,
+                padding: const EdgeInsets.only(left: 8.0),
+                child: ListView(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  children: groupedUpdates.entries.map((e) {
+                    String storeName = e.key;
+                    List<StoreUpdateModel> individualStoreUpdates = e.value;
+                    int indexClicked = 0;
+
+                    for (int i = 0; i < updates.length; i++) {
+                      if (updates[i] == individualStoreUpdates[0]) {
+                        indexClicked = i;
+                      }
+                    }
+                    return UpdateTile(
+                      name: storeName,
+                      image: individualStoreUpdates[0].logoUrl,
+                      index: indexClicked,
+                      updates: updates,
+                    );
+                  }).toList(),
+                ),
+              ),
+        const SizedBox(height: 10.0),
+        SizedBox(
           height: 250.h,
           child: CarouselSlider(
             options: CarouselOptions(
@@ -412,17 +504,17 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   color: hexToColor('#F5F5F5'),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Center(
+                child: const Center(
                   child: Text('Second Page Content'),
                 ),
               ),
             ],
           ),
         ),
-        SizedBox(height: 30.h),
+        SizedBox(height: 40.h),
         GridView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
@@ -493,11 +585,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
         Container(
           height: 340.h,
-          padding: EdgeInsets.only(left: 8.0),
+          padding: const EdgeInsets.only(left: 8.0),
           child: TabBarView(
             controller: _tabController,
             children: [
               ListView.builder(
+                shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 itemCount: featuredProducts.length,
                 itemBuilder: (context, index) {
@@ -507,6 +600,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
               ),
               ListView.builder(
+                shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
@@ -516,6 +610,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
               ),
               ListView.builder(
+                shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
@@ -525,6 +620,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
               ),
               ListView.builder(
+                shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
@@ -534,6 +630,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
               ),
               ListView.builder(
+                shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
@@ -543,6 +640,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
               ),
               ListView.builder(
+                shrinkWrap: true,
                 scrollDirection: Axis.horizontal,
                 itemCount: 5,
                 itemBuilder: (context, index) {
@@ -557,7 +655,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
         SizedBox(height: 30.h),
 
-        Container(
+        SizedBox(
           height: 350.h,
           child: CarouselSlider(
             options: CarouselOptions(
@@ -573,7 +671,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   color: hexToColor('#F5F5F5'),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Center(
+                child: const Center(
                   child: Text('First Page Content'),
                 ),
               ),
@@ -583,7 +681,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   color: hexToColor('#F5F5F5'),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Center(
+                child: const Center(
                   child: Text('Second Page Content'),
                 ),
               ),
@@ -593,7 +691,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   color: hexToColor('#F5F5F5'),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Center(
+                child: const Center(
                   child: Text('Third Page Content'),
                 ),
               ),
@@ -622,6 +720,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         SizedBox(
           height: 200.h,
           child: ListView(
+            shrinkWrap: true,
             scrollDirection: Axis.horizontal,
             children: [
               ...featuredStores.map((store) {
@@ -631,8 +730,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               }).toList(),
               GestureDetector(
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => StoresScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const StoresScreen()));
                 },
                 child: Container(
                   padding: EdgeInsets.all(18.w),
@@ -643,7 +744,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                         height: 120.h,
                         width: 120.w,
                         decoration: BoxDecoration(
-                          color: Color(0xFFF5F5F5),
+                          color: const Color(0xFFF5F5F5),
                           borderRadius: BorderRadius.circular(23.r),
                         ),
                         child: const Center(
@@ -684,7 +785,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               SizedBox(height: 30.h),
               GridView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 padding: EdgeInsets.symmetric(horizontal: 12.w),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
@@ -712,7 +813,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 class StoreTile extends StatelessWidget {
   final StoreModel store;
 
-  StoreTile({required this.store});
+  const StoreTile({super.key, required this.store});
 
   @override
   Widget build(BuildContext context) {
@@ -758,7 +859,7 @@ class StoreTile extends StatelessWidget {
 class CategoryTile extends StatelessWidget {
   Map<String, dynamic> category;
 
-  CategoryTile({required this.category});
+  CategoryTile({super.key, required this.category});
 
   @override
   Widget build(BuildContext context) {
@@ -920,25 +1021,34 @@ class CategoryProductsScreen extends StatelessWidget {
 class UpdateTile extends StatelessWidget {
   final String name;
   final String image;
+  final int index;
+  final List<StoreUpdateModel> updates;
 
-  UpdateTile({
+  const UpdateTile({
+    super.key,
     required this.name,
     required this.image,
+    required this.index,
+    required this.updates,
   });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        /*Navigator.push(
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => UpdateScreen(
               storeName: name,
-              storeImage: Image.asset(image),
+              storeImage: Image(
+                image: CachedNetworkImageProvider(updates[index].logoUrl),
+              ),
+              initialUpdateIndex: index,
+              updates: updates,
             ),
           ),
-        );*/
+        );
       },
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 12.w),
@@ -951,7 +1061,7 @@ class UpdateTile extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(
-                  image: AssetImage(image),
+                  image: CachedNetworkImageProvider(image),
                   fit: BoxFit.cover,
                 ),
               ),

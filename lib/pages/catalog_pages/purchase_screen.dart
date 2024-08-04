@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -74,17 +75,18 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                       ),
                     ],
                   ),
-                  Spacer(),
+                  const Spacer(),
                   IconButton(
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
+                      backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
-                      shape: WidgetStateProperty.all(
-                        CircleBorder(),
+                      shape: MaterialStateProperty.all(
+                        const CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                    icon: const Icon(Icons.arrow_back_ios_new,
+                        color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -116,17 +118,17 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             Expanded(
               child: StreamBuilder<QuerySnapshot>(
                 stream: _ordersStream,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
-                    return Center(child: Text('Something went wrong'));
+                    return const Center(child: Text('Something went wrong'));
                   }
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
 
                   final orders = snapshot.data!.docs;
@@ -141,7 +143,6 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
                       final order =
                           orders[index].data() as Map<String, dynamic>;
                       return PurchaseItemTile(
-
                         order: order,
                       );
                     },
@@ -218,7 +219,7 @@ class _PurchaseItemTileState extends State<PurchaseItemTile> {
                     fontSize: 18.sp,
                   ),
                 ),
-                SizedBox(height: 50.h),
+                SizedBox(height: 40.h),
                 Text(
                   '₹${(widget.order['priceDetails']['price'] * widget.order['quantity']).toStringAsFixed(2)}',
                   style: TextStyle(
@@ -226,67 +227,69 @@ class _PurchaseItemTileState extends State<PurchaseItemTile> {
                     fontSize: 28.sp,
                   ),
                 ),
-                SizedBox(height: 40.h),
-                Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DetailScreen(
-                              order: widget.order,
+                SizedBox(height: 10.h),
+                Expanded(
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => DetailScreen(
+                                order: widget.order,
+                              ),
                             ),
+                          );
+                        },
+                        child: Container(
+                          height: 50.h,
+                          width: 105.w,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: hexToColor('#343434')),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
-                        );
-                      },
-                      child: Container(
-                        height: 50.h,
-                        width: 105.w,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: hexToColor('#343434')),
-                          borderRadius: BorderRadius.circular(50.r),
-                        ),
-                        child: Text(
-                          'Details',
-                          style: TextStyle(
-                            color: hexToColor('#737373'),
-                            fontSize: 17.sp,
+                          child: Text(
+                            'Details',
+                            style: TextStyle(
+                              color: hexToColor('#737373'),
+                              fontSize: 17.sp,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(width: 8.0),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => TrackOrderScreen(
-                              order: widget.order,
+                      const SizedBox(width: 8.0),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TrackOrderScreen(
+                                order: widget.order,
+                              ),
                             ),
+                          );
+                        },
+                        child: Container(
+                          height: 50.h,
+                          width: 150.w,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: hexToColor('#343434'),
+                            borderRadius: BorderRadius.circular(50.r),
                           ),
-                        );
-                      },
-                      child: Container(
-                        height: 50.h,
-                        width: 150.w,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: hexToColor('#343434'),
-                          borderRadius: BorderRadius.circular(50.r),
-                        ),
-                        child: Text(
-                          'Track Order',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 17.sp,
+                          child: Text(
+                            'Track Order',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 17.sp,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 )
               ],
             ),

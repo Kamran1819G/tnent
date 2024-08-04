@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:tnent/models/store_update_model.dart';
@@ -19,8 +20,9 @@ class UpdateScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _UpdateScreenState createState() => _UpdateScreenState();
+  UpdateScreenState createState() => UpdateScreenState();
 }
+
 
 class _UpdateScreenState extends State<UpdateScreen> with SingleTickerProviderStateMixin {
   late int currentUpdateIndex;
@@ -160,7 +162,6 @@ class _UpdateScreenState extends State<UpdateScreen> with SingleTickerProviderSt
                   length: widget.updates.length,
                 ),
               ),
-
               Align(
                 alignment: Alignment(0, -0.95),
                 child: Padding(
