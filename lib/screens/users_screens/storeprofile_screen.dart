@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
@@ -135,17 +134,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
       },
       'timestamp': FieldValue.serverTimestamp(),
     });
-
-    // Send push notification
-    await FirebaseMessaging.instance.sendMessage(
-      to: '/topics/store_${widget.store.storeId}',
-      data: {
-        'type': 'store',
-        'name': currentUser!.firstName,
-        'image': currentUser!.photoURL.toString(),
-        // You can update this with the actual image path
-      },
-    );
   }
 
   Future<void> _fetchUserDetails() async {
@@ -459,7 +447,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                   ),
                                   SizedBox(width: 8.w),
                                   Text(
-                                    widget.store.website,
+                                    '${widget.store.storeDomain}.tnent.com',
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontFamily: 'Poppins',
@@ -479,9 +467,9 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           IconButton(
-                              onPressed: () async{
+                              onPressed: () async {
                                 final String shareMessage =
-                                    'Check out ${widget.store.name} on Tnent! ${widget.store.website}';
+                                    'Check out ${widget.store.name} on Tnent! https://${widget.store.storeDomain}.tnent.com';
                                 await Share.share(shareMessage);
                               },
                               icon: Icon(Icons.ios_share,

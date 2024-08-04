@@ -41,7 +41,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   late String storeName = store.name;
   late String storeCategory = store.category;
   late String storeLocation = store.location;
-  late String storeWebsite = store.website;
+  late String storeDomain = store.storeDomain;
   late bool isActive = store.isActive;
   late int totalProducts = store.totalProducts;
   late int totalPosts = store.totalPosts;
@@ -270,7 +270,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
         storeName = store.name;
         storeCategory = store.category;
         storeLocation = store.location;
-        storeWebsite = store.website;
+        storeDomain = store.storeDomain;
         isActive = store.isActive;
         totalProducts = store.totalProducts;
         totalPosts = store.totalPosts;
@@ -441,7 +441,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                   ),
                                   SizedBox(width: 8.w),
                                   Text(
-                                    storeWebsite,
+                                    '${storeDomain}.tnent.com',
                                     style: TextStyle(
                                         color: Colors.white,
                                         fontFamily: 'Poppins',
@@ -463,7 +463,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                           IconButton(
                               onPressed: () async {
                                 final String shareMessage =
-                                    'Check out ${widget.store.name} on Tnent! ${widget.store.website}';
+                                    'Check out ${widget.store.name} on Tnent! https://${widget.store.storeDomain}.tnent.com';
                                 await Share.share(shareMessage);
                               },
                               icon: Icon(Icons.ios_share,

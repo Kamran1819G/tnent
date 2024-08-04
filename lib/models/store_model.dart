@@ -7,7 +7,7 @@ class StoreModel {
   final String logoUrl;
   final String phone;
   final String email;
-  final String website;
+  final String storeDomain;
   final String upiUsername;
   final String upiId;
   final String location;
@@ -29,7 +29,7 @@ class StoreModel {
     required this.logoUrl,
     required this.phone,
     required this.email,
-    required this.website,
+    required this.storeDomain,
     required this.upiUsername,
     required this.upiId,
     required this.location,
@@ -54,7 +54,7 @@ class StoreModel {
       logoUrl: data['logoUrl'] ?? 'https://via.placeholder.com/150',
       phone: data['phone'],
       email: data['email'],
-      website: data['website'],
+      storeDomain: data['storeDomain'],
       upiUsername: data['upiUsername'],
       upiId: data['upiId'],
       location: data['location'],
@@ -79,7 +79,7 @@ class StoreModel {
       'logoUrl': logoUrl,
       'phone': phone,
       'email': email,
-      'website': website,
+      'storeDomain': storeDomain,
       'upiUsername': upiUsername,
       'upiId': upiId,
       'location': location,

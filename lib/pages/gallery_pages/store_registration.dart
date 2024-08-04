@@ -64,7 +64,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
-  final _websiteController = TextEditingController();
+  final _storeDomainController = TextEditingController();
   final _upiUsernameController = TextEditingController();
   final _upiIdController = TextEditingController();
   final _locationController = TextEditingController();
@@ -109,8 +109,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         name: _nameController.text,
         phone: _phoneController.text,
         email: _emailController.text,
-        logoUrl: "https://firebasestorage.googleapis.com/v0/b/tnent-1e1f2.appspot.com/o/Don't%20Delete%2Fblack_tnent_logo.png?alt=media&token=7880c411-c4dc-4615-b800-f55193f23721",
-        website: '${_websiteController.text}.tnent.com',
+        logoUrl:
+            "https://firebasestorage.googleapis.com/v0/b/tnent-1e1f2.appspot.com/o/Don't%20Delete%2Fblack_tnent_logo.png?alt=media&token=7880c411-c4dc-4615-b800-f55193f23721",
+        storeDomain: '${_storeDomainController.text}.tnent.com',
         upiUsername: _upiUsernameController.text,
         upiId: _upiIdController.text,
         location: _locationController.text,
@@ -148,7 +149,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
 
   Future<void> _validateStoreDomain(String domain) async {
     final storeRef = FirebaseFirestore.instance.collection('Stores');
-    final querySnapshot = await storeRef.where('website', isEqualTo: '$domain.tnent.com').get();
+    final querySnapshot =
+        await storeRef.where('storeDomain', isEqualTo: domain).get();
 
     setState(() {
       _isStoreDomainUnique = querySnapshot.docs.isEmpty;
@@ -800,7 +802,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         onTap: () {
                           _pageController.jumpToPage(_currentPageIndex + 1);
                           setState(() {
-                            _websiteController.text = _nameController.text
+                            _storeDomainController.text = _nameController.text
                                 .toLowerCase()
                                 .replaceAll(' ', '');
                           });
@@ -858,7 +860,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       margin: EdgeInsets.only(left: 45.w),
                       width: 515.w,
                       child: TextField(
-                        controller: _websiteController,
+                        controller: _storeDomainController,
                         style: TextStyle(
                           fontFamily: 'Gotham',
                           fontWeight: FontWeight.w500,

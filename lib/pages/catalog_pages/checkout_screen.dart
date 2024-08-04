@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -1201,7 +1200,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                     ),
                     SizedBox(width: 6.h),
                     Text(
-                      store.website,
+                      '${store.storeDomain}.tnent.com',
                       style: TextStyle(
                         color: hexToColor('#A9A9A9'),
                         fontSize: 14.sp,
@@ -1581,8 +1580,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                           Icons.check,
                                           color: Colors.white,
                                           size: 20.sp,
-                
-                                        
                                         ),
                                       ),
                                     ],
@@ -1599,10 +1596,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                 ],
                               ),
                             ),
-                            
-                            
-                            
-                            
                           ],
                         ),
                       ],
@@ -2345,4 +2338,3 @@ class _TransactionScreenState extends State<TransactionScreen> {
     );
   }
 }
-

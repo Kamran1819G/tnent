@@ -12,6 +12,7 @@ import 'package:quickalert/quickalert.dart';
 import 'package:tnent/models/user_model.dart';
 import 'package:tnent/pages/catalog_pages/checkout_screen.dart';
 import 'package:tnent/screens/webview_screen.dart';
+import 'package:tnent/services/notification_service.dart';
 
 import '../../helpers/snackbar_utils.dart';
 import '../../services/firebase/firebase_auth_service.dart';
@@ -299,6 +300,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             confirmBtnColor: Colors.red,
                             action: () {
                               Navigator.of(context).pop();
+                              NotificationService.onUserLogout();
                               Auth().signOut();
                               Navigator.pushReplacement(
                                 context,

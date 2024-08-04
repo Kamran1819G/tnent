@@ -235,7 +235,7 @@ class _GalleryState extends State<Gallery> {
                                         ),
                                         SizedBox(width: 5.0),
                                         Text(
-                                          store.website,
+                                          '${store.storeDomain}.tnent.com',
                                           style: TextStyle(
                                             color: Colors.white,
                                             fontSize: 10.0,

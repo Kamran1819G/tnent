@@ -234,7 +234,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                 ),
                 const SizedBox(width: 5),
                 Text(
-                  widget.store.website,
+                  '${widget.store.storeDomain}.tnent.com',
                   style: TextStyle(
                     color: Theme.of(context).primaryColor,
                     fontSize: 16.sp,

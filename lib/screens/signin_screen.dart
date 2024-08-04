@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
+import 'package:tnent/services/notification_service.dart';
 import 'package:tnent/helpers/snackbar_utils.dart';
 import 'package:tnent/screens/signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -34,6 +35,7 @@ class _SignInScreenState extends State<SignInScreen> {
           builder: (context) => const WidgetTree(),
         ),
       );
+      await NotificationService.onUserLogin();
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = e.message;

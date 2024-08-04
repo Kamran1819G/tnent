@@ -8,8 +8,7 @@ import 'package:tnent/helpers/color_utils.dart';
 import 'package:tnent/screens/onboarding_screen.dart';
 import 'package:tnent/services/permission_handler_service.dart';
 import 'package:tnent/widget_tree.dart';
-
-import 'controllers/notfication_controller.dart';
+import 'package:tnent/services/notification_service.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -18,39 +17,12 @@ Future<void> main() async {
   final PermissionHandlerService permissionHandler = PermissionHandlerService();
   await permissionHandler.requestMultiplePermissions();
 
-  await AwesomeNotifications().initialize(
-    null, // null means it will use the default app icon
-    [
-      NotificationChannel(
-        channelKey: 'basic_channel',
-        channelName: 'Basic Notifications',
-        channelDescription: 'Notification channel for basic notifications',
-        defaultColor: const Color(0xFF9D50DD),
-        ledColor: const Color(0xFF9D50DD),
-        importance: NotificationImportance.High,
-        channelShowBadge: true,
-      ),
-      NotificationChannel(
-        channelKey: 'order_channel',
-        channelName: 'Order Notifications',
-        channelDescription: 'Notification channel for order notifications',
-        defaultColor: const Color(0xFF9D50DD),
-        ledColor: const Color(0xFF9D50DD),
-        importance: NotificationImportance.High,
-        channelShowBadge: true,
-      )
-    ],
-  );
-
-  bool isNotificationAllowed =
-      await AwesomeNotifications().isNotificationAllowed();
-  if (!isNotificationAllowed) {
-    await AwesomeNotifications().requestPermissionToSendNotifications();
-  }
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await NotificationService.initialize();
+
   final prefs = await SharedPreferences.getInstance();
   final onboarding = prefs.getBool('onboarding') ?? false;
   runApp(MyApp(onboarding: onboarding));
@@ -69,13 +41,13 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     AwesomeNotifications().setListeners(
-      onActionReceivedMethod: NotificationController.onActionReceivedMethod,
+      onActionReceivedMethod: NotificationService.onActionReceivedMethod,
       onNotificationCreatedMethod:
-          NotificationController.onNotificationCreatedMethod,
+          NotificationService.onNotificationCreatedMethod,
       onNotificationDisplayedMethod:
-          NotificationController.onNotificationDisplayedMethod,
+          NotificationService.onNotificationDisplayedMethod,
       onDismissActionReceivedMethod:
-          NotificationController.onDismissActionReceivedMethod,
+          NotificationService.onDismissActionReceivedMethod,
     );
     super.initState();
   }

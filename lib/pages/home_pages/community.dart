@@ -38,9 +38,15 @@ class _CommunityState extends State<Community> {
   Future<void> _checkUserStoreId() async {
     final user = _auth.currentUser;
     if (user != null) {
-      final userDoc = await _firestore.collection('Users').doc(user.uid).get(GetOptions(source: Source.cache));
+      final userDoc = await _firestore
+          .collection('Users')
+          .doc(user.uid)
+          .get(GetOptions(source: Source.cache));
       if (!userDoc.exists) {
-        final serverDoc = await _firestore.collection('Users').doc(user.uid).get(GetOptions(source: Source.server));
+        final serverDoc = await _firestore
+            .collection('Users')
+            .doc(user.uid)
+            .get(GetOptions(source: Source.server));
         setState(() {
           storeId = serverDoc.data()?['storeId'] ?? '';
           _hasStoreId = storeId.isNotEmpty;
@@ -173,7 +179,8 @@ class _CommunityPostState extends State<CommunityPost> {
   }
 
   Future<StoreModel> _getStoreData() async {
-    DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(widget.post.storeId).get();
+    DocumentSnapshot storeDoc =
+        await _firestore.collection('Stores').doc(widget.post.storeId).get();
     return StoreModel.fromFirestore(storeDoc);
   }
 
@@ -282,6 +289,7 @@ class _CommunityPostState extends State<CommunityPost> {
       ),
     );
   }
+
   Widget _buildUserInfo(StoreModel store) {
     return Row(
       children: [
@@ -563,7 +571,8 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
         });
       } else {
         // Compress the image
-        final String targetPath = file.path.replaceAll('.jpg', '_compressed.jpg');
+        final String targetPath =
+            file.path.replaceAll('.jpg', '_compressed.jpg');
         final result = await FlutterImageCompress.compressAndGetFile(
           file.path,
           targetPath,
@@ -580,7 +589,7 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
             });
           } else {
             showSnackBar(context,
-            'The selected image is too large. Please select an image smaller than 500 KB.');
+                'The selected image is too large. Please select an image smaller than 500 KB.');
           }
         }
       }
@@ -592,8 +601,10 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
     final user = FirebaseAuth.instance.currentUser;
 
     List<Future<String>> uploadFutures = _images.map((image) async {
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${user!.uid}.jpg';
-      final Reference storageRef = storage.ref().child('community_posts/$fileName');
+      final fileName =
+          '${DateTime.now().millisecondsSinceEpoch}_${user!.uid}.jpg';
+      final Reference storageRef =
+          storage.ref().child('community_posts/$fileName');
 
       try {
         await storageRef.putFile(image);
@@ -607,7 +618,6 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
     List<String> imageUrls = await Future.wait(uploadFutures);
     return imageUrls.where((url) => url.isNotEmpty).toList();
   }
-
 
   Future<void> _createPost() async {
     setState(() {
