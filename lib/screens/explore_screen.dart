@@ -36,18 +36,29 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
     try {
       // Fetch all products and stores
-      QuerySnapshot productSnapshot = await FirebaseFirestore.instance.collection('products').get();
-      QuerySnapshot storeSnapshot = await FirebaseFirestore.instance.collection('Stores').get();
+      QuerySnapshot productSnapshot =
+          await FirebaseFirestore.instance.collection('products').get();
+      QuerySnapshot storeSnapshot =
+          await FirebaseFirestore.instance.collection('Stores').get();
 
       // Convert to lists of models
-      List<ProductModel> allProducts = productSnapshot.docs.map((doc) => ProductModel.fromFirestore(doc)).toList();
-      List<StoreModel> allStores = storeSnapshot.docs.map((doc) => StoreModel.fromFirestore(doc)).toList();
+      List<ProductModel> allProducts = productSnapshot.docs
+          .map((doc) => ProductModel.fromFirestore(doc))
+          .toList();
+      List<StoreModel> allStores = storeSnapshot.docs
+          .map((doc) => StoreModel.fromFirestore(doc))
+          .toList();
 
       // Filter based on search query
       if (searchQuery.isNotEmpty) {
         String lowercaseQuery = searchQuery.toLowerCase();
-        products = allProducts.where((product) => product.name.toLowerCase().contains(lowercaseQuery)).toList();
-        stores = allStores.where((store) => store.name.toLowerCase().contains(lowercaseQuery)).toList();
+        products = allProducts
+            .where((product) =>
+                product.name.toLowerCase().contains(lowercaseQuery))
+            .toList();
+        stores = allStores
+            .where((store) => store.name.toLowerCase().contains(lowercaseQuery))
+            .toList();
       } else {
         products = allProducts;
         stores = allStores;
@@ -153,37 +164,39 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (context) => NotificationScreen()));
+                                    builder: (context) =>
+                                        NotificationScreen()));
                             setState(() {
                               isNewNotification = false;
                             });
                           },
                           child: isNewNotification
                               ? Image.asset(
-                            'assets/icons/new_notification_box.png',
-                            height: 35.h,
-                            width: 35.w,
-                            fit: BoxFit.cover,
-                          )
+                                  'assets/icons/new_notification_box.png',
+                                  height: 35.h,
+                                  width: 35.w,
+                                  fit: BoxFit.cover,
+                                )
                               : Image.asset(
-                            'assets/icons/no_new_notification_box.png',
-                            height: 35.h,
-                            width: 35.w,
-                            fit: BoxFit.cover,
-                          )),
+                                  'assets/icons/no_new_notification_box.png',
+                                  height: 35.h,
+                                  width: 35.w,
+                                  fit: BoxFit.cover,
+                                )),
                       SizedBox(width: 22.w),
                       IconButton(
                         style: ButtonStyle(
-                          backgroundColor: WidgetStateProperty.all(
+                          backgroundColor: MaterialStateProperty.all(
                             Colors.grey[100],
                           ),
-                          shape: WidgetStateProperty.all(
+                          shape: MaterialStateProperty.all(
                             CircleBorder(),
                           ),
                         ),
-                        icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        icon:
+                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
                         onPressed: () {
-                            Navigator.pop(context);
+                          Navigator.pop(context);
                         },
                       ),
                     ],
@@ -303,7 +316,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             if (stores.isNotEmpty) ...[
                               SliverToBoxAdapter(
                                 child: Padding(
-                                  padding: EdgeInsets.only(left: 20.w, top: 20.h, bottom: 20.h),
+                                  padding: EdgeInsets.only(
+                                      left: 20.w, top: 20.h, bottom: 20.h),
                                   child: Text(
                                     'Stores',
                                     style: TextStyle(
@@ -314,7 +328,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               ),
                               SliverList(
                                 delegate: SliverChildBuilderDelegate(
-                                      (context, index) => StoreTile(store: stores[index]),
+                                  (context, index) =>
+                                      StoreTile(store: stores[index]),
                                   childCount: stores.length,
                                 ),
                               ),
@@ -322,7 +337,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                             if (products.isNotEmpty) ...[
                               SliverToBoxAdapter(
                                 child: Padding(
-                                  padding: EdgeInsets.only(left: 20.w, top: 20.h, bottom: 20.h),
+                                  padding: EdgeInsets.only(
+                                      left: 20.w, top: 20.h, bottom: 20.h),
                                   child: Text(
                                     'Products',
                                     style: TextStyle(
@@ -334,10 +350,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
                               SliverGrid(
                                 gridDelegate:
                                     SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: 8,
-                                      mainAxisSpacing: 8,
-                                      childAspectRatio: 0.8,
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 8,
+                                  mainAxisSpacing: 8,
+                                  childAspectRatio: 0.8,
                                 ),
                                 delegate: SliverChildBuilderDelegate(
                                   (BuildContext context, int index) {

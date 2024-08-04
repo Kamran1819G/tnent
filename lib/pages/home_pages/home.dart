@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnent/helpers/color_utils.dart';
 import 'package:tnent/models/store_category_model.dart';
@@ -19,6 +21,7 @@ import 'package:tnent/screens/notification_screen.dart';
 import 'package:tnent/screens/stores_screen.dart';
 import 'package:tnent/screens/users_screens/myprofile_screen.dart';
 import 'package:tnent/widgets/wishlist_product_tile.dart';
+import '../../screens/update_screen.dart';
 import '../../screens/users_screens/storeprofile_screen.dart';
 
 class Home extends StatefulWidget {
@@ -70,12 +73,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     },
   ];
 
-  List<dynamic> updates = List.generate(5, (index) {
-    return {
-      "name": "Sahachari",
-      "coverImage": "assets/sahachari_image.png",
-    };
-  });
+  List<StoreUpdateModel> updates = [];
 
   /*List<ProductModel> featuredProducts = List.generate(5, (index) {
     return ProductModel(
@@ -153,6 +151,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     super.initState();
     _fetchFeaturedStores();
     _fetchFeaturedProducts();
+    _fetchUpdates();
+
     setState(() {
       firstName = widget.currentUser.firstName;
       lastName = widget.currentUser.lastName;
@@ -214,7 +214,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
       // Extract the store IDs from the array field
       final List<String> storeId =
-      List<String>.from(featuredStoreDoc['stores'] ?? []);
+          List<String>.from(featuredStoreDoc['stores'] ?? []);
 
       // Fetch the actual store documents using the store IDs
       if (storeId.isNotEmpty) {
@@ -248,7 +248,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
       // Extract the product IDs from the array field
       final List<String> productIds =
-      List<String>.from(featuredProductDoc['products'] ?? []);
+          List<String>.from(featuredProductDoc['products'] ?? []);
 
       // Fetch the actual product documents using the product IDs
       if (productIds.isNotEmpty) {
@@ -275,6 +275,62 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       }
     } catch (e) {
       print('Error fetching featured products: $e');
+    }
+  }
+
+  void _fetchUpdates() async {
+    List<StoreUpdateModel> fetchedUpdates = await _fetchAndPopulateUpdates();
+    setState(() {
+      updates = fetchedUpdates;
+      sortInGroupedupdates();
+    });
+  }
+
+  Future<List<StoreUpdateModel>> _fetchAndPopulateUpdates() async {
+    final now = DateTime.now();
+    final oneDayAgo = now.subtract(const Duration(hours: 24));
+    final currentUserId = FirebaseAuth.instance.currentUser!.uid;
+
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection('storeUpdates')
+        .where('createdAt', isGreaterThanOrEqualTo: oneDayAgo)
+        .get();
+
+    List<StoreUpdateModel> updates = [];
+
+    for (var doc in snapshot.docs) {
+      final createdAt = (doc['createdAt'] as Timestamp).toDate();
+      final expiresAt = (doc['expiresAt'] as Timestamp).toDate();
+      final storeId = doc['storeId'];
+
+      if (now.isBefore(expiresAt) && createdAt.isAfter(oneDayAgo)) {
+        DocumentSnapshot storeDoc = await FirebaseFirestore.instance
+            .collection('Stores')
+            .doc(storeId)
+            .get();
+
+        List<String> followerIds = List<String>.from(storeDoc['followerIds']);
+        if (followerIds.contains(currentUserId)) {
+          final storeUpdateModel = StoreUpdateModel.fromFirestore(doc);
+          // Handling the logic that 2/more updates from same store dont show individually in home page
+
+          updates.add(storeUpdateModel);
+        }
+      }
+    }
+
+    return updates;
+  }
+
+  Map<String, List<StoreUpdateModel>> groupedUpdates = {};
+
+  void sortInGroupedupdates() {
+    for (var update in updates) {
+      if (groupedUpdates.containsKey(update.storeName)) {
+        groupedUpdates[update.storeName]!.add(update);
+      } else {
+        groupedUpdates[update.storeName] = [update];
+      }
     }
   }
 
@@ -328,7 +384,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               GestureDetector(
                 onTap: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) {
-                    return CartScreen();
+                    return const CartScreen();
                   }));
                 },
                 child: Icon(
@@ -343,44 +399,44 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => NotificationScreen()));
+                            builder: (context) => const NotificationScreen()));
                     setState(() {
                       isNewNotification = false;
                     });
                   },
                   child: isNewNotification
                       ? Image.asset(
-                    'assets/icons/new_notification_box.png',
-                    height: 35.h,
-                    width: 35.w,
-                    fit: BoxFit.cover,
-                  )
+                          'assets/icons/new_notification_box.png',
+                          height: 35.h,
+                          width: 35.w,
+                          fit: BoxFit.cover,
+                        )
                       : Image.asset(
-                    'assets/icons/no_new_notification_box.png',
-                    height: 35.h,
-                    width: 35.w,
-                    fit: BoxFit.cover,
-                  )),
+                          'assets/icons/no_new_notification_box.png',
+                          height: 35.h,
+                          width: 35.w,
+                          fit: BoxFit.cover,
+                        )),
               SizedBox(width: 22.w),
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => MyProfileScreen()));
+                          builder: (context) => const MyProfileScreen()));
                 },
                 child: widget.currentUser.photoURL != null
                     ? CircleAvatar(
-                  radius: 30.0,
-                  backgroundImage:
-                  NetworkImage(widget.currentUser.photoURL ?? ''),
-                )
+                        radius: 30.0,
+                        backgroundImage:
+                            NetworkImage(widget.currentUser.photoURL ?? ''),
+                      )
                     : CircleAvatar(
-                  radius: 30.0,
-                  backgroundColor: Theme.of(context).primaryColor,
-                  child:
-                  Icon(Icons.person, color: Colors.white, size: 30.0),
-                ),
+                        radius: 30.0,
+                        backgroundColor: Theme.of(context).primaryColor,
+                        child: const Icon(Icons.person,
+                            color: Colors.white, size: 30.0),
+                      ),
               ),
             ],
           ),
@@ -388,7 +444,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         GestureDetector(
           onTap: () {
             Navigator.push(context,
-                MaterialPageRoute(builder: (context) => ExploreScreen()));
+                MaterialPageRoute(builder: (context) => const ExploreScreen()));
           },
           child: Container(
             margin: EdgeInsets.all(28.w),
@@ -429,12 +485,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                         fontSize: 24.sp,
                       ),
                     ),
-                    Text(
-                      'clothings, electronics, groceries & more...',
-                      style: TextStyle(
-                        color: hexToColor('#989898'),
-                        fontFamily: 'Gotham',
-                        fontSize: 14.sp,
+                    Expanded(
+                      child: Text(
+                        'clothings, electronics, groceries & more...',
+                        style: TextStyle(
+                          color: hexToColor('#989898'),
+                          fontFamily: 'Gotham',
+                          fontSize: 14.sp,
+                        ),
                       ),
                     ),
                   ],
@@ -457,33 +515,47 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             },
           ),
         ),*/
-        SizedBox(height: 20.0),
-        Container(
-          height: 250.h,
-          child: CarouselSlider(
-            options: CarouselOptions(
-              height: 250.h,
-              viewportFraction: 1.0,
-              autoPlay: true,
-              enlargeCenterPage: true,
-            ),
-            items: [
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 16.w),
-                child: Image.asset(
-                  'assets/store_profile_banner.png',
-                  height: 250.h,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
+        groupedUpdates.isEmpty
+            ? Container()
+            : Container(
+                height: 125.0,
+                padding: const EdgeInsets.only(left: 8.0),
+                child: ListView(
+                  shrinkWrap: true,
+                  scrollDirection: Axis.horizontal,
+                  children: groupedUpdates.entries.map((e) {
+                    String storeName = e.key;
+                    List<StoreUpdateModel> individualStoreUpdates = e.value;
+                    int indexClicked = 0;
+
+                    for (int i = 0; i < updates.length; i++) {
+                      if (updates[i] == individualStoreUpdates[0]) {
+                        indexClicked = i;
+                      }
+                    }
+                    return UpdateTile(
+                      name: storeName,
+                      image: individualStoreUpdates[0].logoUrl,
+                      index: indexClicked,
+                      updates: updates,
+                    );
+                  }).toList(),
                 ),
               ),
+        const SizedBox(height: 10.0),
+        SizedBox(
+          height: 250.h,
+          child: PageView(
+            controller: PageController(viewportFraction: 1),
+            children: [
+              Image.asset('assets/store_profile_banner.png'),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
                 decoration: BoxDecoration(
                   color: hexToColor('#F5F5F5'),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Center(
+                child: const Center(
                   child: Text('Second Page Content'),
                 ),
               ),
@@ -493,7 +565,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         SizedBox(height: 30.h),
         GridView.builder(
           shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
@@ -564,7 +636,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
         Container(
           height: 340.h,
-          padding: EdgeInsets.only(left: 8.0),
+          padding: const EdgeInsets.only(left: 8.0),
           child: TabBarView(
             controller: _tabController,
             children: [
@@ -644,7 +716,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   color: hexToColor('#F5F5F5'),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Center(
+                child: const Center(
                   child: Text('First Page Content'),
                 ),
               ),
@@ -654,7 +726,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   color: hexToColor('#F5F5F5'),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Center(
+                child: const Center(
                   child: Text('Second Page Content'),
                 ),
               ),
@@ -664,7 +736,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   color: hexToColor('#F5F5F5'),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Center(
+                child: const Center(
                   child: Text('Third Page Content'),
                 ),
               ),
@@ -702,8 +774,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               }).toList(),
               GestureDetector(
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => StoresScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const StoresScreen()));
                 },
                 child: Container(
                   padding: EdgeInsets.all(18.w),
@@ -714,7 +788,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                         height: 120.h,
                         width: 120.w,
                         decoration: BoxDecoration(
-                          color: Color(0xFFF5F5F5),
+                          color: const Color(0xFFF5F5F5),
                           borderRadius: BorderRadius.circular(23.r),
                         ),
                         child: const Center(
@@ -755,7 +829,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               SizedBox(height: 30.h),
               GridView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 padding: EdgeInsets.symmetric(horizontal: 12.w),
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
@@ -963,7 +1037,7 @@ class CategoryProductsScreen extends StatelessWidget {
                   return GridView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,
@@ -972,7 +1046,7 @@ class CategoryProductsScreen extends StatelessWidget {
                     itemCount: products.length,
                     itemBuilder: (context, index) {
                       final product =
-                      ProductModel.fromFirestore(products[index]);
+                          ProductModel.fromFirestore(products[index]);
                       return WishlistProductTile(product: product);
                     },
                   );
@@ -989,55 +1063,71 @@ class CategoryProductsScreen extends StatelessWidget {
 class UpdateTile extends StatelessWidget {
   final String name;
   final String image;
+  final int index;
+  final List<StoreUpdateModel> updates;
 
-  UpdateTile({
+  const UpdateTile({
+    super.key,
     required this.name,
     required this.image,
+    required this.index,
+    required this.updates,
   });
+
+  final double size = 30;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        /*Navigator.push(
+        Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => UpdateScreen(
               storeName: name,
-              storeImage: Image.asset(image),
+              storeImage: Image(
+                image: CachedNetworkImageProvider(updates[index].logoUrl),
+              ),
+              initialUpdateIndex: index,
+              updates: updates,
             ),
           ),
-        );*/
+        );
       },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 100.w,
-              height: 100.h,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                image: DecorationImage(
-                  image: AssetImage(image),
-                  fit: BoxFit.cover,
+      child: Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: size + 3.5,
+                backgroundColor: Colors.green,
+                child: CircleAvatar(
+                  radius: size + 1.5,
+                  backgroundColor: Colors.white,
+                  child: CircleAvatar(
+                    backgroundImage: CachedNetworkImageProvider(image),
+                    radius: size,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 12.h),
-            Text(
-              name,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontWeight: FontWeight.w600,
-                fontSize: 15.sp,
+              SizedBox(height: 12.h),
+              Text(
+                name,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15.sp,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                textAlign: TextAlign.center,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              textAlign: TextAlign.center,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

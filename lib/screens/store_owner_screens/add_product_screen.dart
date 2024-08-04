@@ -177,7 +177,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     String skuBase = productName.substring(0, 3).toUpperCase();
     String skuAttributes = attributes.entries
         .map((entry) =>
-    '${entry.key.substring(0, 1).toUpperCase()}${entry.value.toString().substring(0, 1).toUpperCase()}')
+            '${entry.key.substring(0, 1).toUpperCase()}${entry.value.toString().substring(0, 1).toUpperCase()}')
         .join('-');
     return '$skuBase-$skuAttributes-${DateTime.now().millisecondsSinceEpoch}';
   }
@@ -280,10 +280,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   Spacer(),
                   IconButton(
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
+                      backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
-                      shape: WidgetStateProperty.all(
+                      shape: MaterialStateProperty.all(
                         CircleBorder(),
                       ),
                     ),
@@ -363,8 +363,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                     right: 10),
                                                 decoration: BoxDecoration(
                                                   borderRadius:
-                                                  BorderRadius.circular(
-                                                      22.r),
+                                                      BorderRadius.circular(
+                                                          22.r),
                                                   image: DecorationImage(
                                                     image: FileImage(
                                                         _images[index]),
@@ -534,7 +534,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               SizedBox(height: 20.h),
                               Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Container(
                                     width: 190.w,
@@ -561,12 +561,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           size: 30.sp,
                                         ),
                                         prefixIconConstraints:
-                                        BoxConstraints(minWidth: 30),
+                                            BoxConstraints(minWidth: 30),
                                         border: OutlineInputBorder(
                                           borderSide: BorderSide(
                                               color: hexToColor('#848484')),
                                           borderRadius:
-                                          BorderRadius.circular(18.r),
+                                              BorderRadius.circular(18.r),
                                         ),
                                       ),
                                       validator: (value) {
@@ -577,7 +577,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           return null; // Allow empty discount (0%)
                                         }
                                         final double? discount =
-                                        double.tryParse(value);
+                                            double.tryParse(value);
                                         if (discount == null ||
                                             discount < 0 ||
                                             discount > 100) {
@@ -613,12 +613,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           size: 30.sp,
                                         ),
                                         prefixIconConstraints:
-                                        BoxConstraints(minWidth: 30),
+                                            BoxConstraints(minWidth: 30),
                                         border: OutlineInputBorder(
                                           borderSide: BorderSide(
                                               color: hexToColor('#848484')),
                                           borderRadius:
-                                          BorderRadius.circular(18.r),
+                                              BorderRadius.circular(18.r),
                                         ),
                                       ),
                                       validator: (value) {
@@ -626,7 +626,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           return 'Please enter the MRP';
                                         }
                                         final double? mrp =
-                                        double.tryParse(value);
+                                            double.tryParse(value);
                                         if (mrp == null || mrp <= 0) {
                                           return 'Please enter a valid MRP';
                                         }
@@ -660,12 +660,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           size: 30.sp,
                                         ),
                                         prefixIconConstraints:
-                                        BoxConstraints(minWidth: 30),
+                                            BoxConstraints(minWidth: 30),
                                         border: OutlineInputBorder(
                                           borderSide: BorderSide(
                                               color: hexToColor('#848484')),
                                           borderRadius:
-                                          BorderRadius.circular(18.r),
+                                              BorderRadius.circular(18.r),
                                         ),
                                       ),
                                     ),
@@ -703,7 +703,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               ),
                               decoration: InputDecoration(
                                 floatingLabelBehavior:
-                                FloatingLabelBehavior.always,
+                                    FloatingLabelBehavior.always,
                                 labelText: 'Description',
                                 labelStyle: TextStyle(
                                   color: hexToColor('#545454'),
@@ -773,7 +773,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                             color: hexToColor('#848484'),
                                           ),
                                           borderRadius:
-                                          BorderRadius.circular(18),
+                                              BorderRadius.circular(18),
                                         ),
                                         contentPadding: EdgeInsets.symmetric(
                                           horizontal: 20,
@@ -785,7 +785,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           return 'Please enter the stock quantity';
                                         }
                                         final int? stockQuantity =
-                                        int.tryParse(value);
+                                            int.tryParse(value);
                                         if (stockQuantity == null ||
                                             stockQuantity < 0) {
                                           return 'Please enter a valid stock quantity';
@@ -832,30 +832,30 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       Center(
                         child: isSubmitting
                             ? CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              hexToColor('#2B2B2B')),
-                        )
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                    hexToColor('#2B2B2B')),
+                              )
                             : ElevatedButton(
-                          onPressed: isMultiOptionCategory
-                              ? _navigateToOptionalsScreen
-                              : _addSingleVariantProduct,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: hexToColor('#2B2B2B'),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 75, vertical: 16),
-                            shape: RoundedRectangleBorder(
-                                borderRadius:
-                                BorderRadius.circular(50.r)),
-                          ),
-                          child: Text(
-                            isMultiOptionCategory ? 'Next' : 'List Item',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 25.sp,
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w500),
-                          ),
-                        ),
+                                onPressed: isMultiOptionCategory
+                                    ? _navigateToOptionalsScreen
+                                    : _addSingleVariantProduct,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: hexToColor('#2B2B2B'),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 75, vertical: 16),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                          BorderRadius.circular(50.r)),
+                                ),
+                                child: Text(
+                                  isMultiOptionCategory ? 'Next' : 'List Item',
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 25.sp,
+                                      fontFamily: 'Gotham',
+                                      fontWeight: FontWeight.w500),
+                                ),
+                              ),
                       ),
                       SizedBox(height: 30),
                     ],

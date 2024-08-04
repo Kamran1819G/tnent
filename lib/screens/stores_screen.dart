@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../helpers/color_utils.dart';
@@ -15,6 +14,72 @@ class StoresScreen extends StatefulWidget {
 }
 
 class _StoresScreenState extends State<StoresScreen> {
+  final ScrollController _scrollController = ScrollController();
+  List<StoreModel> stores = [];
+  bool isLoadingMore = false;
+  DocumentSnapshot? lastDocument;
+  bool hasMore = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStores();
+
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _fetchMoreStores();
+      }
+    });
+  }
+
+  Future<void> _fetchStores() async {
+    Query query = FirebaseFirestore.instance.collection('Stores').limit(24);
+
+    QuerySnapshot snapshot = await query.get();
+
+    if (snapshot.docs.isNotEmpty) {
+      setState(() {
+        stores =
+            snapshot.docs.map((doc) => StoreModel.fromFirestore(doc)).toList();
+        lastDocument = snapshot.docs.last;
+        hasMore = snapshot.docs.length == 24;
+      });
+    }
+  }
+
+  Future<void> _fetchMoreStores() async {
+    if (!isLoadingMore && hasMore) {
+      setState(() => isLoadingMore = true);
+
+      Query query = FirebaseFirestore.instance
+          .collection('Stores')
+          .startAfterDocument(lastDocument!)
+          .limit(10);
+
+      QuerySnapshot snapshot = await query.get();
+
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          stores.addAll(snapshot.docs
+              .map((doc) => StoreModel.fromFirestore(doc))
+              .toList());
+          lastDocument = snapshot.docs.last;
+          hasMore = snapshot.docs.length == 10;
+          isLoadingMore = false;
+        });
+      } else {
+        setState(() => hasMore = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,7 +88,7 @@ class _StoresScreenState extends State<StoresScreen> {
           children: [
             Container(
               height: 100,
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
                 children: [
                   Row(
@@ -45,14 +110,14 @@ class _StoresScreenState extends State<StoresScreen> {
                       ),
                     ],
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Container(
-                    margin: EdgeInsets.all(8.0),
+                    margin: const EdgeInsets.all(8.0),
                     child: CircleAvatar(
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
-                        icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        icon: const Icon(Icons.arrow_back_ios_new,
+                            color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -62,41 +127,30 @@ class _StoresScreenState extends State<StoresScreen> {
                 ],
               ),
             ),
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream:
-                    FirebaseFirestore.instance.collection('Stores').snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(child: Text('No stores available'));
-                  }
-
-                  List<StoreModel> stores = snapshot.data!.docs
-                      .map((doc) => StoreModel.fromFirestore(doc))
-                      .toList();
-
-                  return GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 4,
-                      childAspectRatio: 0.8,
-                    ),
-                    itemCount: stores.length,
-                    itemBuilder: (context, index) {
-                      final store = stores[index];
-                      return StoreTile(
-                        store: store,
-                      );
-                    },
-                  );
-                },
+            if (stores.isEmpty && !isLoadingMore)
+              const Expanded(
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else
+              Expanded(
+                child: GridView.builder(
+                  controller: _scrollController,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 4,
+                    childAspectRatio: 0.8,
+                  ),
+                  itemCount: stores.length,
+                  itemBuilder: (context, index) {
+                    final store = stores[index];
+                    return StoreTile(store: store);
+                  },
+                ),
               ),
-            ),
+            if (isLoadingMore && stores.isNotEmpty)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: CircularProgressIndicator(),
+              ),
           ],
         ),
       ),
@@ -107,7 +161,7 @@ class _StoresScreenState extends State<StoresScreen> {
 class StoreTile extends StatelessWidget {
   final StoreModel store;
 
-  StoreTile({required this.store});
+  const StoreTile({super.key, required this.store});
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +177,7 @@ class StoreTile extends StatelessWidget {
         );
       },
       child: Container(
-        padding: EdgeInsets.all(12.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

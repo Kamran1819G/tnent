@@ -156,10 +156,10 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
                     Spacer(),
                     IconButton(
                       style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.all(
+                        backgroundColor: MaterialStateProperty.all(
                           Colors.grey[100],
                         ),
-                        shape: WidgetStateProperty.all(
+                        shape: MaterialStateProperty.all(
                           CircleBorder(),
                         ),
                       ),
@@ -437,10 +437,10 @@ class OrdersScreen extends StatelessWidget {
                   Spacer(),
                   IconButton(
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(
+                      backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
-                      shape: WidgetStateProperty.all(
+                      shape: MaterialStateProperty.all(
                         CircleBorder(),
                       ),
                     ),

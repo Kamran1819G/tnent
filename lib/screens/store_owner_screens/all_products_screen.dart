@@ -39,7 +39,9 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
   Future<void> _deleteProduct(ProductModel product) async {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     scaffoldMessenger.showSnackBar(
-      SnackBar(content: Text('Deleting product...'), duration: Duration(seconds: 30)),
+      SnackBar(
+          content: Text('Deleting product...'),
+          duration: Duration(seconds: 30)),
     );
 
     try {
@@ -47,17 +49,21 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
       final batch = FirebaseFirestore.instance.batch();
 
       // Delete product document
-      final productRef = FirebaseFirestore.instance.collection('products').doc(product.productId);
+      final productRef = FirebaseFirestore.instance
+          .collection('products')
+          .doc(product.productId);
       batch.delete(productRef);
 
       // Decrease product total from store
-      final storeRef = FirebaseFirestore.instance.collection('Stores').doc(widget.storeId);
+      final storeRef =
+          FirebaseFirestore.instance.collection('Stores').doc(widget.storeId);
       batch.update(storeRef, {'totalProducts': FieldValue.increment(-1)});
 
       // Check if product is in featured products array and remove it
       final storeDoc = await storeRef.get();
       final storeData = storeDoc.data();
-      if (storeData != null && storeData['featuredProductIds'].contains(product.productId)) {
+      if (storeData != null &&
+          storeData['featuredProductIds'].contains(product.productId)) {
         batch.update(storeRef, {
           'featuredProductIds': FieldValue.arrayRemove([product.productId]),
         });
@@ -171,7 +177,7 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
               ],
             ),
           ),
-          if (isSelectionMode)...[
+          if (isSelectionMode) ...[
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16.0),
               child: Row(
@@ -186,8 +192,8 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                   TextButton(
                     onPressed: _deleteSelectedProducts,
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(Colors.red),
-                      foregroundColor: WidgetStateProperty.all(Colors.white),
+                      backgroundColor: MaterialStateProperty.all(Colors.red),
+                      foregroundColor: MaterialStateProperty.all(Colors.white),
                     ),
                     child: Text('Delete'),
                   ),
@@ -196,8 +202,8 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                     onPressed: _toggleSelectionMode,
                     child: Text('Cancel'),
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all(Colors.grey),
-                      foregroundColor: WidgetStateProperty.all(Colors.white),
+                      backgroundColor: MaterialStateProperty.all(Colors.grey),
+                      foregroundColor: MaterialStateProperty.all(Colors.white),
                     ),
                   ),
                 ],
@@ -205,7 +211,6 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
             ),
             SizedBox(height: 8.0),
           ],
-
           Expanded(
             child: FutureBuilder<List<ProductModel>>(
               future: _productsFuture,
@@ -247,7 +252,8 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => ProductDetailScreen(product: product),
+                              builder: (context) =>
+                                  ProductDetailScreen(product: product),
                             ),
                           );
                         }
@@ -315,13 +321,15 @@ class ProductTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8.0),
                   image: product.imageUrls.isNotEmpty
                       ? DecorationImage(
-                    image: NetworkImage(product.imageUrls[0]),
-                    fit: BoxFit.cover,
-                  )
+                          image: NetworkImage(product.imageUrls[0]),
+                          fit: BoxFit.cover,
+                        )
                       : null,
                 ),
                 child: product.imageUrls.isEmpty
-                    ? Center(child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey))
+                    ? Center(
+                        child: Icon(Icons.image_not_supported,
+                            size: 40, color: Colors.grey))
                     : null,
               ),
             ),

@@ -120,7 +120,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
       if (userSnapshot.exists) {
         Map<String, dynamic> userData =
-        userSnapshot.data() as Map<String, dynamic>;
+            userSnapshot.data() as Map<String, dynamic>;
         String firstName = userData['firstName'] ?? '';
         String lastName = userData['lastName'] ?? '';
         String photoURL = userData['photoURL'] ?? '';
@@ -213,13 +213,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     User? user = _auth.currentUser;
     if (user != null) {
       DocumentSnapshot userDoc =
-      await _firestore.collection('Users').doc(user.uid).get();
+          await _firestore.collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
         List<dynamic> wishlist =
             (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
         setState(() {
           _isInWishlist = wishlist.any((item) =>
-          item['productId'] == _wishlistItem['productId'] &&
+              item['productId'] == _wishlistItem['productId'] &&
               item['variation'] == _wishlistItem['variation']);
         });
       }
@@ -240,7 +240,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     try {
       DocumentReference userDocRef =
-      _firestore.collection('Users').doc(user.uid);
+          _firestore.collection('Users').doc(user.uid);
 
       if (_isInWishlist) {
         // Add product to wishlist
@@ -305,7 +305,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         .collection('votes')
         .doc(productId);
     DocumentReference productRef =
-    _firestore.collection('products').doc(productId);
+        _firestore.collection('products').doc(productId);
 
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
@@ -322,13 +322,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         }
 
         Map<String, dynamic> productData =
-        productDoc.data() as Map<String, dynamic>;
+            productDoc.data() as Map<String, dynamic>;
         int greenFlags = productData['greenFlags'] ?? 0;
         int redFlags = productData['redFlags'] ?? 0;
 
         if (voteDoc.exists) {
           Map<String, dynamic> previousVote =
-          voteDoc.data() as Map<String, dynamic>;
+              voteDoc.data() as Map<String, dynamic>;
 
           if (previousVote['greenFlag'] && voteType == 'greenFlag') {
             greenFlags--;
@@ -443,10 +443,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             Spacer(),
                             IconButton(
                               style: ButtonStyle(
-                                backgroundColor: WidgetStateProperty.all(
+                                backgroundColor: MaterialStateProperty.all(
                                   Colors.grey[100],
                                 ),
-                                shape: WidgetStateProperty.all(
+                                shape: MaterialStateProperty.all(
                                   CircleBorder(),
                                 ),
                               ),
@@ -466,38 +466,42 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             width: 620.w,
                             child: widget.product.imageUrls.length == 1
                                 ? Center(
-                              child: Container(
-                                width: 445.w,
-                                height: 490.h,
-                                margin: EdgeInsets.symmetric(horizontal: 12.w),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  child: Image.network(
-                                    widget.product.imageUrls[0],
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            )
-                                : ListView.builder(
-                              controller: imagesController,
-                              scrollDirection: Axis.horizontal,
-                              itemCount: widget.product.imageUrls.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 12.w),
-                                  width: 445.w,
-                                  height: 490.h,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.r),
-                                    child: Image.network(
-                                      widget.product.imageUrls[index],
-                                      fit: BoxFit.cover,
+                                    child: Container(
+                                      width: 445.w,
+                                      height: 490.h,
+                                      margin: EdgeInsets.symmetric(
+                                          horizontal: 12.w),
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(8.r),
+                                        child: Image.network(
+                                          widget.product.imageUrls[0],
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
                                     ),
+                                  )
+                                : ListView.builder(
+                                    controller: imagesController,
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: widget.product.imageUrls.length,
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        margin: EdgeInsets.symmetric(
+                                            horizontal: 12.w),
+                                        width: 445.w,
+                                        height: 490.h,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8.r),
+                                          child: Image.network(
+                                            widget.product.imageUrls[index],
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
                           ),
                           SizedBox(height: 30.h),
                           Container(
@@ -544,7 +548,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 children: [
                                   Container(
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(6.r),
+                                        borderRadius:
+                                            BorderRadius.circular(6.r),
                                       ),
                                       child: Image.network(
                                         store.logoUrl,
@@ -624,8 +629,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 SizedBox(width: 12.w),
                                 GestureDetector(
                                   onTap: () async {
-                                    final String productUrl = 'https://tnent.com/product/${widget.product.productId}';
-                                    final String shareMessage = 'Check out this product from ${store.name}! $productUrl';
+                                    final String productUrl =
+                                        'https://tnent.com/product/${widget.product.productId}';
+                                    final String shareMessage =
+                                        'Check out this product from ${store.name}! $productUrl';
                                     await Share.share(shareMessage);
                                   },
                                   child: CircleAvatar(
@@ -686,11 +693,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 children: [
                                   Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                            CrossAxisAlignment.center,
                                         children: [
                                           Text(
                                             '₹${_selectedVariant.price.toStringAsFixed(0)}',
@@ -700,7 +707,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             ),
                                           ),
                                           SizedBox(width: 10.w),
-                                          if(_selectedVariant.discount > 0)
+                                          if (_selectedVariant.discount > 0)
                                             Text(
                                               '${_selectedVariant.discount}% Off',
                                               style: TextStyle(
@@ -716,9 +723,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           color: hexToColor('#B9B9B9'),
                                           fontSize: 22.sp,
                                           decoration:
-                                          TextDecoration.lineThrough,
+                                              TextDecoration.lineThrough,
                                           decorationColor:
-                                          hexToColor('#B9B9B9'),
+                                              hexToColor('#B9B9B9'),
                                         ),
                                       ),
                                     ],
@@ -726,9 +733,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   Spacer(),
                                   GestureDetector(
                                     onTap: () async {
-                                      if(_selectedVariant.stockQuantity > 0 && store.isActive) {
+                                      if (_selectedVariant.stockQuantity > 0 &&
+                                          store.isActive) {
                                         String userId = FirebaseAuth
-                                            .instance.currentUser?.uid ??
+                                                .instance.currentUser?.uid ??
                                             '';
                                         if (userId.isEmpty) {
                                           ScaffoldMessenger.of(context)
@@ -741,65 +749,65 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         }
 
                                         DocumentReference userRef =
-                                        FirebaseFirestore.instance
-                                            .collection('Users')
-                                            .doc(userId);
+                                            FirebaseFirestore.instance
+                                                .collection('Users')
+                                                .doc(userId);
 
                                         try {
                                           await FirebaseFirestore.instance
                                               .runTransaction(
                                                   (transaction) async {
-                                                DocumentSnapshot snapshot =
+                                            DocumentSnapshot snapshot =
                                                 await transaction.get(userRef);
-                                                if (!snapshot.exists) {
-                                                  throw Exception(
-                                                      "User does not exist!");
-                                                }
+                                            if (!snapshot.exists) {
+                                              throw Exception(
+                                                  "User does not exist!");
+                                            }
 
-                                                Map<String, dynamic> userData =
+                                            Map<String, dynamic> userData =
                                                 snapshot.data()
-                                                as Map<String, dynamic>;
-                                                List<dynamic> cartList =
-                                                    userData['cart'] ?? [];
+                                                    as Map<String, dynamic>;
+                                            List<dynamic> cartList =
+                                                userData['cart'] ?? [];
 
-                                                Map<String, dynamic> cartItem = {
-                                                  'productId':
+                                            Map<String, dynamic> cartItem = {
+                                              'productId':
                                                   widget.product.productId,
-                                                  'variation': _selectedVariation,
-                                                  'quantity': 1,
-                                                  // Default quantity
-                                                };
+                                              'variation': _selectedVariation,
+                                              'quantity': 1,
+                                              // Default quantity
+                                            };
 
-                                                int existingIndex =
+                                            int existingIndex =
                                                 cartList.indexWhere((item) =>
-                                                item['productId'] ==
-                                                    widget.product
-                                                        .productId &&
+                                                    item['productId'] ==
+                                                        widget.product
+                                                            .productId &&
                                                     item['variation'] ==
                                                         _selectedVariation);
 
-                                                if (existingIndex != -1) {
-                                                  cartList[existingIndex]
+                                            if (existingIndex != -1) {
+                                              cartList[existingIndex]
                                                   ['quantity'] += 1;
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                        content: Text(
-                                                            'Item already in cart')),
-                                                  );
-                                                } else {
-                                                  cartList.add(cartItem);
-                                                  ScaffoldMessenger.of(context)
-                                                      .showSnackBar(
-                                                    SnackBar(
-                                                        content: Text(
-                                                            'Item added to cart')),
-                                                  );
-                                                }
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(
+                                                        'Item already in cart')),
+                                              );
+                                            } else {
+                                              cartList.add(cartItem);
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                    content: Text(
+                                                        'Item added to cart')),
+                                              );
+                                            }
 
-                                                transaction.update(
-                                                    userRef, {'cart': cartList});
-                                              });
+                                            transaction.update(
+                                                userRef, {'cart': cartList});
+                                          });
                                         } catch (e) {
                                           print('Error updating cart: $e');
                                           ScaffoldMessenger.of(context)
@@ -809,8 +817,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                     'Failed to update cart. Please try again.')),
                                           );
                                         }
-                                      }
-                                      else{
+                                      } else {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           SnackBar(
@@ -824,7 +831,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       width: 95.w,
                                       decoration: BoxDecoration(
                                         color: Theme.of(context).primaryColor,
-                                        borderRadius: BorderRadius.circular(12.r),
+                                        borderRadius:
+                                            BorderRadius.circular(12.r),
                                       ),
                                       child: Icon(Icons.add_shopping_cart,
                                           color: Colors.white, size: 35.sp),
@@ -1007,7 +1015,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   bottom: 0,
                   child: Container(
                     padding:
-                    EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
+                        EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
                     color: Colors.white,
                     child: ElevatedButton(
                       onPressed: () {
@@ -1021,16 +1029,20 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           'variationDetails': _selectedVariant
                         };
 
-                        if (_selectedVariant.stockQuantity > 0 && store.isActive) {
+                        if (_selectedVariant.stockQuantity > 0 &&
+                            store.isActive) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => CheckoutScreen(selectedItems: [item]),
+                              builder: (context) =>
+                                  CheckoutScreen(selectedItems: [item]),
                             ),
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Product is out of stock or store is inactive')),
+                            SnackBar(
+                                content: Text(
+                                    'Product is out of stock or store is inactive')),
                           );
                         }
                       },
@@ -1058,10 +1070,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Widget _buildVariationSelector() {
-    List<String> variations = widget.product.variations.keys.where((variation) => variation.toLowerCase() != 'default').toList();
+    List<String> variations = widget.product.variations.keys
+        .where((variation) => variation.toLowerCase() != 'default')
+        .toList();
 
     if (variations.isEmpty) {
-      return SizedBox.shrink(); // Don't show any chips if only default variation exists
+      return SizedBox
+          .shrink(); // Don't show any chips if only default variation exists
     }
     return Wrap(
       spacing: 8.0,
@@ -1076,7 +1091,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             variation,
             style: TextStyle(
               color:
-              _selectedVariation == variation ? Colors.white : Colors.black,
+                  _selectedVariation == variation ? Colors.white : Colors.black,
               fontSize: 18.sp,
             ),
           ),
@@ -1212,8 +1227,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   SizedBox(height: 20.h),
                   Text(
                     '${_product.redFlags}',
-                    style:
-                    TextStyle(color: hexToColor('#9C9C9C'), fontSize: 24.sp),
+                    style: TextStyle(
+                        color: hexToColor('#9C9C9C'), fontSize: 24.sp),
                   ),
                 ],
               ),
@@ -1237,8 +1252,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   SizedBox(height: 20.h),
                   Text(
                     '${_product.greenFlags}',
-                    style:
-                    TextStyle(color: hexToColor('#9C9C9C'), fontSize: 24.sp),
+                    style: TextStyle(
+                        color: hexToColor('#9C9C9C'), fontSize: 24.sp),
                   ),
                 ],
               ),
