@@ -9,6 +9,7 @@ class UpdateTile extends StatelessWidget {
   final VoidCallback onTap;
 
   UpdateTile({
+    Key? key,
     required this.image,
     required this.onTap,
   });
