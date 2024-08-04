@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -77,74 +78,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     };
   });
 
-  /*List<ProductModel> featuredProducts = List.generate(5, (index) {
-    return ProductModel(
-      productId: 'product123',
-      storeId: 'EBJgGaWsnrluCKcaOUOT',
-      name: 'Premium Cotton T-Shirt',
-      description: 'A high-quality, comfortable cotton t-shirt',
-      productCategory: 'T-Shirts',
-      storeCategory: 'Apparel',
-      imageUrls: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-      isAvailable: true,
-      createdAt: Timestamp.now(),
-      greenFlags: 0,
-      redFlags: 0,
-      variations: {
-        'S': ProductVariant(
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 50,
-          sku: 'TS-S',
-        ),
-        'M': ProductVariant(
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 100,
-          sku: 'TS-M',
-        ),
-        'L': ProductVariant(
-          price: 26.99,
-          mrp: 31.99,
-          discount: 15.63,
-          stockQuantity: 75,
-          sku: 'TS-L',
-        ),
-      },
-    );
-  });*/
-
-  /*List<StoreModel> featuredStores = List.generate(5, (index) {
-    return StoreModel(
-      storeId: 'store$index',
-      ownerId: 'owner$index',
-      name: 'Store Name $index',
-      logoUrl: 'https://via.placeholder.com/150',
-      phone: '123-456-789$index',
-      email: 'store$index@example.com',
-      website: 'https://example.com/store$index',
-      upiUsername: 'upiUser$index',
-      upiId: 'upiId$index',
-      location: 'Location $index',
-      category: 'Category $index',
-      isActive: index % 2 == 0,
-      createdAt: Timestamp.now(),
-      totalProducts: index * 10,
-      totalPosts: index * 5,
-      storeEngagement: index * 20,
-      greenFlags: index * 2,
-      redFlags: index,
-      followerIds: [],
-      featuredProductIds: [],
-    );
-  });
-*/
   List<StoreModel> featuredStores = [];
   List<ProductModel> featuredProducts = [];
 
@@ -206,32 +139,28 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   Future<void> _fetchFeaturedStores() async {
     try {
-      // Fetch the featured-store document from the Featured Stores collection
       final featuredStoreDoc = await FirebaseFirestore.instance
           .collection('Featured Stores')
           .doc('featured-stores')
-          .get();
+          .get(GetOptions(source: Source.serverAndCache));
 
-      // Extract the store IDs from the array field
-      final List<String> storeId =
-          List<String>.from(featuredStoreDoc['stores'] ?? []);
+      final List<String> storeIds = List<String>.from(featuredStoreDoc['stores'] ?? []);
 
-      // Fetch the actual store documents using the store IDs
-      if (storeId.isNotEmpty) {
-        final storesSnapshot = await FirebaseFirestore.instance
-            .collection('Stores')
-            .where(FieldPath.documentId, whereIn: storeId)
-            .get();
+      if (storeIds.isNotEmpty) {
+        const int pageSize = 10;
+        for (int i = 0; i < storeIds.length; i += pageSize) {
+          final chunk = storeIds.sublist(i, min(i + pageSize, storeIds.length));
+          final storesSnapshot = await FirebaseFirestore.instance
+              .collection('Stores')
+              .where(FieldPath.documentId, whereIn: chunk)
+              .get(GetOptions(source: Source.serverAndCache));
 
-        setState(() {
-          featuredStores = storesSnapshot.docs
-              .map((doc) => StoreModel.fromFirestore(doc))
-              .toList();
-        });
-      } else {
-        setState(() {
-          featuredStores = [];
-        });
+          setState(() {
+            featuredStores.addAll(storesSnapshot.docs
+                .map((doc) => StoreModel.fromFirestore(doc))
+                .toList());
+          });
+        }
       }
     } catch (e) {
       print('Error fetching featured stores: $e');
@@ -244,7 +173,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       final featuredProductDoc = await FirebaseFirestore.instance
           .collection('Featured Products')
           .doc('featured-products')
-          .get();
+          .get(GetOptions(source: Source.cache));
 
       // Extract the product IDs from the array field
       final List<String> productIds =
@@ -258,7 +187,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           final productDoc = await FirebaseFirestore.instance
               .collection('products')
               .doc(productId)
-              .get();
+              .get(GetOptions(source: Source.cache));
 
           if (productDoc.exists) {
             products.add(ProductModel.fromFirestore(productDoc));
@@ -805,11 +734,13 @@ class StoreTile extends StatelessWidget {
           children: [
             ClipRRect(
                 borderRadius: BorderRadius.circular(23.r),
-                child: Image.network(
-                  store.logoUrl,
+                child: CachedNetworkImage(
+                  imageUrl: store.logoUrl,
                   fit: BoxFit.fill,
                   height: 120.h,
                   width: 120.w,
+                  placeholder: (context, url) => CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
                 )),
             SizedBox(height: 8.h),
             Text(
