@@ -4,10 +4,7 @@ import 'dart:math';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -16,16 +13,13 @@ import 'package:http/http.dart' as http;
 // import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:tnent/helpers/color_utils.dart';
 import 'package:tnent/models/store_model.dart';
-import 'package:tnent/pages/catalog_pages/purchase_screen.dart';
-import 'package:tnent/pages/catalog_pages/store_coupon_screen.dart';
 import 'package:tnent/screens/home_screen.dart';
-import 'package:tnent/helpers/color_utils.dart';
 import '../../helpers/snackbar_utils.dart';
 
 class CheckoutScreen extends StatefulWidget {
   List<Map<String, dynamic>> selectedItems;
 
-  CheckoutScreen({required this.selectedItems});
+  CheckoutScreen({super.key, required this.selectedItems});
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
@@ -396,7 +390,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 class ChangeAddressScreen extends StatefulWidget {
   final Map<String, dynamic>? existingAddress;
 
-  ChangeAddressScreen({this.existingAddress});
+  ChangeAddressScreen({super.key, this.existingAddress});
 
   @override
   State<ChangeAddressScreen> createState() => _ChangeAddressScreenState();
@@ -1039,7 +1033,7 @@ class SummaryItemTile extends StatelessWidget {
 class SummaryScreen extends StatefulWidget {
   List<Map<String, dynamic>> items;
 
-  SummaryScreen({required this.items});
+  SummaryScreen({super.key, required this.items});
 
   @override
   State<SummaryScreen> createState() => _SummaryScreenState();
@@ -1327,6 +1321,7 @@ class PaymentOptionScreen extends StatefulWidget {
   double totalAmount;
 
   PaymentOptionScreen({
+    super.key,
     required this.items,
     required this.storeDetails,
     required this.totalAmount,
@@ -1834,6 +1829,7 @@ class TransactionScreen extends StatefulWidget {
   List<Map<String, dynamic>> items;
 
   TransactionScreen({
+    super.key,
     required this.storeDetails,
     required this.totalAmount,
     required this.items,

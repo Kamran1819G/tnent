@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:tnent/services/firebase/firebase_auth_service.dart';
 import 'package:tnent/screens/home_screen.dart';
 import 'package:tnent/screens/signin_screen.dart';
@@ -19,9 +17,9 @@ class _WidgetTreeState extends State<WidgetTree> {
       stream: Auth().authStateChanges,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return HomeScreen();
+          return const HomeScreen();
         }
-        return SignInScreen();
+        return const SignInScreen();
       },
     );
   }

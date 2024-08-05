@@ -10,7 +10,8 @@ class FeaturedProductTile extends StatefulWidget {
   final double width;
   final double height;
 
-  FeaturedProductTile({
+  const FeaturedProductTile({
+    super.key,
     required this.product,
     this.width = 150.0,
     this.height = 200.0,
@@ -31,17 +32,20 @@ class _FeaturedProductTileState extends State<FeaturedProductTile> {
   }
 
   void _checkFeaturedStatus() async {
-    DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(widget.product.storeId).get();
+    DocumentSnapshot storeDoc =
+        await _firestore.collection('Stores').doc(widget.product.storeId).get();
     if (storeDoc.exists) {
       StoreModel store = StoreModel.fromFirestore(storeDoc);
       setState(() {
-        _isFeatured = store.featuredProductIds.contains(widget.product.productId);
+        _isFeatured =
+            store.featuredProductIds.contains(widget.product.productId);
       });
     }
   }
 
   Future<void> _toggleFeatured() async {
-    DocumentReference storeDocRef = _firestore.collection('Stores').doc(widget.product.storeId);
+    DocumentReference storeDocRef =
+        _firestore.collection('Stores').doc(widget.product.storeId);
 
     try {
       await _firestore.runTransaction((transaction) async {
@@ -63,7 +67,8 @@ class _FeaturedProductTileState extends State<FeaturedProductTile> {
           featuredProductIds.add(widget.product.productId);
         }
 
-        transaction.update(storeDocRef, {'featuredProductIds': featuredProductIds});
+        transaction
+            .update(storeDocRef, {'featuredProductIds': featuredProductIds});
       });
 
       setState(() {
@@ -80,7 +85,9 @@ class _FeaturedProductTileState extends State<FeaturedProductTile> {
     } catch (e) {
       print('Error updating featured products: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update featured products: ${e.toString()}')),
+        SnackBar(
+            content:
+                Text('Failed to update featured products: ${e.toString()}')),
       );
     }
   }
@@ -126,16 +133,19 @@ class _FeaturedProductTileState extends State<FeaturedProductTile> {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(6.0)),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(6.0)),
                       image: widget.product.imageUrls.isNotEmpty
                           ? DecorationImage(
-                        image: NetworkImage(widget.product.imageUrls[0]),
-                        fit: BoxFit.cover,
-                      ) : null,
+                              image: NetworkImage(widget.product.imageUrls[0]),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
-
                     child: widget.product.imageUrls.isEmpty
-                        ? Center(child: Icon(Icons.image_not_supported, size: 40, color: Colors.grey))
+                        ? Center(
+                            child: Icon(Icons.image_not_supported,
+                                size: 40, color: Colors.grey))
                         : null,
                   ),
                   Positioned(

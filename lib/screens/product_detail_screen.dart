@@ -1,20 +1,13 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tnent/helpers/color_utils.dart';
-import 'package:tnent/helpers/text_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/pages/catalog_pages/checkout_screen.dart';
 import 'package:tnent/screens/users_screens/storeprofile_screen.dart';
 import 'package:tnent/widgets/wishlist_product_tile.dart';
-import 'package:tnent/pages/catalog_pages/cart_screen.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
@@ -23,6 +16,7 @@ class ProductDetailScreen extends StatefulWidget {
   ProductModel product;
 
   ProductDetailScreen({
+    super.key,
     required this.product,
   });
 
@@ -144,7 +138,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please log in to add a review')),
+        const SnackBar(content: Text('Please log in to add a review')),
       );
       return;
     }
@@ -164,7 +158,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget _buildReviewsList() {
     return ListView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: _reviews.length,
       itemBuilder: (context, index) {
         final review = _reviews[index];
@@ -173,7 +167,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             backgroundImage: review['photoURL'].isNotEmpty
                 ? NetworkImage(review['photoURL'])
                 : null,
-            child: review['photoURL'].isEmpty ? Icon(Icons.person) : null,
+            child: review['photoURL'].isEmpty ? const Icon(Icons.person) : null,
           ),
           title: Text(
             review['userFullName'],
@@ -291,7 +285,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     User? user = _auth.currentUser;
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please log in to vote')),
+        const SnackBar(content: Text('Please log in to vote')),
       );
       return;
     }
@@ -309,7 +303,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Vote recorded successfully')),
+      const SnackBar(content: Text('Vote recorded successfully')),
     );
 
     try {
@@ -387,7 +381,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     } catch (error) {
       print('Error recording vote: $error');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to record vote. Please try again.')),
+        const SnackBar(
+            content: Text('Failed to record vote. Please try again.')),
       );
     }
   }
@@ -400,14 +395,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             future: _storeFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError) {
                 print('Error: ${snapshot.error}');
                 return Center(child: Text('Error: ${snapshot.error}'));
               }
               if (!snapshot.hasData) {
-                return Center(child: Text('No store data available'));
+                return const Center(child: Text('No store data available'));
               }
               final store = snapshot.data!;
               return Stack(children: [
@@ -440,17 +435,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 ),
                               ],
                             ),
-                            Spacer(),
+                            const Spacer(),
                             IconButton(
                               style: ButtonStyle(
                                 backgroundColor: MaterialStateProperty.all(
                                   Colors.grey[100],
                                 ),
                                 shape: MaterialStateProperty.all(
-                                  CircleBorder(),
+                                  const CircleBorder(),
                                 ),
                               ),
-                              icon: Icon(Icons.arrow_back_ios_new,
+                              icon: const Icon(Icons.arrow_back_ios_new,
                                   color: Colors.black),
                               onPressed: () {
                                 Navigator.pop(context);
@@ -512,7 +507,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               onDotClicked: (index) {
                                 imagesController.animateToPage(
                                   index,
-                                  duration: Duration(milliseconds: 500),
+                                  duration: const Duration(milliseconds: 500),
                                   curve: Curves.ease,
                                 );
                               },
@@ -730,7 +725,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       ),
                                     ],
                                   ),
-                                  Spacer(),
+                                  const Spacer(),
                                   GestureDetector(
                                     onTap: () async {
                                       if (_selectedVariant.stockQuantity > 0 &&
@@ -741,7 +736,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         if (userId.isEmpty) {
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
-                                            SnackBar(
+                                            const SnackBar(
                                                 content: Text(
                                                     'Please log in to add items to cart')),
                                           );
@@ -791,7 +786,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                   ['quantity'] += 1;
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
-                                                SnackBar(
+                                                const SnackBar(
                                                     content: Text(
                                                         'Item already in cart')),
                                               );
@@ -799,7 +794,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                               cartList.add(cartItem);
                                               ScaffoldMessenger.of(context)
                                                   .showSnackBar(
-                                                SnackBar(
+                                                const SnackBar(
                                                     content: Text(
                                                         'Item added to cart')),
                                               );
@@ -812,7 +807,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           print('Error updating cart: $e');
                                           ScaffoldMessenger.of(context)
                                               .showSnackBar(
-                                            SnackBar(
+                                            const SnackBar(
                                                 content: Text(
                                                     'Failed to update cart. Please try again.')),
                                           );
@@ -820,7 +815,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       } else {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
-                                          SnackBar(
+                                          const SnackBar(
                                               content: Text(
                                                   'Product is out of stock or store is inactive')),
                                         );
@@ -1040,7 +1035,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           );
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
+                            const SnackBar(
                                 content: Text(
                                     'Product is out of stock or store is inactive')),
                           );
@@ -1075,7 +1070,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         .toList();
 
     if (variations.isEmpty) {
-      return SizedBox
+      return const SizedBox
           .shrink(); // Don't show any chips if only default variation exists
     }
     return Wrap(
@@ -1185,7 +1180,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 'Add Your Rating',
                 style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
               ),
-              Spacer(),
+              const Spacer(),
               CircleAvatar(
                 radius: 22.w,
                 backgroundColor: hexToColor('#F5F5F5'),

@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:io';
@@ -157,7 +156,7 @@ class CommunityState extends State<Community> {
 class CommunityPost extends StatefulWidget {
   final CommunityPostModel post;
 
-  CommunityPost({required this.post});
+  CommunityPost({super.key, required this.post});
 
   @override
   _CommunityPostState createState() => _CommunityPostState();
@@ -539,7 +538,7 @@ class _CommunityPostState extends State<CommunityPost> {
 class CreateCommunityPost extends StatefulWidget {
   String storeId;
 
-  CreateCommunityPost({required this.storeId});
+  CreateCommunityPost({super.key, required this.storeId});
 
   @override
   State<CreateCommunityPost> createState() => _CreateCommunityPostState();

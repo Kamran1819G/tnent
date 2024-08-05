@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -15,8 +13,6 @@ import 'package:tnent/models/store_model.dart';
 import 'package:tnent/screens/webview_screen.dart';
 import 'package:tnent/widget_tree.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 import '../../helpers/snackbar_utils.dart';
 
