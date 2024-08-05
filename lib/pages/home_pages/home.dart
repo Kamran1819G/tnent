@@ -9,6 +9,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tnent/helpers/color_utils.dart';
 import 'package:tnent/models/store_category_model.dart';
 import 'package:tnent/models/product_model.dart';
@@ -286,6 +287,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     });
   }
 
+  bool isUpdatesLoading = false;
+
   Future<List<StoreUpdateModel>> _fetchAndPopulateUpdates() async {
     final now = DateTime.now();
     final oneDayAgo = now.subtract(const Duration(hours: 24));
@@ -296,7 +299,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         .where('createdAt', isGreaterThanOrEqualTo: oneDayAgo)
         .get();
 
-    List<StoreUpdateModel> updates = [];
+    setState(() {
+      isUpdatesLoading = true;
+    });
+
+    List<StoreUpdateModel> updatesLocal = [];
 
     for (var doc in snapshot.docs) {
       final createdAt = (doc['createdAt'] as Timestamp).toDate();
@@ -314,12 +321,16 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           final storeUpdateModel = StoreUpdateModel.fromFirestore(doc);
           // Handling the logic that 2/more updates from same store dont show individually in home page
 
-          updates.add(storeUpdateModel);
+          updatesLocal.add(storeUpdateModel);
         }
       }
     }
 
-    return updates;
+    setState(() {
+      isUpdatesLoading = false;
+    });
+
+    return updatesLocal;
   }
 
   Map<String, List<StoreUpdateModel>> groupedUpdates = {};
@@ -333,6 +344,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       }
     }
   }
+
+  final double size = 30.0;
 
   @override
   Widget build(BuildContext context) {
@@ -515,33 +528,44 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             },
           ),
         ),*/
-        groupedUpdates.isEmpty
-            ? Container()
-            : Container(
-                height: 125.0,
-                padding: const EdgeInsets.only(left: 8.0),
-                child: ListView(
-                  shrinkWrap: true,
+        isUpdatesLoading
+            ? Padding(
+                padding: const EdgeInsets.only(left: 20),
+                child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  children: groupedUpdates.entries.map((e) {
-                    String storeName = e.key;
-                    List<StoreUpdateModel> individualStoreUpdates = e.value;
-                    int indexClicked = 0;
-
-                    for (int i = 0; i < updates.length; i++) {
-                      if (updates[i] == individualStoreUpdates[0]) {
-                        indexClicked = i;
-                      }
-                    }
-                    return UpdateTile(
-                      name: storeName,
-                      image: individualStoreUpdates[0].logoUrl,
-                      index: indexClicked,
-                      updates: updates,
-                    );
-                  }).toList(),
+                  child: Row(
+                    children:
+                        List.generate(4, (index) => updatesShimmerEffect()),
+                  ),
                 ),
-              ),
+              )
+            : updates.isEmpty
+                ? Container()
+                : Container(
+                    height: 110.0,
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: ListView(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      children: groupedUpdates.entries.map((e) {
+                        String storeName = e.key;
+                        List<StoreUpdateModel> individualStoreUpdates = e.value;
+                        int indexClicked = 0;
+
+                        for (int i = 0; i < updates.length; i++) {
+                          if (updates[i] == individualStoreUpdates[0]) {
+                            indexClicked = i;
+                          }
+                        }
+                        return UpdateTile(
+                          name: storeName,
+                          image: individualStoreUpdates[0].logoUrl,
+                          index: indexClicked,
+                          updates: updates,
+                        );
+                      }).toList(),
+                    ),
+                  ),
         const SizedBox(height: 10.0),
         SizedBox(
           height: 250.h,
@@ -852,6 +876,50 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       ],
     );
   }
+
+  Widget updatesShimmerEffect() {
+    int rand = Random().nextInt(3);
+    String text = rand == 1 ? "Loading..." : "Just a sec...";
+    return Shimmer.fromColors(
+      baseColor: Colors.grey.shade300,
+      highlightColor: Colors.grey.shade400,
+      child: Padding(
+        padding: const EdgeInsets.all(2.0),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircleAvatar(
+                radius: size + 3.5,
+                backgroundColor: Colors.green,
+                child: CircleAvatar(
+                  radius: size + 1.5,
+                  backgroundColor: Colors.white,
+                  child: CircleAvatar(
+                    radius: size,
+                  ),
+                ),
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                text,
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15.sp,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class StoreTile extends StatelessWidget {
@@ -1095,7 +1163,7 @@ class UpdateTile extends StatelessWidget {
         );
       },
       child: Padding(
-        padding: const EdgeInsets.all(2.0),
+        padding: const EdgeInsets.all(2.0).copyWith(top: 0),
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: 12.w),
           child: Column(

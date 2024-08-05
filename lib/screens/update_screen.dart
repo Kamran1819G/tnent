@@ -23,8 +23,8 @@ class UpdateScreen extends StatefulWidget {
   _UpdateScreenState createState() => _UpdateScreenState();
 }
 
-
-class _UpdateScreenState extends State<UpdateScreen> with SingleTickerProviderStateMixin {
+class _UpdateScreenState extends State<UpdateScreen>
+    with SingleTickerProviderStateMixin {
   late int currentUpdateIndex;
   late Image _storeImage;
   late String _storeName;
@@ -44,7 +44,7 @@ class _UpdateScreenState extends State<UpdateScreen> with SingleTickerProviderSt
 
     _animationController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 5000),
+      duration: const Duration(milliseconds: 5000),
     );
 
     // initially, all stories haven't been watched yet
@@ -72,6 +72,7 @@ class _UpdateScreenState extends State<UpdateScreen> with SingleTickerProviderSt
   void _nextStory() {
     if (currentUpdateIndex < widget.updates.length - 1) {
       setState(() {
+        percentWatched[currentUpdateIndex] = 1;
         currentUpdateIndex++;
         _startWatching();
       });
@@ -83,6 +84,7 @@ class _UpdateScreenState extends State<UpdateScreen> with SingleTickerProviderSt
   void _previousStory() {
     if (currentUpdateIndex > 0) {
       setState(() {
+        percentWatched[currentUpdateIndex] = 0;
         percentWatched[currentUpdateIndex - 1] = 0;
         currentUpdateIndex--;
         _startWatching();
@@ -147,8 +149,8 @@ class _UpdateScreenState extends State<UpdateScreen> with SingleTickerProviderSt
           child: Stack(
             children: [
               // story
-              Image.network(
-                widget.updates[currentUpdateIndex].imageUrl,
+              CachedNetworkImage(
+                imageUrl: widget.updates[currentUpdateIndex].imageUrl,
                 fit: BoxFit.cover,
                 height: double.infinity,
                 width: double.infinity,
@@ -156,37 +158,36 @@ class _UpdateScreenState extends State<UpdateScreen> with SingleTickerProviderSt
 
               // progress bar
               Align(
-                alignment: Alignment(0, -0.95),
-                child: UpdateBars(
-                  percentWatched: percentWatched,
-                  length: widget.updates.length,
-                ),
-              ),
+                  alignment: const Alignment(0, -0.95),
+                  child: UpdateBars(
+                    percentWatched: percentWatched,
+                    length: widget.updates.length,
+                  )),
               Align(
-                alignment: Alignment(0, -0.95),
+                alignment: const Alignment(0, -0.95),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Container(height: 40, width: 40, child: _storeImage),
-                      SizedBox(width: 10),
+                      SizedBox(height: 40, width: 40, child: _storeImage),
+                      const SizedBox(width: 10),
                       Text(
                         _storeName,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 18,
                           fontWeight: FontWeight.w400,
                         ),
                       ),
-                      Spacer(),
+                      const Spacer(),
                       Container(
-                        margin: EdgeInsets.all(8.0),
+                        margin: const EdgeInsets.all(8.0),
                         child: CircleAvatar(
                           backgroundColor: Colors.grey[100],
                           child: IconButton(
-                            icon: Icon(Icons.close, color: Colors.black),
+                            icon: const Icon(Icons.close, color: Colors.black),
                             onPressed: () {
                               Navigator.pop(context);
                             },
