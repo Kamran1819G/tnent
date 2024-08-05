@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -336,7 +337,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 20.0),
+              const SizedBox(height: 20.0),
               // Profile Card
               Container(
                 height: 290.h,
@@ -355,7 +356,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                         backgroundColor: hexToColor('#F5F5F5'),
                         radius: 20,
                         child: IconButton(
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.arrow_back_ios_new,
                             color: Colors.black,
                             size: 18,
@@ -367,19 +368,19 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                       ),
                     ),
                     Align(
-                      alignment: Alignment(-0.9, -0.5),
+                      alignment: const Alignment(-0.9, -0.5),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Container(
-                            margin: EdgeInsets.only(top: 8),
+                            margin: const EdgeInsets.only(top: 8),
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 16.0),
                             child: ClipRRect(
                               borderRadius: BorderRadius.circular(12.0),
-                              child: Image.network(
-                                widget.store.logoUrl,
+                              child: CachedNetworkImage(
+                                imageUrl: widget.store.logoUrl,
                                 height: 90,
                                 width: 90,
                                 fit: BoxFit.cover,
@@ -391,7 +392,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                padding: EdgeInsets.symmetric(horizontal: 12.0),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12.0),
                                 height: 30.h,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
@@ -461,8 +463,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      alignment: Alignment(0.9, 0.9),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      alignment: const Alignment(0.9, 0.9),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -474,7 +476,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                               },
                               icon: Icon(Icons.ios_share,
                                   color: Colors.white, size: 25.sp)),
-                          SizedBox(width: 10.0),
+                          const SizedBox(width: 10.0),
                           Container(
                             height: 45.h,
                             width: 205.w,
@@ -493,7 +495,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                               maxLines: 1,
                             ),
                           ),
-                          Spacer(),
+                          const Spacer(),
                           Container(
                             width: 110.w,
                             height: 75.h,
@@ -532,7 +534,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
 
               Container(
                 height: 225.h,
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -582,7 +584,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                     ),
                                   ],
                                 ),
-                                Spacer(),
+                                const Spacer(),
                                 Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
@@ -608,7 +610,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                 GestureDetector(
                                   onTap: toggleConnection,
                                   child: AnimatedSwitcher(
-                                    duration: Duration(milliseconds: 300),
+                                    duration: const Duration(milliseconds: 300),
                                     // Adjust the duration as needed
                                     child: Container(
                                       key: ValueKey<bool>(isConnected),
@@ -624,9 +626,9 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                             CrossAxisAlignment.center,
                                         children: [
                                           AnimatedContainer(
-                                            duration:
-                                                Duration(milliseconds: 300),
-                                            padding: EdgeInsets.all(4.0),
+                                            duration: const Duration(
+                                                milliseconds: 300),
+                                            padding: const EdgeInsets.all(4.0),
                                             decoration: BoxDecoration(
                                               color: isConnected
                                                   ? hexToColor('#D4EDDA')
@@ -644,8 +646,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                           ),
                                           SizedBox(width: 8.w),
                                           AnimatedSwitcher(
-                                            duration:
-                                                Duration(milliseconds: 300),
+                                            duration: const Duration(
+                                                milliseconds: 300),
                                             child: Text(
                                               isConnected
                                                   ? 'Connected'.toUpperCase()
@@ -662,7 +664,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                     ),
                                   ),
                                 ),
-                                Spacer(),
+                                const Spacer(),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
@@ -701,7 +703,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                       child: Container(
                         height: 180.h,
                         width: 180.w,
-                        padding: EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         decoration: BoxDecoration(
                           color: hexToColor('#EFEFEF'),
                           borderRadius: BorderRadius.circular(22.r),
@@ -736,14 +738,14 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                               'Community'.toUpperCase(),
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 21.sp,
+                                fontSize: 18.sp,
                               ),
                             ),
                             Text(
                               'Post'.toUpperCase(),
                               style: TextStyle(
                                 color: Colors.black,
-                                fontSize: 21.sp,
+                                fontSize: 18.sp,
                               ),
                             ),
                             Row(
@@ -771,13 +773,13 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                 ),
                                 // right arrow box
                                 Container(
-                                  margin: EdgeInsets.only(left: 10.0),
-                                  padding: EdgeInsets.all(8.0),
+                                  margin: const EdgeInsets.only(left: 10.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[700],
                                     borderRadius: BorderRadius.circular(50.0),
                                   ),
-                                  child: Icon(
+                                  child: const Icon(
                                     Icons.arrow_forward_ios,
                                     color: Colors.white,
                                     size: 16.0,
@@ -792,7 +794,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                   ],
                 ),
               ),
-              SizedBox(height: 20.0),
+              const SizedBox(height: 20.0),
 
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -811,7 +813,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                           ),
                         ),
                       ),
-                      SizedBox(height: 10.0),
+                      const SizedBox(height: 10.0),
                       Container(
                         height: 220.h,
                         child: ListView(
@@ -828,7 +830,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                       ),
                     ],
                   ),
-                  SizedBox(height: 20.0),
+                  const SizedBox(height: 20.0),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -843,17 +845,17 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                           ),
                         ),
                       ),
-                      SizedBox(height: 20.0),
+                      const SizedBox(height: 20.0),
                       FeatureProductsListView(
                           featuredProductIds: widget.store.featuredProductIds),
                     ],
                   ),
-                  SizedBox(height: 20.0),
+                  const SizedBox(height: 20.0),
                   FutureBuilder<List<StoreCategoryModel>>(
                     future: fetchCategories(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
+                        return const Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else {
@@ -920,7 +922,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
               : Container(
                   width: 40,
                   height: 35.0,
-                  padding: EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(50.0),
@@ -968,13 +970,13 @@ class _FeatureProductsListViewState extends State<FeatureProductsListView> {
         future: fetchProducts(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else {
             List<ProductModel> featuredProducts = snapshot.data!;
             if (featuredProducts.isEmpty) {
-              return Center(
+              return const Center(
                 child: Text(
                   'No Products in Featured',
                   style: TextStyle(fontSize: 16, color: Colors.grey),
@@ -1028,13 +1030,13 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
       future: fetchProducts(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return SizedBox.shrink(); // Don't show anything while loading
+          return const SizedBox.shrink(); // Don't show anything while loading
         } else if (snapshot.hasError) {
-          return SizedBox.shrink(); // Don't show anything on error
+          return const SizedBox.shrink(); // Don't show anything on error
         } else {
           List<ProductModel> products = snapshot.data!;
           if (products.isEmpty) {
-            return SizedBox
+            return const SizedBox
                 .shrink(); // Don't show the category if there are no products
           }
           return Column(
@@ -1050,10 +1052,10 @@ class _CategoryProductsListViewState extends State<CategoryProductsListView> {
                   ),
                 ),
               ),
-              SizedBox(height: 10.0),
+              const SizedBox(height: 10.0),
               Container(
                 height: 340.h,
-                margin: EdgeInsets.only(bottom: 50.0),
+                margin: const EdgeInsets.only(bottom: 50.0),
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: products.length,

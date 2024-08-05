@@ -69,16 +69,17 @@ class _GalleryState extends State<Gallery> {
   Widget build(BuildContext context) {
     return Container(
       color: hexToColor('#F1F0EC'),
-      padding: EdgeInsets.symmetric(horizontal: 10.0),
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
       child: SingleChildScrollView(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             Container(
               height: 100.h,
               margin: EdgeInsets.only(top: 20.h),
-              padding: EdgeInsets.symmetric(horizontal: 2.0),
+              padding: const EdgeInsets.symmetric(horizontal: 2.0),
               child: Row(
                 children: [
                   Row(
@@ -100,13 +101,13 @@ class _GalleryState extends State<Gallery> {
                       ),
                     ],
                   ),
-                  Spacer(),
+                  const Spacer(),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => WebViewScreen(
+                              builder: (context) => const WebViewScreen(
                                   url:
                                       'https://tnent-updated.vercel.app/contact',
                                   title: 'Contact Us')));
@@ -139,8 +140,8 @@ class _GalleryState extends State<Gallery> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 2.0),
                       child: Text(
                         'Store',
                         style: TextStyle(
@@ -149,7 +150,7 @@ class _GalleryState extends State<Gallery> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 10.0),
+                    const SizedBox(height: 10.0),
                     GestureDetector(
                       onTap: () async {
                         Navigator.push(
@@ -178,8 +179,8 @@ class _GalleryState extends State<Gallery> {
                                 Container(
                                   height: 135.h,
                                   width: 135.w,
-                                  margin:
-                                      EdgeInsets.symmetric(horizontal: 15.0),
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 15.0),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(18.r),
                                     image: DecorationImage(
@@ -233,10 +234,10 @@ class _GalleryState extends State<Gallery> {
                                           height: 10.0,
                                           width: 10.0,
                                         ),
-                                        SizedBox(width: 5.0),
+                                        const SizedBox(width: 5.0),
                                         Text(
                                           '${store.storeDomain}.tnent.com',
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             color: Colors.white,
                                             fontSize: 10.0,
                                             fontFamily: 'Poppins',
@@ -275,55 +276,55 @@ class _GalleryState extends State<Gallery> {
                   ],
                 ),
               ),
-            SizedBox(height: 20.0),
+            const SizedBox(height: 20.0),
             if (!isStoreRegistered) ...[
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => StoreRegistration()));
+                          builder: (context) => const StoreRegistration()));
                 },
                 child: Image.asset("assets/digital_store_banner.png"),
               ),
-              SizedBox(height: 20.0),
+              const SizedBox(height: 20.0),
             ],
             GestureDetector(
                 onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => TheMiddlemen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const TheMiddlemen()));
                 },
                 child: Image.asset("assets/the_middleman_banner.png")),
-            SizedBox(height: 20.0),
-            Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Dash(
-                direction: Axis.horizontal,
-                length: (MediaQuery.of(context).size.width / 3),
-                dashLength: 8,
-                dashColor: Colors.grey,
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
-                decoration: BoxDecoration(
-                  color: Colors.grey[900],
-                  borderRadius: BorderRadius.circular(8.0),
+            const SizedBox(height: 20.0),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Dash(
+                  direction: Axis.horizontal,
+                  length: MediaQuery.of(context).size.width * 0.9,
+                  dashLength: 8,
+                  dashColor: Colors.grey,
                 ),
-                child: Text(
-                  'Coming Soon',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12.0,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12.0, vertical: 8.0),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[900],
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  child: const Text(
+                    'Coming Soon',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12.0,
+                    ),
                   ),
                 ),
-              ),
-              Dash(
-                direction: Axis.horizontal,
-                length: (MediaQuery.of(context).size.width / 3),
-                dashLength: 8,
-                dashColor: Colors.grey,
-              ),
-            ]),
-            SizedBox(height: 20.0),
+              ],
+            ),
+            const SizedBox(height: 20.0),
             GestureDetector(
               onTap: () {
                 /* Navigator.push(

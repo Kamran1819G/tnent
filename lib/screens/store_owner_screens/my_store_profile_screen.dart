@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:quickalert/quickalert.dart';
@@ -330,12 +331,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(height: 20.0),
+              const SizedBox(height: 20.0),
               // Profile Card
               Container(
                 height: 290.h,
                 width: 680.w,
-                margin: EdgeInsets.symmetric(horizontal: 10),
+                margin: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
                   color: hexToColor('#2D332F'),
                   borderRadius: BorderRadius.circular(20.0),
@@ -361,13 +362,13 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                       ),
                     ),
                     Align(
-                      alignment: Alignment(-0.9, -0.5),
+                      alignment: const Alignment(-0.9, -0.5),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Container(
-                            margin: EdgeInsets.only(top: 8),
+                            margin: const EdgeInsets.only(top: 8),
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 16.0),
                             child: ClipRRect(
@@ -455,8 +456,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      alignment: Alignment(0.9, 0.9),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      alignment: const Alignment(0.9, 0.9),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -478,7 +479,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               borderRadius: BorderRadius.circular(20.r),
                             ),
                             child: Text(
-                              '$storeLocation',
+                              storeLocation,
                               style: TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'Poppins',
@@ -487,7 +488,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               maxLines: 1,
                             ),
                           ),
-                          Spacer(),
+                          const Spacer(),
                           Text(
                             "Accepting Orders: ",
                             style: TextStyle(
@@ -497,34 +498,40 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               fontSize: 14.sp,
                             ),
                           ),
-                          Switch(
-                              value: isActive,
-                              activeColor: hexToColor('#41FA00'),
-                              trackOutlineColor: MaterialStateColor.resolveWith(
-                                  (states) => Colors.grey),
-                              trackOutlineWidth:
-                                  MaterialStateProperty.resolveWith(
-                                      (states) => 1.0),
-                              activeTrackColor: Colors.transparent,
-                              inactiveTrackColor: Colors.transparent,
-                              onChanged: (value) {
-                                setState(() {
-                                  isActive = value;
-                                });
-                              })
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Expanded(
+                            child: Switch(
+                                value: isActive,
+                                activeColor: hexToColor('#41FA00'),
+                                trackOutlineColor:
+                                    MaterialStateColor.resolveWith(
+                                        (states) => Colors.grey),
+                                trackOutlineWidth:
+                                    MaterialStateProperty.resolveWith(
+                                        (states) => 1.0),
+                                activeTrackColor: Colors.transparent,
+                                inactiveTrackColor: Colors.transparent,
+                                onChanged: (value) {
+                                  setState(() {
+                                    isActive = value;
+                                  });
+                                }),
+                          )
                         ],
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(height: 30.0),
+              const SizedBox(height: 30.0),
               Expanded(
                 flex: 0,
                 child: GridView.count(
                   padding: EdgeInsets.symmetric(horizontal: 16.w),
                   shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   crossAxisCount: 3,
                   mainAxisSpacing: 10.0,
                   crossAxisSpacing: 10.0,
@@ -611,7 +618,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                   ],
                                 ),
                                 Container(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   decoration: BoxDecoration(
                                     color: hexToColor('#0D6A6D'),
                                     borderRadius: BorderRadius.circular(50.r),
@@ -633,7 +640,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => ComingSoon(),
+                            builder: (context) => const ComingSoon(),
                           ),
                         );
                       },
@@ -682,7 +689,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                   fit: BoxFit.fill,
                                 ),
                                 Container(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[800],
                                     borderRadius: BorderRadius.circular(50.r),
@@ -752,14 +759,14 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                   'Community'.toUpperCase(),
                                   style: TextStyle(
                                     color: Colors.black,
-                                    fontSize: 21.sp,
+                                    fontSize: 18.sp,
                                   ),
                                 ),
                                 Text(
                                   'Post'.toUpperCase(),
                                   style: TextStyle(
                                     color: Colors.black,
-                                    fontSize: 21.sp,
+                                    fontSize: 18.sp,
                                   ),
                                 ),
                               ],
@@ -789,7 +796,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                 ),
                                 // right arrow box
                                 Container(
-                                  padding: EdgeInsets.all(8.0),
+                                  padding: const EdgeInsets.all(8.0),
                                   decoration: BoxDecoration(
                                     color: Colors.grey[700],
                                     borderRadius: BorderRadius.circular(50.r),
@@ -916,7 +923,8 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                             : Container(
                                                 width: 40,
                                                 height: 35.0,
-                                                padding: EdgeInsets.all(8.0),
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
                                                 decoration: BoxDecoration(
                                                   color: Colors.white,
                                                   borderRadius:
@@ -992,7 +1000,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      CircleAvatar(
+                                      const CircleAvatar(
                                           backgroundColor: Colors.white,
                                           child: Icon(Icons.person_outline,
                                               color: Colors.black)),
@@ -1011,17 +1019,19 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                               fontSize: 20.sp,
                                             ),
                                           ),
-                                          SizedBox(
-                                            width: 100,
-                                            child: Text(
-                                              'Orders, Payments & Coupons',
-                                              style: TextStyle(
-                                                color: hexToColor('#838383'),
-                                                fontFamily: 'Gotham',
-                                                fontSize: 14.sp,
-                                                fontWeight: FontWeight.w500,
+                                          Expanded(
+                                            child: SizedBox(
+                                              width: 100,
+                                              child: Text(
+                                                'Orders, Payments & Coupons',
+                                                style: TextStyle(
+                                                  color: hexToColor('#838383'),
+                                                  fontFamily: 'Gotham',
+                                                  fontSize: 14.sp,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                                maxLines: 2,
                                               ),
-                                              maxLines: 2,
                                             ),
                                           ),
                                         ],
@@ -1054,7 +1064,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                   ),
                                   child: Row(
                                     children: [
-                                      CircleAvatar(
+                                      const CircleAvatar(
                                           backgroundColor: Colors.white,
                                           child: Icon(Icons.settings_outlined,
                                               color: Colors.black)),
@@ -1170,12 +1180,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                 fontSize: 24.sp,
                               ),
                             ),
-                            Spacer(),
+                            const Spacer(),
                             GestureDetector(
                               onTap: () {
                                 showModalBottomSheet(
                                   backgroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
+                                  shape: const RoundedRectangleBorder(
                                     borderRadius: BorderRadius.only(
                                       topLeft: Radius.circular(12),
                                       topRight: Radius.circular(12),
@@ -1187,12 +1197,12 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                 );
                               },
                               child: Container(
-                                padding: EdgeInsets.all(6.0),
+                                padding: const EdgeInsets.all(6.0),
                                 decoration: BoxDecoration(
                                   color: Theme.of(context).primaryColor,
                                   borderRadius: BorderRadius.circular(6.0),
                                 ),
-                                child: Icon(
+                                child: const Icon(
                                   Icons.add,
                                   color: Colors.white,
                                   size: 16.0,
@@ -1207,13 +1217,13 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                           featuredProductIds: store.featuredProductIds),
                     ],
                   ),
-                  SizedBox(height: 20.0),
+                  const SizedBox(height: 20.0),
 
                   FutureBuilder<List<StoreCategoryModel>>(
                     future: _fetchCategories(),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
+                        return const Center(child: CircularProgressIndicator());
                       } else if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       } else {

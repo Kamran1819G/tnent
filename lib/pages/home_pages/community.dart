@@ -20,10 +20,10 @@ class Community extends StatefulWidget {
   const Community({Key? key}) : super(key: key);
 
   @override
-  _CommunityState createState() => _CommunityState();
+  CommunityState createState() => CommunityState();
 }
 
-class _CommunityState extends State<Community> {
+class CommunityState extends State<Community> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   late String storeId;
@@ -41,12 +41,12 @@ class _CommunityState extends State<Community> {
       final userDoc = await _firestore
           .collection('Users')
           .doc(user.uid)
-          .get(GetOptions(source: Source.cache));
+          .get(const GetOptions(source: Source.cache));
       if (!userDoc.exists) {
         final serverDoc = await _firestore
             .collection('Users')
             .doc(user.uid)
-            .get(GetOptions(source: Source.server));
+            .get(const GetOptions(source: Source.server));
         setState(() {
           storeId = serverDoc.data()?['storeId'] ?? '';
           _hasStoreId = storeId.isNotEmpty;
@@ -70,7 +70,7 @@ class _CommunityState extends State<Community> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: MediaQuery.of(context).size.height,
       child: Column(
         children: <Widget>[
@@ -99,7 +99,7 @@ class _CommunityState extends State<Community> {
                     ),
                   ],
                 ),
-                Spacer(),
+                const Spacer(),
                 if (_hasStoreId)
                   Container(
                     margin: EdgeInsets.all(12.w),
@@ -131,7 +131,7 @@ class _CommunityState extends State<Community> {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 }
                 if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(child: Text('No posts available'));
+                  return const Center(child: Text('No posts available'));
                 }
                 return ListView.builder(
                   itemCount: snapshot.data!.length,
@@ -348,8 +348,8 @@ class _CommunityPostState extends State<CommunityPost> {
                   imageUrl: widget.post.images[index],
                   fit: BoxFit.cover,
                   placeholder: (context, url) =>
-                      Center(child: CircularProgressIndicator()),
-                  errorWidget: (context, url, error) => Icon(Icons.error),
+                      const Center(child: CircularProgressIndicator()),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
               ),
             ),
@@ -373,7 +373,7 @@ class _CommunityPostState extends State<CommunityPost> {
             child: Row(
               children: [
                 AnimatedSwitcher(
-                  duration: Duration(milliseconds: 300),
+                  duration: const Duration(milliseconds: 300),
                   transitionBuilder:
                       (Widget child, Animation<double> animation) {
                     return ScaleTransition(scale: animation, child: child);
@@ -395,7 +395,7 @@ class _CommunityPostState extends State<CommunityPost> {
             ),
           ),
         ),
-        Spacer(),
+        const Spacer(),
         IconButton(
           icon: Icon(
             Icons.ios_share_outlined,
@@ -419,7 +419,7 @@ class _CommunityPostState extends State<CommunityPost> {
   void _showMoreOptions() {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => _buildMoreBottomSheet(),
@@ -441,7 +441,7 @@ class _CommunityPostState extends State<CommunityPost> {
               size: 20,
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             'Report',
             style: TextStyle(
@@ -463,7 +463,7 @@ class _CommunityPostState extends State<CommunityPost> {
           // User information row
           Row(
             children: [
-              CircleAvatar(
+              const CircleAvatar(
                 backgroundColor: Colors.grey,
                 radius: 20.0,
               ),
@@ -644,6 +644,7 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
       showSnackBar(context, 'Post created successfully!');
 
       Navigator.pop(context);
+      CommunityState().getCommunityPosts();
     } catch (e) {
       showSnackBar(context, 'Error creating post: $e');
     } finally {
@@ -663,7 +664,7 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
             children: <Widget>[
               Container(
                 height: 100,
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Row(
                   children: [
                     Row(
@@ -685,13 +686,13 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                         ),
                       ],
                     ),
-                    Spacer(),
+                    const Spacer(),
                     Container(
-                      margin: EdgeInsets.all(8.0),
+                      margin: const EdgeInsets.all(8.0),
                       child: CircleAvatar(
                         backgroundColor: hexToColor('#F5F5F5'),
                         child: IconButton(
-                          icon: Icon(Icons.arrow_back_ios_rounded,
+                          icon: const Icon(Icons.arrow_back_ios_rounded,
                               color: Colors.black),
                           onPressed: () {
                             Navigator.pop(context);
@@ -702,19 +703,19 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               // Add Image
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Add Image',
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -740,14 +741,14 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                             ),
                           ),
                         ),
-                        SizedBox(width: 10),
+                        const SizedBox(width: 10),
                         if (_images.isNotEmpty)
                           Expanded(
                             child: SizedBox(
                               height: 75,
                               child: ListView.builder(
                                 scrollDirection: Axis.horizontal,
-                                physics: NeverScrollableScrollPhysics(),
+                                physics: const NeverScrollableScrollPhysics(),
                                 itemCount:
                                     _images.length > 3 ? 3 : _images.length,
                                 itemBuilder: (context, index) {
@@ -778,11 +779,11 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                                             });
                                           },
                                           child: Container(
-                                            decoration: BoxDecoration(
+                                            decoration: const BoxDecoration(
                                               shape: BoxShape.circle,
                                               color: Colors.red,
                                             ),
-                                            child: Icon(
+                                            child: const Icon(
                                               Icons.close,
                                               color: Colors.white,
                                               size: 16,
@@ -816,19 +817,19 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                   ],
                 ),
               ),
-              SizedBox(height: 50),
+              const SizedBox(height: 50),
               // Caption
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Caption',
                       style:
                           TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     TextField(
                       controller: _captionController,
                       textAlign: TextAlign.start,
@@ -859,16 +860,16 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                   ],
                 ),
               ),
-              SizedBox(height: 100),
+              const SizedBox(height: 100),
               Center(
                 child: ElevatedButton(
                   onPressed: _isLoading ? null : _createPost,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: hexToColor('#2D332F'),
                     foregroundColor: Colors.white,
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 100, vertical: 18),
-                    textStyle: TextStyle(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 100, vertical: 18),
+                    textStyle: const TextStyle(
                       fontSize: 16,
                       fontFamily: 'Gotham',
                       fontWeight: FontWeight.w500,
@@ -878,8 +879,8 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
                     ),
                   ),
                   child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text('Post', style: TextStyle(fontSize: 16)),
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Post', style: TextStyle(fontSize: 16)),
                 ),
               ),
             ],
