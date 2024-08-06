@@ -63,9 +63,10 @@ class DefaultFirebaseOptions {
     messagingSenderId: '950564714045',
     projectId: 'tnennt-1e1f2',
     storageBucket: 'tnennt-1e1f2.appspot.com',
-    androidClientId: '950564714045-5nuorc4ghg3e9859gnbmlukj99fsakm5.apps.googleusercontent.com',
-    iosClientId: '950564714045-fq5s9nh6rp287996fmajlgk096qv1mcc.apps.googleusercontent.com',
+    androidClientId:
+        '950564714045-5nuorc4ghg3e9859gnbmlukj99fsakm5.apps.googleusercontent.com',
+    iosClientId:
+        '950564714045-fq5s9nh6rp287996fmajlgk096qv1mcc.apps.googleusercontent.com',
     iosBundleId: 'com.tnent.tnent',
   );
-
 }

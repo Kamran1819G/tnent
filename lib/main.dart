@@ -3,8 +3,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tnent/helpers/color_utils.dart';
+import 'package:tnent/helpers/snackbar_utils.dart';
 import 'package:tnent/screens/onboarding_screen.dart';
 import 'package:tnent/services/permission_handler_service.dart';
 import 'package:tnent/widget_tree.dart';
@@ -40,6 +42,8 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   void initState() {
+    checkForUpdates();
+
     AwesomeNotifications().setListeners(
       onActionReceivedMethod: NotificationService.onActionReceivedMethod,
       onNotificationCreatedMethod:
@@ -49,7 +53,31 @@ class _MyAppState extends State<MyApp> {
       onDismissActionReceivedMethod:
           NotificationService.onDismissActionReceivedMethod,
     );
+
     super.initState();
+  }
+
+  Future<void> checkForUpdates() async {
+    InAppUpdate.checkForUpdate().then((info) {
+      setState(() {
+        if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+          update();
+        }
+        if (info.updateAvailability == UpdateAvailability.updateNotAvailable) {
+          showSnackBar(context, "Your app is up-to-date!",
+              bgColor: Colors.green);
+        }
+      });
+    }).catchError((e) {
+      showSnackBar(context, "Failed to check for new releases: $e");
+    });
+  }
+
+  void update() async {
+    await InAppUpdate.startFlexibleUpdate();
+    InAppUpdate.completeFlexibleUpdate().then((_) {}).catchError((e) {
+      showSnackBar(context, "Failed to auto-update: $e");
+    });
   }
 
   @override

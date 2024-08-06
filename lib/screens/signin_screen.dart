@@ -334,7 +334,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: 100.h),
+              SizedBox(height: 30.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -350,7 +350,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   const SizedBox(width: 5),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const SignUpScreen(),
@@ -368,7 +368,8 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                   ),
                 ],
-              )
+              ),
+              SizedBox(height: 10.h),
             ],
           ),
         ),
