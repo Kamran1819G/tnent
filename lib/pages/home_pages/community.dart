@@ -14,6 +14,7 @@ import 'package:tnent/screens/users_screens/storeprofile_screen.dart';
 import 'package:tnent/widgets/full_screen_image_view.dart';
 import '../../helpers/color_utils.dart';
 import '../../helpers/snackbar_utils.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class Community extends StatefulWidget {
   const Community({Key? key}) : super(key: key);
@@ -343,12 +344,15 @@ class _CommunityPostState extends State<CommunityPost> {
               tag: 'postImage${widget.post.postId}$index',
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8.0),
-                child: CachedNetworkImage(
-                  imageUrl: widget.post.images[index],
+                child: FadeInImage.memoryNetwork(
+                  placeholder: kTransparentImage,
+                  image: widget.post.images[index],
                   fit: BoxFit.cover,
-                  placeholder: (context, url) =>
-                      const Center(child: CircularProgressIndicator()),
-                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                  fadeInDuration: const Duration(milliseconds: 300),
+                  fadeInCurve: Curves.easeIn,
+                  imageErrorBuilder: (context, error, stackTrace) {
+                    return const Center(child: Icon(Icons.error));
+                  },
                 ),
               ),
             ),

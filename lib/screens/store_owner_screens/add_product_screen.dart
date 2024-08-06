@@ -1,15 +1,16 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:tnent/helpers/color_utils.dart';
-import 'package:tnent/models/store_category_model.dart';
-import 'package:tnent/models/product_model.dart';
-import 'package:tnent/screens/store_owner_screens/optionals_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:uuid/uuid.dart';
+
+import '../../helpers/color_utils.dart';
+import '../../models/product_model.dart';
+import '../../models/store_category_model.dart';
+import 'optionals_screen.dart';
 
 class AddProductScreen extends StatefulWidget {
   final StoreCategoryModel category;
@@ -78,9 +79,32 @@ class _AddProductScreenState extends State<AddProductScreen> {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
+      File compressedImage = await compressImage(File(image.path));
       setState(() {
-        _images.add(File(image.path));
+        _images.add(compressedImage);
       });
+    }
+  }
+
+  Future<File> compressImage(File file) async {
+    final filePath = file.absolute.path;
+    final lastIndex = filePath.lastIndexOf(RegExp(r'.jp'));
+    final splitted = filePath.substring(0, (lastIndex));
+    final outPath = "${splitted}_compressed.jpg";
+
+    final result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      outPath,
+      quality: 70,
+      minWidth: 1024,
+      minHeight: 1024,
+    );
+
+    if (result != null) {
+      return File(result.path);
+    } else {
+      // If compression fails, return the original file
+      return file;
     }
   }
 
@@ -287,7 +311,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -382,7 +406,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                     });
                                                   },
                                                   child: Container(
-                                                    decoration: BoxDecoration(
+                                                    decoration: const BoxDecoration(
                                                       shape: BoxShape.circle,
                                                       color: Colors.red,
                                                     ),
@@ -439,7 +463,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                             fontSize: 20.sp,
                             fontWeight: FontWeight.w900,
                           ),
-                          icon: Icon(Icons.keyboard_arrow_down_rounded),
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded),
                           underline: SizedBox(),
                           value: selectedCategory,
                           onChanged: (String? newValue) {

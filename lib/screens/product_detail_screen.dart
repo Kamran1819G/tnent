@@ -467,13 +467,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       margin: EdgeInsets.symmetric(
                                           horizontal: 12.w),
                                       child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.r),
+                                        borderRadius: BorderRadius.circular(8.r),
                                         child: Image.network(
                                           widget.product.imageUrls[0],
                                           fit: BoxFit.cover,
+                                          loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                                            if (loadingProgress == null) return child;
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress.expectedTotalBytes != null
+                                                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                    : null,
+                                              ),
+                                            );
+                                          },
+                                          ),
                                         ),
-                                      ),
                                     ),
                                   )
                                 : ListView.builder(
@@ -486,15 +495,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             horizontal: 12.w),
                                         width: 445.w,
                                         height: 490.h,
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8.r),
-                                          child: Image.network(
-                                            widget.product.imageUrls[index],
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      );
+              child: Image.network(
+              widget.product.imageUrls[0],
+              fit: BoxFit.cover,
+              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Center(
+              child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                  : null,
+              ),
+              );
+              },
+                                    ),
+                                  );
                                     },
                                   ),
                           ),
