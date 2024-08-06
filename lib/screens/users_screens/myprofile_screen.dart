@@ -278,14 +278,29 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => const WebViewScreen(
-                                    title: 'Terms of Service',
-                                    url:
-                                        'https://tnent-updated.vercel.app/legals',
+                                    title:
+                                        'Legals | Terms of Service, Privacy Policy & more',
+                                    url: 'https://tnennt.com/legals',
                                   ),
                                 ),
                               );
                             },
-                            child: _buildMenuItem(Icons.gavel, 'Legal')),
+                            child: _buildMenuItem(
+                                Icons.gavel, 'Privacy Policy & more')),
+                        GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const WebViewScreen(
+                                    title: 'Request for deleting account',
+                                    url: 'https://tnennt.com/deleteacc',
+                                  ),
+                                ),
+                              );
+                            },
+                            child: _buildMenuItem(
+                                Icons.delete_rounded, 'Delete Account')),
                       ],
                     ),
                   ),

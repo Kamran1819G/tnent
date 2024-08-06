@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
@@ -11,6 +12,8 @@ import 'package:tnent/widgets/wishlist_product_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
+
+import '../helpers/report_helper.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   ProductModel product;
@@ -467,22 +470,32 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       margin: EdgeInsets.symmetric(
                                           horizontal: 12.w),
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(8.r),
+                                        borderRadius:
+                                            BorderRadius.circular(8.r),
                                         child: Image.network(
                                           widget.product.imageUrls[0],
                                           fit: BoxFit.cover,
-                                          loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-                                            if (loadingProgress == null) return child;
+                                          loadingBuilder: (BuildContext context,
+                                              Widget child,
+                                              ImageChunkEvent?
+                                                  loadingProgress) {
+                                            if (loadingProgress == null)
+                                              return child;
                                             return Center(
                                               child: CircularProgressIndicator(
-                                                value: loadingProgress.expectedTotalBytes != null
-                                                    ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                                value: loadingProgress
+                                                            .expectedTotalBytes !=
+                                                        null
+                                                    ? loadingProgress
+                                                            .cumulativeBytesLoaded /
+                                                        loadingProgress
+                                                            .expectedTotalBytes!
                                                     : null,
                                               ),
                                             );
                                           },
-                                          ),
                                         ),
+                                      ),
                                     ),
                                   )
                                 : ListView.builder(
@@ -495,21 +508,30 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             horizontal: 12.w),
                                         width: 445.w,
                                         height: 490.h,
-              child: Image.network(
-              widget.product.imageUrls[0],
-              fit: BoxFit.cover,
-              loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
-              if (loadingProgress == null) return child;
-              return Center(
-              child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                  : null,
-              ),
-              );
-              },
-                                    ),
-                                  );
+                                        child: Image.network(
+                                          widget.product.imageUrls[0],
+                                          fit: BoxFit.cover,
+                                          loadingBuilder: (BuildContext context,
+                                              Widget child,
+                                              ImageChunkEvent?
+                                                  loadingProgress) {
+                                            if (loadingProgress == null)
+                                              return child;
+                                            return Center(
+                                              child: CircularProgressIndicator(
+                                                value: loadingProgress
+                                                            .expectedTotalBytes !=
+                                                        null
+                                                    ? loadingProgress
+                                                            .cumulativeBytesLoaded /
+                                                        loadingProgress
+                                                            .expectedTotalBytes!
+                                                    : null,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      );
                                     },
                                   ),
                           ),
@@ -1148,12 +1170,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             ),
           ),
           SizedBox(height: 75.h),
-          CircleAvatar(
-            backgroundColor: hexToColor('#2B2B2B'),
-            child: Icon(
-              Icons.report_gmailerrorred,
-              color: hexToColor('#BEBEBE'),
-              size: 28.sp,
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return const ReportHelperWidget();
+                },
+              );
+            },
+            child: CircleAvatar(
+              backgroundColor: hexToColor('#2B2B2B'),
+              child: Icon(
+                Icons.report_gmailerrorred,
+                color: hexToColor('#BEBEBE'),
+                size: 28.sp,
+              ),
             ),
           ),
           SizedBox(height: 30.h),

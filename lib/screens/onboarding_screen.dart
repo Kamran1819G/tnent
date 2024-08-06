@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,7 +13,7 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  PageController _pageController = PageController();
+  final PageController _pageController = PageController();
   bool onLastPage = false;
   int arrowIconCount = 1;
   int currentPage = 0;
@@ -36,16 +34,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             },
             children: <Widget>[
               _buildAppFeaturePage(
-                  'Lorem Ipsum',
-                  'Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem',
+                  'Get Your Desired Products',
+                  'Buy from your local sellers, avail discounts and more. All in one app.',
                   'assets/discount_shopping.png'),
               _buildAppFeaturePage(
-                  'Lorem Ipsum',
-                  'Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem',
+                  'Instant Shipping',
+                  'Get your orders instantly without the hassle of waiting for days',
                   'assets/instant_shipping.png'),
               _buildAppFeaturePage(
-                  'Lorem Ipsum',
-                  'Lorem ipsum lorem ipsum lorem ipsum lorem ipsum lorem',
+                  'Middlemen Security',
+                  'Our middlemen will provide a gentle service ensuring that the products remain in perfect condition',
                   'assets/middleman_delivery.png'),
               _buildAppFeaturePage(
                   'Create Your Own e-Store',
@@ -54,9 +52,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ],
           ),
           onLastPage
-              ? SizedBox()
+              ? const SizedBox()
               : Container(
-                  alignment: Alignment(0, 0.75),
+                  alignment: const Alignment(0, 0.75),
                   child: SmoothPageIndicator(
                     controller: _pageController,
                     count: 4,
@@ -72,7 +70,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 ),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 24.w),
-            alignment: Alignment(0, -0.9),
+            alignment: const Alignment(0, -0.9),
             child: Row(
               children: [
                 Container(
@@ -99,7 +97,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                       ]),
                 ),
-                Spacer(),
+                const Spacer(),
                 Container(
                   height: 35.h,
                   width: 66.w,
@@ -138,7 +136,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
           Align(
-            alignment: Alignment(0, 0.95),
+            alignment: const Alignment(0, 0.95),
             child: GestureDetector(
               onTap: () async {
                 if (onLastPage) {
@@ -146,11 +144,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   prefs.setBool('onboarding', true);
 
                   if (!mounted) return;
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => WidgetTree()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const WidgetTree()));
                 } else {
                   _pageController.nextPage(
-                    duration: Duration(milliseconds: 500),
+                    duration: const Duration(milliseconds: 500),
                     curve: Curves.ease,
                   );
                 }
@@ -222,7 +222,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               fontWeight: FontWeight.w500,
               fontSize: 23.sp,
             ),
-            maxLines: 2,
+            maxLines: 3,
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,
           ),

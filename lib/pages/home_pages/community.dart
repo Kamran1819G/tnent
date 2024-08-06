@@ -2,12 +2,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:tnent/helpers/report_helper.dart';
 import 'package:tnent/models/community_post_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/screens/users_screens/storeprofile_screen.dart';
@@ -430,18 +432,29 @@ class _CommunityPostState extends State<CommunityPost> {
   }
 
   Widget _buildMoreBottomSheet() {
-    return Container(
+    return SizedBox(
       height: 250,
       width: double.infinity,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircleAvatar(
-            backgroundColor: hexToColor('#2B2B2B'),
-            child: Icon(
-              Icons.report_gmailerrorred,
-              color: hexToColor('#BEBEBE'),
-              size: 20,
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pop();
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return const ReportHelperWidget();
+                },
+              );
+            },
+            child: CircleAvatar(
+              backgroundColor: hexToColor('#2B2B2B'),
+              child: Icon(
+                Icons.report_gmailerrorred,
+                color: hexToColor('#BEBEBE'),
+                size: 20,
+              ),
             ),
           ),
           const SizedBox(height: 20),
@@ -644,7 +657,12 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
 
       await CommunityPostModel.createPost(post, widget.storeId);
 
-      showSnackBar(context, 'Post created successfully!');
+      showSnackBar(context, 'Post created successfully!',
+          bgColor: Colors.green,
+          leadIcon: const Icon(
+            Icons.check,
+            color: Colors.white,
+          ));
 
       Navigator.pop(context);
       CommunityState().getCommunityPosts();
@@ -866,7 +884,12 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
               const SizedBox(height: 100),
               Center(
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _createPost,
+                  onPressed: () {
+                    if (_captionController.text.isEmpty) {
+                      return;
+                    }
+                    _isLoading ? null : _createPost();
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: hexToColor('#2D332F'),
                     foregroundColor: Colors.white,
