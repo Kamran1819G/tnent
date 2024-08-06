@@ -237,7 +237,7 @@ class _NotificationScreenState extends State<NotificationScreen>
                   productName: data['data']['productName'],
                   price: double.parse(data['data']['price']),
                   orderId: data['data']['orderId'],
-                  time: DateFormat('jm').format((data['timestamp'] as Timestamp).toDate()), onAccept: () {  }, onReject: () {  },
+                 time: DateFormat('jm').format((data['timestamp'] as Timestamp).toDate()), onAccept: () {  }, onReject: () {  },
                 );
               } else {
                 return StoreConnectionNotification(

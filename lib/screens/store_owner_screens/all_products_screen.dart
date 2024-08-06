@@ -197,7 +197,7 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                     ),
                     child: Text('Delete'),
                   ),
-                  SizedBox(width: 8.0),
+                  const SizedBox(width: 8.0),
                   TextButton(
                     onPressed: _toggleSelectionMode,
                     child: Text('Cancel'),
@@ -209,7 +209,7 @@ class _AllProductsScreenState extends State<AllProductsScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 8.0),
+           const SizedBox(height: 8.0),
           ],
           Expanded(
             child: FutureBuilder<List<ProductModel>>(
