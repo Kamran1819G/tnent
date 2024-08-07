@@ -47,11 +47,15 @@ class _OptionalsScreenState extends State<OptionalsScreen>
   int getTabLength() {
     switch (widget.productData.productCategory.toLowerCase()) {
       case 'clothings':
-        return 3; // Topwear, Bottomwear, Footwear
+        return 2; // Topwear, Bottomwear
       case 'bakeries':
         return 2; // Pound, Gram/KG
       case 'electronics':
         return 1; // Capacity
+      case 'restaurants':
+        return 1; // Bowel Size
+      case 'footwears':
+        return 1;
       default:
         return 3;
     }
@@ -67,6 +71,8 @@ class _OptionalsScreenState extends State<OptionalsScreen>
         return 'Add Storage';
       case 'restaurants':
         return 'Add Bowel Size';
+      case 'footwears':
+        return 'Add Size';
       default:
         return 'Add Option';
     }
@@ -78,7 +84,6 @@ class _OptionalsScreenState extends State<OptionalsScreen>
         return [
           OptionTab('Topwear', hexToColor('#343434')),
           OptionTab('Bottomwear', hexToColor('#343434')),
-          OptionTab('Footwear', hexToColor('#343434')),
         ];
       case 'bakeries':
         return [
@@ -89,6 +94,8 @@ class _OptionalsScreenState extends State<OptionalsScreen>
         return [OptionTab('Capacity', hexToColor('#343434'))];
       case 'restaurants':
         return [OptionTab('Bowel Size', hexToColor('#343434'))];
+      case 'footwears':
+        return [OptionTab('Footwear', hexToColor('#343434'))];
       default:
         return [OptionTab('Option', hexToColor('#343434'))];
     }
@@ -99,17 +106,51 @@ class _OptionalsScreenState extends State<OptionalsScreen>
       case 'clothings':
         return [
           OptionListView(
-            options: ['XS', 'S', 'M', 'L', 'XL'],
+            options: [
+              'XXS',
+              'XS',
+              'S',
+              'M',
+              'L',
+              'XL',
+              'XXL',
+              'XXXL',
+              '28"',
+              '30"',
+              '32"',
+              '34"',
+              '36"',
+              '38"',
+              '40"',
+              '42"',
+              '44"',
+              '46"',
+              '48"'
+            ],
             selectedOptions: selectedOptions,
             onOptionSelected: updateSelectedOptions,
           ),
           OptionListView(
-            options: ['28', '30', '32', '34', '36'],
-            selectedOptions: selectedOptions,
-            onOptionSelected: updateSelectedOptions,
-          ),
-          OptionListView(
-            options: ['US 6', 'US 7', 'US 8', 'US 9', 'US 10'],
+            options: [
+              '20"',
+              '22"',
+              '24"',
+              '26"',
+              '28"',
+              '30"',
+              '32"',
+              '34"',
+              '36"',
+              '38"',
+              '40"',
+              '42"',
+              '44"',
+              '46"',
+              '48"',
+              '50"',
+              '52"',
+              '54"'
+            ],
             selectedOptions: selectedOptions,
             onOptionSelected: updateSelectedOptions,
           ),
@@ -117,12 +158,22 @@ class _OptionalsScreenState extends State<OptionalsScreen>
       case 'bakeries':
         return [
           OptionListView(
-            options: ['1 Pound', '2 Pound', '5 Pound', '10 Pound'],
+            options: ['1 Pound', '1.5 Pound', '2 Pound', '3 Pound'],
             selectedOptions: selectedOptions,
             onOptionSelected: updateSelectedOptions,
           ),
           OptionListView(
-            options: ['50g', '100g', '200g', '500g', '1kg', '2kg'],
+            options: [
+              '100g',
+              '150g',
+              '250g',
+              '600g',
+              '650g',
+              '700g',
+              '1kg',
+              '1.5kg',
+              '2kg'
+            ],
             selectedOptions: selectedOptions,
             onOptionSelected: updateSelectedOptions,
           ),
@@ -131,12 +182,14 @@ class _OptionalsScreenState extends State<OptionalsScreen>
         return [
           OptionListView(
             options: [
-              '8GB + 64GB',
+              '6GB + 128GB',
               '8GB + 128GB',
               '8GB + 256GB',
               '12GB + 128GB',
               '12GB + 256GB',
-              '12GB + 512GB'
+              '12GB + 512GB',
+              '12GB + 1TB',
+              '16GB + 128GB',
             ],
             selectedOptions: selectedOptions,
             onOptionSelected: updateSelectedOptions,
@@ -146,6 +199,33 @@ class _OptionalsScreenState extends State<OptionalsScreen>
         return [
           OptionListView(
             options: ['Half', 'Full'],
+            selectedOptions: selectedOptions,
+            onOptionSelected: updateSelectedOptions,
+          ),
+        ];
+      case 'footwears':
+        return [
+          OptionListView(
+            options: [
+              'US 5',
+              'US 6',
+              'US 7',
+              'US 8',
+              'US 9',
+              'US 10',
+              'US 11',
+              'US 12',
+              'US 13',
+              'UK 4',
+              'UK 5',
+              'UK 6',
+              'UK 7',
+              'UK 8',
+              'UK 9',
+              'UK 10',
+              'UK 11',
+              'UK 12'
+            ],
             selectedOptions: selectedOptions,
             onOptionSelected: updateSelectedOptions,
           ),
