@@ -126,11 +126,12 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
         .doc(widget.store.ownerId)
         .collection('notifications')
         .add({
-      'title': 'New Follower',
-      'body': '${currentUser!.firstName} started following your store.',
+      'title': '🌟 You’ve Got a New Follower!',
+      'body':
+          '"${currentUser!.firstName} ${currentUser!.lastName}" just followed your store. Keep the momentum going by showcasing your best products',
       'data': {
         'type': 'store',
-        'name': currentUser!.firstName,
+        'name': '${currentUser!.firstName} ${currentUser!.lastName}',
         'image': currentUser!.photoURL.toString(),
       },
       'timestamp': FieldValue.serverTimestamp(),

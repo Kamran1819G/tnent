@@ -24,6 +24,15 @@ class NotificationService {
           channelShowBadge: true,
         ),
         NotificationChannel(
+          channelKey: 'store_channel',
+          channelName: 'Store Notifications',
+          channelDescription: 'Notification channel for store notifications',
+          defaultColor: const Color(0xFF9D50DD),
+          ledColor: const Color(0xFF9D50DD),
+          importance: NotificationImportance.High,
+          channelShowBadge: true,
+        ),
+        NotificationChannel(
           channelKey: 'order_channel',
           channelName: 'Order Notifications',
           channelDescription: 'Notification channel for order notifications',
@@ -101,8 +110,16 @@ class NotificationService {
 
   static Future<void> _handleMessage(RemoteMessage message) async {
     debugPrint('Handling a message: ${message.messageId}');
-    // Process the message and show a notification
-    AwesomeNotifications().createNotificationFromJsonData(message.data);
+
+    // Display the notification using Awesome Notifications
+    AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: message.hashCode, // Unique ID for the notification
+        channelKey: 'basic_channel', // Change as per your requirement
+        title: message.notification?.title,
+        body: message.notification?.body,
+      ),
+    );
   }
 
   /// Use this method to detect when a new notification or a schedule is created

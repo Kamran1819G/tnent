@@ -1945,6 +1945,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
     final firestore = FirebaseFirestore.instance;
 
     for (var item in widget.items) {
+      // Calculate total price
+      double totalPrice = item['variationDetails'].price * item['quantity'];
+
       // Store the notification in Firestore
       await firestore
           .collection('Users')
@@ -1958,7 +1961,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           'status': 'orderplaced',
           'productImage': item['productImage'],
           'productName': item['productName'],
-          'price': item['variationDetails'].price.toString(),
+          'price': totalPrice.toString(),
           'orderId': item['orderId'],
         },
         'timestamp': FieldValue.serverTimestamp(),
