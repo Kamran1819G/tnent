@@ -45,22 +45,38 @@ class _WishlistScreenState extends State<WishlistScreen> {
           List<Map<String, dynamic>> updatedWishlistItems = [];
 
           for (var item in wishlist) {
-            Map<String, dynamic> productDetails =
-            await _fetchProductDetails(item['productId']);
-            updatedWishlistItems.add({
-              ...item,
-              ...productDetails,
-              'quantity': 1,
-              'variationDetails': productDetails['variations'][item['variation']],
-              'isSelected': false,
-            });
+            try {
+              Map<String, dynamic> productDetails =
+                  await _fetchProductDetails(item['productId']);
+              if (productDetails.isNotEmpty) {
+                updatedWishlistItems.add({
+                  ...item,
+                  ...productDetails,
+                  'quantity': 1,
+                  'variationDetails': productDetails['variations']
+                      [item['variation']],
+                  'isSelected': false,
+                });
+              }
+            } catch (e) {
+              print('Error fetching product ${item['productId']}: $e');
+              // Optionally, you can add a placeholder or error item here
+            }
           }
 
           setState(() {
             wishlistItems = updatedWishlistItems;
             isLoading = false;
           });
+        } else {
+          setState(() {
+            isLoading = false;
+          });
         }
+      } else {
+        setState(() {
+          isLoading = false;
+        });
       }
     } catch (e) {
       print('Error fetching wishlist: $e');
@@ -71,21 +87,35 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 
   Future<Map<String, dynamic>> _fetchProductDetails(String productId) async {
-    DocumentSnapshot productDoc = await FirebaseFirestore.instance
-        .collection('products')
-        .doc(productId)
-        .get();
+    try {
+      DocumentSnapshot productDoc = await FirebaseFirestore.instance
+          .collection('products')
+          .doc(productId)
+          .get(GetOptions(source: Source.cache));
 
-    if (!productDoc.exists) {
+      if (!productDoc.exists) {
+        productDoc = await FirebaseFirestore.instance
+            .collection('products')
+            .doc(productId)
+            .get(GetOptions(source: Source.server));
+      }
+
+      if (!productDoc.exists) {
+        print('Product document not found for ID: $productId');
+        return {};
+      }
+
+      ProductModel product = ProductModel.fromFirestore(productDoc);
+      return {
+        'productName': product.name,
+        'productImage':
+            product.imageUrls.isNotEmpty ? product.imageUrls[0] : '',
+        'variations': product.variations,
+      };
+    } catch (e) {
+      print('Error fetching product details for ID $productId: $e');
       return {};
     }
-
-    ProductModel product = ProductModel.fromFirestore(productDoc);
-    return {
-      'productName': product.name,
-      'productImage': product.imageUrls.isNotEmpty ? product.imageUrls[0] : '',
-      'variations': product.variations,
-    };
   }
 
   void _updateSelectionState() {
@@ -95,9 +125,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
   }
 
   void _calculateTotalAmount() {
-    _totalAmount = wishlistItems.where((item) => item['isSelected'] == true).fold(
-        0,
-            (sum, item) => sum + item['variationDetails'].price);
+    _totalAmount = wishlistItems
+        .where((item) => item['isSelected'] == true)
+        .fold(0, (sum, item) => sum + item['variationDetails'].price);
   }
 
   void _toggleAllItemsSelection(bool? value) {
@@ -111,10 +141,11 @@ class _WishlistScreenState extends State<WishlistScreen> {
     _updateFirestore();
   }
 
-  void _updateItemSelection(String productId, String variation, bool isSelected) {
+  void _updateItemSelection(
+      String productId, String variation, bool isSelected) {
     setState(() {
       int index = wishlistItems.indexWhere((item) =>
-      item['productId'] == productId && item['variation'] == variation);
+          item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
         wishlistItems[index]['isSelected'] = isSelected;
         _updateSelectionState();
@@ -128,9 +159,9 @@ class _WishlistScreenState extends State<WishlistScreen> {
       if (user != null) {
         List<Map<String, dynamic>> wishlistData = wishlistItems
             .map((item) => {
-          'productId': item['productId'],
-          'variation': item['variation'],
-        })
+                  'productId': item['productId'],
+                  'variation': item['variation'],
+                })
             .toList();
 
         await FirebaseFirestore.instance
@@ -146,7 +177,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
   void _removeFromWishlist(String productId, String variation) {
     setState(() {
       wishlistItems.removeWhere((item) =>
-      item['productId'] == productId && item['variation'] == variation);
+          item['productId'] == productId && item['variation'] == variation);
       _updateSelectionState();
     });
     _updateFirestore();
@@ -154,7 +185,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
 
   void _navigateToCheckout() {
     List<Map<String, dynamic>> selectedItems =
-    wishlistItems.where((item) => item['isSelected'] == true).toList();
+        wishlistItems.where((item) => item['isSelected'] == true).toList();
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -278,27 +309,32 @@ class _WishlistScreenState extends State<WishlistScreen> {
             Expanded(
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 12.w),
-                itemCount: wishlistItems.length,
-                itemBuilder: (context, index) {
-                  final item = wishlistItems[index];
-                  return WishlistItemTile(
-                    item: item,
-                    onRemove: _removeFromWishlist,
-                    onUpdateSelection: _updateItemSelection,
-                  );
-                },
-              ),
+                  : wishlistItems.isEmpty
+                      ? Center(child: Text('Your wishlist is empty'))
+                      : ListView.builder(
+                          padding: EdgeInsets.symmetric(horizontal: 12.w),
+                          itemCount: wishlistItems.length,
+                          itemBuilder: (context, index) {
+                            final item = wishlistItems[index];
+                            return WishlistItemTile(
+                              key: ValueKey(
+                                  '${item['productId']}_${item['variation']}'),
+                              item: item,
+                              onRemove: _removeFromWishlist,
+                              onUpdateSelection: _updateItemSelection,
+                            );
+                          },
+                        ),
             ),
             Padding(
               padding: EdgeInsets.all(24.w),
               child: ElevatedButton(
                 child: Text('Buy Selected Items',
                     style: TextStyle(fontSize: 22.sp)),
-                onPressed: wishlistItems.any((item) => item['isSelected'] == true)
-                    ? _navigateToCheckout
-                    : null,
+                onPressed:
+                    wishlistItems.any((item) => item['isSelected'] == true)
+                        ? _navigateToCheckout
+                        : null,
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18.r),
@@ -355,15 +391,15 @@ class WishlistItemTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(8.r),
                 image: item['productImage'] != null
                     ? DecorationImage(
-                  image: NetworkImage(item['productImage']),
-                  fit: BoxFit.cover,
-                )
+                        image: NetworkImage(item['productImage']),
+                        fit: BoxFit.cover,
+                      )
                     : null,
               ),
               child: item['productImage'] == null
                   ? Center(
-                  child: Icon(Icons.image_not_supported,
-                      size: 50.sp, color: Colors.grey))
+                      child: Icon(Icons.image_not_supported,
+                          size: 50.sp, color: Colors.grey))
                   : null,
             ),
             SizedBox(width: 16.w),
@@ -402,7 +438,8 @@ class WishlistItemTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     GestureDetector(
-                      onTap: () => onRemove(item['productId'], item['variation']),
+                      onTap: () =>
+                          onRemove(item['productId'], item['variation']),
                       child: Container(
                         height: 50.h,
                         width: 105.w,
@@ -458,8 +495,8 @@ class WishlistItemTile extends StatelessWidget {
                       ),
                       value: item['isSelected'] ?? false,
                       onChanged: (value) {
-                        onUpdateSelection(
-                            item['productId'], item['variation'], value ?? false);
+                        onUpdateSelection(item['productId'], item['variation'],
+                            value ?? false);
                       },
                     ),
                   ],

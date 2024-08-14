@@ -37,14 +37,22 @@ class _CartScreenState extends State<CartScreen> {
 
         List<Map<String, dynamic>> updatedCartItems = [];
         for (var item in cartData) {
-          Map<String, dynamic> productDetails =
-              await _fetchProductDetails(item['productId']);
-          updatedCartItems.add({
-            ...item,
-            ...productDetails,
-            'variationDetails': productDetails['variations'][item['variation']],
-            'isSelected': false, // Add a selection state for each item
-          });
+          try {
+            Map<String, dynamic> productDetails =
+                await _fetchProductDetails(item['productId']);
+            if (productDetails.isNotEmpty) {
+              updatedCartItems.add({
+                ...item,
+                ...productDetails,
+                'variationDetails': productDetails['variations']
+                    [item['variation']],
+                'isSelected': false,
+              });
+            }
+          } catch (e) {
+            print('Error fetching product ${item['productId']}: $e');
+            // Optionally, you can add a placeholder or error item here
+          }
         }
 
         setState(() {
@@ -56,29 +64,36 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   Future<Map<String, dynamic>> _fetchProductDetails(String productId) async {
-    DocumentSnapshot productDoc = await FirebaseFirestore.instance
-        .collection('products')
-        .doc(productId)
-        .get(GetOptions(source: Source.cache));
+    try {
+      DocumentSnapshot productDoc = await FirebaseFirestore.instance
+          .collection('products')
+          .doc(productId)
+          .get(GetOptions(source: Source.cache));
 
-    if (!productDoc.exists) {
-      productDoc = await FirebaseFirestore.instance
-           .collection('products')
-           .doc(productId)
-           .get(GetOptions(source: Source.server));
-    }
+      if (!productDoc.exists) {
+        productDoc = await FirebaseFirestore.instance
+            .collection('products')
+            .doc(productId)
+            .get(GetOptions(source: Source.server));
+      }
 
-    if (!productDoc.exists) {
+      if (!productDoc.exists) {
+        print('Product document not found for ID: $productId');
+        return {};
+      }
+
+      ProductModel product = ProductModel.fromFirestore(productDoc);
+      return {
+        'productName': product.name,
+        'storeId': product.storeId,
+        'productImage':
+            product.imageUrls.isNotEmpty ? product.imageUrls[0] : '',
+        'variations': product.variations,
+      };
+    } catch (e) {
+      print('Error fetching product details for ID $productId: $e');
       return {};
     }
-
-    ProductModel product = ProductModel.fromFirestore(productDoc);
-    return {
-      'productName': product.name,
-      'storeId': product.storeId,
-      'productImage': product.imageUrls.isNotEmpty ? product.imageUrls[0] : '',
-      'variations': product.variations,
-    };
   }
 
   void _updateSelectionState() {
@@ -350,13 +365,17 @@ class CartItemTile extends StatelessWidget {
             width: 255.w,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: CachedNetworkImage(
-            imageUrl: item['productImage'] ?? '',
-            fit: BoxFit.cover,
-            placeholder: (context, url) => Center(child: CircularProgressIndicator()),
-            errorWidget: (context, url, error) => Icon(Icons.image_not_supported, size: 50.sp, color: Colors.grey),
-          ),
+            ),
+            child: CachedNetworkImage(
+              imageUrl: item['productImage'] ?? '',
+              fit: BoxFit.cover,
+              placeholder: (context, url) =>
+                  Center(child: CircularProgressIndicator()),
+              errorWidget: (context, url, error) => Icon(
+                  Icons.image_not_supported,
+                  size: 50.sp,
+                  color: Colors.grey),
+            ),
           ),
           SizedBox(width: 16.w),
           Column(

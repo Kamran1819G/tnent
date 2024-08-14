@@ -382,115 +382,55 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
 }
 
 class OrdersScreen extends StatelessWidget {
-  String orderType;
-  List<QueryDocumentSnapshot> orders;
+  final String orderType;
+  final List<QueryDocumentSnapshot> orders;
 
   OrdersScreen({required this.orderType, required this.orders});
 
   @override
   Widget build(BuildContext context) {
+    // Filter orders to remove any invalid or incomplete documents
+    final validOrders = orders.where((doc) {
+      final data = doc.data() as Map<String, dynamic>?;
+
+      // Ensure the required fields exist and are valid
+      return data != null &&
+          data.containsKey('productName') &&
+          data.containsKey('productImage') &&
+          data.containsKey('orderId') &&
+          data.containsKey('quantity') &&
+          data.containsKey('priceDetails') &&
+          data['priceDetails'].containsKey('price') &&
+          data.containsKey('status');
+    }).toList();
+
     return Scaffold(
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 100.h,
-              margin: EdgeInsets.only(top: 20.h),
-              padding: EdgeInsets.symmetric(horizontal: 16.h),
-              child: Row(
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Orders'.toUpperCase(),
-                            style: TextStyle(
-                              color: hexToColor('#1E1E1E'),
-                              fontSize: 35.sp,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                          Text(
-                            ' •',
-                            style: TextStyle(
-                              fontSize: 35.sp,
-                              color: hexToColor('#42FF00'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Text(
-                        'My Orders',
-                        style: TextStyle(
-                          color: hexToColor('#9C9C9C'),
-                          fontWeight: FontWeight.w500,
-                          fontFamily: 'Gotham',
-                          fontSize: 20.sp,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Spacer(),
-                  IconButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
-                        Colors.grey[100],
-                      ),
-                      shape: MaterialStateProperty.all(
-                        CircleBorder(),
-                      ),
-                    ),
-                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                ],
-              ),
-            ),
+            _buildHeader(context),
             SizedBox(height: 50.h),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    '$orderType Orders',
-                    style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontSize: 27.sp,
-                    ),
-                  ),
-                  Text(
-                    '${orders.length}',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 27.sp,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildOrderSummary(context, validOrders),
             SizedBox(height: 30.h),
             Expanded(
               child: ListView.builder(
-                itemCount: orders.length,
+                itemCount: validOrders.length,
                 itemBuilder: (context, index) {
-                  final order = orders[index].data() as Map<String, dynamic>;
+                  final order =
+                      validOrders[index].data() as Map<String, dynamic>;
                   return OrderCard(
                     productName: order['productName'],
                     productImage: order['productImage'],
                     orderId: order['orderId'],
+                    productQuantity: order['quantity'],
                     productPrice: order['priceDetails']['price'],
                     uniqueCode: order['pickupCode'],
                     orderStatus: _getOrderStatus(order),
-                    middleman: order['providedMiddleman'],
-                    shippingAddress:
-                        '${order['shippingAddress']['city']}, ${order['shippingAddress']['zip']}, ${order['shippingAddress']['state']}',
+                    middleman: order['providedMiddleman'] ?? {},
+                    shippingAddress: order['shippingAddress'] != null
+                        ? '${order['shippingAddress']['city']}, ${order['shippingAddress']['zip']}, ${order['shippingAddress']['state']}'
+                        : null,
                     cancelReason: order['status']['cancelled']?['message'],
                   );
                 },
@@ -498,6 +438,93 @@ class OrdersScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      height: 100.h,
+      margin: EdgeInsets.only(top: 20.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.h),
+      child: Row(
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Row(
+                children: [
+                  Text(
+                    'Orders'.toUpperCase(),
+                    style: TextStyle(
+                      color: hexToColor('#1E1E1E'),
+                      fontSize: 35.sp,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  Text(
+                    ' •',
+                    style: TextStyle(
+                      fontSize: 35.sp,
+                      color: hexToColor('#42FF00'),
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                'My Orders',
+                style: TextStyle(
+                  color: hexToColor('#9C9C9C'),
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'Gotham',
+                  fontSize: 20.sp,
+                ),
+              ),
+            ],
+          ),
+          Spacer(),
+          IconButton(
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all(
+                Colors.grey[100],
+              ),
+              shape: MaterialStateProperty.all(
+                CircleBorder(),
+              ),
+            ),
+            icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOrderSummary(
+      BuildContext context, List<QueryDocumentSnapshot> validOrders) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            '$orderType Orders',
+            style: TextStyle(
+              color: hexToColor('#343434'),
+              fontSize: 27.sp,
+            ),
+          ),
+          Text(
+            '${validOrders.length}',
+            style: TextStyle(
+              color: Theme.of(context).primaryColor,
+              fontSize: 27.sp,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -519,6 +546,7 @@ class OrderCard extends StatelessWidget {
   final String productName;
   final String productImage;
   final String orderId;
+  final int productQuantity;
   final double productPrice;
   final String? uniqueCode;
   final OrderStatus orderStatus;
@@ -530,6 +558,7 @@ class OrderCard extends StatelessWidget {
     required this.productName,
     required this.productImage,
     required this.orderId,
+    required this.productQuantity,
     required this.productPrice,
     this.uniqueCode,
     required this.orderStatus,
@@ -600,9 +629,32 @@ class OrderCard extends StatelessWidget {
                             ),
                           ],
                         ),
+                        SizedBox(height: 6.h),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Quantity:',
+                              style: TextStyle(
+                                color: hexToColor('#878787'),
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                            SizedBox(width: 6.w),
+                            Text(
+                              '$productQuantity',
+                              style: TextStyle(
+                                color: hexToColor('#A9A9A9'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w600,
+                                fontSize: 12.sp,
+                              ),
+                            ),
+                          ],
+                        ),
                         SizedBox(height: 20),
                         Text(
-                          '₹$productPrice',
+                          '₹${(productPrice * productQuantity).toStringAsFixed(2)}',
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontSize: 16.sp,
