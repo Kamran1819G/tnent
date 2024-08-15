@@ -43,19 +43,19 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
   void _updateOrderCounts() {
     ongoingOrdersCount = allOrders.where((doc) {
       final status = doc['status'] as Map<String, dynamic>;
-      return status['ordered'] != null &&
+      return status.containsKey('ordered') == true &&
           status.containsKey('delivered') == false &&
           status.containsKey('cancelled') == false;
     }).length;
 
     deliveredOrdersCount = allOrders.where((doc) {
       final status = doc['status'] as Map<String, dynamic>;
-      return status['delivered'] != null;
+      return status.containsKey('delivered') == true;
     }).length;
 
     cancelledOrdersCount = allOrders.where((doc) {
       final status = doc['status'] as Map<String, dynamic>;
-      return status['cancelled'] != null;
+      return status.containsKey('cancelled') == true;
     }).length;
   }
 
@@ -64,13 +64,13 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
       final orderStatus = doc['status'] as Map<String, dynamic>;
       switch (status) {
         case 'ongoing':
-          return orderStatus['ordered'] != null &&
+          return orderStatus.containsKey('ordered') == true &&
               orderStatus.containsKey('delivered') == false &&
               orderStatus.containsKey('cancelled') == false;
         case 'delivered':
-          return orderStatus['delivered'] != null;
+          return orderStatus.containsKey('delivered') == true;
         case 'cancelled':
-          return orderStatus['cancelled'] != null;
+          return orderStatus.containsKey('cancelled') == true;
         default:
           return false;
       }
