@@ -18,6 +18,7 @@ class OrderAndPaysScreen extends StatefulWidget {
 }
 
 class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
+  List<QueryDocumentSnapshot> allOrders = [];
   int ongoingOrdersCount = 0;
   int deliveredOrdersCount = 0;
   int cancelledOrdersCount = 0;
@@ -25,82 +26,64 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchOrderCounts();
+    _fetchOrders();
   }
 
-  Future<void> _fetchOrderCounts() async {
+  Future<void> _fetchOrders() async {
     final ordersRef = FirebaseFirestore.instance.collection('Orders');
-
-    // Query for ongoing orders
-    final ongoingSnapshot = await ordersRef
-        .where('storeId', isEqualTo: widget.storeId)
-        .where('status.ordered', isNull: false)
-        .get();
-
-    // Query for delivered orders
-    final deliveredSnapshot = await ordersRef
-        .where('storeId', isEqualTo: widget.storeId)
-        .where('status.delivered', isNull: false)
-        .get();
-
-    // Query for cancelled orders
-    final cancelledSnapshot = await ordersRef
-        .where('storeId', isEqualTo: widget.storeId)
-        .where('status.cancelled', isNull: false)
-        .get();
-
-    print('Ongoing Orders: ${ongoingSnapshot.docs.length}');
-    print('Delivered Orders: ${deliveredSnapshot.docs.length}');
-    print('Cancelled Orders: ${cancelledSnapshot.docs.length}');
+    final snapshot =
+        await ordersRef.where('storeId', isEqualTo: widget.storeId).get();
 
     setState(() {
-      ongoingOrdersCount = ongoingSnapshot.docs.length;
-      deliveredOrdersCount = deliveredSnapshot.docs.length;
-      cancelledOrdersCount = cancelledSnapshot.docs.length;
+      allOrders = snapshot.docs;
+      _updateOrderCounts();
     });
   }
 
-  Future<List<QueryDocumentSnapshot>> _fetchOrders(String status) async {
-    final ordersRef = FirebaseFirestore.instance.collection('Orders');
-    QuerySnapshot querySnapshot;
+  void _updateOrderCounts() {
+    ongoingOrdersCount = allOrders.where((doc) {
+      final status = doc['status'] as Map<String, dynamic>;
+      return status['ordered'] != null &&
+          status.containsKey('delivered') == false &&
+          status.containsKey('cancelled') == false;
+    }).length;
 
-    switch (status) {
-      case 'ordered':
-        querySnapshot = await ordersRef
-            .where('storeId', isEqualTo: widget.storeId)
-            .where('status.ordered', isNull: false)
-            .get();
-        break;
-      case 'delivered':
-        querySnapshot = await ordersRef
-            .where('storeId', isEqualTo: widget.storeId)
-            .where('status.delivered', isNull: false)
-            .get();
-        break;
-      case 'cancelled':
-        querySnapshot = await ordersRef
-            .where('storeId', isEqualTo: widget.storeId)
-            .where('status.cancelled', isNull: false)
-            .get();
-        break;
-      default:
-        throw ArgumentError('Invalid status: $status');
-    }
+    deliveredOrdersCount = allOrders.where((doc) {
+      final status = doc['status'] as Map<String, dynamic>;
+      return status['delivered'] != null;
+    }).length;
 
-    return querySnapshot.docs;
+    cancelledOrdersCount = allOrders.where((doc) {
+      final status = doc['status'] as Map<String, dynamic>;
+      return status['cancelled'] != null;
+    }).length;
   }
 
-  void _navigateToOrdersScreen(String orderType) async {
-    final orders = await _fetchOrders(orderType.toLowerCase() == 'ongoing'
-        ? 'ordered'
-        : orderType.toLowerCase() == 'delivered'
-            ? 'delivered'
-            : 'cancelled');
+  List<QueryDocumentSnapshot> _filterOrders(String status) {
+    return allOrders.where((doc) {
+      final orderStatus = doc['status'] as Map<String, dynamic>;
+      switch (status) {
+        case 'ongoing':
+          return orderStatus['ordered'] != null &&
+              orderStatus.containsKey('delivered') == false &&
+              orderStatus.containsKey('cancelled') == false;
+        case 'delivered':
+          return orderStatus['delivered'] != null;
+        case 'cancelled':
+          return orderStatus['cancelled'] != null;
+        default:
+          return false;
+      }
+    }).toList();
+  }
+
+  void _navigateToOrdersScreen(String orderType) {
+    final filteredOrders = _filterOrders(orderType.toLowerCase());
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) =>
-            OrdersScreen(orderType: orderType, orders: orders),
+            OrdersScreen(orderType: orderType, orders: filteredOrders),
       ),
     );
   }
@@ -428,9 +411,8 @@ class OrdersScreen extends StatelessWidget {
                     uniqueCode: order['pickupCode'],
                     orderStatus: _getOrderStatus(order),
                     middleman: order['providedMiddleman'] ?? {},
-                    shippingAddress: order['shippingAddress'] != null
-                        ? '${order['shippingAddress']['city']}, ${order['shippingAddress']['zip']}, ${order['shippingAddress']['state']}'
-                        : null,
+                    shippingAddress:
+                        order['shippingAddress'] as Map<String, dynamic>?,
                     cancelReason: order['status']['cancelled']?['message'],
                   );
                 },
@@ -551,7 +533,7 @@ class OrderCard extends StatelessWidget {
   final String? uniqueCode;
   final OrderStatus orderStatus;
   final Map<String, dynamic> middleman;
-  final String? shippingAddress;
+  final Map<String, dynamic>? shippingAddress;
   final String? cancelReason;
 
   OrderCard({
@@ -720,13 +702,15 @@ class OrderCard extends StatelessWidget {
                       ),
                     ),
                     SizedBox(width: 12.w),
-                    Text(
-                      shippingAddress ?? 'Not Available',
-                      style: TextStyle(
-                        color: hexToColor('#878787'),
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14.sp,
+                    Expanded(
+                      child: Text(
+                        _formatShippingAddress(),
+                        style: TextStyle(
+                          color: hexToColor('#878787'),
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14.sp,
+                        ),
                       ),
                     ),
                   ],
@@ -760,5 +744,15 @@ class OrderCard extends StatelessWidget {
         );
       },
     );
+  }
+
+  String _formatShippingAddress() {
+    if (shippingAddress == null) {
+      return 'Not Available';
+    }
+    final city = shippingAddress!['city'] ?? '';
+    final zip = shippingAddress!['zip'] ?? '';
+    final state = shippingAddress!['state'] ?? '';
+    return [city, zip, state].where((e) => e.isNotEmpty).join(', ');
   }
 }
