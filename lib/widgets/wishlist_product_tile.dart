@@ -14,11 +14,13 @@ class WishlistProductTile extends StatefulWidget {
   final double height;
 
   WishlistProductTile({
+    Key? key,
     required this.product,
     double? width,
     double? height,
   })  : width = width ?? 240.w,
-        height = height ?? 340.h;
+        height = height ?? 340.h,
+        super(key: key);
 
   @override
   _WishlistProductTileState createState() => _WishlistProductTileState();

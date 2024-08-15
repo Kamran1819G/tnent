@@ -70,6 +70,7 @@ dependencies:
   flutter_image_compress: ^2.3.0
   in_app_update: ^4.2.3
   transparent_image: ^2.0.1
+  rxdart: ^0.28.0
 
 dev_dependencies:
   flutter_launcher_icons: "^0.13.1"
