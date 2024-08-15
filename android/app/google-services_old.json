@@ -14,14 +14,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "950564714045-u8gmqhgharan18pgvmth61561segqdt9.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.tnennt.middlemen.tnennt_middlemen",
-            "certificate_hash": "c8b317f7099125f8cb5d2dc161c54738d2c22f21"
-          }
-        },
-        {
           "client_id": "950564714045-62b8mue9piourqms3kdddm5p5t086li0.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -63,14 +55,6 @@
           "android_info": {
             "package_name": "com.tnent.tnent",
             "certificate_hash": "35a22cd03730c32390ed6686a908b9988db49164"
-          }
-        },
-        {
-          "client_id": "950564714045-g6tar8rl2m20b62th44t8vp1tqurhhd1.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.tnent.tnent",
-            "certificate_hash": "c8b317f7099125f8cb5d2dc161c54738d2c22f21"
           }
         },
         {
