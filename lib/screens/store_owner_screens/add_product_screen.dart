@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:transparent_image/transparent_image.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../helpers/color_utils.dart';
@@ -88,14 +89,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   Future<File> compressImage(File file) async {
     final filePath = file.absolute.path;
-    final lastIndex = filePath.lastIndexOf(RegExp(r'.jp'));
+    final lastIndex = filePath.lastIndexOf(RegExp(r'.jpg'));
     final splitted = filePath.substring(0, (lastIndex));
     final outPath = "${splitted}_compressed.jpg";
 
     final result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
       outPath,
-      quality: 70,
+      quality: 50,
       minWidth: 1024,
       minHeight: 1024,
     );
@@ -374,24 +375,19 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                       child: ListView.builder(
                                         scrollDirection: Axis.horizontal,
                                         physics: NeverScrollableScrollPhysics(),
-                                        itemCount: _images.length > 3
-                                            ? 3
-                                            : _images.length,
+                                        itemCount: _images.length > 3 ? 3 : _images.length,
                                         itemBuilder: (context, index) {
                                           return Stack(
                                             children: [
                                               Container(
                                                 height: 105.h,
                                                 width: 105.w,
-                                                margin: const EdgeInsets.only(
-                                                    right: 10),
-                                                decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          22.r),
-                                                  image: DecorationImage(
-                                                    image: FileImage(
-                                                        _images[index]),
+                                                margin: const EdgeInsets.only(right: 10),
+                                                child: ClipRRect(
+                                                  borderRadius: BorderRadius.circular(22.r),
+                                                  child: FadeInImage(
+                                                    placeholder: MemoryImage(kTransparentImage),
+                                                    image: MemoryImage(_images[index].readAsBytesSync()),
                                                     fit: BoxFit.cover,
                                                   ),
                                                 ),

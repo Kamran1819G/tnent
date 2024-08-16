@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,12 +8,13 @@ import 'package:tnent/helpers/color_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/pages/catalog_pages/checkout_screen.dart';
+import 'package:tnent/screens/related_products_service.dart';
 import 'package:tnent/screens/users_screens/storeprofile_screen.dart';
 import 'package:tnent/widgets/wishlist_product_tile.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
-
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../helpers/report_helper.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -39,7 +41,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String _flagImage = 'assets/grey-flag.png';
 
-  List<ProductModel> relatedProducts = List.generate(5, (index) {
+  /*List<ProductModel> relatedProducts = List.generate(5, (index) {
     return ProductModel(
       productId: 'product123',
       storeId: 'EBJgGaWsnrluCKcaOUOT',
@@ -80,8 +82,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         ),
       },
     );
-  });
+  });*/
 
+  List<ProductModel> relatedProducts=[];
   final TextEditingController _reviewController = TextEditingController();
   List<Map<String, dynamic>> _reviews = [];
 
@@ -94,6 +97,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _checkWishlistStatus();
     _checkUserVote();
     _loadReviews();
+    _prefetchImages();
+    _loadRelatedProducts();
+  }
+
+  Future<void> _prefetchImages() async {
+    for (String url in widget.product.imageUrls) {
+      await DefaultCacheManager().downloadFile(url);
+    }
+  }
+
+  Future<void> _loadRelatedProducts() async {
+    List<ProductModel> fetchedRelatedProducts = await RelatedProductsService.fetchRelatedProducts(widget.product);
+    setState(() {
+      relatedProducts = fetchedRelatedProducts;
+    });
   }
 
   Future<void> _loadReviews() async {
@@ -470,30 +488,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       margin: EdgeInsets.symmetric(
                                           horizontal: 12.w),
                                       child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.r),
-                                        child: Image.network(
-                                          widget.product.imageUrls[0],
-                                          fit: BoxFit.cover,
-                                          loadingBuilder: (BuildContext context,
-                                              Widget child,
-                                              ImageChunkEvent?
-                                                  loadingProgress) {
-                                            if (loadingProgress == null)
-                                              return child;
-                                            return Center(
-                                              child: CircularProgressIndicator(
-                                                value: loadingProgress
-                                                            .expectedTotalBytes !=
-                                                        null
-                                                    ? loadingProgress
-                                                            .cumulativeBytesLoaded /
-                                                        loadingProgress
-                                                            .expectedTotalBytes!
-                                                    : null,
-                                              ),
-                                            );
-                                          },
+                                          borderRadius: BorderRadius.circular(8.r),
+                                          child: CachedNetworkImage(
+                                            imageUrl: widget.product.imageUrls[0],
+                                            cacheManager: DefaultCacheManager(),
+                                            placeholder: (context, url) => Container(color: Colors.grey[300]),
+                                            errorWidget: (context, url, error) => Icon(Icons.error),
+                                            fit: BoxFit.cover,
+
                                         ),
                                       ),
                                     ),
@@ -504,33 +506,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     itemCount: widget.product.imageUrls.length,
                                     itemBuilder: (context, index) {
                                       return Container(
-                                        margin: EdgeInsets.symmetric(
-                                            horizontal: 12.w),
-                                        width: 445.w,
-                                        height: 490.h,
-                                        child: Image.network(
-                                          widget.product.imageUrls[0],
-                                          fit: BoxFit.cover,
-                                          loadingBuilder: (BuildContext context,
-                                              Widget child,
-                                              ImageChunkEvent?
-                                                  loadingProgress) {
-                                            if (loadingProgress == null)
-                                              return child;
-                                            return Center(
-                                              child: CircularProgressIndicator(
-                                                value: loadingProgress
-                                                            .expectedTotalBytes !=
-                                                        null
-                                                    ? loadingProgress
-                                                            .cumulativeBytesLoaded /
-                                                        loadingProgress
-                                                            .expectedTotalBytes!
-                                                    : null,
-                                              ),
-                                            );
-                                          },
-                                        ),
+                                          margin: EdgeInsets.symmetric(horizontal: 12.w),
+                                      width: 445.w,
+                                      height: 490.h,
+                                      child: CachedNetworkImage(
+                                      imageUrl: widget.product.imageUrls[index],
+                                      cacheManager: DefaultCacheManager(),
+                                      placeholder: (context, url) => Container(color: Colors.grey[300]),
+                                      errorWidget: (context, url, error) => Icon(Icons.error),
+                                      fit: BoxFit.cover,
+                                      ),
                                       );
                                     },
                                   ),
@@ -913,6 +898,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                       SizedBox(height: 50.h),
                       // Related Products
+
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -941,7 +927,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           Container(
                             margin: EdgeInsets.only(left: 12.w),
                             height: 300.h,
-                            child: ListView.builder(
+                            child: relatedProducts.isEmpty
+              ? Center(child: CircularProgressIndicator())
+                  : ListView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: relatedProducts.length,
                               itemBuilder: (context, index) {

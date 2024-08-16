@@ -9,7 +9,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnent/helpers/color_utils.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/pages/gallery_pages/store_registration.dart';
-import 'package:tnent/pages/gallery_pages/the_middlemen.dart';
+import 'package:tnent/pages/gallery_pages/the_middlemen_registration.dart';
 import 'package:tnent/screens/store_owner_screens/my_store_profile_screen.dart';
 import 'package:tnent/screens/webview_screen.dart';
 
