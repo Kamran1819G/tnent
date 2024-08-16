@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:tnent/models/store_update_model.dart';
 import '../helpers/color_utils.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class UpdateScreen extends StatefulWidget {
   final Image storeImage;
@@ -149,8 +150,9 @@ class _UpdateScreenState extends State<UpdateScreen>
           child: Stack(
             children: [
               // story
-              CachedNetworkImage(
-                imageUrl: widget.updates[currentUpdateIndex].imageUrl,
+              FadeInImage.memoryNetwork(
+                placeholder: kTransparentImage,
+                image: widget.updates[currentUpdateIndex].imageUrl,
                 fit: BoxFit.cover,
                 height: double.infinity,
                 width: double.infinity,

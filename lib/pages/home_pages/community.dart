@@ -37,6 +37,10 @@ class CommunityState extends State<Community> {
     _checkUserStoreId();
   }
 
+  void setTheState() {
+    getCommunityPosts();
+  }
+
   Future<void> _checkUserStoreId() async {
     final user = _auth.currentUser;
     if (user != null) {
@@ -665,7 +669,7 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
           ));
 
       Navigator.pop(context);
-      CommunityState().getCommunityPosts();
+      CommunityState().setTheState();
     } catch (e) {
       showSnackBar(context, 'Error creating post: $e');
     } finally {
