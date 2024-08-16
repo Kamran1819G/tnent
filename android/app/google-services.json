@@ -7,20 +7,12 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:950564714045:android:8ca89b2f3f284c95a39c54",
+        "mobilesdk_app_id": "1:950564714045:android:abd2bae505146e29a39c54",
         "android_client_info": {
-          "package_name": "com.tnennt.middlemen.tnennt_middlemen"
+          "package_name": "com.tnent.middlemen"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "950564714045-u8gmqhgharan18pgvmth61561segqdt9.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.tnennt.middlemen.tnennt_middlemen",
-            "certificate_hash": "c8b317f7099125f8cb5d2dc161c54738d2c22f21"
-          }
-        },
         {
           "client_id": "950564714045-62b8mue9piourqms3kdddm5p5t086li0.apps.googleusercontent.com",
           "client_type": 3
@@ -39,10 +31,10 @@
               "client_type": 3
             },
             {
-              "client_id": "950564714045-8b8fggqc5g0rkrlspqnrnari117qhbvn.apps.googleusercontent.com",
+              "client_id": "950564714045-5npd5lqtn0sn8o04u8b1p0jko89q50fd.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.tnennt.tnennt"
+                "bundle_id": "com.tnent.middlemen.tnentMiddlemen"
               }
             }
           ]
@@ -63,6 +55,14 @@
           "android_info": {
             "package_name": "com.tnent.tnent",
             "certificate_hash": "35a22cd03730c32390ed6686a908b9988db49164"
+          }
+        },
+        {
+          "client_id": "950564714045-f8jct7lcskj14fhjkudon3keg7jhenr3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tnent.tnent",
+            "certificate_hash": "d9dd2d3aa28c79aa9e655eaa9d62333a7275ad78"
           }
         },
         {
@@ -91,10 +91,10 @@
               "client_type": 3
             },
             {
-              "client_id": "950564714045-8b8fggqc5g0rkrlspqnrnari117qhbvn.apps.googleusercontent.com",
+              "client_id": "950564714045-5npd5lqtn0sn8o04u8b1p0jko89q50fd.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.tnennt.tnennt"
+                "bundle_id": "com.tnent.middlemen.tnentMiddlemen"
               }
             }
           ]
