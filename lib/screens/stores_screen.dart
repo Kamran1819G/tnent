@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:tnent/screens/store_owner_screens/my_store_profile_screen.dart';
 
 import '../helpers/color_utils.dart';
 import 'users_screens/storeprofile_screen.dart';
@@ -167,6 +169,15 @@ class StoreTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
+        if (store.ownerId == FirebaseAuth.instance.currentUser!.uid) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MyStoreProfileScreen(store: store),
+            ),
+          );
+        }
+
         Navigator.push(
           context,
           MaterialPageRoute(

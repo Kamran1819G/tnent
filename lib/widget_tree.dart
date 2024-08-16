@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tnent/services/firebase/firebase_auth_service.dart';
 import 'package:tnent/screens/home_screen.dart';
-import 'package:tnent/screens/signin_screen.dart';
+import 'screens/signup_screen.dart';
 
 class WidgetTree extends StatefulWidget {
   const WidgetTree({super.key});
@@ -19,7 +19,7 @@ class _WidgetTreeState extends State<WidgetTree> {
         if (snapshot.hasData) {
           return const HomeScreen();
         }
-        return const SignInScreen();
+        return const SignUpScreen();
       },
     );
   }

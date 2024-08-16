@@ -21,6 +21,7 @@ class Gallery extends StatefulWidget {
 }
 
 class _GalleryState extends State<Gallery> {
+  bool isLoaded = false;
   bool isStoreRegistered = false;
   bool isActive = true;
   late StoreModel store;
@@ -51,6 +52,7 @@ class _GalleryState extends State<Gallery> {
             .get();
         setState(() {
           isStoreRegistered = storeDoc.exists;
+          isLoaded = true;
           store = StoreModel.fromFirestore(storeDoc);
           isActive = store.isActive;
         });
@@ -277,7 +279,7 @@ class _GalleryState extends State<Gallery> {
                 ),
               ),
             const SizedBox(height: 20.0),
-            if (!isStoreRegistered) ...[
+            if (!isStoreRegistered && isLoaded) ...[
               GestureDetector(
                 onTap: () {
                   Navigator.push(

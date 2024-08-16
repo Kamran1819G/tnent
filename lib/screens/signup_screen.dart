@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tnent/screens/signin_screen.dart';
+import 'package:tnent/screens/webview_screen.dart';
 import 'package:tnent/services/firebase/firebase_auth_service.dart';
 import 'package:tnent/screens/users_screens/user_registration.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -31,7 +32,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => UserRegistration(),
+            builder: (context) => const UserRegistration(),
           ),
         );
       }
@@ -54,7 +55,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => UserRegistration(),
+          builder: (context) => const UserRegistration(),
         ),
       );
     } catch (e) {
@@ -101,7 +102,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ),
                           ]),
                     ),
-                    Spacer(),
+                    const Spacer(),
                   ],
                 ),
               ),
@@ -142,12 +143,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     fontSize: 24.sp,
                   ),
                   decoration: InputDecoration(
-                    label: Text('Email'),
+                    label: const Text('Email'),
                     labelStyle: TextStyle(
                       color: hexToColor('#545454'),
                       fontSize: 24.sp,
                     ),
-                    suffixIcon: Icon(Icons.email_outlined),
+                    suffixIcon: const Icon(Icons.email_outlined),
                     suffixIconColor: Theme.of(context).primaryColor,
                     fillColor: hexToColorWithOpacity('#D9D9D9', 0.2),
                     filled: true,
@@ -175,7 +176,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     fontSize: 24.sp,
                   ),
                   decoration: InputDecoration(
-                    label: Text('Password'),
+                    label: const Text('Password'),
                     labelStyle: TextStyle(
                       color: hexToColor('#545454'),
                       fontSize: 24.sp,
@@ -204,21 +205,58 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   keyboardType: TextInputType.visiblePassword,
                 ),
               ),
-              SizedBox(height: 50.h),
+              SizedBox(height: 10.h),
+              Row(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20),
+                    child: Text(
+                      'Already a user?',
+                      style: TextStyle(
+                        color: hexToColor('#636363'),
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                        fontSize: 23.sp,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const SignInScreen(),
+                        ),
+                      );
+                    },
+                    child: Text(
+                      'Sign In',
+                      style: TextStyle(
+                        color: hexToColor('#636363'),
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 23.sp,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 10.h),
               Container(
                   padding: EdgeInsets.only(left: 470.w),
                   child: CircleAvatar(
                     backgroundColor: Theme.of(context).primaryColor,
                     radius: 40.w,
                     child: IconButton(
-                      icon: Icon(Icons.arrow_forward),
+                      icon: const Icon(Icons.arrow_forward),
                       onPressed: () {
                         signUpWithEmailAndPassword();
                       },
                       color: Colors.white,
                     ),
                   )),
-              SizedBox(height: 200.h),
+              SizedBox(height: 180.h),
               Center(
                 child: Text(
                   'Or Sign Up With',
@@ -238,7 +276,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     Expanded(
                       child: Container(
                         height: 75.h,
-                        margin: EdgeInsets.only(right: 10),
+                        margin: const EdgeInsets.only(right: 10),
                         child: ElevatedButton(
                           onPressed: () {
                             signUpWithGoogle();
@@ -276,7 +314,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     Expanded(
                       child: Container(
                         height: 75.h,
-                        margin: EdgeInsets.only(left: 10),
+                        margin: const EdgeInsets.only(left: 10),
                         child: ElevatedButton(
                           onPressed: () {},
                           style: ElevatedButton.styleFrom(
@@ -312,41 +350,51 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: 100.h),
+              SizedBox(height: 20.h),
+              Center(
+                child: Text(
+                  'By Signing in, you agree to our',
+                  style: TextStyle(
+                    color: hexToColor('#636363'),
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w400,
+                    fontSize: 15.sp,
+                  ),
+                ),
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(
-                    'Already a user?',
-                    style: TextStyle(
-                      color: hexToColor('#636363'),
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w400,
-                      fontSize: 27.sp,
-                    ),
-                  ),
-                  SizedBox(width: 5),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushReplacement(
+                      Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SignInScreen(),
+                          builder: (context) => const WebViewScreen(
+                            title:
+                                'Legals | Terms of Service, Privacy Policy & more',
+                            url: 'https://tnennt.com/legals',
+                          ),
                         ),
                       );
                     },
                     child: Text(
-                      'Sign In',
+                      'Terms of Service & Privacy Policy',
                       style: TextStyle(
-                        color: hexToColor('#636363'),
+                        color: Colors.black,
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w600,
-                        fontSize: 27.sp,
+                        fontSize: 15.sp,
                       ),
                     ),
                   ),
+                  const Icon(
+                    Icons.launch_rounded,
+                    size: 10,
+                  ),
                 ],
-              )
+              ),
+              SizedBox(height: 30.h),
             ],
           ),
         ),
