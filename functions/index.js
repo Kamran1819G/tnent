@@ -1,5 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const {getMessaging} = require("firebase-admin/messaging");
+
 admin.initializeApp();
 
 exports.sendStoreFollowNotification = functions.firestore
@@ -8,9 +10,7 @@ exports.sendStoreFollowNotification = functions.firestore
       const notificationData = snap.data();
       const userId = context.params.userId;
 
-      // Check if the notification type is 'store'
       if (notificationData.data.type === "store") {
-      // Fetch the user's FCM token
         const userDoc = await admin
             .firestore()
             .collection("Users")
@@ -19,7 +19,8 @@ exports.sendStoreFollowNotification = functions.firestore
         const fcmToken = userDoc.data().fcmToken;
 
         if (fcmToken) {
-          const payload = {
+          const message = {
+            token: fcmToken,
             notification: {
               title: notificationData.title,
               body: notificationData.body,
@@ -28,7 +29,7 @@ exports.sendStoreFollowNotification = functions.firestore
           };
 
           try {
-            await admin.messaging().sendToDevice(fcmToken, payload);
+            await getMessaging().send(message);
             console.log("Push notification sent successfully");
           } catch (error) {
             console.error("Error sending push notification:", error);
@@ -49,7 +50,6 @@ exports.sendOrderNotificationToStoreOwner = functions.firestore
       const orderId = orderData.orderId;
 
       try {
-      // Fetch the store owner's FCM token
         const storeDoc = await admin
             .firestore()
             .collection("Stores")
@@ -64,7 +64,8 @@ exports.sendOrderNotificationToStoreOwner = functions.firestore
         const fcmToken = userDoc.data().fcmToken;
 
         if (fcmToken) {
-          const payload = {
+          const message = {
+            token: fcmToken,
             notification: {
               title: "New Order Received",
               body: `You have received a new order #${orderId}.`,
@@ -75,8 +76,7 @@ exports.sendOrderNotificationToStoreOwner = functions.firestore
             },
           };
 
-          // Send the notification
-          await admin.messaging().sendToDevice(fcmToken, payload);
+          await getMessaging().send(message);
           console.log("Order notification sent successfully to store owner");
         } else {
           console.log("No FCM token for store owner:", ownerId);
