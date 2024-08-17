@@ -30,7 +30,6 @@ class _UpdateScreenState extends State<UpdateScreen>
   late Image _storeImage;
   late String _storeName;
   bool isPaused = false;
-  Timer? _timer;
   late AnimationController _animationController;
 
   List<double> percentWatched = [];

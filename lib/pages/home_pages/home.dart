@@ -41,12 +41,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   int _selectedIndex = 0;
   bool isNewNotification = true;
 
-  final List<String> carouselImgList = [
-    'assets/carousel1.png',
-    'assets/carousel2.png',
-    'assets/carousel3.png',
-  ];
-
   List<Map<String, dynamic>> categories = [
     {
       'name': 'Clothings',
@@ -75,75 +69,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   ];
 
   List<StoreUpdateModel> updates = [];
-
-  /*List<ProductModel> featuredProducts = List.generate(5, (index) {
-    return ProductModel(
-      productId: 'product123',
-      storeId: 'EBJgGaWsnrluCKcaOUOT',
-      name: 'Premium Cotton T-Shirt',
-      description: 'A high-quality, comfortable cotton t-shirt',
-      productCategory: 'T-Shirts',
-      storeCategory: 'Apparel',
-      imageUrls: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-      isAvailable: true,
-      createdAt: Timestamp.now(),
-      greenFlags: 0,
-      redFlags: 0,
-      variations: {
-        'S': ProductVariant(
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 50,
-          sku: 'TS-S',
-        ),
-        'M': ProductVariant(
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 100,
-          sku: 'TS-M',
-        ),
-        'L': ProductVariant(
-          price: 26.99,
-          mrp: 31.99,
-          discount: 15.63,
-          stockQuantity: 75,
-          sku: 'TS-L',
-        ),
-      },
-    );
-  });*/
-
-  /*List<StoreModel> featuredStores = List.generate(5, (index) {
-    return StoreModel(
-      storeId: 'store$index',
-      ownerId: 'owner$index',
-      name: 'Store Name $index',
-      logoUrl: 'https://via.placeholder.com/150',
-      phone: '123-456-789$index',
-      email: 'store$index@example.com',
-      website: 'https://example.com/store$index',
-      upiUsername: 'upiUser$index',
-      upiId: 'upiId$index',
-      location: 'Location $index',
-      category: 'Category $index',
-      isActive: index % 2 == 0,
-      createdAt: Timestamp.now(),
-      totalProducts: index * 10,
-      totalPosts: index * 5,
-      storeEngagement: index * 20,
-      greenFlags: index * 2,
-      redFlags: index,
-      followerIds: [],
-      featuredProductIds: [],
-    );
-  });
-*/
   List<StoreModel> featuredStores = [];
   List<ProductModel> featuredProducts = [];
 
@@ -569,9 +494,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         const SizedBox(height: 10.0),
         SizedBox(
           height: 250.h,
-          child: PageView(
-            controller: PageController(viewportFraction: 1),
-            children: [
+          child: CarouselSlider(
+            options: CarouselOptions(
+              height: 250.h,
+              autoPlay: true,
+              viewportFraction: 1.0,
+              enlargeCenterPage: true,
+            ),
+            items: [
               Image.asset('assets/store_profile_banner.png'),
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 16.w),
@@ -1027,9 +957,15 @@ class CategoryProductsScreen extends StatelessWidget {
 
   Stream<QuerySnapshot> _getProductsStream() {
     if (categoryName.toLowerCase() == 'more') {
-      return FirebaseFirestore.instance.collection('products').where(
-          'productCategory',
-          whereNotIn: ['SpecialCategory1', 'SpecialCategory2']).snapshots();
+      return FirebaseFirestore.instance
+          .collection('products')
+          .where('productCategory', whereNotIn: [
+        'Clothings',
+        'Electronics',
+        'Accessories',
+        'Groceries',
+        'Books'
+      ]).snapshots();
     } else {
       return FirebaseFirestore.instance
           .collection('products')
