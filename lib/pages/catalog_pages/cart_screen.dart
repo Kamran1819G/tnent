@@ -36,7 +36,7 @@ class _CartScreenState extends State<CartScreen> {
         List<dynamic> cartData = snapshot.data()?['cart'] ?? [];
 
         List<Map<String, dynamic>> updatedCartItems = [];
-        for (var item in cartData) {
+        for (var item in cartData.reversed) {
           try {
             Map<String, dynamic> productDetails =
                 await _fetchProductDetails(item['productId']);

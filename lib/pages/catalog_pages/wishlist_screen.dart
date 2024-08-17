@@ -44,7 +44,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
               (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
           List<Map<String, dynamic>> updatedWishlistItems = [];
 
-          for (var item in wishlist) {
+          for (var item in wishlist.reversed) {
             try {
               Map<String, dynamic> productDetails =
                   await _fetchProductDetails(item['productId']);
