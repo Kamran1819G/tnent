@@ -83,7 +83,8 @@ class ProductModel {
     Map<String, ProductVariant> variations = {};
 
     if (data['variations'] != null && data['variations'] is Map) {
-      (data['variations'] as Map<String, dynamic>).forEach((variantKey, variantData) {
+      (data['variations'] as Map<String, dynamic>)
+          .forEach((variantKey, variantData) {
         if (variantData is Map<String, dynamic>) {
           try {
             variations[variantKey] = ProductVariant.fromMap(variantData);
@@ -111,7 +112,8 @@ class ProductModel {
   }
 
   Map<String, dynamic> toFirestore() {
-    Map<String, dynamic> variationsMap = variations.map((variantKey, variant) => MapEntry(variantKey, variant.toMap()));
+    Map<String, dynamic> variationsMap = variations
+        .map((variantKey, variant) => MapEntry(variantKey, variant.toMap()));
 
     return {
       'storeId': storeId,

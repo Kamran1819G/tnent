@@ -41,13 +41,12 @@ class CommunityPostModel {
     };
   }
 
-  static Future<void> createPost(CommunityPostModel post, String storeId) async {
+  static Future<void> createPost(
+      CommunityPostModel post, String storeId) async {
     try {
-      await FirebaseFirestore.instance.collection('communityPosts').add(post.toFirestore());
       await FirebaseFirestore.instance
-          .collection('Stores')
-          .doc(storeId)
-          .update({'totalPosts': FieldValue.increment(1)});
+          .collection('communityPosts')
+          .add(post.toFirestore());
     } catch (e) {
       print('Error creating post: $e');
     }
@@ -55,7 +54,9 @@ class CommunityPostModel {
 
   static Future<void> updatePost(CommunityPostModel post) async {
     try {
-      final postRef = FirebaseFirestore.instance.collection('communityPosts').doc(post.postId);
+      final postRef = FirebaseFirestore.instance
+          .collection('communityPosts')
+          .doc(post.postId);
 
       // Update the post document in Firestore
       await postRef.update({
@@ -63,17 +64,6 @@ class CommunityPostModel {
         'images': post.images,
         // Note: We're not updating 'likes' or 'createdAt' here,
         // as these should typically remain unchanged during an edit
-      });
-
-      // Optionally, update the post count for the store
-      // This might be necessary if the number of images changed
-      final storeRef = FirebaseFirestore.instance.collection('Stores').doc(post.storeId);
-      await FirebaseFirestore.instance.runTransaction((transaction) async {
-        final storeSnapshot = await transaction.get(storeRef);
-        if (storeSnapshot.exists) {
-          final currentPostCount = storeSnapshot.data()?['totalPosts'] ?? 0;
-          transaction.update(storeRef, {'totalPosts': currentPostCount});
-        }
       });
 
       print('Post updated successfully');
@@ -85,10 +75,11 @@ class CommunityPostModel {
 
   static Future<void> deletePost(String postId, String storeId) async {
     try {
-
       // Get a reference to the Firestore document
-      final postRef = FirebaseFirestore.instance.collection('communityPosts').doc(postId);
-      final storeRef = FirebaseFirestore.instance.collection('Stores').doc(storeId);
+      final postRef =
+          FirebaseFirestore.instance.collection('communityPosts').doc(postId);
+      final storeRef =
+          FirebaseFirestore.instance.collection('Stores').doc(storeId);
 
       // Get the post data
       final postSnapshot = await postRef.get();
@@ -115,7 +106,6 @@ class CommunityPostModel {
 
       // Delete the post document from Firestore
       await postRef.delete();
-      await storeRef.update({'totalPosts': FieldValue.increment(-1)});
 
       print('Post and associated images deleted successfully');
     } catch (e) {
@@ -124,4 +114,3 @@ class CommunityPostModel {
     }
   }
 }
-

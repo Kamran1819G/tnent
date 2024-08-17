@@ -14,9 +14,7 @@ class StoreModel {
   final String category;
   final bool isActive;
   final Timestamp createdAt;
-  final int totalProducts;
-  final int totalPosts;
-  final int storeEngagement;
+  final int? storeEngagement;
   final int greenFlags;
   final int redFlags;
   final List<String> featuredProductIds;
@@ -36,9 +34,7 @@ class StoreModel {
     required this.category,
     required this.isActive,
     required this.createdAt,
-    required this.totalProducts,
-    required this.totalPosts,
-    required this.storeEngagement,
+    this.storeEngagement,
     required this.greenFlags,
     required this.redFlags,
     required this.featuredProductIds,
@@ -61,9 +57,7 @@ class StoreModel {
       category: data['category'] ?? '',
       isActive: data['isActive'] ?? false,
       createdAt: data['createdAt'] ?? Timestamp.now(),
-      totalProducts: data['totalProducts'] ?? 0,
-      totalPosts: data['totalPosts'] ?? 0,
-      storeEngagement: data['storeEngagement'] ?? 0,
+      storeEngagement: List<String>.from(data['followerIds'] ?? []).length,
       greenFlags: data['greenFlags'] ?? 0,
       redFlags: data['redFlags'] ?? 0,
       featuredProductIds: List<String>.from(data['featuredProductIds'] ?? []),
@@ -86,9 +80,6 @@ class StoreModel {
       'category': category,
       'isActive': isActive,
       'createdAt': createdAt,
-      'totalProduct': totalProducts,
-      'totalPosts': totalPosts,
-      'storeEngagement': storeEngagement,
       'greenFlags': greenFlags,
       'redFlags': redFlags,
       'featuredProductIds': featuredProductIds,
