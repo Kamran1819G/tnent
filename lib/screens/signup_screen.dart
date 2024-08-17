@@ -206,41 +206,41 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
               ),
               SizedBox(height: 10.h),
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 20),
-                    child: Text(
+              Padding(
+                padding: EdgeInsets.only(left: 50.w),
+                child: Row(
+                  children: [
+                    Text(
                       'Already a user?',
                       style: TextStyle(
                         color: hexToColor('#636363'),
                         fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w400,
-                        fontSize: 23.sp,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 18.sp,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 5),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const SignInScreen(),
+                    const SizedBox(width: 5),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const SignInScreen(),
+                          ),
+                        );
+                      },
+                      child: Text(
+                        'Sign In',
+                        style: TextStyle(
+                          color: hexToColor('#636363'),
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 18.sp,
                         ),
-                      );
-                    },
-                    child: Text(
-                      'Sign In',
-                      style: TextStyle(
-                        color: hexToColor('#636363'),
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 23.sp,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
               SizedBox(height: 10.h),
               Container(
@@ -350,7 +350,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ],
                 ),
               ),
-              SizedBox(height: 20.h),
+              SizedBox(height: 30.h),
               Center(
                 child: Text(
                   'By Signing in, you agree to our',
