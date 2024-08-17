@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:transparent_image/transparent_image.dart';
 import 'package:uuid/uuid.dart';
 
@@ -78,34 +79,28 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
   Future<void> pickImage() async {
     final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? image =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 60);
+
     if (image != null) {
-      File compressedImage = await compressImage(File(image.path));
-      setState(() {
-        _images.add(compressedImage);
-      });
-    }
-  }
+      // Get the app's temporary directory to save the WebP image
+      final directory = await getTemporaryDirectory();
+      final targetPath =
+          '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.webp';
 
-  Future<File> compressImage(File file) async {
-    final filePath = file.absolute.path;
-    final lastIndex = filePath.lastIndexOf(RegExp(r'.jpg'));
-    final splitted = filePath.substring(0, (lastIndex));
-    final outPath = "${splitted}_compressed.jpg";
+      // Compress the image and convert to WebP format
+      final compressedFile = await FlutterImageCompress.compressAndGetFile(
+        image.path,
+        targetPath,
+        format: CompressFormat.webp,
+        quality: 80, // Adjust the quality as needed
+      );
 
-    final result = await FlutterImageCompress.compressAndGetFile(
-      file.absolute.path,
-      outPath,
-      quality: 50,
-      minWidth: 1024,
-      minHeight: 1024,
-    );
-
-    if (result != null) {
-      return File(result.path);
-    } else {
-      // If compression fails, return the original file
-      return file;
+      if (compressedFile != null) {
+        setState(() {
+          _images.add(File(compressedFile.path));
+        });
+      }
     }
   }
 
@@ -312,7 +307,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                         CircleBorder(),
                       ),
                     ),
-                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                    icon: const Icon(Icons.arrow_back_ios_new,
+                        color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -375,19 +371,27 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                       child: ListView.builder(
                                         scrollDirection: Axis.horizontal,
                                         physics: NeverScrollableScrollPhysics(),
-                                        itemCount: _images.length > 3 ? 3 : _images.length,
+                                        itemCount: _images.length > 3
+                                            ? 3
+                                            : _images.length,
                                         itemBuilder: (context, index) {
                                           return Stack(
                                             children: [
                                               Container(
                                                 height: 105.h,
                                                 width: 105.w,
-                                                margin: const EdgeInsets.only(right: 10),
+                                                margin: const EdgeInsets.only(
+                                                    right: 10),
                                                 child: ClipRRect(
-                                                  borderRadius: BorderRadius.circular(22.r),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          22.r),
                                                   child: FadeInImage(
-                                                    placeholder: MemoryImage(kTransparentImage),
-                                                    image: MemoryImage(_images[index].readAsBytesSync()),
+                                                    placeholder: MemoryImage(
+                                                        kTransparentImage),
+                                                    image: MemoryImage(
+                                                        _images[index]
+                                                            .readAsBytesSync()),
                                                     fit: BoxFit.cover,
                                                   ),
                                                 ),
@@ -402,7 +406,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                     });
                                                   },
                                                   child: Container(
-                                                    decoration: const BoxDecoration(
+                                                    decoration:
+                                                        const BoxDecoration(
                                                       shape: BoxShape.circle,
                                                       color: Colors.red,
                                                     ),

@@ -298,10 +298,9 @@ class _CommunityPostState extends State<CommunityPost> {
           return SizedBox.shrink();
         }
 
-        final storeData = snapshot.data!.data() as Map<String, dynamic>;
-        final userName = storeData['name'] ?? 'Unknown User';
-        final userProfileImage =
-            storeData['profileImage'] ?? 'https://via.placeholder.com/150';
+        final store = StoreModel.fromFirestore(snapshot.data!);
+        final userName = store.name;
+        final userProfileImage = store.logoUrl;
 
         return _buildPostContent(userName, userProfileImage);
       },
