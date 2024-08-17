@@ -721,8 +721,13 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
                       title: option,
                       onDeletePressed: () {
                         setState(() {
-                          widget.selectedOptions.remove(option);
-                          optionalPriceKeys.remove(option);
+                          if (widget.selectedOptions.length > 1) {
+                            widget.selectedOptions.remove(option);
+                            optionalPriceKeys.remove(option);
+                          } else {
+                            showSnackBar(
+                                context, 'At least one optional is required');
+                          }
                         });
                       },
                     );
