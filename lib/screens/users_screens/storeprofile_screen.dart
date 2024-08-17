@@ -27,7 +27,8 @@ class StoreProfileScreen extends StatefulWidget {
 class _StoreProfileScreenState extends State<StoreProfileScreen>
     with SingleTickerProviderStateMixin {
   bool isConnected = false;
-  int storeEngagement = 0;
+  late int storeEngagement = widget.store.storeEngagement ?? 0;
+  late int totalPosts = 0;
   bool isExpanded = false;
   bool isGreenFlag = true;
   String userVote = 'none'; // 'none', 'green', or 'red'
@@ -63,6 +64,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
   @override
   void initState() {
     super.initState();
+    _fetchStoreCommunityPosts();
     greenFlags = widget.store.greenFlags;
     redFlags = widget.store.redFlags;
     _fetchUserDetails();
@@ -78,6 +80,20 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
       curve: Curves.easeInOut,
     );
     listenToFlagChanges();
+  }
+
+  Future<void> _fetchStoreCommunityPosts() async {
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('communityPosts')
+          .where('storeId', isEqualTo: widget.store.storeId)
+          .get();
+      totalPosts = querySnapshot.docs.length;
+    } catch (e) {
+      print('Error fetching store posts: $e');
+      // Handle the error, maybe show a message to the user
+      totalPosts = 0;
+    }
   }
 
   Future<void> _fetchStoreUpdates() async {
@@ -263,7 +279,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
 
   Future<void> checkConnectionStatus() async {
     setState(() {
-      storeEngagement = widget.store.storeEngagement;
       isConnected = widget.store.followerIds.contains(userId);
     });
   }
@@ -497,34 +512,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                             ),
                           ),
                           const Spacer(),
-                          Container(
-                            width: 110.w,
-                            height: 75.h,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              border:
-                                  Border.all(color: Colors.white, width: 0.5),
-                              borderRadius: BorderRadius.circular(10.r),
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  '0',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 24.sp),
-                                ),
-                                Text(
-                                  'Customers',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 12.sp),
-                                ),
-                              ],
-                            ),
-                          )
                         ],
                       ),
                     ),
@@ -608,63 +595,69 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                             Row(
                               children: [
                                 // connect button with left + button and connect text at right
-                                GestureDetector(
-                                  onTap: toggleConnection,
-                                  child: AnimatedSwitcher(
-                                    duration: const Duration(milliseconds: 300),
-                                    // Adjust the duration as needed
-                                    child: Container(
-                                      key: ValueKey<bool>(isConnected),
-                                      // Key helps AnimatedSwitcher identify the widget
-                                      padding: EdgeInsets.all(12.w),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        borderRadius:
-                                            BorderRadius.circular(50.r),
-                                      ),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
-                                        children: [
-                                          AnimatedContainer(
-                                            duration: const Duration(
-                                                milliseconds: 300),
-                                            padding: const EdgeInsets.all(4.0),
-                                            decoration: BoxDecoration(
-                                              color: isConnected
-                                                  ? hexToColor('#D4EDDA')
-                                                  : hexToColor('#F3F3F3'),
-                                              borderRadius:
-                                                  BorderRadius.circular(50.0),
-                                            ),
-                                            child: Icon(
-                                              isConnected
-                                                  ? Icons.check
-                                                  : Icons.add,
-                                              color: hexToColor('#272822'),
-                                              size: 18.sp,
-                                            ),
-                                          ),
-                                          SizedBox(width: 8.w),
-                                          AnimatedSwitcher(
-                                            duration: const Duration(
-                                                milliseconds: 300),
-                                            child: Text(
-                                              isConnected
-                                                  ? 'Connected'.toUpperCase()
-                                                  : 'Connect'.toUpperCase(),
-                                              key: ValueKey<bool>(isConnected),
-                                              style: TextStyle(
-                                                color: hexToColor("#272822"),
-                                                fontSize: 16.sp,
+                                if (widget.store.ownerId !=
+                                    FirebaseAuth.instance.currentUser!.uid) ...[
+                                  GestureDetector(
+                                    onTap: toggleConnection,
+                                    child: AnimatedSwitcher(
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      // Adjust the duration as needed
+                                      child: Container(
+                                        key: ValueKey<bool>(isConnected),
+                                        // Key helps AnimatedSwitcher identify the widget
+                                        padding: EdgeInsets.all(12.w),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(50.r),
+                                        ),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            AnimatedContainer(
+                                              duration: const Duration(
+                                                  milliseconds: 300),
+                                              padding:
+                                                  const EdgeInsets.all(4.0),
+                                              decoration: BoxDecoration(
+                                                color: isConnected
+                                                    ? hexToColor('#D4EDDA')
+                                                    : hexToColor('#F3F3F3'),
+                                                borderRadius:
+                                                    BorderRadius.circular(50.0),
+                                              ),
+                                              child: Icon(
+                                                isConnected
+                                                    ? Icons.check
+                                                    : Icons.add,
+                                                color: hexToColor('#272822'),
+                                                size: 18.sp,
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                            SizedBox(width: 8.w),
+                                            AnimatedSwitcher(
+                                              duration: const Duration(
+                                                  milliseconds: 300),
+                                              child: Text(
+                                                isConnected
+                                                    ? 'Connected'.toUpperCase()
+                                                    : 'Connect'.toUpperCase(),
+                                                key:
+                                                    ValueKey<bool>(isConnected),
+                                                style: TextStyle(
+                                                  color: hexToColor("#272822"),
+                                                  fontSize: 16.sp,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
+                                ],
                                 const Spacer(),
                                 Column(
                                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -757,7 +750,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      widget.store.totalPosts.toString(),
+                                      totalPosts.toString(),
                                       style: TextStyle(
                                         color: Colors.black,
                                         fontSize: 24.sp,

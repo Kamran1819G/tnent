@@ -5,8 +5,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:tnent/helpers/color_utils.dart';
 import 'package:tnent/helpers/snackbar_utils.dart';
@@ -44,9 +46,9 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   late String storeLocation = store.location;
   late String storeDomain = store.storeDomain;
   late bool isActive = store.isActive;
-  late int totalProducts = store.totalProducts;
-  late int totalPosts = store.totalPosts;
-  late int storeEngagement = store.storeEngagement;
+  late int totalProducts = 0;
+  late int totalPosts = 0;
+  late int storeEngagement = store.storeEngagement ?? 0;
   late int greenFlags = store.greenFlags;
   late int totalFlags = store.greenFlags + store.redFlags;
   late int redFlags = store.redFlags;
@@ -64,56 +66,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
 
   late AnimationController _controller;
   late Animation<double> _animation;
-
-  List<dynamic> updates = List.generate(10, (index) {
-    return {
-      "name": "Sahachari",
-      "coverImage": "assets/sahachari_image.png",
-    };
-  });
-
-  List<ProductModel> featuredProducts = List.generate(5, (index) {
-    return ProductModel(
-      productId: 'product123',
-      storeId: 'EBJgGaWsnrluCKcaOUOT',
-      name: 'Premium Cotton T-Shirt',
-      description: 'A high-quality, comfortable cotton t-shirt',
-      productCategory: 'T-Shirts',
-      storeCategory: 'Apparel',
-      imageUrls: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-      isAvailable: true,
-      createdAt: Timestamp.now(),
-      greenFlags: 0,
-      redFlags: 0,
-      variations: {
-        'S': ProductVariant(
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 50,
-          sku: 'TS-S',
-        ),
-        'M': ProductVariant(
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 100,
-          sku: 'TS-M',
-        ),
-        'L': ProductVariant(
-          price: 26.99,
-          mrp: 31.99,
-          discount: 15.63,
-          stockQuantity: 75,
-          sku: 'TS-L',
-        ),
-      },
-    );
-  });
 
   @override
   void initState() {
@@ -143,7 +95,19 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image == null) return;
 
-    String imageUrl = await _uploadImage(image);
+    final directory = await getTemporaryDirectory();
+    final targetPath =
+        '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.webp';
+
+    // Compress the image and convert to WebP format
+    final compressedFile = await FlutterImageCompress.compressAndGetFile(
+      image.path,
+      targetPath,
+      format: CompressFormat.webp,
+      quality: 80, // Adjust the quality as needed
+    );
+
+    String imageUrl = await _uploadImage(compressedFile!);
 
     Timestamp now = Timestamp.now();
     Timestamp expiresAt =
@@ -265,6 +229,17 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
           .collection('Stores')
           .doc(store.storeId)
           .get();
+
+      QuerySnapshot postSnapshot = await FirebaseFirestore.instance
+          .collection('communityPosts')
+          .where('storeId', isEqualTo: store.storeId)
+          .get();
+
+      QuerySnapshot productSnapshot = await FirebaseFirestore.instance
+          .collection('products')
+          .where('storeId', isEqualTo: store.storeId)
+          .get();
+
       setState(() {
         store = StoreModel.fromFirestore(doc);
         logoUrl = store.logoUrl;
@@ -273,9 +248,9 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
         storeLocation = store.location;
         storeDomain = store.storeDomain;
         isActive = store.isActive;
-        totalProducts = store.totalProducts;
-        totalPosts = store.totalPosts;
-        storeEngagement = store.storeEngagement;
+        storeEngagement = store.storeEngagement ?? 0;
+        totalPosts = postSnapshot.docs.length;
+        totalProducts = productSnapshot.docs.length;
         greenFlags = store.greenFlags;
         totalFlags = store.greenFlags + store.redFlags;
         redFlags = store.redFlags;
