@@ -8,6 +8,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:tnent/helpers/report_helper.dart';
 import 'package:tnent/models/community_post_model.dart';
@@ -577,41 +578,27 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
 
   Future<void> pickImage() async {
     final ImagePicker _picker = ImagePicker();
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? image =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 60);
 
     if (image != null) {
-      final File file = File(image.path);
-      final int fileSize = await file.length();
+      // Get the app's temporary directory to save the WebP image
+      final directory = await getTemporaryDirectory();
+      final targetPath =
+          '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.webp';
 
-      const int maxSizeInBytes = 500 * 1024; // 500 KB
+      // Compress the image and convert to WebP format
+      final compressedFile = await FlutterImageCompress.compressAndGetFile(
+        image.path,
+        targetPath,
+        format: CompressFormat.webp,
+        quality: 80, // Adjust the quality as needed
+      );
 
-      if (fileSize <= maxSizeInBytes) {
+      if (compressedFile != null) {
         setState(() {
-          _images.add(file);
+          _images.add(File(compressedFile.path));
         });
-      } else {
-        // Compress the image
-        final String targetPath =
-            file.path.replaceAll('.jpg', '_compressed.jpg');
-        final result = await FlutterImageCompress.compressAndGetFile(
-          file.path,
-          targetPath,
-          quality: 70,
-          minWidth: 1024,
-          minHeight: 1024,
-        );
-
-        if (result != null) {
-          final int compressedSize = await result.length();
-          if (compressedSize <= maxSizeInBytes) {
-            setState(() {
-              _images.add(File(result.path));
-            });
-          } else {
-            showSnackBar(context,
-                'The selected image is too large. Please select an image smaller than 500 KB.');
-          }
-        }
       }
     }
   }
