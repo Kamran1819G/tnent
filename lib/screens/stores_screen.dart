@@ -169,15 +169,6 @@ class StoreTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        if (store.ownerId == FirebaseAuth.instance.currentUser!.uid) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MyStoreProfileScreen(store: store),
-            ),
-          );
-        }
-
         Navigator.push(
           context,
           MaterialPageRoute(
