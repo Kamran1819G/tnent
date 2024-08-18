@@ -5,19 +5,24 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tnent/helpers/color_utils.dart';
-import 'package:tnent/helpers/snackbar_utils.dart';
-import 'package:tnent/screens/onboarding_screen.dart';
-import 'package:tnent/services/permission_handler_service.dart';
-import 'package:tnent/widget_tree.dart';
+import 'package:tnent/core/helpers/color_utils.dart';
+import 'package:tnent/core/helpers/snackbar_utils.dart';
+import 'package:tnent/core/routes/app_pages.dart';
+import 'package:tnent/core/routes/app_routes.dart';
+import 'package:tnent/presentation/controllers/permission_controller.dart';
+import 'package:tnent/presentation/pages/onboarding_screen.dart';
+import 'package:tnent/core/services/permission_handler_service.dart';
 import 'package:tnent/services/notification_service.dart';
 import 'firebase_options.dart';
+import 'package:get/get.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final PermissionHandlerService permissionHandler = PermissionHandlerService();
-  await permissionHandler.requestMultiplePermissions();
+  final PermissionController permissionController =
+      Get.put(PermissionController());
+
+  await permissionController.requestPermissions();
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -85,15 +90,16 @@ class _MyAppState extends State<MyApp> {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     return ScreenUtilInit(
       designSize: const Size(642, 1376),
-      builder: (_, child) => MaterialApp(
+      builder: (_, child) => GetMaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           scaffoldBackgroundColor: Colors.white,
           primaryColor: hexToColor('#094446'),
           fontFamily: 'Gotham Black',
         ),
-        home:
-            widget.onboarding! ? const WidgetTree() : const OnboardingScreen(),
+        initialRoute:
+            widget.onboarding! ? AppRoutes.AUTH_GATE : AppRoutes.ONBOARDING,
+        getPages: AppPages.pages,
       ),
     );
   }

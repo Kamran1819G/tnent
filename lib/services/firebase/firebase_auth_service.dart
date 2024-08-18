@@ -21,7 +21,8 @@ class Auth {
     required String email,
     required String password,
   }) async {
-    final userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+    final userCredential = await _auth.signInWithEmailAndPassword(
+        email: email, password: password);
 
     // Check if the user document exists in Firestore
     final userDoc = await _firestore
@@ -45,8 +46,7 @@ class Auth {
       return;
     }
 
-    final googleSignInAuthentication =
-        await googleSignInAccount.authentication;
+    final googleSignInAuthentication = await googleSignInAccount.authentication;
 
     final credential = GoogleAuthProvider.credential(
       accessToken: googleSignInAuthentication.accessToken,
@@ -56,7 +56,10 @@ class Auth {
     final userCredential = await _auth.signInWithCredential(credential);
 
     // Check if the user document exists in Firestore
-    final userDoc = await _firestore.collection('Users').doc(userCredential.user!.uid).get();
+    final userDoc = await _firestore
+        .collection('Users')
+        .doc(userCredential.user!.uid)
+        .get();
     if (!userDoc.exists) {
       // If user document does not exist, sign out and throw an error
       await signOut();
@@ -71,14 +74,16 @@ class Auth {
     required String email,
     required String password,
   }) async {
-    await _auth.createUserWithEmailAndPassword(email: email, password: password);
+    await _auth.createUserWithEmailAndPassword(
+        email: email, password: password);
 
     if (currentUser != null && !currentUser!.emailVerified) {
       await currentUser!.sendEmailVerification();
     }
 
     if (currentUser != null) {
-      final userDoc = await _firestore.collection('Users').doc(currentUser!.uid).get();
+      final userDoc =
+          await _firestore.collection('Users').doc(currentUser!.uid).get();
       if (!userDoc.exists) {
         await _firestore.collection('Users').doc(currentUser!.uid).set({
           'email': currentUser!.email,
@@ -93,8 +98,7 @@ class Auth {
       // User cancelled the sign-in process
       return;
     }
-    final googleSignInAuthentication =
-        await googleSignInAccount.authentication;
+    final googleSignInAuthentication = await googleSignInAccount.authentication;
 
     final credential = GoogleAuthProvider.credential(
       accessToken: googleSignInAuthentication.accessToken,
@@ -118,12 +122,16 @@ class Auth {
     final LoginResult result = await FacebookAuth.instance.login();
     if (result.status == LoginStatus.success) {
       final AccessToken accessToken = result.accessToken!;
-      final OAuthCredential credential = FacebookAuthProvider.credential(accessToken.tokenString);
+      final OAuthCredential credential =
+          FacebookAuthProvider.credential(accessToken.tokenString);
 
       final userCredential = await _auth.signInWithCredential(credential);
 
       // Check if the user document exists in Firestore
-      final userDoc = await _firestore.collection('Users').doc(userCredential.user!.uid).get();
+      final userDoc = await _firestore
+          .collection('Users')
+          .doc(userCredential.user!.uid)
+          .get();
       if (!userDoc.exists) {
         // If user document does not exist, sign out and throw an error
         await signOut();
@@ -142,11 +150,15 @@ class Auth {
     final LoginResult result = await FacebookAuth.instance.login();
     if (result.status == LoginStatus.success) {
       final AccessToken accessToken = result.accessToken!;
-      final OAuthCredential credential = FacebookAuthProvider.credential(accessToken.tokenString);
+      final OAuthCredential credential =
+          FacebookAuthProvider.credential(accessToken.tokenString);
 
       final userCredential = await _auth.signInWithCredential(credential);
 
-      final userDoc = await _firestore.collection('Users').doc(userCredential.user!.uid).get();
+      final userDoc = await _firestore
+          .collection('Users')
+          .doc(userCredential.user!.uid)
+          .get();
       if (!userDoc.exists) {
         await _firestore.collection('Users').doc(userCredential.user!.uid).set({
           'email': userCredential.user!.email,
