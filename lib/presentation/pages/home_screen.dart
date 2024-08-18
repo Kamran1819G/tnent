@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -66,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
           if (mounted) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => UserRegistration()),
+              MaterialPageRoute(builder: (context) => const UserRegistration()),
             );
           }
         } else {
@@ -90,19 +91,19 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return _isLoading
-        ? SplashScreen()
+        ? const SplashScreen()
         : Scaffold(
             body: SafeArea(
               child: Stack(
                 children: [
                   PageView(
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     controller: _pageController,
                     children: [
                       SingleChildScrollView(
                           child: Home(currentUser: currentUser!)),
-                      SingleChildScrollView(child: Community()),
-                      SingleChildScrollView(child: Gallery()),
+                      const SingleChildScrollView(child: Community()),
+                      const SingleChildScrollView(child: Gallery()),
                       SingleChildScrollView(
                           child: Catalog(currentUser: currentUser!)),
                     ],
@@ -119,20 +120,35 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBottomNavigationBar() {
     return Container(
-      margin: EdgeInsets.only(bottom: 20, left: 40, right: 40),
-      padding: EdgeInsets.symmetric(vertical: 12),
+      margin: const EdgeInsets.only(bottom: 20, left: 40, right: 40),
       decoration: BoxDecoration(
-        color: hexToColor('#2D332F'),
+        color: Colors.white.withOpacity(0.85), // Semi-transparent white
         borderRadius: BorderRadius.circular(100),
+        // border: Border.all(color: Colors.white.withOpacity(0.7), width: 1.0),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _buildNavItem(0, 'assets/home.png'),
-          _buildNavItem(1, 'assets/community.png'),
-          _buildNavItem(2, 'assets/gallery.png'),
-          _buildNavItem(3, 'assets/catalog.png'),
-        ],
+      child: Material(
+        shadowColor: Colors.white,
+        elevation: 20,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(100),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildNavItem(0, 'assets/home.png'),
+                  _buildNavItem(1, 'assets/community.png'),
+                  _buildNavItem(2, 'assets/gallery.png'),
+                  _buildNavItem(3, 'assets/catalog.png'),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -146,15 +162,17 @@ class _HomeScreenState extends State<HomeScreen> {
         });
       },
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
-          color: _selectedIndex == index ? Colors.white : Colors.transparent,
+          color: _selectedIndex == index
+              ? Colors.indigo.shade200
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(100),
         ),
         child: Image.asset(
           assetName,
           width: 20.0,
-          color: _selectedIndex == index ? Colors.black : hexToColor('#747474'),
+          color: _selectedIndex == index ? Colors.white : hexToColor('#747474'),
         ),
       ),
     );

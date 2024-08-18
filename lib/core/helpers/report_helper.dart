@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:tnent/core/helpers/snackbar_utils.dart';
 
 class ReportHelperWidget extends StatefulWidget {
@@ -11,10 +9,7 @@ class ReportHelperWidget extends StatefulWidget {
 }
 
 class _ReportDialogState extends State<ReportHelperWidget> {
-  bool inappropriateContent = false;
-  bool spamContent = false;
-  bool offensiveContent = false;
-  bool otherContent = false;
+  String? selectedOption;
 
   TextEditingController otherContentController = TextEditingController();
 
@@ -39,7 +34,7 @@ class _ReportDialogState extends State<ReportHelperWidget> {
           const SizedBox(
             height: 10,
           ),
-          CheckboxListTile(
+          RadioListTile<String>(
             title: const Text(
               'Inappropriate Content',
               style: TextStyle(
@@ -47,14 +42,15 @@ class _ReportDialogState extends State<ReportHelperWidget> {
                 fontWeight: FontWeight.w100,
               ),
             ),
-            value: inappropriateContent,
-            onChanged: (bool? value) {
+            value: 'Inappropriate Content',
+            groupValue: selectedOption,
+            onChanged: (String? value) {
               setState(() {
-                inappropriateContent = value!;
+                selectedOption = value;
               });
             },
           ),
-          CheckboxListTile(
+          RadioListTile<String>(
             title: const Text(
               'Spam Content',
               style: TextStyle(
@@ -62,14 +58,15 @@ class _ReportDialogState extends State<ReportHelperWidget> {
                 fontWeight: FontWeight.w100,
               ),
             ),
-            value: spamContent,
-            onChanged: (bool? value) {
+            value: 'Spam Content',
+            groupValue: selectedOption,
+            onChanged: (String? value) {
               setState(() {
-                spamContent = value!;
+                selectedOption = value;
               });
             },
           ),
-          CheckboxListTile(
+          RadioListTile<String>(
             title: const Text(
               'Offensive Content',
               style: TextStyle(
@@ -77,14 +74,15 @@ class _ReportDialogState extends State<ReportHelperWidget> {
                 fontWeight: FontWeight.w100,
               ),
             ),
-            value: offensiveContent,
-            onChanged: (bool? value) {
+            value: 'Offensive Content',
+            groupValue: selectedOption,
+            onChanged: (String? value) {
               setState(() {
-                offensiveContent = value!;
+                selectedOption = value;
               });
             },
           ),
-          CheckboxListTile(
+          RadioListTile<String>(
             title: const Text(
               'Other Content',
               style: TextStyle(
@@ -92,14 +90,15 @@ class _ReportDialogState extends State<ReportHelperWidget> {
                 fontWeight: FontWeight.w100,
               ),
             ),
-            value: otherContent,
-            onChanged: (bool? value) {
+            value: 'Other Content',
+            groupValue: selectedOption,
+            onChanged: (String? value) {
               setState(() {
-                otherContent = value!;
+                selectedOption = value;
               });
             },
           ),
-          if (otherContent)
+          if (selectedOption == 'Other Content')
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: TextField(
@@ -107,7 +106,6 @@ class _ReportDialogState extends State<ReportHelperWidget> {
                 onChanged: (value) {
                   setState(() {});
                 },
-                // ignore: prefer_const_constructors
                 decoration: InputDecoration(
                   hintText: 'Please specify the reason',
                   hintStyle: const TextStyle(
@@ -129,18 +127,16 @@ class _ReportDialogState extends State<ReportHelperWidget> {
               width: double.infinity,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                    backgroundColor: otherContent
-                        ? otherContentController.text.isEmpty
-                            ? Colors.grey
-                            : Colors.red
+                    backgroundColor: selectedOption == 'Other Content' &&
+                            otherContentController.text.isEmpty
+                        ? Colors.grey
                         : Colors.red,
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5))),
                 onPressed: () {
-                  if (otherContent) {
-                    if (otherContentController.text.isEmpty) {
-                      return;
-                    }
+                  if (selectedOption == 'Other Content' &&
+                      otherContentController.text.isEmpty) {
+                    return;
                   }
                   Navigator.of(context).pop();
                   showSnackBar(
