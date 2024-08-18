@@ -5,13 +5,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
-import 'package:tnent/models/store_category_model.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/models/store_update_model.dart';
@@ -578,7 +575,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
-            'Featured Products',
+            'Featured',
             style: TextStyle(
               color: hexToColor('#343434'),
               fontSize: 35.sp,
@@ -1108,7 +1105,7 @@ class UpdateTile extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: size + 3.5,
-                backgroundColor: Colors.green,
+                backgroundColor: hexToColor('#2D332F'),
                 child: CircleAvatar(
                   radius: size + 1.5,
                   backgroundColor: Colors.white,
