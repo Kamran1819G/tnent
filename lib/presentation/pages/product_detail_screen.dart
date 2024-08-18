@@ -749,7 +749,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           color: hexToColor('#B9B9B9'),
                                           fontSize: 22.sp,
                                           decoration:
-                                              TextDecoration.lineThrough,
+                                              _selectedVariant.discount > 0
+                                                  ? TextDecoration.lineThrough
+                                                  : TextDecoration.none,
                                           decorationColor:
                                               hexToColor('#B9B9B9'),
                                         ),

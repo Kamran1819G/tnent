@@ -8,7 +8,6 @@ class UserModel {
   final String lastName;
   final String? phoneNumber;
   final String? location;
-  final String? pincode;
   final String? storeId;
   Map<String, dynamic>? address;
   final List<String> likedPosts;
@@ -24,22 +23,20 @@ class UserModel {
     required this.lastName,
     this.phoneNumber,
     this.location,
-    this.pincode,
     this.storeId,
     this.address,
     List<String>? likedPosts,
     List<String>? followedStores,
     Timestamp? createdAt,
     Timestamp? lastUpdated,
-  }) :
-        this.likedPosts = likedPosts ?? [],
+  })  : this.likedPosts = likedPosts ?? [],
         this.followedStores = followedStores ?? [],
         this.createdAt = createdAt ?? Timestamp.now(),
         this.lastUpdated = lastUpdated ?? Timestamp.now();
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-
+    
     return UserModel(
       uid: doc.id,
       email: data['email'] ?? '',
@@ -48,7 +45,6 @@ class UserModel {
       lastName: data['lastName'] ?? '',
       phoneNumber: data['phoneNumber'],
       location: data['location'],
-      pincode: data['pincode'],
       storeId: data['storeId'],
       address: data['address'] as Map<String, dynamic>?,
       likedPosts: List<String>.from(data['likedPosts'] ?? []),
@@ -66,7 +62,6 @@ class UserModel {
       'lastName': lastName,
       'phoneNumber': phoneNumber,
       'location': location,
-      'pincode': pincode,
       'storeId': storeId,
       'address': address,
       'likedPosts': likedPosts,
@@ -83,7 +78,6 @@ class UserModel {
     String? lastName,
     String? phoneNumber,
     String? location,
-    String? pincode,
     String? storeId,
     Map<String, dynamic>? address,
     List<String>? likedPosts,
@@ -98,7 +92,6 @@ class UserModel {
       lastName: lastName ?? this.lastName,
       phoneNumber: phoneNumber ?? this.phoneNumber,
       location: location ?? this.location,
-      pincode: pincode ?? this.pincode,
       storeId: storeId ?? this.storeId,
       likedPosts: likedPosts ?? this.likedPosts,
       followedStores: followedStores ?? this.followedStores,

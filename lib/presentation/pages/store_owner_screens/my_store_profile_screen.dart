@@ -7,11 +7,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/core/helpers/snackbar_utils.dart';
+import 'package:tnent/core/routes/app_routes.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_category_model.dart';
 import 'package:tnent/models/store_model.dart';
@@ -612,12 +614,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const ComingSoon(),
-                          ),
-                        );
+                        Get.toNamed(AppRoutes.COMING_SOON);
                       },
                       child: Container(
                         height: 180.h,
@@ -1174,7 +1171,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               child: Container(
                                 padding: const EdgeInsets.all(6.0),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(context).primaryColor,
+                                  color: hexToColor('#323232'),
                                   borderRadius: BorderRadius.circular(6.0),
                                 ),
                                 child: const Icon(

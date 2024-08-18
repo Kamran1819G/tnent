@@ -425,7 +425,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     ),
                     Expanded(
                       child: Text(
-                        'clothings, electronics, groceries & more...',
+                        'restaurants, cafes, bakeries, clothings & more...',
                         style: TextStyle(
                           color: hexToColor('#989898'),
                           fontFamily: 'Gotham',

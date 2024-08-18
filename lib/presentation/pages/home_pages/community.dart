@@ -110,21 +110,24 @@ class CommunityState extends State<Community> {
                 if (_hasStoreId)
                   Container(
                     margin: EdgeInsets.all(12.w),
-                    child: CircleAvatar(
-                      backgroundColor: hexToColor('#F5F5F5'),
-                      child: IconButton(
-                        icon: Icon(Icons.create_outlined,
-                            color: Colors.black, size: 30.sp),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => CreateCommunityPost(
-                                      storeId: storeId,
-                                    )),
-                          );
-                        },
+                    child: IconButton(
+                      icon: Icon(Icons.movie_edit,
+                          color: hexToColor('#272822'), size: 35.sp),
+                      style: ButtonStyle(
+                        backgroundColor:
+                            WidgetStateProperty.all(hexToColor('#F5F5F5')),
+                        shape: WidgetStateProperty.all(const CircleBorder()),
                       ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CreateCommunityPost(
+                              storeId: storeId,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   )
               ],
@@ -279,16 +282,17 @@ class _CommunityPostState extends State<CommunityPost> {
             onTap: () => _navigateToStoreProfile(context, store),
             child: _buildUserInfo(store),
           ),
-          SizedBox(height: 24.h),
-          Text(
-            widget.post.content,
-            style: TextStyle(
-              color: hexToColor('#737373'),
-              fontFamily: 'Gotham',
-              fontSize: 20.sp,
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 24.h),
+            child: Text(
+              widget.post.content,
+              style: TextStyle(
+                color: hexToColor('#737373'),
+                fontFamily: 'Gotham Black',
+                fontSize: 20.sp,
+              ),
             ),
           ),
-          SizedBox(height: 10.h),
           if (widget.post.images.isNotEmpty) _buildImageGallery(),
           SizedBox(height: 10.h),
           _buildInteractionBar(),
@@ -341,7 +345,8 @@ class _CommunityPostState extends State<CommunityPost> {
 
   Widget _buildImageGallery() {
     return Container(
-      height: 200.0,
+      height: 345.h,
+      width: 598.w,
       child: PageView.builder(
         itemCount: widget.post.images.length,
         itemBuilder: (context, index) {

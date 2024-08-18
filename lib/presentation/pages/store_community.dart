@@ -314,16 +314,17 @@ class _CommunityPostState extends State<CommunityPost> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildUserInfo(userName, userProfileImage),
-          SizedBox(height: 24.h),
-          Text(
-            widget.post.content,
-            style: TextStyle(
-              color: hexToColor('#737373'),
-              fontFamily: 'Gotham',
-              fontSize: 20.sp,
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 24.h),
+            child: Text(
+              widget.post.content,
+              style: TextStyle(
+                color: hexToColor('#737373'),
+                fontFamily: 'Gotham Black',
+                fontSize: 20.sp,
+              ),
             ),
           ),
-          SizedBox(height: 10.h),
           if (widget.post.images.isNotEmpty) _buildImageGallery(),
           SizedBox(height: 10.h),
           _buildInteractionBar(),
@@ -376,7 +377,8 @@ class _CommunityPostState extends State<CommunityPost> {
 
   Widget _buildImageGallery() {
     return Container(
-      height: 200.0,
+      height: 345.h,
+      width: 598.w,
       child: PageView.builder(
         itemCount: widget.post.images.length,
         itemBuilder: (context, index) {

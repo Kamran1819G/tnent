@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:tnent/core/routes/app_routes.dart';
 import 'package:tnent/models/user_model.dart';
 import 'package:tnent/presentation/pages/catalog_pages/purchase_screen.dart';
 import 'package:tnent/presentation/pages/catalog_pages/wishlist_screen.dart';
@@ -243,51 +245,56 @@ class _CatalogState extends State<Catalog> {
                   ),
                 ),
               ),
-              Container(
-                height: 265.h,
-                width: 290.w,
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                decoration: BoxDecoration(
-                  color: hexToColor('#EAE6F6'),
-                  image: DecorationImage(
-                    image: AssetImage('assets/catalog_container_graphic.png'),
-                    fit: BoxFit.cover,
-                  ),
-                  borderRadius: BorderRadius.circular(24.r),
-                ),
+              GestureDetector(
+                onTap: () {
+                  Get.toNamed(AppRoutes.COMING_SOON);
+                },
                 child: Container(
-                  width: 200.w,
-                  padding: EdgeInsets.only(left: 10.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Premium',
-                        style: TextStyle(
-                          color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w400,
-                          fontSize: 30.sp,
+                  height: 265.h,
+                  width: 290.w,
+                  padding: EdgeInsets.symmetric(horizontal: 20.w),
+                  decoration: BoxDecoration(
+                    color: hexToColor('#EAE6F6'),
+                    image: DecorationImage(
+                      image: AssetImage('assets/catalog_container_graphic.png'),
+                      fit: BoxFit.cover,
+                    ),
+                    borderRadius: BorderRadius.circular(24.r),
+                  ),
+                  child: Container(
+                    width: 200.w,
+                    padding: EdgeInsets.only(left: 10.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Premium',
+                          style: TextStyle(
+                            color: hexToColor('#1E1E1E'),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 30.sp,
+                          ),
                         ),
-                      ),
-                      Text(
-                        'Unlock features with our premium services',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14.sp,
-                          color: hexToColor('#585858'),
+                        Text(
+                          'Unlock features with our premium services',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14.sp,
+                            color: hexToColor('#585858'),
+                          ),
                         ),
-                      ),
-                      SizedBox(height: 50.h),
-                      Row(
-                        children: [
-                          Spacer(),
-                          Image.asset('assets/icons/premium.png',
-                              height: 55.h, width: 55.w, fit: BoxFit.cover),
-                        ],
-                      )
-                    ],
+                        SizedBox(height: 50.h),
+                        Row(
+                          children: [
+                            Spacer(),
+                            Image.asset('assets/icons/premium.png',
+                                height: 55.h, width: 55.w, fit: BoxFit.cover),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),

@@ -832,7 +832,9 @@ class CheckoutItemTile extends StatelessWidget {
                             style: TextStyle(
                               color: hexToColor('#B9B9B9'),
                               fontSize: 16.sp,
-                              decoration: TextDecoration.lineThrough,
+                              decoration: item['variationDetails'].discount > 0
+                                  ? TextDecoration.lineThrough
+                                  : TextDecoration.none,
                               decorationColor: hexToColor('#B9B9B9'),
                             ),
                           ),
@@ -1001,7 +1003,10 @@ class SummaryItemTile extends StatelessWidget {
                                 style: TextStyle(
                                   color: hexToColor('#B9B9B9'),
                                   fontSize: 16.sp,
-                                  decoration: TextDecoration.lineThrough,
+                                  decoration:
+                                      item['variationDetails'].discount > 0
+                                          ? TextDecoration.lineThrough
+                                          : TextDecoration.none,
                                   decorationColor: hexToColor('#B9B9B9'),
                                 ),
                               ),
