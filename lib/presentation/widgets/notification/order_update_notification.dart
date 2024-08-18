@@ -20,7 +20,9 @@ class OrderUpdateNotification extends StatelessWidget {
     this.productName,
     required this.orderId,
     required this.time,
-    this.price, required Null Function() onAccept, required Null Function() onReject,
+    this.price,
+    required Null Function() onAccept,
+    required Null Function() onReject,
   });
 
   @override
@@ -67,16 +69,16 @@ class OrderUpdateNotification extends StatelessWidget {
         ),
         leading: productImage != null
             ? Container(
-          height: 125.h,
-          width: 112.w,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(4.r),
-            child: Image.network(
-              productImage!,
-              fit: BoxFit.fill,
-            ),
-          ),
-        )
+                height: 125.h,
+                width: 112.w,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(4.r),
+                  child: Image.network(
+                    productImage!,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              )
             : null,
         title: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -127,70 +129,70 @@ class OrderUpdateNotification extends StatelessWidget {
           ],
         ),
         subtitle: (type == NotificationType.delivered ||
-            type == NotificationType.cancelled ||
-            type == NotificationType.refunded)
+                type == NotificationType.cancelled ||
+                type == NotificationType.refunded)
             ? Text(
-          type == NotificationType.delivered
-              ? name != null
-              ? 'Item delivered to $name'
-              : 'Item delivered'
-              : (type == NotificationType.refunded
-              ? 'Item refunded'
-              : (type == NotificationType.cancelled
-              ? 'Item cancelled'
-              : '')),
-          style: TextStyle(
-            color: hexToColor('#343434'),
-            fontFamily: 'Poppins',
-            fontSize: 18.sp,
-          ),
-        )
-            : Row(
-          children: [
-            Text(
-              productName!,
-              style: TextStyle(
-                color: hexToColor('#343434'),
-                fontSize: 17.sp,
-              ),
-            ),
-            Spacer(),
-            Container(
-              padding:
-              EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: hexToColor('#343434'),
-                  width: 1.0,
-                ),
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: Text(
-                '₹${price}',
+                type == NotificationType.delivered
+                    ? name != null
+                        ? 'Item delivered to $name'
+                        : 'Item delivered'
+                    : (type == NotificationType.refunded
+                        ? 'Item refunded'
+                        : (type == NotificationType.cancelled
+                            ? 'Item cancelled'
+                            : '')),
                 style: TextStyle(
-                  color: hexToColor('#838383'),
-                  fontSize: 16.sp,
+                  color: hexToColor('#343434'),
+                  fontFamily: 'Poppins',
+                  fontSize: 18.sp,
                 ),
+              )
+            : Row(
+                children: [
+                  Text(
+                    productName!,
+                    style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontSize: 17.sp,
+                    ),
+                  ),
+                  Spacer(),
+                  Container(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: hexToColor('#343434'),
+                        width: 1.0,
+                      ),
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: Text(
+                      '₹${price}',
+                      style: TextStyle(
+                        color: hexToColor('#838383'),
+                        fontSize: 16.sp,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
         trailing: (type == NotificationType.delivered ||
-            type == NotificationType.cancelled ||
-            type == NotificationType.refunded)
+                type == NotificationType.cancelled ||
+                type == NotificationType.refunded)
             ? Container(
-          height: 50.h,
-          width: 50.w,
-          decoration: BoxDecoration(
-            color: backgroundColor,
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Icon(
-            iconData,
-            color: Colors.white,
-            size: 23.sp,
-          ),
-        )
+                height: 50.h,
+                width: 50.w,
+                decoration: BoxDecoration(
+                  color: backgroundColor,
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Icon(
+                  iconData,
+                  color: Colors.white,
+                  size: 23.sp,
+                ),
+              )
             : null,
       ),
     );

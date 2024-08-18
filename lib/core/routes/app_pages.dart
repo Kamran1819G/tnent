@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:tnent/core/routes/app_routes.dart';
 import 'package:tnent/presentation/pages/auth_gate.dart';
+import 'package:tnent/presentation/pages/coming_soon.dart';
 import 'package:tnent/presentation/pages/home_screen.dart';
 import 'package:tnent/presentation/pages/onboarding_screen.dart';
 import 'package:tnent/presentation/pages/signin_screen.dart';
@@ -15,5 +16,6 @@ class AppPages {
     GetPage(name: AppRoutes.SIGN_IN, page: () => const SignInScreen()),
     GetPage(name: AppRoutes.SIGN_UP, page: () => const SignUpScreen()),
     GetPage(name: AppRoutes.AUTH_GATE, page: () => const AuthGate()),
+    GetPage(name: AppRoutes.COMING_SOON, page: () => const ComingSoon()),
   ];
 }
