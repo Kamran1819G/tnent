@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -247,8 +248,8 @@ class _CommunityPostState extends State<CommunityPost> {
   }
 
   Future<void> _sharePost() async {
-    final String postUrl = 'https://tnent.com/post/${widget.post.postId}';
-    final String shareText = 'Check out this post: $postUrl';
+    final String postDeepLink = 'tnent://post/${widget.post.postId}';
+    final String shareText = 'Check out this post on TNEnt: $postDeepLink';
 
     await Share.share(shareText);
   }
@@ -348,8 +349,10 @@ class _CommunityPostState extends State<CommunityPost> {
 
   Widget _buildImageGallery() {
     return Container(
-      height: 345.h,
+      height: 336.h,
       width: 598.w,
+      child: AspectRatio(
+      aspectRatio: 16/9,
       child: PageView.builder(
         itemCount: widget.post.images.length,
         itemBuilder: (context, index) {
@@ -373,6 +376,7 @@ class _CommunityPostState extends State<CommunityPost> {
             ),
           );
         },
+      ),
       ),
     );
   }
@@ -586,27 +590,32 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
 
   Future<void> pickImage() async {
     final ImagePicker _picker = ImagePicker();
-    final XFile? image =
-        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 60);
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      // Get the app's temporary directory to save the WebP image
-      final directory = await getTemporaryDirectory();
-      final targetPath =
-          '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.webp';
-
-      // Compress the image and convert to WebP format
-      final compressedFile = await FlutterImageCompress.compressAndGetFile(
-        image.path,
-        targetPath,
-        format: CompressFormat.webp,
-        quality: 80, // Adjust the quality as needed
+      // Crop the image to 16:9 ratio
+      final croppedFile = await ImageCropper().cropImage(
+        sourcePath: image.path,
+        aspectRatio: CropAspectRatio(ratioX: 16, ratioY: 9),
       );
 
-      if (compressedFile != null) {
-        setState(() {
-          _images.add(File(compressedFile.path));
-        });
+      if (croppedFile != null) {
+        // Compress and convert to WebP as before
+        final directory = await getTemporaryDirectory();
+        final targetPath = '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.webp';
+
+        final compressedFile = await FlutterImageCompress.compressAndGetFile(
+          croppedFile.path,
+          targetPath,
+          format: CompressFormat.webp,
+          quality: 80,
+        );
+
+        if (compressedFile != null) {
+          setState(() {
+            _images.add(File(compressedFile.path));
+          });
+        }
       }
     }
   }

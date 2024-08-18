@@ -37,29 +37,29 @@ class _AddProductScreenState extends State<AddProductScreen> {
   TextEditingController _stockQuantityController = TextEditingController();
 
   List<String> categories = [
-    "Clothings",
-    "Electronics",
-    "Restaurants",
-    "Books",
-    "Bakeries",
-    "Beauty Apparels",
-    "Cafes",
-    "Florists",
-    "Footwears",
+    "Clothing",
+    "Electronic",
+    "Restaurant",
+    "Book",
+    "Bakerie",
+    "Beauty Apparel",
+    "Cafe",
+    "Florist",
+    "Footwear",
     "Accessories",
-    "Stationeries",
-    "Eyewears",
-    "Watches",
-    "Musicals",
-    "Sports"
+    "Stationery",
+    "Eyewear",
+    "Watch",
+    "Musical",
+    "Sport"
   ];
 
   List<String> multiOptionCategories = [
-    'Clothings',
-    'Electronics',
-    'Bakeries',
-    'Footwears',
-    "Restaurants",
+    'Clothing',
+    'Electronic',
+    'Bakery',
+    'Footwear',
+    "Restaurant",
   ];
 
   bool get isMultiOptionCategory =>
