@@ -1974,7 +1974,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       await AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: 10,
-          channelKey: 'order_channel',
+          channelKey: 'user_order_channel',
           title: 'Order Placed',
           body: 'Your order #${item['orderId']} has been placed successfully.',
           bigPicture: 'file://$bigPicturePath',

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,37 +14,70 @@ class NotificationService {
 
   static Future<void> initialize() async {
     await AwesomeNotifications().initialize(
-      null, // null means it will use the default app icon
-      [
-        NotificationChannel(
-          channelKey: 'basic_channel',
-          channelName: 'Basic Notifications',
-          channelDescription: 'Notification channel for basic notifications',
-          defaultColor: const Color(0xFF9D50DD),
-          ledColor: const Color(0xFF9D50DD),
-          importance: NotificationImportance.High,
-          channelShowBadge: true,
-        ),
-        NotificationChannel(
-          channelKey: 'store_channel',
-          channelName: 'Store Notifications',
-          channelDescription: 'Notification channel for store notifications',
-          defaultColor: const Color(0xFF9D50DD),
-          ledColor: const Color(0xFF9D50DD),
-          importance: NotificationImportance.High,
-          channelShowBadge: true,
-        ),
-        NotificationChannel(
-          channelKey: 'order_channel',
-          channelName: 'Order Notifications',
-          channelDescription: 'Notification channel for order notifications',
-          defaultColor: const Color(0xFF9D50DD),
-          ledColor: const Color(0xFF9D50DD),
-          importance: NotificationImportance.High,
-          channelShowBadge: true,
-        )
-      ],
-    );
+        null, // null means it will use the default app icon
+        [
+          // Store Notifications Channels
+          NotificationChannel(
+            channelKey: 'store_order_channel',
+            channelName: 'Communication for store orders',
+            channelGroupKey: 'store_channel_group',
+            channelDescription: 'Notification channel for store notifications',
+            playSound: true,
+            enableVibration: true,
+            vibrationPattern: Int64List(400),
+            defaultColor: const Color(0xFF9D50DD),
+            ledColor: const Color(0xFF9D50DD),
+            importance: NotificationImportance.High,
+            channelShowBadge: true,
+          ),
+
+          NotificationChannel(
+            channelKey: 'store_new_follower',
+            channelName: 'New Followers',
+            channelGroupKey: 'store_channel_group',
+            channelDescription: 'Notification channel for store notifications',
+            playSound: true,
+            defaultColor: const Color(0xFF9D50DD),
+            ledColor: const Color(0xFF9D50DD),
+            importance: NotificationImportance.High,
+            channelShowBadge: true,
+          ),
+
+          // User Notifications Channels
+          NotificationChannel(
+            channelKey: 'user_order_channel',
+            channelName: 'Communication for your orders',
+            channelDescription: 'Order Status, Payments, Status, etc.',
+            channelGroupKey: 'user_channel_group',
+            defaultColor: const Color(0xFF9D50DD),
+            ledColor: const Color(0xFF9D50DD),
+            importance: NotificationImportance.High,
+            channelShowBadge: true,
+          ),
+          NotificationChannel(
+            channelKey: 'help_support_channel',
+            channelName: 'Help & Support',
+            channelDescription: 'Notification channel for help & support',
+            channelGroupKey: 'help_support_channel_group',
+            defaultColor: const Color(0xFF9D50DD),
+            ledColor: const Color(0xFF9D50DD),
+            importance: NotificationImportance.High,
+            channelShowBadge: true,
+          )
+        ], channelGroups: [
+      NotificationChannelGroup(
+        channelGroupKey: 'user_channel_group',
+        channelGroupName: 'User Notifications',
+      ),
+      NotificationChannelGroup(
+        channelGroupKey: 'store_channel_group',
+        channelGroupName: 'Store Notifications',
+      ),
+      NotificationChannelGroup(
+        channelGroupKey: 'help_support_channel_group',
+        channelGroupName: 'Help & Support',
+      ),
+    ]);
 
     // Set up notification handlers
     AwesomeNotifications().setListeners(

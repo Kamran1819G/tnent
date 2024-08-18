@@ -88,7 +88,7 @@ class _DetailScreenState extends State<DetailScreen> {
     await AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: 11,
-        channelKey: 'order_channel',
+        channelKey: 'user_order_channel',
         title: 'Order Cancelled',
         body: 'Your order #${widget.order['orderId']} has been cancelled.',
         bigPicture: 'file://$bigPicturePath',
