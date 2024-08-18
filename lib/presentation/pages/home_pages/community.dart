@@ -306,13 +306,16 @@ class _CommunityPostState extends State<CommunityPost> {
         ),
         SizedBox(width: 22.w),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Text(
+              Expanded(
+                child: Text(
                 store.name,
                 style: TextStyle(fontSize: 30.sp),
+                overflow: TextOverflow.ellipsis,
               ),
+              ),
+              SizedBox(width: 10.w),
               Text(
                 _formatTimestamp(widget.post.createdAt),
                 style: TextStyle(
