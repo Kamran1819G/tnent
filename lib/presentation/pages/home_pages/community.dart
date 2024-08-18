@@ -249,7 +249,7 @@ class _CommunityPostState extends State<CommunityPost> {
 
   Future<void> _sharePost() async {
     final String postDeepLink = 'tnent://post/${widget.post.postId}';
-    final String shareText = 'Check out this post on TNEnt: $postDeepLink';
+    final String shareText = 'Check out this post on Tnent: $postDeepLink';
 
     await Share.share(shareText);
   }
