@@ -409,9 +409,10 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                     ),
                   ),
                 ),
-                SizedBox(width: 30.w),
+                SizedBox(width: 25.w),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Search Products & Store',
@@ -420,14 +421,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                         fontSize: 24.sp,
                       ),
                     ),
-                    Expanded(
-                      child: Text(
-                          'restaurant, cafe, bakery, clothing',
-                        style: TextStyle(
-                          color: hexToColor('#989898'),
-                          fontFamily: 'Gotham',
-                          fontSize: 14.sp,
-                        ),
+                    Text(
+                      'restaurants, cafes, bakeries, clothings & more...',
+                      style: TextStyle(
+                        color: hexToColor('#989898'),
+                        fontFamily: 'Gotham',
+                        fontSize: 14.sp,
                       ),
                     ),
                   ],

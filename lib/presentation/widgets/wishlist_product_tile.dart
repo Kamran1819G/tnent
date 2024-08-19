@@ -38,7 +38,6 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
     _wishlistItem = {
       'productId': widget.product.productId,
       'variation': widget.product.variations.keys.first,
-      'addedAt': FieldValue.serverTimestamp(), // Add this line
     };
     _checkWishlistStatus();
   }
@@ -78,7 +77,6 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
       if (_isInWishlist) {
         await userDocRef.update({
           'wishlist': FieldValue.arrayUnion([_wishlistItem]),
-          'addedAt': FieldValue.serverTimestamp(),
         });
         print('Added to wishlist: $_wishlistItem');
       } else {
