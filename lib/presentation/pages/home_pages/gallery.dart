@@ -299,52 +299,6 @@ class _GalleryState extends State<Gallery> {
                           builder: (context) => const TheMiddlemen()));
                 },
                 child: Image.asset("assets/the_middleman_banner.png")),
-            const SizedBox(height: 20.0),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Dash(
-                  direction: Axis.horizontal,
-                  length: MediaQuery.of(context).size.width * 0.9,
-                  dashLength: 8,
-                  dashColor: Colors.grey,
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 12.0, vertical: 8.0),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[900],
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: const Text(
-                    'Coming Soon',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12.0,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20.0),
-            GestureDetector(
-              onTap: () {
-                /* Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => DeliverAnythingAnywhere()));*/
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(22.0),
-                child: ColorFiltered(
-                  colorFilter: ColorFilter.mode(
-                      Colors.black.withOpacity(0.45), BlendMode.darken),
-                  child: Image.asset(
-                    "assets/deliver_anything_banner.png",
-                  ),
-                ),
-              ),
-            ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.2),
           ],
         ),

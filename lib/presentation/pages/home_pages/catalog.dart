@@ -55,7 +55,7 @@ class _CatalogState extends State<Catalog> {
                 ],
               ),
               Spacer(),
-              Row(
+              /*Row(
                 children: [
                   GestureDetector(
                       onTap: () {
@@ -102,7 +102,7 @@ class _CatalogState extends State<Catalog> {
                           ),
                   ),
                 ],
-              )
+              )*/
             ],
           ),
         ),

@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:quickalert/quickalert.dart';
@@ -41,6 +42,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
 
   bool isChanged = false;
   bool isSaving = false;
+  double _uploadProgress = 0.0;
 
   @override
   void initState() {
@@ -83,18 +85,70 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
+      // Compress image
+      final File compressedFile = await compressImage(File(image.path));
+
       setState(() {
-        storeImage = File(image.path);
+        storeImage = compressedFile;
         _checkForChanges();
       });
+
+      // Show loading dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            content: Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                strokeWidth: 5,
+              ),
+            ),
+          );
+        },
+      );
+
+      // Upload image
+      await uploadImage();
+
+      // Close loading dialog
+      Navigator.of(context).pop();
     }
+  }
+
+  Future<File> compressImage(File file) async {
+    final filePath = file.absolute.path;
+
+    // Create output file path
+    // eg: /storage/emulated/0/Android/data/...
+    final lastIndex = filePath.lastIndexOf(new RegExp(r'.jp'));
+    final splitted = filePath.substring(0, (lastIndex));
+    final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
+
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      outPath,
+      quality: 70,
+      // Adjust the quality as needed. Lower quality = smaller file size
+    );
+
+    return File(result!.path);
   }
 
   Future<void> uploadImage() async {
     FirebaseStorage storage = FirebaseStorage.instance;
-    Reference ref =
-        storage.ref().child('store_logos/${widget.store.storeId}.jpg');
+    Reference ref = storage.ref().child('store_logos/${widget.store.storeId}.jpg');
     UploadTask uploadTask = ref.putFile(storeImage!);
+
+    uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
+      setState(() {
+        _uploadProgress = snapshot.bytesTransferred / snapshot.totalBytes;
+      });
+    });
+
     TaskSnapshot taskSnapshot = await uploadTask;
     uploadedImageUrl = await taskSnapshot.ref.getDownloadURL();
   }

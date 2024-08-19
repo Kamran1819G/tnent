@@ -36,23 +36,41 @@ class _AddProductScreenState extends State<AddProductScreen> {
   TextEditingController _descriptionController = TextEditingController();
   TextEditingController _stockQuantityController = TextEditingController();
 
-  List<String> categories = [
-    "Clothing",
-    "Electronic",
-    "Restaurant",
-    "Book",
-    "Bakerie",
-    "Beauty Apparel",
-    "Cafe",
-    "Florist",
-    "Footwear",
-    "Accessories",
-    "Stationery",
-    "Eyewear",
-    "Watch",
-    "Musical",
-    "Sport"
-  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    final fetchedCategories = await fetchCategories();
+    setState(() {
+      categories = fetchedCategories;
+    });
+  }
+
+  Future<List<String>> fetchCategories() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Product Categories')
+          .doc('product-categories')
+          .get();
+
+      if (snapshot.exists && snapshot.data() != null) {
+        final data = snapshot.data() as Map<String, dynamic>;
+        if (data.containsKey('categories')) {
+          return List<String>.from(data['categories']);
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching categories: $e');
+      return [];
+    }
+  }
+
+  List<String> categories = [];
 
   List<String> multiOptionCategories = [
     'Clothing',
@@ -472,8 +490,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               selectedCategory = newValue!;
                             });
                           },
-                          items: categories
-                              .map<DropdownMenuItem<String>>((String value) {
+                          items: categories.map<DropdownMenuItem<String>>((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
                               child: Text(
