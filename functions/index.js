@@ -25,7 +25,10 @@ exports.sendStoreFollowNotification = functions.firestore
               title: notificationData.title,
               body: notificationData.body,
             },
-            data: notificationData.data,
+            data: {
+              ...notificationData.data,
+              channelKey: "store_new_follower",
+            },
           };
 
           try {
@@ -73,6 +76,7 @@ exports.sendOrderNotificationToStoreOwner = functions.firestore
             data: {
               orderId: orderId,
               storeId: storeId,
+              channelKey: "store_new_order_channel",
             },
           };
 

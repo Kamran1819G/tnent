@@ -22,13 +22,25 @@ class NotificationService {
         [
           // Store Notifications Channels
           NotificationChannel(
+            channelKey: 'store_new_order_channel',
+            channelName: 'New Orders',
+            channelGroupKey: 'store_channel_group',
+            channelDescription: 'Notification channel for store notifications',
+            playSound: true,
+            enableVibration: true,
+            defaultColor: const Color(0xFF9D50DD),
+            ledColor: const Color(0xFF9D50DD),
+            importance: NotificationImportance.High,
+            channelShowBadge: true,
+          ),
+
+          NotificationChannel(
             channelKey: 'store_order_channel',
             channelName: 'Communication for store orders',
             channelGroupKey: 'store_channel_group',
             channelDescription: 'Notification channel for store notifications',
             playSound: true,
             enableVibration: true,
-            vibrationPattern: Int64List(400),
             defaultColor: const Color(0xFF9D50DD),
             ledColor: const Color(0xFF9D50DD),
             importance: NotificationImportance.High,
@@ -99,7 +111,6 @@ class NotificationService {
       onDismissActionReceivedMethod: _onDismissActionReceivedMethod,
     );*/
 
-
     // Request FCM token on app start
     await _firebaseMessaging.requestPermission();
     String? token = await _firebaseMessaging.getToken();
@@ -159,18 +170,21 @@ class NotificationService {
   static Future<void> _handleMessage(RemoteMessage message) async {
     debugPrint('Handling a message: ${message.messageId}');
 
+    // Get the channel key from the message data, or use a default
+    String channelKey = message.data['channelKey'] ?? 'default_channel';
+
     // Display the notification using Awesome Notifications
     AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: message.hashCode, // Unique ID for the notification
-        channelKey:'store_order_channel', // Change as per your requirement
+        channelKey: channelKey, // Change as per your requirement
         title: message.notification?.title,
         body: message.notification?.body,
       ),
     );
   }
 
- /* /// Use this method to detect when a new notification or a schedule is created
+  /* /// Use this method to detect when a new notification or a schedule is created
   @pragma("vm:entry-point")
   static Future<void> onNotificationCreatedMethod(
       ReceivedNotification receivedNotification) async {
@@ -203,7 +217,8 @@ class NotificationService {
     // You can navigate to a specific screen based on the notification action here
   }*/
 
-  static Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
+  static Future<void> onActionReceivedMethod(
+      ReceivedAction receivedAction) async {
     if (receivedAction.buttonKeyPressed == 'accept') {
       // Handle accept action
       final orderId = receivedAction.payload?['orderId'];
@@ -223,7 +238,8 @@ class NotificationService {
         await Navigator.push(
           context!,
           MaterialPageRoute(
-            builder: (context) => OrderDetailsScreen(orderId: orderId, storeId: storeId),
+            builder: (context) =>
+                OrderDetailsScreen(orderId: orderId, storeId: storeId),
           ),
         );
       }
@@ -260,7 +276,8 @@ class NotificationService {
     await _notifyCustomerOrderStatus(orderId, 'rejected');
   }
 
-  static Future<void> _notifyCustomerOrderStatus(String orderId, String status) async {
+  static Future<void> _notifyCustomerOrderStatus(
+      String orderId, String status) async {
     final orderDoc = await _firestore.collection('Orders').doc(orderId).get();
     final userId = orderDoc.data()!['userId'];
     final storeId = orderDoc.data()!['storeId'];
@@ -306,4 +323,3 @@ class NotificationService {
     debugPrint('Notification dismissed: ${receivedAction.title}');
   }
 }
-
