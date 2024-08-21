@@ -150,7 +150,7 @@ class NotificationService {
     AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: message.hashCode, // Unique ID for the notification
-        channelKey: 'basic_channel', // Change as per your requirement
+        channelKey: 'store_order_channel', // Change as per your requirement
         title: message.notification?.title,
         body: message.notification?.body,
       ),
