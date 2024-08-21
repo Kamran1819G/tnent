@@ -73,6 +73,7 @@ dependencies:
   get: ^4.6.6
   image_cropper: ^8.0.2
 
+
 dev_dependencies:
   flutter_launcher_icons: "^0.13.1"
 

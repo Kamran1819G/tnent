@@ -6,11 +6,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
+import '../presentation/widgets/notification/OrderDetailsScreen.dart';
+
 class NotificationService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FirebaseMessaging _firebaseMessaging =
       FirebaseMessaging.instance;
+
+  static BuildContext? get context => null;
 
   static Future<void> initialize() async {
     await AwesomeNotifications().initialize(
@@ -87,6 +91,15 @@ class NotificationService {
       onDismissActionReceivedMethod: onDismissActionReceivedMethod,
     );
 
+    /*// Set up notification handlers
+    AwesomeNotifications().setListeners(
+      onActionReceivedMethod: _onActionReceivedMethod,
+      onNotificationCreatedMethod: _onNotificationCreatedMethod,
+      onNotificationDisplayedMethod: _onNotificationDisplayedMethod,
+      onDismissActionReceivedMethod: _onDismissActionReceivedMethod,
+    );*/
+
+
     // Request FCM token on app start
     await _firebaseMessaging.requestPermission();
     String? token = await _firebaseMessaging.getToken();
@@ -150,14 +163,14 @@ class NotificationService {
     AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: message.hashCode, // Unique ID for the notification
-        channelKey: 'basic_channel', // Change as per your requirement
+        channelKey:'store_order_channel', // Change as per your requirement
         title: message.notification?.title,
         body: message.notification?.body,
       ),
     );
   }
 
-  /// Use this method to detect when a new notification or a schedule is created
+ /* /// Use this method to detect when a new notification or a schedule is created
   @pragma("vm:entry-point")
   static Future<void> onNotificationCreatedMethod(
       ReceivedNotification receivedNotification) async {
@@ -188,5 +201,109 @@ class NotificationService {
     // Your code goes here
     debugPrint('Notification action received: ${receivedAction.title}');
     // You can navigate to a specific screen based on the notification action here
+  }*/
+
+  static Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
+    if (receivedAction.buttonKeyPressed == 'accept') {
+      // Handle accept action
+      final orderId = receivedAction.payload?['orderId'];
+      if (orderId != null) {
+        await _acceptOrder(orderId);
+      }
+    } else if (receivedAction.buttonKeyPressed == 'reject') {
+      // Handle reject action
+      final orderId = receivedAction.payload?['orderId'];
+      if (orderId != null) {
+        await _rejectOrder(orderId);
+      }
+    } else if (receivedAction.payload != null) {
+      final orderId = receivedAction.payload?['orderId'];
+      final storeId = receivedAction.payload?['storeId'];
+      if (orderId != null && storeId != null) {
+        await Navigator.push(
+          context!,
+          MaterialPageRoute(
+            builder: (context) => OrderDetailsScreen(orderId: orderId, storeId: storeId),
+          ),
+        );
+      }
+    }
+  }
+
+  static Future<void> _acceptOrder(String orderId) async {
+    // Update order status in Firestore
+    await _firestore.collection('Orders').doc(orderId).update({
+      'status': {
+        'accepted': {
+          'timestamp': FieldValue.serverTimestamp(),
+          'message': 'Order accepted by store owner',
+        },
+      },
+    });
+
+    // Notify the customer about the accepted order
+    await _notifyCustomerOrderStatus(orderId, 'accepted');
+  }
+
+  static Future<void> _rejectOrder(String orderId) async {
+    // Update order status in Firestore
+    await _firestore.collection('Orders').doc(orderId).update({
+      'status': {
+        'rejected': {
+          'timestamp': FieldValue.serverTimestamp(),
+          'message': 'Order rejected by store owner',
+        },
+      },
+    });
+
+    // Notify the customer about the rejected order
+    await _notifyCustomerOrderStatus(orderId, 'rejected');
+  }
+
+  static Future<void> _notifyCustomerOrderStatus(String orderId, String status) async {
+    final orderDoc = await _firestore.collection('Orders').doc(orderId).get();
+    final userId = orderDoc.data()!['userId'];
+    final storeId = orderDoc.data()!['storeId'];
+
+    final customerDoc = await _firestore.collection('Users').doc(userId).get();
+    final customerFcmToken = customerDoc.data()?['fcmToken'];
+
+    if (customerFcmToken != null) {
+      final message = RemoteMessage(
+        data: {
+          'orderId': orderId,
+          'storeId': storeId,
+        },
+        notification: RemoteNotification(
+          title: 'Order #$orderId $status',
+          body: 'Your order has been $status by the store.',
+        ),
+        ttl: customerFcmToken,
+      );
+
+      await FirebaseMessaging.instance.sendMessage();
+      debugPrint('Order status notification sent successfully to the customer');
+    } else {
+      debugPrint('No FCM token for the customer: $userId');
+    }
+  }
+
+  static Future<void> onNotificationCreatedMethod(
+      ReceivedNotification receivedNotification) async {
+    // Your code goes here
+    debugPrint('Notification created: ${receivedNotification.title}');
+  }
+
+  static Future<void> onNotificationDisplayedMethod(
+      ReceivedNotification receivedNotification) async {
+    // Your code goes here
+    debugPrint('Notification displayed: ${receivedNotification.title}');
+  }
+
+  static Future<void> onDismissActionReceivedMethod(
+      ReceivedAction receivedAction) async {
+    // Your code goes here
+    debugPrint('Notification dismissed: ${receivedAction.title}');
   }
 }
+

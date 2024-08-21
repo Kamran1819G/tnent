@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
@@ -1846,6 +1847,7 @@ class TransactionScreen extends StatefulWidget {
 
 class _TransactionScreenState extends State<TransactionScreen> {
   GlobalKey _globalKey = GlobalKey();
+
   late Map<String, dynamic> _userAddress;
   bool _isLoading = true;
 
@@ -1856,15 +1858,116 @@ class _TransactionScreenState extends State<TransactionScreen> {
   }
 
   void initialize() async {
-    await _loadUserAddress();
-    processOrder();
+    _userAddress = await _loadUserAddress();
+    /*processOrder();*/
+    _isLoading = false;
+    processOrder(widget.items);
     setState(() => _isLoading = false);
     sendOrderNotification();
   }
 
   final user = FirebaseAuth.instance.currentUser!;
 
-  Future<void> _loadUserAddress() async {
+  Future<Map<String, dynamic>> _loadUserAddress() async {
+    final userData = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get();
+
+    final address = userData.data()?['address'];
+    if (address == null || !(address is Map<String, dynamic>)) {
+      throw Exception('User address is missing or invalid');
+    }
+
+    return address;
+  }
+
+  String _chars =
+      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  final _rnd = Random();
+
+  String _getRandomString(int length) => String.fromCharCodes(Iterable.generate(
+      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+
+  Future<void> _sendOrderNotificationToStoreOwner(List<Map<String, dynamic>> items) async {
+    for (var item in items) {
+      double totalPrice = item['variationDetails'].price * item['quantity'];
+      String orderId = item['orderId'];
+      String storeId = item['storeId'];
+
+      await NotificationSender.sendOrderNotificationToStoreOwner(
+        orderId: orderId,
+        storeId: storeId,
+        productImage: item['productImage'],
+        productName: item['productName'],
+        price: totalPrice.toString(),
+      );
+    }
+  }
+
+  Future<void> processOrder(List<Map<String, dynamic>> items) async {
+    try {
+      WriteBatch batch = FirebaseFirestore.instance.batch();
+
+      for (var item in items) {
+        String pickupCode = _getRandomString(5);
+        DocumentReference orderRef =
+        FirebaseFirestore.instance.collection('Orders').doc();
+        Map<String, dynamic> orderData = {
+          'orderId': item['orderId'],
+          'userId': FirebaseAuth.instance.currentUser!.uid,
+          'storeId': item['storeId'],
+          'productId': item['productId'],
+          'productName': item['productName'],
+          'productImage': item['productImage'],
+          'variation': item['variation'],
+          'priceDetails': {
+            'price': item['variationDetails'].price,
+            'mrp': item['variationDetails'].mrp,
+            'discount': item['variationDetails'].discount,
+          },
+          'quantity': item['quantity'],
+          'status': {
+            'ordered': {
+              'timestamp': FieldValue.serverTimestamp(),
+              'message': 'Order was placed',
+            },
+          },
+          'orderAt': FieldValue.serverTimestamp(),
+          'shippingAddress': await _loadUserAddress(),
+          'pickupCode': pickupCode,
+          'providedMiddleman': {},
+          'payment': {
+            'method': 'Cash on Delivery',
+            'status': 'Pending',
+          },
+        };
+
+        batch.set(orderRef, orderData);
+
+        // Update stock quantity
+        DocumentReference productRef = FirebaseFirestore.instance
+            .collection('products')
+            .doc(item['productId']);
+        batch.update(productRef, {
+          'variations.${item['variation']}.stockQuantity':
+          FieldValue.increment(-item['quantity'])
+        });
+      }
+
+      await batch.commit();
+
+      // Send order notification to the store owner
+      await _sendOrderNotificationToStoreOwner(items);
+    } catch (e) {
+      // Handle error
+    }
+  }
+
+
+
+
+ /* Future<void> _loadUserAddress() async {
     final userData = await FirebaseFirestore.instance
         .collection('Users')
         .doc(user.uid)
@@ -1878,16 +1981,16 @@ class _TransactionScreenState extends State<TransactionScreen> {
     setState(() {
       _userAddress = address;
     });
-  }
+  }*/
 
-  String _chars =
+  /*String _chars =
       'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
   Random _rnd = Random();
 
   String getRandomString(int length) => String.fromCharCodes(Iterable.generate(
       length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
-
-  Future<void> processOrder() async {
+*/
+  /*Future<void> processOrder() async {
     try {
       WriteBatch batch = FirebaseFirestore.instance.batch();
 
@@ -1944,7 +2047,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     } catch (e) {
       showSnackBar(context, 'Error sending order data: $e');
     }
-  }
+  }*/
 
   Future<void> sendOrderNotification() async {
     final firestore = FirebaseFirestore.instance;
@@ -2045,6 +2148,13 @@ class _TransactionScreenState extends State<TransactionScreen> {
     if (_isLoading) {
       return Scaffold(
         body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (_userAddress == null) {
+      return Scaffold(
+        body: Center(
+          child: Text('Error: User address not found'),
+        ),
       );
     }
     return Scaffold(
@@ -2340,5 +2450,44 @@ class _TransactionScreenState extends State<TransactionScreen> {
         ),
       ),
     );
+  }
+}
+
+class NotificationSender {
+  static Future<void> sendOrderNotificationToStoreOwner({
+    required String orderId,
+    required String storeId,
+    required String productImage,
+    required String productName,
+    required String price,
+  }) async {
+    final firestore = FirebaseFirestore.instance;
+
+    final storeDoc = await firestore.collection('Stores').doc(storeId).get();
+    final ownerId = storeDoc.data()?['ownerId'];
+
+    final userDoc = await firestore.collection('Users').doc(ownerId).get();
+    final fcmToken = userDoc.data()?['fcmToken'];
+
+    if (fcmToken != null) {
+      final message = {
+        'token': fcmToken,
+        'notification': {
+          'title': 'New Order Received',
+          'body': 'You have received a new order #$orderId.',
+        },
+        'data': {
+          'orderId': orderId,
+          'storeId': storeId,
+          'acceptAction': 'accept',
+          'rejectAction': 'reject',
+        },
+      };
+
+      await FirebaseMessaging.instance.sendMessage();
+      debugPrint('Order notification sent successfully to the store owner');
+    } else {
+      debugPrint('No FCM token for the store owner: $ownerId');
+    }
   }
 }
