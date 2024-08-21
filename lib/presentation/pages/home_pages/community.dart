@@ -248,7 +248,7 @@ class _CommunityPostState extends State<CommunityPost> {
   }
 
   Future<void> _sharePost() async {
-    final String postDeepLink = 'https://tnent/post/${widget.post.postId}';
+    final String postDeepLink = 'tnent://post/${widget.post.postId}';
     final String shareText = 'Check out this post on Tnent: $postDeepLink';
 
     await Share.share(shareText, subject: 'Tnent Post');
@@ -316,16 +316,16 @@ class _CommunityPostState extends State<CommunityPost> {
               Expanded(
                 child: Text(
                 store.name,
-                style: TextStyle(fontSize: 25.sp),
+                style: TextStyle(fontSize: 30.sp),
                 overflow: TextOverflow.ellipsis,
               ),
               ),
-              SizedBox(width: 9.w),
+              SizedBox(width: 10.w),
               Text(
                 _formatTimestamp(widget.post.createdAt),
                 style: TextStyle(
                   color: hexToColor('#C1C1C1'),
-                  fontSize: 13.sp,
+                  fontSize: 15.sp,
                 ),
               ),
             ],
