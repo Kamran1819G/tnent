@@ -6,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -248,7 +249,7 @@ class _CommunityPostState extends State<CommunityPost> {
   }
 
   Future<void> _sharePost() async {
-    final String postDeepLink = 'tnent://post/${widget.post.postId}';
+    final String postDeepLink = 'https://tnent.com/post/${widget.post.postId}';
     final String shareText = 'Check out this post on Tnent: $postDeepLink';
 
     await Share.share(shareText, subject: 'Tnent Post');
@@ -315,10 +316,10 @@ class _CommunityPostState extends State<CommunityPost> {
             children: [
               Expanded(
                 child: Text(
-                store.name,
-                style: TextStyle(fontSize: 30.sp),
-                overflow: TextOverflow.ellipsis,
-              ),
+                  store.name,
+                  style: TextStyle(fontSize: 30.sp),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               SizedBox(width: 10.w),
               Text(
@@ -352,31 +353,31 @@ class _CommunityPostState extends State<CommunityPost> {
       height: 336.h,
       width: 598.w,
       child: AspectRatio(
-      aspectRatio: 16/9,
-      child: PageView.builder(
-        itemCount: widget.post.images.length,
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () => _showFullScreenImage(widget.post.images[index]),
-            child: Hero(
-              tag: 'postImage${widget.post.postId}$index',
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8.0),
-                child: FadeInImage.memoryNetwork(
-                  placeholder: kTransparentImage,
-                  image: widget.post.images[index],
-                  fit: BoxFit.cover,
-                  fadeInDuration: const Duration(milliseconds: 300),
-                  fadeInCurve: Curves.easeIn,
-                  imageErrorBuilder: (context, error, stackTrace) {
-                    return const Center(child: Icon(Icons.error));
-                  },
+        aspectRatio: 16 / 9,
+        child: PageView.builder(
+          itemCount: widget.post.images.length,
+          itemBuilder: (context, index) {
+            return GestureDetector(
+              onTap: () => _showFullScreenImage(widget.post.images[index]),
+              child: Hero(
+                tag: 'postImage${widget.post.postId}$index',
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8.0),
+                  child: FadeInImage.memoryNetwork(
+                    placeholder: kTransparentImage,
+                    image: widget.post.images[index],
+                    fit: BoxFit.cover,
+                    fadeInDuration: const Duration(milliseconds: 300),
+                    fadeInCurve: Curves.easeIn,
+                    imageErrorBuilder: (context, error, stackTrace) {
+                      return const Center(child: Icon(Icons.error));
+                    },
+                  ),
                 ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -602,7 +603,8 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
       if (croppedFile != null) {
         // Compress and convert to WebP as before
         final directory = await getTemporaryDirectory();
-        final targetPath = '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.webp';
+        final targetPath =
+            '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.webp';
 
         final compressedFile = await FlutterImageCompress.compressAndGetFile(
           croppedFile.path,
@@ -920,6 +922,21 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class PostViewScreen extends StatelessWidget {
+  const PostViewScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final postId = Get.parameters['postId'];
+    return Scaffold(
+      appBar: AppBar(title: Text('Post $postId')),
+      body: Center(
+        child: Text('Viewing post with ID: $postId'),
       ),
     );
   }
