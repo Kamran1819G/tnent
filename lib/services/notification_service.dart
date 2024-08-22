@@ -224,11 +224,9 @@ class NotificationService {
       // Update each document found (assuming orderId is unique)
       for (final doc in querySnapshot.docs) {
         await doc.reference.update({
-          'status': {
-            'Accepted': {
-              'timestamp': FieldValue.serverTimestamp(),
-              'message': 'Order accepted by store owner',
-            }
+          'status.accepted': {
+            'timestamp': FieldValue.serverTimestamp(),
+            'message': 'Order accepted by store owner',
           },
         });
       }
@@ -248,11 +246,9 @@ class NotificationService {
       // Update each document found (assuming orderId is unique)
       for (final doc in querySnapshot.docs) {
         await doc.reference.update({
-          'status': {
-            'Rejected': {
-              'timestamp': FieldValue.serverTimestamp(),
-              'message': 'Order rejected by store owner',
-            }
+          'status.rejected': {
+            'timestamp': FieldValue.serverTimestamp(),
+            'message': 'Order rejected by store owner',
           },
         });
       }
