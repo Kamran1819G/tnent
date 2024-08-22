@@ -71,9 +71,9 @@ dependencies:
   transparent_image: ^2.0.1
   rxdart: ^0.28.0
   get: ^4.6.6
-  image_cropper: ^8.0.2
-  app_links: ^6.2.1
   firebase_app_check: ^0.3.0+4
+  image_cropper: ^8.0.1
+  app_links: ^6.2.1
 
 dev_dependencies:
   flutter_launcher_icons: "^0.13.1"

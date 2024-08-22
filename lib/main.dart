@@ -13,7 +13,6 @@ import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/core/routes/app_pages.dart';
 import 'package:tnent/core/routes/app_routes.dart';
 import 'package:tnent/presentation/controllers/permission_controller.dart';
-import 'package:tnent/presentation/widgets/notification/OrderDetailsScreen.dart';
 import 'package:tnent/services/notification_service.dart';
 import 'firebase_options.dart';
 import 'package:get/get.dart';

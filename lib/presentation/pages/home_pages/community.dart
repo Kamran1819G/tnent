@@ -117,8 +117,8 @@ class CommunityState extends State<Community> {
                           color: hexToColor('#272822'), size: 35.sp),
                       style: ButtonStyle(
                         backgroundColor:
-                            WidgetStateProperty.all(hexToColor('#F5F5F5')),
-                        shape: WidgetStateProperty.all(const CircleBorder()),
+                            MaterialStateProperty.all(hexToColor('#F5F5F5')),
+                        shape: MaterialStateProperty.all(const CircleBorder()),
                       ),
                       onPressed: () {
                         Navigator.push(
