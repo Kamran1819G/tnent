@@ -37,21 +37,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
   TextEditingController _stockQuantityController = TextEditingController();
 
   List<String> categories = [
-    "Clothings",
-    "Electronics",
-    "Restaurants",
-    "Books",
-    "Bakeries",
-    "Beauty Apparels",
-    "Cafes",
-    "Florists",
-    "Footwears",
+    "Clothing",
+    "Electronic",
+    "Restaurant",
+    "Book",
+    "Bakery",
+    "Beauty Apparel",
+    "Cafe",
+    "Florist",
+    "Footwear",
     "Accessories",
-    "Stationeries",
-    "Eyewears",
+    "Stationery",
+    "Eyewear",
     "Watches",
     "Musicals",
-    "Groceries"
+    "Grocery",
     "Sports"
   ];
 

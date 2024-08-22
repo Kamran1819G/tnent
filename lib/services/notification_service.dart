@@ -190,6 +190,7 @@ class NotificationService {
         content: NotificationContent(
           id: message.hashCode, // Unique ID for the notification
           channelKey: channelKey, // Change as per your requirement
+          autoDismissible: false,
           title: message.notification?.title,
           body: message.notification?.body,
           notificationLayout: NotificationLayout.Default,
