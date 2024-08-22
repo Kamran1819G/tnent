@@ -37,30 +37,29 @@ class _AddProductScreenState extends State<AddProductScreen> {
   TextEditingController _stockQuantityController = TextEditingController();
 
   List<String> categories = [
-    "Clothing",
-    "Electronic",
-    "Restaurant",
-    "Book",
-    "Bakery",
+    "Clothings",
+    "Electronics",
+    "Restaurants",
+    "Books",
+    "Bakeries",
     "Beauty Apparel",
-    "Cafe",
-    "Florist",
-    "Footwear",
+    "Cafes",
+    "Florists",
+    "Footwears",
     "Accessories",
     "Stationery",
-    "Eyewear",
+    "Eyewears",
     "Watches",
     "Musicals",
-    "Grocery",
     "Sports"
   ];
 
   List<String> multiOptionCategories = [
-    'Clothing',
-    'Electronic',
-    'Bakery',
-    'Footwear',
-    "Restaurant",
+    'Clothings',
+    'Electronics',
+    'Bakeries',
+    'Footwears',
+    "Restaurants",
   ];
 
   bool get isMultiOptionCategory =>
@@ -473,7 +472,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                               selectedCategory = newValue!;
                             });
                           },
-                          items: categories.map<DropdownMenuItem<String>>((String value) {
+                          items: categories
+                              .map<DropdownMenuItem<String>>((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
                               child: Text(
