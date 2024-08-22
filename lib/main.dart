@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:app_links/app_links.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -13,12 +12,15 @@ import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/core/routes/app_pages.dart';
 import 'package:tnent/core/routes/app_routes.dart';
 import 'package:tnent/presentation/controllers/permission_controller.dart';
+import 'package:tnent/services/context_utility.dart';
+import 'package:tnent/services/external_linking_services/universal_linking.dart';
 import 'package:tnent/services/notification_service.dart';
 import 'firebase_options.dart';
 import 'package:get/get.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await UniversalLinking.init();
 
   final PermissionController permissionController =
       Get.put(PermissionController());
@@ -46,13 +48,9 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final appLinks = AppLinks();
-
   @override
   void initState() {
     checkForUpdates();
-
-    initDeepLinks();
 
     AwesomeNotifications().setListeners(
       onActionReceivedMethod: NotificationService.onActionReceivedMethod,
@@ -65,28 +63,6 @@ class _MyAppState extends State<MyApp> {
     );
 
     super.initState();
-  }
-
-  Future<void> initDeepLinks() async {
-    // Handle app start by deep link
-    final appLink = await appLinks.getInitialLink();
-    if (appLink != null) {
-      handleDeepLink(appLink);
-    }
-
-    // Handle app links while app is in memory
-    appLinks.uriLinkStream.listen((uri) {
-      handleDeepLink(uri);
-    });
-  }
-
-  void handleDeepLink(Uri uri) {
-    if (uri.host == 'tnent.com' &&
-        uri.pathSegments.length == 2 &&
-        uri.pathSegments.first == 'post') {
-      final postId = uri.pathSegments.last;
-      Get.toNamed(AppRoutes.POST, parameters: {'postId': postId});
-    }
   }
 
   Future<void> checkForUpdates() async {
@@ -118,6 +94,7 @@ class _MyAppState extends State<MyApp> {
     return ScreenUtilInit(
       designSize: const Size(642, 1376),
       builder: (_, child) => GetMaterialApp(
+        navigatorKey: ContextUtility.navigatorKey,
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           scaffoldBackgroundColor: Colors.white,
