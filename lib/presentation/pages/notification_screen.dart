@@ -29,22 +29,6 @@ class _NotificationScreenState extends State<NotificationScreen>
     _loadNotifications();
   }
 
-  Future<void> _handleAccept(String orderId) async {
-    await FirebaseFirestore.instance.collection('Orders').doc(orderId).update({
-      'status': 'accepted',
-    });
-    // Refresh notifications
-    await _loadNotifications();
-  }
-
-  Future<void> _handleReject(String orderId) async {
-    await FirebaseFirestore.instance.collection('Orders').doc(orderId).update({
-      'status': 'rejected',
-    });
-    // Refresh notifications
-    await _loadNotifications();
-  }
-
   Future<void> _loadNotifications() async {
     final firestore = FirebaseFirestore.instance;
     final userId = FirebaseAuth.instance.currentUser?.uid;
@@ -254,8 +238,8 @@ class _NotificationScreenState extends State<NotificationScreen>
                   orderId: data['data']['orderId'],
                   time: DateFormat('jm')
                       .format((data['timestamp'] as Timestamp).toDate()),
-                  onAccept: () => _handleAccept(data['data']['orderId']),
-                  onReject: () => _handleReject(data['data']['orderId']),
+                  onAccept: () {},
+                  onReject: () {},
                 );
               } else {
                 return StoreConnectionNotification(
