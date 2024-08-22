@@ -3,7 +3,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:tnent/core/helpers/snackbar_utils.dart';
+import 'package:tnent/models/community_post_model.dart';
 import 'package:tnent/models/product_model.dart';
+import 'package:tnent/presentation/pages/home_pages/community.dart';
 import 'package:tnent/presentation/pages/product_detail_screen.dart';
 import 'package:tnent/services/context_utility.dart';
 
@@ -47,7 +49,11 @@ class UniversalLinking {
 
     // ----------------------------------------------------------------
     if (receivedPostId.isNotEmpty) {
-      Get.toNamed(AppRoutes.POST, parameters: {'postId': postId});
+      DocumentSnapshot doc = await FirebaseFirestore.instance
+          .collection('communityPosts')
+          .doc(receivedPostId)
+          .get();
+      Get.to(() => PostViewScreen(post: CommunityPostModel.fromFirestore(doc)));
     }
     if (receivedProductId.isNotEmpty) {
       DocumentSnapshot doc = await FirebaseFirestore.instance

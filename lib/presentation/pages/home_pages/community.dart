@@ -928,15 +928,19 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
 }
 
 class PostViewScreen extends StatelessWidget {
-  const PostViewScreen({Key? key}) : super(key: key);
+  final CommunityPostModel post;
+
+  const PostViewScreen({Key? key, required this.post}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final postId = Get.parameters['postId'];
     return Scaffold(
-      appBar: AppBar(title: Text('Post $postId')),
-      body: Center(
-        child: Text('Viewing post with ID: $postId'),
+      body: SafeArea(
+        child: Column(
+          children: [
+            CommunityPost(post: post),
+          ],
+        ),
       ),
     );
   }

@@ -6,5 +6,4 @@ class AppRoutes {
   static const String SIGN_IN = '/sign-in';
   static const String SIGN_UP = '/sign-up';
   static const String COMING_SOON = '/coming-soon';
-  static const String POST = '/post/:postId';
 }

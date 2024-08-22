@@ -18,10 +18,5 @@ class AppPages {
     GetPage(name: AppRoutes.SIGN_UP, page: () => const SignUpScreen()),
     GetPage(name: AppRoutes.AUTH_GATE, page: () => const AuthGate()),
     GetPage(name: AppRoutes.COMING_SOON, page: () => const ComingSoon()),
-    GetPage(
-      name: AppRoutes.POST,
-      page: () => PostViewScreen(),
-      parameters: {'postId': ''},
-    ),
   ];
 }
