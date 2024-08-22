@@ -20,12 +20,23 @@ class NotificationService {
     await AwesomeNotifications().initialize(
         null, // null means it will use the default app icon
         [
+          NotificationChannel(
+            channelKey: 'default_channel',
+            channelName: 'Default Channel',
+            channelDescription: 'This is the default channel',
+            playSound: true,
+            defaultColor: const Color(0xFF9D50DD),
+            ledColor: const Color(0xFF9D50DD),
+            importance: NotificationImportance.High,
+            channelShowBadge: true,
+          ),
+
           // Store Notifications Channels
           NotificationChannel(
             channelKey: 'store_new_order_channel',
             channelName: 'New Orders',
             channelGroupKey: 'store_channel_group',
-            channelDescription: 'Notification channel for store notifications',
+            channelDescription: 'New order notifications for store owners',
             playSound: true,
             enableVibration: true,
             defaultColor: const Color(0xFF9D50DD),
@@ -38,7 +49,6 @@ class NotificationService {
             channelKey: 'store_order_channel',
             channelName: 'Communication for store orders',
             channelGroupKey: 'store_channel_group',
-            channelDescription: 'Notification channel for store notifications',
             playSound: true,
             enableVibration: true,
             defaultColor: const Color(0xFF9D50DD),
@@ -51,7 +61,6 @@ class NotificationService {
             channelKey: 'store_new_follower',
             channelName: 'New Followers',
             channelGroupKey: 'store_channel_group',
-            channelDescription: 'Notification channel for store notifications',
             playSound: true,
             defaultColor: const Color(0xFF9D50DD),
             ledColor: const Color(0xFF9D50DD),

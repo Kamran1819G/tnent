@@ -89,3 +89,53 @@ exports.sendOrderNotificationToStoreOwner = functions.firestore
         console.error("Error sending order notification:", error);
       }
     });
+
+exports.sendOrderCancelledNotificationToStoreOwner = functions.firestore
+    .document("Orders/{orderId}")
+    .onUpdate(async (change, context) => {
+      const orderData = change.after.data();
+      const storeId = orderData.storeId;
+      const orderId = orderData.orderId;
+      const status = orderData.status;
+
+      if (status === "cancelled") {
+        try {
+          const storeDoc = await admin
+              .firestore()
+              .collection("Stores")
+              .doc(storeId)
+              .get();
+          const ownerId = storeDoc.data().ownerId;
+          const userDoc = await admin
+              .firestore()
+              .collection("Users")
+              .doc(ownerId)
+              .get();
+          const fcmToken = userDoc.data().fcmToken;
+
+          if (fcmToken) {
+            const message = {
+              token: fcmToken,
+              notification: {
+                title: "Order Cancelled",
+                body: `Order #${orderId} has been cancelled.`,
+              },
+              data: {
+                orderId: orderId,
+                storeId: storeId,
+                channelKey: "store_order_cancelled_channel",
+              },
+            };
+
+            await getMessaging().send(message);
+            console.log(
+                "Order cancelled notification sent successfully to store owner",
+            );
+          } else {
+            console.log("No FCM token for store owner:", ownerId);
+          }
+        } catch (error) {
+          console.error("Error sending order cancelled notification:", error);
+        }
+      }
+    });
