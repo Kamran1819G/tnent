@@ -53,17 +53,9 @@ exports.sendOrderNotificationToStoreOwner = functions.firestore
       const orderId = orderData.orderId;
 
       try {
-        const storeDoc = await admin
-            .firestore()
-            .collection("Stores")
-            .doc(storeId)
-            .get();
+        const storeDoc = await admin.firestore().collection("Stores").doc(storeId).get();
         const ownerId = storeDoc.data().ownerId;
-        const userDoc = await admin
-            .firestore()
-            .collection("Users")
-            .doc(ownerId)
-            .get();
+        const userDoc = await admin.firestore().collection("Users").doc(ownerId).get();
         const fcmToken = userDoc.data().fcmToken;
 
         if (fcmToken) {
@@ -78,6 +70,25 @@ exports.sendOrderNotificationToStoreOwner = functions.firestore
               storeId: storeId,
               channelKey: "store_new_order_channel",
             },
+            android: {
+              notification: {
+                click_action: "FLUTTER_NOTIFICATION_CLICK",
+                priority: "high",
+                default_sound: true,
+                default_vibrate_timings: true,
+                notification_priority: "PRIORITY_MAX",
+                buttons: [
+                  {
+                    title: "Accept",
+                    action: "accept",
+                  },
+                  {
+                    title: "Reject",
+                    action: "reject",
+                  },
+                ],
+              },
+            },
           };
 
           await getMessaging().send(message);
@@ -87,6 +98,42 @@ exports.sendOrderNotificationToStoreOwner = functions.firestore
         }
       } catch (error) {
         console.error("Error sending order notification:", error);
+      }
+    });
+
+// New function to handle order status updates
+exports.handleOrderStatusUpdate = functions.firestore
+    .document("Orders/{orderId}")
+    .onUpdate(async (change, context) => {
+      const newValue = change.after.data();
+      const previousValue = change.before.data();
+
+      if (newValue.status !== previousValue.status) {
+        const orderId = context.params.orderId;
+        const userId = newValue.userId;
+
+        const userDoc = await admin.firestore().collection("Users").doc(userId).get();
+        const fcmToken = userDoc.data().fcmToken;
+
+        if (fcmToken) {
+          const message = {
+            token: fcmToken,
+            notification: {
+              title: `Order #${orderId} ${newValue.status}`,
+              body: `Your order has been ${newValue.status} by the store.`,
+            },
+            data: {
+              orderId: orderId,
+              status: newValue.status,
+              channelKey: "user_order_channel",
+            },
+          };
+
+          await getMessaging().send(message);
+          console.log("Order status notification sent successfully to customer");
+        } else {
+          console.log("No FCM token for customer:", userId);
+        }
       }
     });
 

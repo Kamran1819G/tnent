@@ -226,16 +226,13 @@ class NotificationService {
     // You can navigate to a specific screen based on the notification action here
   }*/
 
-  static Future<void> onActionReceivedMethod(
-      ReceivedAction receivedAction) async {
+  static Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
     if (receivedAction.buttonKeyPressed == 'accept') {
-      // Handle accept action
       final orderId = receivedAction.payload?['orderId'];
       if (orderId != null) {
         await _acceptOrder(orderId);
       }
     } else if (receivedAction.buttonKeyPressed == 'reject') {
-      // Handle reject action
       final orderId = receivedAction.payload?['orderId'];
       if (orderId != null) {
         await _rejectOrder(orderId);
@@ -247,8 +244,7 @@ class NotificationService {
         await Navigator.push(
           context!,
           MaterialPageRoute(
-            builder: (context) =>
-                OrderDetailsScreen(orderId: orderId, storeId: storeId),
+            builder: (context) => OrderDetailsScreen(orderId: orderId, storeId: storeId),
           ),
         );
       }
@@ -256,6 +252,18 @@ class NotificationService {
   }
 
   static Future<void> _acceptOrder(String orderId) async {
+    await FirebaseFirestore.instance.collection('Orders').doc(orderId).update({
+      'status': 'accepted',
+    });
+  }
+
+  static Future<void> _rejectOrder(String orderId) async {
+    await FirebaseFirestore.instance.collection('Orders').doc(orderId).update({
+      'status': 'rejected',
+    });
+  }
+
+ /* static Future<void> _acceptOrder(String orderId) async {
     // Update order status in Firestore
     await _firestore.collection('Orders').doc(orderId).update({
       'status': {
@@ -283,7 +291,7 @@ class NotificationService {
 
     // Notify the customer about the rejected order
     await _notifyCustomerOrderStatus(orderId, 'rejected');
-  }
+  }*/
 
   static Future<void> _notifyCustomerOrderStatus(
       String orderId, String status) async {

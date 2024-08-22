@@ -5,12 +5,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:tnent/presentation/widgets/notification/order_update_notification.dart';
 import 'package:tnent/presentation/widgets/notification/store_connection_notification.dart';
-
 import '../../core/helpers/color_utils.dart';
 
-class NotificationScreen extends StatefulWidget {
+class NotificationScreen extends StatefulWidget
+{
   const NotificationScreen({Key? key}) : super(key: key);
-
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
 }
@@ -28,6 +27,22 @@ class _NotificationScreenState extends State<NotificationScreen>
     super.initState();
     _tabController = TabController(length: isStoreOwner ? 2 : 1, vsync: this);
     _loadNotifications();
+  }
+
+  Future<void> _handleAccept(String orderId) async {
+    await FirebaseFirestore.instance.collection('Orders').doc(orderId).update({
+      'status': 'accepted',
+    });
+    // Refresh notifications
+    await _loadNotifications();
+  }
+
+  Future<void> _handleReject(String orderId) async {
+    await FirebaseFirestore.instance.collection('Orders').doc(orderId).update({
+      'status': 'rejected',
+    });
+    // Refresh notifications
+    await _loadNotifications();
   }
 
   Future<void> _loadNotifications() async {
@@ -239,8 +254,8 @@ class _NotificationScreenState extends State<NotificationScreen>
                   orderId: data['data']['orderId'],
                   time: DateFormat('jm')
                       .format((data['timestamp'] as Timestamp).toDate()),
-                  onAccept: () {},
-                  onReject: () {},
+                  onAccept: () => _handleAccept(data['data']['orderId']),
+                  onReject: () => _handleReject(data['data']['orderId']),
                 );
               } else {
                 return StoreConnectionNotification(
