@@ -267,6 +267,23 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     }
   }
 
+  Widget underWidget(String text) => Padding(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 13),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: AspectRatio(
+            aspectRatio: 235 / 342,
+            child: Container(
+              color: Colors.grey,
+              child: Center(
+                child: Text(text),
+              ),
+            ),
+          ),
+        ),
+      );
+
   final double size = 30.0;
 
   @override
@@ -421,12 +438,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                         fontSize: 24.sp,
                       ),
                     ),
-                    Text(
-                      'restaurants, cafes, bakeries, clothings & more...',
-                      style: TextStyle(
-                        color: hexToColor('#989898'),
-                        fontFamily: 'Gotham',
-                        fontSize: 14.sp,
+                    Expanded(
+                      child: Text(
+                        'restaurants, cafes, bakeries, clothings & more...',
+                        style: TextStyle(
+                          color: hexToColor('#989898'),
+                          fontFamily: 'Gotham',
+                          fontSize: 14.sp,
+                        ),
                       ),
                     ),
                   ],
@@ -650,47 +669,19 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
         SizedBox(height: 30.h),
 
-        Container(
-          height: 350.h,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
           child: CarouselSlider(
             options: CarouselOptions(
-              height: 350.h,
+              aspectRatio: 235 / 342,
               viewportFraction: 1.0,
               autoPlay: true,
               enlargeCenterPage: true,
             ),
-            items: [
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 16.w),
-                decoration: BoxDecoration(
-                  color: hexToColor('#F5F5F5'),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Center(
-                  child: Text('First Page Content'),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 16.w),
-                decoration: BoxDecoration(
-                  color: hexToColor('#F5F5F5'),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Center(
-                  child: Text('Second Page Content'),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 16.w),
-                decoration: BoxDecoration(
-                  color: hexToColor('#F5F5F5'),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Center(
-                  child: Text('Third Page Content'),
-                ),
-              ),
-            ],
+            items: List.generate(
+              4,
+              (index) => underWidget(index.toString()),
+            ),
           ),
         ),
 
@@ -851,7 +842,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 class StoreTile extends StatelessWidget {
   final StoreModel store;
 
-  StoreTile({required this.store});
+  StoreTile({super.key, required this.store});
 
   @override
   Widget build(BuildContext context) {
@@ -895,7 +886,7 @@ class StoreTile extends StatelessWidget {
 class CategoryTile extends StatelessWidget {
   Map<String, dynamic> category;
 
-  CategoryTile({required this.category});
+  CategoryTile({super.key, required this.category});
 
   @override
   Widget build(BuildContext context) {
@@ -1103,7 +1094,7 @@ class UpdateTile extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircleAvatar(
-                radius: size + 3.5,
+                radius: size + 2.5,
                 backgroundColor: hexToColor('#2D332F'),
                 child: CircleAvatar(
                   radius: size + 1.5,

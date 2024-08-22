@@ -92,19 +92,19 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
           children: [
             Container(
               height: 100,
-              padding: EdgeInsets.only(left: 16, right: 8),
+              padding: const EdgeInsets.only(left: 16, right: 8),
               child: Row(
                 children: [
                   Image.asset('assets/black_tnent_logo.png',
                       width: 30, height: 30),
-                  Spacer(),
+                  const Spacer(),
                   Container(
-                    margin: EdgeInsets.all(8.0),
+                    margin: const EdgeInsets.all(8.0),
                     child: CircleAvatar(
                       backgroundColor: Colors.grey[100],
                       child: IconButton(
-                        icon:
-                            Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                        icon: const Icon(Icons.arrow_back_ios_new,
+                            color: Colors.black),
                         onPressed: () {
                           Navigator.pop(context);
                         },
@@ -114,9 +114,9 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
                 widget.category.name.capitalize(),
                 style: TextStyle(
@@ -125,30 +125,31 @@ class _CategoryProductsScreenState extends State<CategoryProductsScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Expanded(
               child: FutureBuilder<List<ProductModel>>(
                 future: _productsFuture,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
                     print(snapshot.error);
-                    return Center(child: Text('Something went wrong'));
+                    return const Center(child: Text('Something went wrong'));
                   }
 
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
+                    return const Center(child: CircularProgressIndicator());
                   }
 
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Center(child: Text('No products found'));
+                    return const Center(child: Text('No products found'));
                   }
 
                   List<ProductModel> products = snapshot.data!;
 
                   return GridView.builder(
                     shrinkWrap: true,
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,

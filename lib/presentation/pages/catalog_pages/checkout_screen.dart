@@ -101,17 +101,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       ),
                     ],
                   ),
-                  Spacer(),
+                  const Spacer(),
                   IconButton(
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
                       shape: MaterialStateProperty.all(
-                        CircleBorder(),
+                        const CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                    icon: const Icon(Icons.arrow_back_ios_new,
+                        color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -494,17 +495,18 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                         ),
                       ],
                     ),
-                    Spacer(),
+                    const Spacer(),
                     IconButton(
                       style: ButtonStyle(
                         backgroundColor: MaterialStateProperty.all(
                           Colors.grey[100],
                         ),
                         shape: MaterialStateProperty.all(
-                          CircleBorder(),
+                          const CircleBorder(),
                         ),
                       ),
-                      icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                      icon: const Icon(Icons.arrow_back_ios_new,
+                          color: Colors.black),
                       onPressed: () {
                         Navigator.pop(context);
                       },
@@ -642,12 +644,12 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                       ),
                       SizedBox(height: 50.h),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         width: 300.w,
                         child: Row(
                           children: [
                             _buildAddressType('Home'),
-                            SizedBox(width: 10.0),
+                            const SizedBox(width: 10.0),
                             _buildAddressType('Office'),
                           ],
                         ),
@@ -855,7 +857,7 @@ class CheckoutItemTile extends StatelessWidget {
                 ],
               ),
             ),
-            Spacer(),
+            const Spacer(),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -877,7 +879,7 @@ class CheckoutItemTile extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
-                        icon: Icon(Icons.remove),
+                        icon: const Icon(Icons.remove),
                         iconSize: 14.sp,
                         onPressed: () => onUpdateQuantity(item['quantity'] - 1),
                       ),
@@ -891,7 +893,7 @@ class CheckoutItemTile extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        icon: Icon(Icons.add),
+                        icon: const Icon(Icons.add),
                         iconSize: 14.sp,
                         onPressed: () => onUpdateQuantity(item['quantity'] + 1),
                       ),
@@ -929,7 +931,7 @@ class SummaryItemTile extends StatelessWidget {
         child: Column(
           children: [
             Row(children: [
-              Spacer(),
+              const Spacer(),
               Text(
                 'Order ID: ${item['orderId']}',
                 style: TextStyle(
@@ -1100,9 +1102,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 child: Column(
                   children: [
                     _buildStoreSection(),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     _buildProductSection(),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     _buildSummarySection(),
                   ],
                 ),
@@ -1141,17 +1143,17 @@ class _SummaryScreenState extends State<SummaryScreen> {
               ),
             ],
           ),
-          Spacer(),
+          const Spacer(),
           IconButton(
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all(
                 Colors.grey[100],
               ),
               shape: MaterialStateProperty.all(
-                CircleBorder(),
+                const CircleBorder(),
               ),
             ),
-            icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+            icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
             onPressed: () {
               Navigator.pop(context);
             },
@@ -1233,7 +1235,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
             'Summary',
             style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
           ),
-          SizedBox(height: 20.0),
+          const SizedBox(height: 20.0),
           ...widget.items.map((item) => _buildItemSummary(item)),
           Container(
             margin: EdgeInsets.symmetric(vertical: 20.h),
@@ -1371,17 +1373,18 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                       ),
                     ],
                   ),
-                  Spacer(),
+                  const Spacer(),
                   IconButton(
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
                       shape: MaterialStateProperty.all(
-                        CircleBorder(),
+                        const CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                    icon: const Icon(Icons.arrow_back_ios_new,
+                        color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -1407,7 +1410,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                     ),
                     SizedBox(height: 30.h),
                     ExpansionTile(
-                      key: Key('upi'),
+                      key: const Key('upi'),
                       initiallyExpanded: expandedTile == ExpandedTile.upi,
                       onExpansionChanged: (expanded) {
                         setState(() {
@@ -1500,7 +1503,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                           onTap: () {},
                         ),
                         ExpansionTile(
-                          key: Key('other_upi'),
+                          key: const Key('other_upi'),
                           initiallyExpanded:
                               expandedTile == ExpandedTile.otherUpi,
                           onExpansionChanged: (expanded) {
@@ -1603,7 +1606,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                     ),
                     SizedBox(height: 20.h),
                     ExpansionTile(
-                      key: Key('card'),
+                      key: const Key('card'),
                       initiallyExpanded: expandedTile == ExpandedTile.card,
                       onExpansionChanged: (expanded) {
                         setState(() {
@@ -1648,7 +1651,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                       ),
                       children: [
                         Container(
-                          margin: EdgeInsets.symmetric(
+                          margin: const EdgeInsets.symmetric(
                               horizontal: 16.0, vertical: 15.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1711,7 +1714,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(width: 8.0),
+                                  const SizedBox(width: 8.0),
                                   SizedBox(
                                     width: 200.w,
                                     height: 55.h,
@@ -1815,7 +1818,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                             )
                           ],
                         ),
-                        trailing: SizedBox(),
+                        trailing: const SizedBox(),
                       ),
                     ),
                   ],
@@ -1875,21 +1878,22 @@ class _TransactionScreenState extends State<TransactionScreen> {
         .get();
 
     final address = userData.data()?['address'];
-    if (address == null || !(address is Map<String, dynamic>)) {
+    if (address == null || address is! Map<String, dynamic>) {
       throw Exception('User address is missing or invalid');
     }
 
     return address;
   }
 
-  String _chars =
+  final String _chars =
       'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
   final _rnd = Random();
 
   String _getRandomString(int length) => String.fromCharCodes(Iterable.generate(
       length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
 
-  Future<void> _sendOrderNotificationToStoreOwner(List<Map<String, dynamic>> items) async {
+  Future<void> _sendOrderNotificationToStoreOwner(
+      List<Map<String, dynamic>> items) async {
     for (var item in items) {
       double totalPrice = item['variationDetails'].price * item['quantity'];
       String orderId = item['orderId'];
@@ -1912,7 +1916,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       for (var item in items) {
         String pickupCode = _getRandomString(5);
         DocumentReference orderRef =
-        FirebaseFirestore.instance.collection('Orders').doc();
+            FirebaseFirestore.instance.collection('Orders').doc();
         Map<String, dynamic> orderData = {
           'orderId': item['orderId'],
           'userId': FirebaseAuth.instance.currentUser!.uid,
@@ -1951,7 +1955,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
             .doc(item['productId']);
         batch.update(productRef, {
           'variations.${item['variation']}.stockQuantity':
-          FieldValue.increment(-item['quantity'])
+              FieldValue.increment(-item['quantity'])
         });
       }
 
@@ -1964,10 +1968,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     }
   }
 
-
-
-
- /* Future<void> _loadUserAddress() async {
+  /* Future<void> _loadUserAddress() async {
     final userData = await FirebaseFirestore.instance
         .collection('Users')
         .doc(user.uid)
@@ -2146,12 +2147,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
     }
     if (_userAddress == null) {
-      return Scaffold(
+      return const Scaffold(
         body: Center(
           child: Text('Error: User address not found'),
         ),
@@ -2167,21 +2168,23 @@ class _TransactionScreenState extends State<TransactionScreen> {
               padding: EdgeInsets.symmetric(horizontal: 24.w),
               child: Row(
                 children: [
-                  Spacer(),
+                  const Spacer(),
                   IconButton(
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
                       shape: MaterialStateProperty.all(
-                        CircleBorder(),
+                        const CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                    icon: const Icon(Icons.arrow_back_ios_new,
+                        color: Colors.black),
                     onPressed: () {
                       Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(builder: (context) => HomeScreen()),
+                        MaterialPageRoute(
+                            builder: (context) => const HomeScreen()),
                         (Route<dynamic> route) => false,
                       );
                     },
@@ -2197,7 +2200,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     height: 1150.h,
                     width: 680.w,
                     margin: EdgeInsets.symmetric(horizontal: 30.w),
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage('assets/transaction_bg.png'),
                         fit: BoxFit.fill,
@@ -2205,7 +2208,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     ),
                   ),
                   Align(
-                    alignment: Alignment(0.0, 0.0),
+                    alignment: const Alignment(0.0, 0.0),
                     child: Container(
                       margin: EdgeInsets.all(12.w),
                       child: CircleAvatar(
@@ -2217,7 +2220,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     ),
                   ),
                   Align(
-                    alignment: Alignment(0.0, 0.0),
+                    alignment: const Alignment(0.0, 0.0),
                     child: Padding(
                       padding: EdgeInsets.symmetric(horizontal: 40.w),
                       child: Column(
@@ -2311,7 +2314,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                    SizedBox(width: 8.0),
+                                    const SizedBox(width: 8.0),
                                     Text(
                                       _userAddress['name'],
                                       style: TextStyle(
@@ -2413,7 +2416,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                           )
                                           .toList(),
                                     ),
-                                    Spacer(),
+                                    const Spacer(),
                                     Container(
                                         height: 95.h,
                                         width: 200.w,

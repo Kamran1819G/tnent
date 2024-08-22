@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,6 +9,7 @@ import 'package:tnent/presentation/pages/catalog_pages/purchase_screen.dart';
 import 'package:tnent/presentation/pages/catalog_pages/wishlist_screen.dart';
 import 'package:tnent/presentation/pages/notification_screen.dart';
 import 'package:tnent/presentation/pages/users_screens/myprofile_screen.dart';
+import 'package:tnent/presentation/widgets/stylized_custom_button.dart';
 
 import '../../../core/helpers/color_utils.dart';
 
@@ -21,6 +23,36 @@ class Catalog extends StatefulWidget {
 }
 
 class _CatalogState extends State<Catalog> {
+  List<Map<String, dynamic>> content = [
+    {
+      "title": "Wishlist",
+      "icon": "assets/icons/wishlist.png",
+      "function": () {
+        Get.to(() => const WishlistScreen());
+      },
+    },
+    {
+      "title": "My Purchases",
+      "icon": "assets/icons/my_purchases.png",
+      "function": () {
+        Get.to(() => const PurchaseScreen());
+      },
+    },
+    {
+      "title": "Premium",
+      "icon": "assets/icons/premium.png",
+      "function": () {
+        Get.toNamed(AppRoutes.COMING_SOON);
+      },
+    },
+    {
+      "title": "Settings",
+      "icon": "",
+      "function": () {
+        Get.to(() => const MyProfileScreen());
+      },
+    },
+  ];
   bool isNewNotification = true;
 
   @override
@@ -54,7 +86,7 @@ class _CatalogState extends State<Catalog> {
                   ),
                 ],
               ),
-              Spacer(),
+              // const Spacer(),
               /*Row(
                 children: [
                   GestureDetector(
@@ -106,243 +138,46 @@ class _CatalogState extends State<Catalog> {
             ],
           ),
         ),
-        Container(
-          height: 400.h,
-          margin: EdgeInsets.symmetric(horizontal: 20.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.shade300,
-                blurRadius: 10,
-                spreadRadius: 5,
-                offset: Offset(0, 0),
-              ),
-            ],
+        Row(
+          children: List.generate(
+            2,
+            (index) => StylizedCustomButton(
+              icon: content[index]["icon"],
+              label: content[index]["title"],
+              onPressed: content[index]["function"],
+            ),
           ),
         ),
-        SizedBox(height: 30.h),
-        Container(
-          height: 600.h,
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            crossAxisSpacing: 20.w,
-            mainAxisSpacing: 20.h,
-            physics: NeverScrollableScrollPhysics(),
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => WishlistScreen()),
-                  );
-                },
-                child: Container(
-                  height: 265.h,
-                  width: 290.w,
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  decoration: BoxDecoration(
-                    color: hexToColor('#FFFCE4'),
-                    image: DecorationImage(
-                      image: AssetImage('assets/catalog_container_graphic.png'),
-                      fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.circular(24.r),
-                  ),
-                  child: Container(
-                    width: 200.w,
-                    padding: EdgeInsets.only(left: 10.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Wishlist',
-                          style: TextStyle(
-                            color: hexToColor('#1E1E1E'),
-                            fontWeight: FontWeight.w400,
-                            fontSize: 30.sp,
-                          ),
-                        ),
-                        Text(
-                          'See all your saved products here',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14.sp,
-                            color: hexToColor('#585858'),
-                          ),
-                        ),
-                        SizedBox(height: 50.h),
-                        Row(
-                          children: [
-                            Spacer(),
-                            Image.asset('assets/icons/wishlist.png',
-                                height: 55.h, width: 55.w, fit: BoxFit.cover),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => PurchaseScreen()),
-                  );
-                },
-                child: Container(
-                  height: 265.h,
-                  width: 290.w,
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  decoration: BoxDecoration(
-                    color: hexToColor('#FFDFDF'),
-                    image: DecorationImage(
-                      image: AssetImage('assets/catalog_container_graphic.png'),
-                      fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  child: Container(
-                    width: 200.w,
-                    padding: EdgeInsets.only(left: 10.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'My Purchases',
-                          style: TextStyle(
-                            color: hexToColor('#1E1E1E'),
-                            fontWeight: FontWeight.w400,
-                            fontSize: 30.sp,
-                          ),
-                        ),
-                        Text(
-                          'See all your currently purchased items',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14.sp,
-                            color: hexToColor('#585858'),
-                          ),
-                        ),
-                        SizedBox(height: 50.h),
-                        Row(
-                          children: [
-                            Spacer(),
-                            Image.asset('assets/icons/my_purchases.png',
-                                height: 55.h, width: 55.w, fit: BoxFit.cover),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Get.toNamed(AppRoutes.COMING_SOON);
-                },
-                child: Container(
-                  height: 265.h,
-                  width: 290.w,
-                  padding: EdgeInsets.symmetric(horizontal: 20.w),
-                  decoration: BoxDecoration(
-                    color: hexToColor('#EAE6F6'),
-                    image: DecorationImage(
-                      image: AssetImage('assets/catalog_container_graphic.png'),
-                      fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.circular(24.r),
-                  ),
-                  child: Container(
-                    width: 200.w,
-                    padding: EdgeInsets.only(left: 10.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Premium',
-                          style: TextStyle(
-                            color: hexToColor('#1E1E1E'),
-                            fontWeight: FontWeight.w400,
-                            fontSize: 30.sp,
-                          ),
-                        ),
-                        Text(
-                          'Unlock features with our premium services',
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14.sp,
-                            color: hexToColor('#585858'),
-                          ),
-                        ),
-                        SizedBox(height: 50.h),
-                        Row(
-                          children: [
-                            Spacer(),
-                            Image.asset('assets/icons/premium.png',
-                                height: 55.h, width: 55.w, fit: BoxFit.cover),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Container(
-                height: 265.h,
-                width: 290.w,
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                decoration: BoxDecoration(
-                  color: hexToColor('#E2FDD9'),
-                  image: DecorationImage(
-                    image: AssetImage('assets/catalog_container_graphic.png'),
-                    fit: BoxFit.cover,
-                  ),
-                  borderRadius: BorderRadius.circular(24.r),
-                ),
-                child: Container(
-                  width: 200.w,
-                  padding: EdgeInsets.only(left: 10.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Coming Soon...',
-                        style: TextStyle(
-                          color: hexToColor('#1E1E1E'),
-                          fontWeight: FontWeight.w400,
-                          fontSize: 30.sp,
-                        ),
-                      ),
-                      Text(
-                        'Let Team Tnent. Cook ',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14.sp,
-                          color: hexToColor('#585858'),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+        Row(
+          children: List.generate(
+            2,
+            (index) => StylizedCustomButton(
+              icon: content[index + 2]["icon"],
+              label: content[index + 2]["title"],
+              onPressed: content[index + 2]["function"],
+            ),
           ),
         ),
-        SizedBox(height: 100.0),
+        const SizedBox(
+          height: 30,
+        ),
+        underWidget(),
+        underWidget(),
       ],
     );
   }
+
+  Widget underWidget() => Padding(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 13),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Container(
+              color: Colors.grey,
+            ),
+          ),
+        ),
+      );
 }

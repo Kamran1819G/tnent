@@ -1,12 +1,14 @@
+#  uncomment the branches when u need github actions
+
 on:
   pull_request:
     branches:
-      - main
-      - master
+      # - main
+      # - master
   push:
     branches:
-      - main
-      - master
+      # - main
+      # - master
 name: "Build & Release"
 jobs:
   build:

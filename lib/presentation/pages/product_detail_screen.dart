@@ -1077,10 +1077,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           );
                         }
                       },
-                      child: Text(
-                        'Buy Now',
-                        style: TextStyle(fontSize: 28.sp),
-                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: hexToColor('#343434'),
                         foregroundColor: Colors.white,
@@ -1090,6 +1086,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16.r),
                         ),
+                      ),
+                      child: Text(
+                        'Buy Now',
+                        style: TextStyle(fontSize: 28.sp),
                       ),
                     ),
                   ),

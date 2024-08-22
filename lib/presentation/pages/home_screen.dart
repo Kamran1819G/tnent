@@ -127,13 +127,14 @@ class _HomeScreenState extends State<HomeScreen> {
         // border: Border.all(color: Colors.white.withOpacity(0.7), width: 1.0),
       ),
       child: Material(
+        surfaceTintColor: Colors.white,
         shadowColor: Colors.white,
-        elevation: 20,
+        elevation: 25,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(100),
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Row(
