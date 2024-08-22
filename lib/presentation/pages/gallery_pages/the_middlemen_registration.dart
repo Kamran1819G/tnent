@@ -221,9 +221,8 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
   }
 
   String _generateRandomPassword() {
-    const String chars = '0123456789!@#\$%^&*()_+';
-    return List.generate(6, (index) => chars[Random().nextInt(chars.length)])
-        .join();
+    const String chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return List.generate(6, (index) => chars[Random().nextInt(chars.length)]).join();
   }
 
   void _copyToClipboard(String text) {

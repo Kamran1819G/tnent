@@ -20,16 +20,6 @@ class NotificationService {
     await AwesomeNotifications().initialize(
         null, // null means it will use the default app icon
         [
-          NotificationChannel(
-            channelKey: 'default_channel',
-            channelName: 'Default Channel',
-            channelDescription: 'This is the default channel',
-            playSound: true,
-            defaultColor: const Color(0xFF9D50DD),
-            ledColor: const Color(0xFF9D50DD),
-            importance: NotificationImportance.High,
-            channelShowBadge: true,
-          ),
 
           // Store Notifications Channels
           NotificationChannel(
@@ -55,6 +45,7 @@ class NotificationService {
             ledColor: const Color(0xFF9D50DD),
             importance: NotificationImportance.High,
             channelShowBadge: true,
+              channelDescription: 'Notifications related to store orders'
           ),
 
           NotificationChannel(
@@ -65,7 +56,7 @@ class NotificationService {
             defaultColor: const Color(0xFF9D50DD),
             ledColor: const Color(0xFF9D50DD),
             importance: NotificationImportance.High,
-            channelShowBadge: true,
+            channelShowBadge: true, channelDescription: 'Notifications for new store followers',
           ),
 
           // User Notifications Channels
@@ -293,7 +284,7 @@ class NotificationService {
     await _notifyCustomerOrderStatus(orderId, 'rejected');
   }*/
 
-  static Future<void> _notifyCustomerOrderStatus(
+  /*static Future<void> _notifyCustomerOrderStatus(
       String orderId, String status) async {
     final orderDoc = await _firestore.collection('Orders').doc(orderId).get();
     final userId = orderDoc.data()!['userId'];
@@ -320,7 +311,7 @@ class NotificationService {
     } else {
       debugPrint('No FCM token for the customer: $userId');
     }
-  }
+  }*/
 
   static Future<void> onNotificationCreatedMethod(
       ReceivedNotification receivedNotification) async {
