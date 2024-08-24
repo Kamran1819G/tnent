@@ -6,7 +6,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
+import 'package:tnent/core/routes/app_routes.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/presentation/pages/gallery_pages/store_registration.dart';
 import 'package:tnent/presentation/pages/gallery_pages/the_middlemen_registration.dart';
@@ -106,13 +108,7 @@ class _GalleryState extends State<Gallery> {
                   const Spacer(),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const WebViewScreen(
-                                  url:
-                                      'https://tnent-updated.vercel.app/contact',
-                                  title: 'Contact Us')));
+                      Get.toNamed(AppRoutes.CONTACT);
                     },
                     child: Container(
                       height: 55.h,
