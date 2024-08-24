@@ -457,15 +457,7 @@ class _CommunityPostState extends State<CommunityPost> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return const ReportHelperWidget();
-                },
-              );
-            },
+            onTap: _reportPost,
             child: CircleAvatar(
               backgroundColor: hexToColor('#2B2B2B'),
               child: Icon(
@@ -486,6 +478,35 @@ class _CommunityPostState extends State<CommunityPost> {
         ],
       ),
     );
+  }
+
+  Future<void> _reportPost() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      showSnackBar(context, 'You must be logged in to report a post.');
+      return;
+    }
+
+    final reportReason = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return const ReportHelperWidget();
+      },
+    );
+
+    if (reportReason == null) {
+      return;
+    }
+    try {
+      await CommunityPostModel.reportPost(
+        widget.post.postId,
+        widget.post.storeId,
+        reportReason,
+        user.uid,
+      );
+    } catch (e) {
+      showSnackBar(context, 'Error reporting post: $e');
+    }
   }
 
   Widget _buildLoadingPlaceholder() {
@@ -638,6 +659,8 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
     List<String> imageUrls = await Future.wait(uploadFutures);
     return imageUrls.where((url) => url.isNotEmpty).toList();
   }
+
+
 
   Future<void> _createPost() async {
     setState(() {

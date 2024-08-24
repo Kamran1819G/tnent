@@ -73,6 +73,29 @@ class CommunityPostModel {
     }
   }
 
+  static Future<void> reportPost(
+      String postId, String storeId, String reason, String reportedBy) async {
+    try {
+      final reportedItemsRef = FirebaseFirestore.instance
+          .collection('ReportedItems')
+          .doc(); // Create a new reported item document
+      final reportedPostRef = reportedItemsRef
+          .collection('reportedPosts')
+          .doc(); // Create a new reported post documentr
+
+      await reportedPostRef.set({
+        'postId': postId,
+        'storeId': storeId,
+        'reason': reason,
+        'reportedBy': reportedBy,
+        'reportedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error reporting post: $e');
+      throw e;
+    }
+  }
+
   static Future<void> deletePost(String postId, String storeId) async {
     try {
       // Get a reference to the Firestore document
