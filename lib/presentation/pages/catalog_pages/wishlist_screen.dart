@@ -44,7 +44,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
               (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
           List<Map<String, dynamic>> updatedWishlistItems = [];
 
-          for (var item in wishlist.reversed) {
+          for (var item in wishlist) {
             try {
               Map<String, dynamic> productDetails =
                   await _fetchProductDetails(item['productId']);
@@ -65,7 +65,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
           }
 
           setState(() {
-            wishlistItems = updatedWishlistItems;
+            wishlistItems = updatedWishlistItems.reversed.toList();
             isLoading = false;
           });
         } else {
@@ -157,7 +157,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
     try {
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        List<Map<String, dynamic>> wishlistData = wishlistItems
+        List<Map<String, dynamic>> wishlistData = wishlistItems.reversed
             .map((item) => {
                   'productId': item['productId'],
                   'variation': item['variation'],
