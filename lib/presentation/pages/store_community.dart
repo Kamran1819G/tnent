@@ -189,19 +189,20 @@ class _StoreCommunityState extends State<StoreCommunity> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          IconButton(
-            icon: Icon(Icons.add_circle_outline,
-                size: 75.sp, color: Theme.of(context).primaryColor),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      CreateCommunityPost(storeId: widget.store.storeId),
-                ),
-              );
-            },
-          ),
+          if (_isStoreOwner)
+            IconButton(
+              icon: Icon(Icons.add_circle_outline,
+                  size: 75.sp, color: Theme.of(context).primaryColor),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        CreateCommunityPost(storeId: widget.store.storeId),
+                  ),
+                );
+              },
+            ),
           SizedBox(height: 20.h),
           Text(
             'No posts found',
