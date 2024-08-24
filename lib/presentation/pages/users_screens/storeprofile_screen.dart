@@ -148,7 +148,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
       'data': {
         'type': 'store',
         'name': '${currentUser!.firstName} ${currentUser!.lastName}',
-        'image': currentUser!.photoURL.toString(),
       },
       'timestamp': FieldValue.serverTimestamp(),
     });
