@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 
 class ContactScreen extends StatelessWidget {
@@ -30,7 +31,7 @@ class ContactScreen extends StatelessWidget {
                           MaterialStateProperty.all(hexToColor('#F5F5F5')),
                     ),
                     onPressed: () {
-                      // Add your back logic here
+                      Get.back();
                     },
                     icon: Icon(Icons.arrow_back_ios),
                   ),
