@@ -30,7 +30,7 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
 
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -50,11 +50,11 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="http"
-                    android:host="tnent.com"
+                    android:host="tnennt.com"
                 />
                 <data
                     android:scheme="https"
-                    android:host="tnent.com"
+                    android:host="tnennt.com"
                 />
             </intent-filter>
 
