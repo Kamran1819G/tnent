@@ -16,6 +16,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../../core/helpers/report_helper.dart';
+import '../../core/helpers/snackbar_utils.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   ProductModel product;
@@ -1150,55 +1151,62 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   _buildMoreBottomSheet() {
     return Container(
-      height: 350.h,
+      height: 250,
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Center(
-            child: Container(
-              width: 150.w,
-              height: 6.h,
-              margin: EdgeInsets.symmetric(vertical: 18.h),
-              decoration: BoxDecoration(
-                color: hexToColor('#CACACA'),
-                borderRadius: BorderRadius.circular(50.r),
-              ),
-            ),
-          ),
-          SizedBox(height: 75.h),
           GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return const ReportHelperWidget();
-                },
-              );
-            },
+            onTap: _reportProduct,
             child: CircleAvatar(
               backgroundColor: hexToColor('#2B2B2B'),
               child: Icon(
                 Icons.report_gmailerrorred,
                 color: hexToColor('#BEBEBE'),
-                size: 28.sp,
+                size: 20,
               ),
             ),
           ),
-          SizedBox(height: 30.h),
+          SizedBox(height: 20),
           Text(
             'Report',
             style: TextStyle(
               color: hexToColor('#9B9B9B'),
-              fontSize: 23.sp,
+              fontSize: 16.0,
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _reportProduct() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      showSnackBar(context, 'You must be logged in to report a product.');
+      return;
+    }
+
+    final reportReason = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return const ReportHelperWidget();
+      },
+    );
+
+    if (reportReason == null) {
+      return;
+    }
+    try {
+      await ProductModel.reportProduct(
+        widget.product.productId,
+        widget.product.storeId,
+        reportReason,
+        user.uid,
+      );
+    } catch (e) {
+      showSnackBar(context, 'Error reporting product: $e');
+    }
   }
 
   _buildRatingBottomSheet() {
