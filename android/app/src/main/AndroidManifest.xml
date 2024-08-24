@@ -16,6 +16,9 @@
     <!--  Internet permission  -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <!--  Full screen intent permission  -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
     <application
         android:label="Tnent"
         android:name="${applicationName}"
@@ -23,6 +26,7 @@
         android:label="Deep Linking"
         <activity
             android:name=".MainActivity"
+            android:showOnLockScreen="true"
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/LaunchTheme"
@@ -74,15 +78,6 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            
-            <!-- This was created by Raj or Kamran 
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="tnent.com" android:pathPrefix="/post/" />
-                <data android:scheme="https" android:host="tnent.com" android:pathPrefix="/post/" />
-            </intent-filter> -->
 
         </activity>
         <!-- Don't delete the meta-data below.

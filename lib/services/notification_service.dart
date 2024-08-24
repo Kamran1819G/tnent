@@ -34,11 +34,15 @@ class NotificationService {
             channelGroupKey: 'store_channel_group',
             channelDescription: 'New order notifications for store owners',
             playSound: true,
+            defaultRingtoneType: DefaultRingtoneType.Ringtone,
+            locked: true,
             enableVibration: true,
             defaultColor: const Color(0xFF9D50DD),
             ledColor: const Color(0xFF9D50DD),
             importance: NotificationImportance.Max,
             channelShowBadge: true,
+            onlyAlertOnce: false,
+            criticalAlerts: true,
           ),
 
           NotificationChannel(
@@ -179,9 +183,10 @@ class NotificationService {
         content: NotificationContent(
           id: message.hashCode, // Unique ID for the notification
           channelKey: channelKey, // Change as per your requirement
-          autoDismissible: false,
           title: message.notification?.title,
           body: message.notification?.body,
+          autoDismissible: false,
+          locked: true,
           fullScreenIntent: true,
           wakeUpScreen: true,
           notificationLayout: NotificationLayout.Default,
