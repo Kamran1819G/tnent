@@ -12,6 +12,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:tnent/models/community_post_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
+import 'package:tnent/presentation/pages/home_pages/community.dart';
 import 'package:tnent/presentation/widgets/full_screen_image_view.dart';
 
 import '../../core/helpers/snackbar_utils.dart';
@@ -188,6 +189,20 @@ class _StoreCommunityState extends State<StoreCommunity> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          IconButton(
+            icon: Icon(Icons.add_circle_outline,
+                size: 75.sp, color: Theme.of(context).primaryColor),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      CreateCommunityPost(storeId: widget.store.storeId),
+                ),
+              );
+            },
+          ),
+          SizedBox(height: 20.h),
           Text(
             'No posts found',
             style: TextStyle(
