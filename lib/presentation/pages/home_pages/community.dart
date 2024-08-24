@@ -594,20 +594,12 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      // Crop the image to 16:9 ratio
-      final croppedFile = await ImageCropper().cropImage(
-        sourcePath: image.path,
-        aspectRatio: CropAspectRatio(ratioX: 16, ratioY: 9),
-      );
-
-      if (croppedFile != null) {
-        // Compress and convert to WebP as before
+      try {
         final directory = await getTemporaryDirectory();
-        final targetPath =
-            '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.webp';
+        final targetPath = '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.webp';
 
         final compressedFile = await FlutterImageCompress.compressAndGetFile(
-          croppedFile.path,
+          image.path,
           targetPath,
           format: CompressFormat.webp,
           quality: 80,
@@ -618,6 +610,8 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
             _images.add(File(compressedFile.path));
           });
         }
+      } catch (e) {
+        print('Error processing image: $e');
       }
     }
   }
