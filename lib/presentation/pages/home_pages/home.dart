@@ -116,6 +116,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     }
   }
 
+  Stream<bool> _getNewNotificationsStream() {
+    return FirebaseFirestore.instance
+        .collection('notifications')
+        .where('userId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .where('isRead', isEqualTo: false)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.isNotEmpty);
+  }
+
   String getGreeting() {
     final hour = DateTime.now().hour;
     if (hour < 12) {
@@ -346,29 +355,33 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 ),
               ),
               SizedBox(width: 22.w),
-              GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const NotificationScreen()));
-                    setState(() {
+              StreamBuilder(stream: _getNewNotificationsStream(),
+                  builder:(context, snapshot) {
+                    bool hasNewNotifications = snapshot.data ?? false;
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const NotificationScreen()
+                            )
+                        );
+                      },
+                      /* setState(() {
                       isNewNotification = false;
                     });
+                  },*/
+                      child: Image.asset(
+                        hasNewNotifications
+                            ? 'assets/icons/new_notification_box.png'
+                            : 'assets/icons/no_new_notification_box.png',
+                        height: 35.h,
+                        width: 35.w,
+                        fit: BoxFit.cover,
+                      ),
+                    );
                   },
-                  child: isNewNotification
-                      ? Image.asset(
-                          'assets/icons/new_notification_box.png',
-                          height: 35.h,
-                          width: 35.w,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.asset(
-                          'assets/icons/no_new_notification_box.png',
-                          height: 35.h,
-                          width: 35.w,
-                          fit: BoxFit.cover,
-                        )),
+    ),
               SizedBox(width: 22.w),
               GestureDetector(
                 onTap: () {
