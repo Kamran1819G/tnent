@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
+import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/models/store_update_model.dart';
@@ -1076,8 +1077,11 @@ class UpdateTile extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) => UpdateScreen(
               storeName: name,
-              storeImage: Image(
-                image: CachedNetworkImageProvider(updates[index].logoUrl),
+              storeImage: CachedNetworkImage(
+                imageUrl: updates[index].logoUrl,
+                placeholder: (context, url) => CircularProgressIndicator(
+                  color: hexToColor('#094446'),
+                ),
               ),
               initialUpdateIndex: index,
               updates: updates,

@@ -6,7 +6,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
@@ -453,35 +452,73 @@ class _CommunityPostState extends State<CommunityPost> {
     return SizedBox(
       height: 250,
       width: double.infinity,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return const ReportHelperWidget();
+          // Report
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return const ReportHelperWidget();
+                    },
+                  );
                 },
-              );
-            },
-            child: CircleAvatar(
-              backgroundColor: hexToColor('#2B2B2B'),
-              child: Icon(
-                Icons.report_gmailerrorred,
-                color: hexToColor('#BEBEBE'),
-                size: 20,
+                child: CircleAvatar(
+                  backgroundColor: hexToColor('#2B2B2B'),
+                  child: Icon(
+                    Icons.report_gmailerrorred,
+                    color: hexToColor('#BEBEBE'),
+                    size: 20,
+                  ),
+                ),
               ),
-            ),
+              const SizedBox(height: 20),
+              Text(
+                'Report',
+                style: TextStyle(
+                  color: hexToColor('#9B9B9B'),
+                  fontSize: 16.0,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            'Report',
-            style: TextStyle(
-              color: hexToColor('#9B9B9B'),
-              fontSize: 16.0,
-            ),
+
+          // Share
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GestureDetector(
+                onTap: () async {
+                  final String productUrl =
+                      'https://tnentstore.com/?postId=${widget.post.postId}';
+                  final String shareMessage =
+                      'Check out this post on Tnent Store! $productUrl';
+                  await Share.share(shareMessage);
+                },
+                child: CircleAvatar(
+                  backgroundColor: hexToColor('#2B2B2B'),
+                  child: Icon(
+                    Icons.ios_share_outlined,
+                    color: hexToColor('#BEBEBE'),
+                    size: 20,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Share',
+                style: TextStyle(
+                  color: hexToColor('#9B9B9B'),
+                  fontSize: 16.0,
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -1,11 +1,9 @@
-import 'dart:ui' as ui;
-
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dash/flutter_dash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/presentation/pages/gallery_pages/store_registration.dart';
@@ -65,6 +63,21 @@ class _GalleryState extends State<Gallery> {
         .collection('Stores')
         .doc(store.storeId)
         .update({'isActive': isActive});
+  }
+
+  Widget _buildShimmerSkeleton() {
+    return Shimmer.fromColors(
+      baseColor: Colors.grey[300]!,
+      highlightColor: Colors.grey[100]!,
+      child: Container(
+        height: 90.h,
+        width: 90.w,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12.r),
+          color: Colors.white,
+        ),
+      ),
+    );
   }
 
   @override
@@ -179,15 +192,32 @@ class _GalleryState extends State<Gallery> {
                             Row(
                               children: [
                                 Container(
-                                  height: 135.h,
-                                  width: 135.w,
+                                  height: 135
+                                      .h, // Use responsive height if needed (e.g., 135.h)
+                                  width: 135
+                                      .w, // Use responsive width if needed (e.g., 135.w)
                                   margin: const EdgeInsets.symmetric(
                                       horizontal: 15.0),
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(18.r),
-                                    image: DecorationImage(
-                                      image: NetworkImage(store.logoUrl),
+                                    borderRadius: BorderRadius.circular(18
+                                        .r), // Use responsive radius if needed (e.g., 18.r)
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(18
+                                        .r), // Use responsive radius if needed (e.g., 18.r)
+                                    child: CachedNetworkImage(
+                                      imageUrl: store.logoUrl,
                                       fit: BoxFit.cover,
+                                      placeholder: (context, url) =>
+                                          Shimmer.fromColors(
+                                        baseColor: Colors.grey[300]!,
+                                        highlightColor: Colors.grey[100]!,
+                                        child: Container(
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          const Icon(Icons.error),
                                     ),
                                   ),
                                 ),
@@ -290,6 +320,28 @@ class _GalleryState extends State<Gallery> {
                 child: Image.asset("assets/digital_store_banner.png"),
               ),
               const SizedBox(height: 20.0),
+            ],
+            if (!isLoaded) ...[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Shimmer.fromColors(
+                  baseColor: Colors.grey[500]!,
+                  highlightColor: Colors.grey[300]!,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 180.h,
+                        width: 604.w,
+                        decoration: BoxDecoration(
+                          color: hexToColor('#2D332F'),
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
             GestureDetector(
                 onTap: () {

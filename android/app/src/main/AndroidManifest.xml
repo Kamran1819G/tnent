@@ -1,26 +1,21 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!--  Camera permission  -->
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.CAMERA"/>
-    <!--  Location permissions  -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <!--  Storage permissions  -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <!--  Microphone permission  -->
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-    <!--  Notification permissions  -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <!--  Internet permission  -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
         android:label="Tnent"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
-        android:label="Deep Linking"
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -30,38 +25,22 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
 
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="http"
-                    android:host="tnent.com"
-                />
-                <data
-                    android:scheme="https"
-                    android:host="tnent.com"
-                />
-            </intent-filter>
-
+            <!-- Deep Linking Intent Filter -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="http"
-                    android:host="tnent.com"
-                />
-                <data
-                    android:scheme="https"
-                    android:host="tnent.com"
-                />
+                
+                <!-- tnentstore.com domain -->
+                <data android:scheme="http" android:host="tnentstore.com" />
+                <data android:scheme="https" android:host="tnentstore.com" />
+
+                <!-- tnennt.com domain -->
+                <data android:scheme="http" android:host="tnennt.com" />
+                <data android:scheme="https" android:host="tnennt.com" />
             </intent-filter>
 
-            <!-- Specifies an Android theme to apply to this Activity as soon as
-                 the Android process has started. This theme is visible to the user
-                 while the Flutter UI initializes. After that, this theme continues
-                 to determine the Window background behind the Flutter UI. -->
+            <!-- Specifies an Android theme to apply to this Activity -->
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme"
@@ -74,19 +53,9 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
-            
-            <!-- This was created by Raj or Kamran 
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="tnent.com" android:pathPrefix="/post/" />
-                <data android:scheme="https" android:host="tnent.com" android:pathPrefix="/post/" />
-            </intent-filter> -->
-
         </activity>
-        <!-- Don't delete the meta-data below.
-             This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
+
+        <!-- Flutter Tool Meta-Data -->
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

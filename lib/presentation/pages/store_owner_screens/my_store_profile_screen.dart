@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/core/routes/app_routes.dart';
@@ -18,9 +20,7 @@ import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_category_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/models/store_update_model.dart';
-import 'package:tnent/presentation/pages/coming_soon.dart';
 import 'package:tnent/presentation/pages/store_community.dart';
-import 'package:tnent/presentation/pages/store_owner_screens/analytics_screen.dart';
 import 'package:tnent/presentation/pages/store_owner_screens/order_pays_screen.dart';
 import 'package:tnent/presentation/pages/store_owner_screens/product_categories_screen.dart';
 import 'package:tnent/presentation/pages/store_owner_screens/store_settings_screen.dart';
@@ -349,12 +349,23 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 16.0),
                             child: ClipRRect(
-                              borderRadius: BorderRadius.circular(18.r),
-                              child: Image.network(
-                                logoUrl,
+                              borderRadius: BorderRadius.circular(18
+                                  .r), // Use responsive radius if needed (e.g., 18.r)
+                              child: CachedNetworkImage(
+                                imageUrl: logoUrl,
                                 height: 130.h,
                                 width: 130.w,
                                 fit: BoxFit.cover,
+                                placeholder: (context, url) =>
+                                    Shimmer.fromColors(
+                                  baseColor: Colors.grey[300]!,
+                                  highlightColor: Colors.grey[100]!,
+                                  child: Container(
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) =>
+                                    const Icon(Icons.error),
                               ),
                             ),
                           ),

@@ -7,7 +7,7 @@ import '../../core/helpers/color_utils.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class UpdateScreen extends StatefulWidget {
-  final Image storeImage;
+  final Widget storeImage;
   final String storeName;
   final int initialUpdateIndex;
   final List<StoreUpdateModel> updates;
@@ -27,7 +27,7 @@ class UpdateScreen extends StatefulWidget {
 class _UpdateScreenState extends State<UpdateScreen>
     with SingleTickerProviderStateMixin {
   late int currentUpdateIndex;
-  late Image _storeImage;
+  late Widget _storeImage;
   late String _storeName;
   bool isPaused = false;
   late AnimationController _animationController;
@@ -149,12 +149,15 @@ class _UpdateScreenState extends State<UpdateScreen>
           child: Stack(
             children: [
               // story
-              FadeInImage.memoryNetwork(
-                placeholder: kTransparentImage,
-                image: widget.updates[currentUpdateIndex].imageUrl,
+
+              CachedNetworkImage(
+                imageUrl: widget.updates[currentUpdateIndex].imageUrl,
                 fit: BoxFit.cover,
                 height: double.infinity,
                 width: double.infinity,
+                placeholder: (context, url) => CircularProgressIndicator(
+                  color: hexToColor('#094446'),
+                ),
               ),
 
               // progress bar

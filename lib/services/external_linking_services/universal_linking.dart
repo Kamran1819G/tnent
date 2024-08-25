@@ -9,9 +9,8 @@ import 'package:tnent/presentation/pages/home_pages/community.dart';
 import 'package:tnent/presentation/pages/product_detail_screen.dart';
 import 'package:tnent/services/context_utility.dart';
 
-import '../../core/routes/app_routes.dart';
-
 class UniversalLinking {
+  // ignore: prefer_final_fields
   static AppLinks _appLinks = AppLinks();
 
   static String _productId = "";

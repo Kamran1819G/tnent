@@ -1,18 +1,18 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:tnent/core/helpers/color_utils.dart';
 
 class UpdateTile extends StatelessWidget {
   final String image;
   final VoidCallback onTap;
 
-  UpdateTile({
+  const UpdateTile({
     Key? key,
     required this.image,
     required this.onTap,
-  });
+  }) : super(key: key);
 
   Widget _buildShimmerSkeleton() {
     return Shimmer.fromColors(
@@ -47,11 +47,11 @@ class UpdateTile extends StatelessWidget {
                   imageUrl: image,
                   fit: BoxFit.cover,
                   placeholder: (context, url) => _buildShimmerSkeleton(),
-                  errorWidget: (context, url, error) => Center(
+                  errorWidget: (context, url, error) => const Center(
                     child: Icon(Icons.error, size: 40, color: Colors.grey),
                   ),
                 )
-              : Center(
+              : const Center(
                   child: Icon(Icons.image_not_supported,
                       size: 40, color: Colors.grey),
                 ),

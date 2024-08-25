@@ -7,20 +7,21 @@ void showSnackBar(
   BuildContext context,
   String? message, {
   ToastificationType toastificationType = ToastificationType.info,
-  ToastificationStyle toastificationStyle = ToastificationStyle.flat,
+  ToastificationStyle toastificationStyle = ToastificationStyle.simple,
   Widget leadIcon = const Icon(
     Icons.warning_amber_rounded,
     color: Colors.white,
   ),
-  Color bgColor = Colors.red,
+  Color bgColor = const Color.fromRGBO(9, 68, 79, 1), // dark green
+  // Color bgColor = const Color.fromRGBO(159, 168, 218, 1), // purple
   Duration duration = const Duration(seconds: 4),
 }) {
   if (!context.mounted) return;
 
   toastification.show(
     context: context,
-    style: ToastificationStyle.flat,
-    type: ToastificationType.info,
+    style: toastificationStyle,
+    type: toastificationType,
     title: Text(
       message!,
       style: TextStyle(
