@@ -11,6 +11,9 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <!--  Full screen intent permission  -->
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+
     <application
         android:label="Tnent"
         android:name="${applicationName}"
@@ -18,6 +21,7 @@
 
         <activity
             android:name=".MainActivity"
+            android:showOnLockScreen="true"
             android:exported="true"
             android:launchMode="singleTask"
             android:theme="@style/LaunchTheme"
@@ -25,19 +29,32 @@
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
 
-            <!-- Deep Linking Intent Filter -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="http"
+                    android:host="tnent.com"
+                />
+                <data
+                    android:scheme="https"
+                    android:host="tnent.com"
+                />
+            </intent-filter>
+
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                
-                <!-- tnentstore.com domain -->
-                <data android:scheme="http" android:host="tnentstore.com" />
-                <data android:scheme="https" android:host="tnentstore.com" />
-
-                <!-- tnennt.com domain -->
-                <data android:scheme="http" android:host="tnennt.com" />
-                <data android:scheme="https" android:host="tnennt.com" />
+                <data
+                    android:scheme="http"
+                    android:host="tnent.com"
+                />
+                <data
+                    android:scheme="https"
+                    android:host="tnent.com"
+                />
             </intent-filter>
 
             <!-- Specifies an Android theme to apply to this Activity -->

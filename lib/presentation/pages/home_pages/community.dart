@@ -525,6 +525,35 @@ class _CommunityPostState extends State<CommunityPost> {
     );
   }
 
+  Future<void> _reportPost() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      showSnackBar(context, 'You must be logged in to report a post.');
+      return;
+    }
+
+    final reportReason = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return const ReportHelperWidget();
+      },
+    );
+
+    if (reportReason == null) {
+      return;
+    }
+    try {
+      await CommunityPostModel.reportPost(
+        widget.post.postId,
+        widget.post.storeId,
+        reportReason,
+        user.uid,
+      );
+    } catch (e) {
+      showSnackBar(context, 'Error reporting post: $e');
+    }
+  }
+
   Widget _buildLoadingPlaceholder() {
     return Container(
       padding: const EdgeInsets.all(16.0),
@@ -631,20 +660,13 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
     if (image != null) {
-      // Crop the image to 16:9 ratio
-      final croppedFile = await ImageCropper().cropImage(
-        sourcePath: image.path,
-        aspectRatio: CropAspectRatio(ratioX: 16, ratioY: 9),
-      );
-
-      if (croppedFile != null) {
-        // Compress and convert to WebP as before
+      try {
         final directory = await getTemporaryDirectory();
         final targetPath =
             '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.webp';
 
         final compressedFile = await FlutterImageCompress.compressAndGetFile(
-          croppedFile.path,
+          image.path,
           targetPath,
           format: CompressFormat.webp,
           quality: 80,
@@ -655,6 +677,8 @@ class _CreateCommunityPostState extends State<CreateCommunityPost> {
             _images.add(File(compressedFile.path));
           });
         }
+      } catch (e) {
+        print('Error processing image: $e');
       }
     }
   }

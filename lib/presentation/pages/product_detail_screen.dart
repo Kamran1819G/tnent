@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/models/product_model.dart';
@@ -16,6 +17,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../../core/helpers/report_helper.dart';
+import '../../core/helpers/snackbar_utils.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   ProductModel product;
@@ -40,49 +42,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String _flagImage = 'assets/grey-flag.png';
-
-  /*List<ProductModel> relatedProducts = List.generate(5, (index) {
-    return ProductModel(
-      productId: 'product123',
-      storeId: 'EBJgGaWsnrluCKcaOUOT',
-      name: 'Premium Cotton T-Shirt',
-      description: 'A high-quality, comfortable cotton t-shirt',
-      productCategory: 'T-Shirts',
-      storeCategory: 'Apparel',
-      imageUrls: [
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-        'https://via.placeholder.com/150',
-      ],
-      isAvailable: true,
-      createdAt: Timestamp.now(),
-      greenFlags: 0,
-      redFlags: 0,
-      variations: {
-        'S': ProductVariant(
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 50,
-          sku: 'TS-S',
-        ),
-        'M': ProductVariant(
-          price: 24.99,
-          mrp: 29.99,
-          discount: 16.67,
-          stockQuantity: 100,
-          sku: 'TS-M',
-        ),
-        'L': ProductVariant(
-          price: 26.99,
-          mrp: 31.99,
-          discount: 15.63,
-          stockQuantity: 75,
-          sku: 'TS-L',
-        ),
-      },
-    );
-  });*/
 
   List<ProductModel> relatedProducts = [];
   final TextEditingController _reviewController = TextEditingController();
@@ -109,11 +68,35 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   Future<void> _loadRelatedProducts() async {
     List<ProductModel> fetchedRelatedProducts =
-        await RelatedProductsService.fetchRelatedProducts(widget.product);
+    await RelatedProductsService.fetchRelatedProducts(widget.product);
+
+    if (fetchedRelatedProducts.isEmpty) {
+      // If no related products, fetch random products
+      fetchedRelatedProducts = await RelatedProductsService.fetchRandomProducts(5); // Fetch 5 random products
+    }
+
     setState(() {
       relatedProducts = fetchedRelatedProducts;
     });
   }
+
+  static Future<List<ProductModel>> fetchRandomProducts(int count) async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('products')
+          .where('isActive', isEqualTo: true)
+          .limit(count)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => ProductModel.fromFirestore(doc))
+          .toList();
+    } catch (e) {
+      print('Error fetching random products: $e');
+      return [];
+    }
+  }
+
 
   Future<void> _loadReviews() async {
     QuerySnapshot reviewsSnapshot = await FirebaseFirestore.instance
@@ -483,51 +466,52 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             width: 620.w,
                             child: widget.product.imageUrls.length == 1
                                 ? Center(
-                                    child: Container(
-                                      width: 445.w,
-                                      height: 490.h,
-                                      margin: EdgeInsets.symmetric(
-                                          horizontal: 12.w),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.r),
-                                        child: CachedNetworkImage(
-                                          imageUrl: widget.product.imageUrls[0],
-                                          cacheManager: DefaultCacheManager(),
-                                          placeholder: (context, url) =>
-                                              Container(
-                                                  color: Colors.grey[300]),
-                                          errorWidget: (context, url, error) =>
-                                              Icon(Icons.error),
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
+                              child: Container(
+                                width: 445.w,
+                                height: 490.h,
+                                margin: EdgeInsets.symmetric(horizontal: 12.w),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  child: CachedNetworkImage(
+                                    imageUrl: widget.product.imageUrls[0],
+                                    cacheManager: DefaultCacheManager(),
+                                    placeholder: (context, url) => Shimmer.fromColors(
+                                      baseColor: hexToColor('#E0E0E0'),
+                                      highlightColor: hexToColor('#F5F5F5'),
+                                      child: Container(color: Colors.white),
                                     ),
-                                  )
-                                : ListView.builder(
-                                    controller: imagesController,
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: widget.product.imageUrls.length,
-                                    itemBuilder: (context, index) {
-                                      return Container(
-                                        margin: EdgeInsets.symmetric(
-                                            horizontal: 12.w),
-                                        width: 445.w,
-                                        height: 490.h,
-                                        child: CachedNetworkImage(
-                                          imageUrl:
-                                              widget.product.imageUrls[index],
-                                          cacheManager: DefaultCacheManager(),
-                                          placeholder: (context, url) =>
-                                              Container(
-                                                  color: Colors.grey[300]),
-                                          errorWidget: (context, url, error) =>
-                                              Icon(Icons.error),
-                                          fit: BoxFit.cover,
-                                        ),
-                                      );
-                                    },
+                                    errorWidget: (context, url, error) => Icon(Icons.error),
+                                    fit: BoxFit.cover,
                                   ),
+                                ),
+                              ),
+                            )
+                                : ListView.builder(
+                              controller: imagesController,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: widget.product.imageUrls.length,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 12.w),
+                                  width: 445.w,
+                                  height: 490.h,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.r),
+                                    child: CachedNetworkImage(
+                                      imageUrl: widget.product.imageUrls[index],
+                                      cacheManager: DefaultCacheManager(),
+                                      placeholder: (context, url) => Shimmer.fromColors(
+                                        baseColor: hexToColor('#E0E0E0'),
+                                        highlightColor: hexToColor('#F5F5F5'),
+                                        child: Container(color: Colors.white),
+                                      ),
+                                      errorWidget: (context, url, error) => Icon(Icons.error),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                           ),
                           SizedBox(height: 30.h),
                           Container(
@@ -942,21 +926,65 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             margin: EdgeInsets.only(left: 12.w),
                             height: 300.h,
                             child: relatedProducts.isEmpty
-                                ? Center(child: CircularProgressIndicator())
-                                : ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: relatedProducts.length,
-                                    itemBuilder: (context, index) {
-                                      return WishlistProductTile(
-                                        product: relatedProducts[index],
-                                      );
-                                    },
+                                ? ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: 5, // Show 3 placeholder items
+                              itemBuilder: (context, index) {
+                                return Shimmer.fromColors(
+                                  baseColor: hexToColor('#E0E0E0'),
+                                  highlightColor: hexToColor('#F5F5F5'),
+                                  child: Container(
+                                    width: 200.w,
+                                    margin: EdgeInsets.only(right: 12.w),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12.r),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          height: 150.h,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(12.r),
+                                              topRight: Radius.circular(12.r),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(height: 10.h),
+                                        Container(
+                                          margin: EdgeInsets.symmetric(horizontal: 10.w),
+                                          height: 20.h,
+                                          width: 150.w,
+                                          color: Colors.white,
+                                        ),
+                                        SizedBox(height: 5.h),
+                                        Container(
+                                          margin: EdgeInsets.symmetric(horizontal: 10.w),
+                                          height: 15.h,
+                                          width: 100.w,
+                                          color: Colors.white,
+                                        ),
+                                      ],
+                                    ),
                                   ),
+                                );
+                              },
+                            )
+                                : ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: relatedProducts.length,
+                              itemBuilder: (context, index) {
+                                return WishlistProductTile(
+                                  product: relatedProducts[index],
+                                );
+                              },
+                            ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 50.h),
-
                       // Reviews
 
                       Column(
@@ -1153,55 +1181,62 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   _buildMoreBottomSheet() {
     return Container(
-      height: 350.h,
+      height: 250,
       width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Center(
-            child: Container(
-              width: 150.w,
-              height: 6.h,
-              margin: EdgeInsets.symmetric(vertical: 18.h),
-              decoration: BoxDecoration(
-                color: hexToColor('#CACACA'),
-                borderRadius: BorderRadius.circular(50.r),
-              ),
-            ),
-          ),
-          SizedBox(height: 75.h),
           GestureDetector(
-            onTap: () {
-              Navigator.of(context).pop();
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return const ReportHelperWidget();
-                },
-              );
-            },
+            onTap: _reportProduct,
             child: CircleAvatar(
               backgroundColor: hexToColor('#2B2B2B'),
               child: Icon(
                 Icons.report_gmailerrorred,
                 color: hexToColor('#BEBEBE'),
-                size: 28.sp,
+                size: 20,
               ),
             ),
           ),
-          SizedBox(height: 30.h),
+          SizedBox(height: 20),
           Text(
             'Report',
             style: TextStyle(
               color: hexToColor('#9B9B9B'),
-              fontSize: 23.sp,
+              fontSize: 16.0,
             ),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _reportProduct() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      showSnackBar(context, 'You must be logged in to report a product.');
+      return;
+    }
+
+    final reportReason = await showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return const ReportHelperWidget();
+      },
+    );
+
+    if (reportReason == null) {
+      return;
+    }
+    try {
+      await ProductModel.reportProduct(
+        widget.product.productId,
+        widget.product.storeId,
+        reportReason,
+        user.uid,
+      );
+    } catch (e) {
+      showSnackBar(context, 'Error reporting product: $e');
+    }
   }
 
   _buildRatingBottomSheet() {

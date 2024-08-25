@@ -134,11 +134,20 @@ class _ReportDialogState extends State<ReportHelperWidget> {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5))),
                 onPressed: () {
-                  if (selectedOption == 'Other Content' &&
-                      otherContentController.text.isEmpty) {
+                  if (selectedOption == null) {
+                    showSnackBar(context, "Please select a reason for reporting.");
                     return;
                   }
-                  Navigator.of(context).pop();
+                  if (selectedOption == 'Other Content' &&
+                      otherContentController.text.isEmpty) {
+                    showSnackBar(
+                      context,
+                      "Please specify the reason for reporting.",
+                    );
+                    return;
+                  }
+                  String reason = selectedOption == 'Other Content' ? otherContentController.text : selectedOption!;
+                  Navigator.of(context).pop(reason);
                   showSnackBar(
                     context,
                     "Your issue has been reported!",

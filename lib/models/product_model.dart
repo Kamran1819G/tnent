@@ -111,6 +111,7 @@ class ProductModel {
     );
   }
 
+
   Map<String, dynamic> toFirestore() {
     Map<String, dynamic> variationsMap = variations
         .map((variantKey, variant) => MapEntry(variantKey, variant.toMap()));
@@ -158,5 +159,35 @@ class ProductModel {
       redFlags: redFlags ?? this.redFlags,
       variations: variations ?? this.variations,
     );
+  }
+
+  static Future<void> reportProduct(
+      String productId, String storeId, String reason, String reportedBy) async {
+    try {
+      final reportedItemsRef = FirebaseFirestore.instance
+          .collection('ReportedItems')
+          .doc(reportedBy); // Use the reportedBy field as the document ID
+
+      final reportedItemDoc = await reportedItemsRef.get();
+      if (!reportedItemDoc.exists) {
+        // Create a new reported item document
+        await reportedItemsRef.set({});
+      }
+
+      final reportedProductRef = reportedItemsRef
+          .collection('reportedProducts')
+          .doc(); // Create a new reported product document
+
+      await reportedProductRef.set({
+        'productId': productId,
+        'storeId': storeId,
+        'reason': reason,
+        'reportedBy': reportedBy,
+        'reportedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print('Error reporting product: $e');
+      throw e;
+    }
   }
 }

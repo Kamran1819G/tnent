@@ -1,27 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
+import 'package:tnent/core/helpers/text_utils.dart';
 
 class StoreConnectionNotification extends StatelessWidget {
   final String name;
-  final String image;
   final String time;
 
   StoreConnectionNotification({
     required this.name,
-    required this.image,
     required this.time,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 20.h),
+      margin: EdgeInsets.symmetric(vertical: 20.h, horizontal: 20.w),
       child: ListTile(
-        leading: CircleAvatar(
-          radius: 36.w,
-          child: Image.network(image),
-        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

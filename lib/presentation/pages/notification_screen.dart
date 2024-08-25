@@ -7,8 +7,7 @@ import 'package:tnent/presentation/widgets/notification/order_update_notificatio
 import 'package:tnent/presentation/widgets/notification/store_connection_notification.dart';
 import '../../core/helpers/color_utils.dart';
 
-class NotificationScreen extends StatefulWidget
-{
+class NotificationScreen extends StatefulWidget {
   const NotificationScreen({Key? key}) : super(key: key);
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -244,7 +243,6 @@ class _NotificationScreenState extends State<NotificationScreen>
               } else {
                 return StoreConnectionNotification(
                   name: data['data']['name'],
-                  image: data['data']['image'],
                   time: DateFormat('jm')
                       .format((data['timestamp'] as Timestamp).toDate()),
                 );

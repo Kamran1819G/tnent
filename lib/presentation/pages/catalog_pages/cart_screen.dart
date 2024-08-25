@@ -36,7 +36,7 @@ class _CartScreenState extends State<CartScreen> {
         List<dynamic> cartData = snapshot.data()?['cart'] ?? [];
 
         List<Map<String, dynamic>> updatedCartItems = [];
-        for (var item in cartData.reversed) {
+        for (var item in cartData) {
           try {
             Map<String, dynamic> productDetails =
                 await _fetchProductDetails(item['productId']);
@@ -56,7 +56,7 @@ class _CartScreenState extends State<CartScreen> {
         }
 
         setState(() {
-          _cartItems = updatedCartItems;
+          _cartItems = updatedCartItems.reversed.toList();
           _updateSelectionState();
         });
       }
@@ -134,7 +134,7 @@ class _CartScreenState extends State<CartScreen> {
 
   void _updateFirestore() {
     String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
-    List<Map<String, dynamic>> cartData = _cartItems
+    List<Map<String, dynamic>> cartData = _cartItems.reversed
         .map((item) => {
               'productId': item['productId'],
               'quantity': item['quantity'],
