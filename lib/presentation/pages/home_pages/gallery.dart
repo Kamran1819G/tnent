@@ -38,29 +38,57 @@ class _GalleryState extends State<Gallery> {
 
   Future<void> _checkStoreRegistration() async {
     final user = FirebaseAuth.instance.currentUser;
-    print(user?.uid);
     if (user != null) {
-      final storeId = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(user.uid)
-          .get()
-          .then((doc) => doc.get('storeId'));
-      if (storeId.isNotEmpty) {
-        final storeDoc = await FirebaseFirestore.instance
-            .collection('Stores')
-            .doc(storeId)
+      try {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
             .get();
+
+        if (userDoc.exists && userDoc.data()!.containsKey('storeId')) {
+          final storeId = userDoc.get('storeId');
+          if (storeId.isNotEmpty) {
+            final storeDoc = await FirebaseFirestore.instance
+                .collection('Stores')
+                .doc(storeId)
+                .get();
+            setState(() {
+              isStoreRegistered = storeDoc.exists;
+              isLoaded = true;
+              if (storeDoc.exists) {
+                store = StoreModel.fromFirestore(storeDoc);
+                isActive = store.isActive;
+              }
+            });
+          } else {
+            setState(() {
+              isStoreRegistered = false;
+              isLoaded = true;
+            });
+          }
+        } else {
+          setState(() {
+            isStoreRegistered = false;
+            isLoaded = true;
+          });
+        }
+      } catch (e) {
+        print("Error checking store registration: $e");
         setState(() {
-          isStoreRegistered = storeDoc.exists;
           isLoaded = true;
-          store = StoreModel.fromFirestore(storeDoc);
-          isActive = store.isActive;
+          isStoreRegistered = false;
         });
       }
+    } else {
+      setState(() {
+        isLoaded = true;
+        isStoreRegistered = false;
+      });
     }
   }
 
-  Future<void> _updateStoreStatus(bool isActive) async {
+  Future<void> _updateStoreStatus(bool isActive) async
+  {
     await FirebaseFirestore.instance
         .collection('Stores')
         .doc(store.storeId)
