@@ -37,6 +37,13 @@ class _UserRegistrationState extends State<UserRegistration> {
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
+  final TextEditingController _addressLine1Controller = TextEditingController();
+  final TextEditingController _addressLine2Controller = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _stateController = TextEditingController();
+  final TextEditingController _zipController = TextEditingController();
+  final TextEditingController _addressNameController = TextEditingController();
+  String _addressType = 'Home'; // Default value
 
   final OTPController otpController = OTPController();
   String? sessionIdReceived;
@@ -60,7 +67,7 @@ class _UserRegistrationState extends State<UserRegistration> {
     );
   }
 
-  Future<void> addUserDetails() async {
+  /*Future<void> addUserDetails() async {
     try {
       final updatedUser = _userModel.copyWith(
         phoneNumber: _phoneController.text,
@@ -81,6 +88,46 @@ class _UserRegistrationState extends State<UserRegistration> {
     } catch (e) {
       showSnackBar(context, 'Error: $e');
     }
+  }*/
+  Future<void> addUserDetails() async {
+    try {
+      // Parse the location string to create the address structure
+      Map<String, dynamic> newAddress = _parseLocationToAddress(_locationController.text);
+
+      final updatedUser = _userModel.copyWith(
+        phoneNumber: _phoneController.text,
+        firstName: _firstNameController.text,
+        lastName: _lastNameController.text,
+        location: _locationController.text,
+        address: newAddress,
+        lastUpdated: Timestamp.now(),
+      );
+
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(updatedUser.uid)
+          .set(updatedUser.toFirestore());
+
+      setState(() {
+        _userModel = updatedUser;
+      });
+    } catch (e) {
+      showSnackBar(context, 'Error: $e');
+    }
+  }
+  Map<String, dynamic> _parseLocationToAddress(String location) {
+    List<String> parts = location.split(',');
+
+    return {
+      'name': '${_firstNameController.text} ${_lastNameController.text}'.trim(),
+      'addressLine1': parts.isNotEmpty ? parts[0].trim() : '',
+      'addressLine2': parts.length > 1 ? parts[1].trim() : '',
+      'city': parts.length > 2 ? parts[2].trim() : '',
+      'state': parts.length > 3 ? parts[4].trim() : '', // Corrected here
+      'zip': parts.length > 4 ? parts[3].trim() : '', // Corrected here
+      'phone': _phoneController.text,
+      'type': 'Home', // Default type
+    };
   }
 
   bool _validateFields() {
@@ -98,6 +145,8 @@ class _UserRegistrationState extends State<UserRegistration> {
         return true;
     }
   }
+
+
 
   Future<void> _validatePhoneNumberUnique(String phone) async {
     final querySnapshot = await FirebaseFirestore.instance
@@ -149,7 +198,7 @@ class _UserRegistrationState extends State<UserRegistration> {
           errorMessage = 'Please enter a valid 10-digit Indian phone number.';
           break;
         case 1:
-          errorMessage = 'Please enter a valid 4-digit OTP.';
+          errorMessage = 'Please enter a valid 6-digit OTP.';
           break;
         case 2:
           errorMessage =
