@@ -45,29 +45,36 @@ class _GalleryState extends State<Gallery> {
             .doc(user.uid)
             .get();
 
-        if (userDoc.exists && userDoc.data()!.containsKey('storeId')) {
+        if (userDoc.exists && userDoc.data()!.containsKey('storeId'))
+        {
           final storeId = userDoc.get('storeId');
-          if (storeId.isNotEmpty) {
+          if (storeId.isNotEmpty)
+          {
             final storeDoc = await FirebaseFirestore.instance
                 .collection('Stores')
                 .doc(storeId)
                 .get();
-            setState(() {
+            setState(()
+            {
               isStoreRegistered = storeDoc.exists;
               isLoaded = true;
-              if (storeDoc.exists) {
+              if (storeDoc.exists)
+              {
                 store = StoreModel.fromFirestore(storeDoc);
                 isActive = store.isActive;
               }
             });
-          } else {
-            setState(() {
+          } else
+          {
+            setState(()
+            {
               isStoreRegistered = false;
               isLoaded = true;
             });
           }
         } else {
-          setState(() {
+          setState(()
+          {
             isStoreRegistered = false;
             isLoaded = true;
           });
