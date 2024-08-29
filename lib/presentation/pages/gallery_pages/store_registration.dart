@@ -70,6 +70,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   @override
   void initState() {
     super.initState();
+    _getUserLocation(_locationController);
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 5));
     _storeFeaturesPageController = PageController()
@@ -141,11 +142,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     }
   }
 
-  Future<void> _validateStoreDomain(String domain) async {
+  Future<void> _validateStoreDomain(String domain) async
+  {
     final storeRef = FirebaseFirestore.instance.collection('Stores');
     final querySnapshot =
         await storeRef.where('storeDomain', isEqualTo: domain).get();
-
     setState(() {
       _isStoreDomainUnique = querySnapshot.docs.isEmpty;
     });
@@ -1687,7 +1688,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 Text(
                   'Tnent inc.',
                   style:
-                      TextStyle(color: hexToColor('#E6E6E6'), fontSize: 16.sp),
+                  TextStyle(color: hexToColor('#E6E6E6'), fontSize: 16.sp),
                 ),
               ],
             ),
@@ -1714,6 +1715,43 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         ],
       ),
     );
+  }
+
+  Future<void> _getUserLocation(TextEditingController locationController) async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Check if location services are enabled
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return;
+    }
+
+    // Check for location permissions
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return;
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return;
+    }
+
+    // Get the current position
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+
+    // Get the address from the coordinates
+    List<Placemark> placemarks =
+    await placemarkFromCoordinates(position.latitude, position.longitude);
+
+    if (placemarks.isNotEmpty) {
+      Placemark place = placemarks[0];
+      locationController.text = '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
+    }
   }
 
   Widget _buildStoreFeatures() {

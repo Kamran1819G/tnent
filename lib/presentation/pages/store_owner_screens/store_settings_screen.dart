@@ -85,8 +85,8 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      // Compress image
-      final File compressedFile = await compressImage(File(image.path));
+      // Compress image to WebP format
+      final File compressedFile = await compressImageToWebP(File(image.path));
 
       setState(() {
         storeImage = compressedFile;
@@ -119,20 +119,19 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     }
   }
 
-  Future<File> compressImage(File file) async {
+  Future<File> compressImageToWebP(File file) async {
     final filePath = file.absolute.path;
 
     // Create output file path
-    // eg: /storage/emulated/0/Android/data/...
     final lastIndex = filePath.lastIndexOf(new RegExp(r'.jp'));
     final splitted = filePath.substring(0, (lastIndex));
-    final outPath = "${splitted}_out${filePath.substring(lastIndex)}";
+    final outPath = "${splitted}_out.webp";
 
     var result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
       outPath,
-      quality: 70,
-      // Adjust the quality as needed. Lower quality = smaller file size
+      quality: 70, // Adjust the quality as needed
+      format: CompressFormat.webp,
     );
 
     return File(result!.path);
@@ -140,7 +139,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
 
   Future<void> uploadImage() async {
     FirebaseStorage storage = FirebaseStorage.instance;
-    Reference ref = storage.ref().child('store_logos/${widget.store.storeId}.jpg');
+    Reference ref = storage.ref().child('store_logos/${widget.store.storeId}.webp');
     UploadTask uploadTask = ref.putFile(storeImage!);
 
     uploadTask.snapshotEvents.listen((TaskSnapshot snapshot) {
@@ -152,6 +151,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
     TaskSnapshot taskSnapshot = await uploadTask;
     uploadedImageUrl = await taskSnapshot.ref.getDownloadURL();
   }
+
 
   Future<void> updateStoreDetails() async {
     setState(() {
@@ -253,7 +253,7 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
                 borderRadius: BorderRadius.circular(17.r),
               ),
               child: (storeImage != null)
-                  ? Image.file(
+                  ?  Image.file(
                       storeImage!,
                       fit: BoxFit.fill,
                     )
@@ -548,10 +548,25 @@ class _StoreSettingsScreenState extends State<StoreSettingsScreen> {
               child: GestureDetector(
                 onTap: isChanged
                     ? () {
-                        updateStoreDetails();
-                      }
+                  updateStoreDetails();
+                }
                     : null,
-                child: Container(
+                child: isSaving
+                    ? Container(
+                  width: 470.w,
+                  height: 100.h,
+                  margin: EdgeInsets.symmetric(vertical: 10.h),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).primaryColor,
+                    borderRadius: BorderRadius.circular(50.r),
+                  ),
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    strokeWidth: 5,
+                  ),
+                )
+                    : Container(
                   width: 470.w,
                   height: 100.h,
                   margin: EdgeInsets.symmetric(vertical: 10.h),
