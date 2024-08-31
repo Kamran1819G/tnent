@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:tnent/presentation/pages/catalog_pages/detail_screen.dart';
 
 class NotificationService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -262,6 +264,22 @@ class NotificationService {
     }
   }
 
+  static Future<void> _fetchOrderAndNavigate(String orderId) async {
+    try {
+      final orderDoc = await FirebaseFirestore.instance
+          .collection('Orders')
+          .where('orderId', isEqualTo: orderId)
+          .get();
+
+      if (orderDoc.docs.isNotEmpty) {
+        final orderData = orderDoc.docs.first.data();
+        Get.to(() => DetailScreen(order: orderData));
+      }
+    } catch (e) {
+      print("Failed to fetch order");
+    }
+  }
+
   /// Use this method to detect when a new notification or a schedule is created
   @pragma("vm:entry-point")
   static Future<void> onNotificationCreatedMethod(
@@ -316,6 +334,14 @@ class NotificationService {
             ),
           );
         }
+      }
+    }
+
+    if (receivedAction.channelKey == 'user_order_channel') {
+      final orderId = receivedAction.payload?['orderId'];
+
+      if (orderId != null) {
+        _fetchOrderAndNavigate(orderId);
       }
     }
   }

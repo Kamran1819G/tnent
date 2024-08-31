@@ -2089,8 +2089,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
           bigPicture: 'file://$bigPicturePath',
           notificationLayout: NotificationLayout.BigPicture,
           payload: {
-            'orderId': item['orderId'],
-            'productName': item['productName'],
+            'orderId': item['orderId'].toString(),
+            'productName': item['productName'].toString(),
           },
         ),
       );
