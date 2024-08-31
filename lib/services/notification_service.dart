@@ -240,7 +240,7 @@ class NotificationService {
     }
   }
 
-  static Future<void> _rejectOrder(String orderId) async {
+  static Future<void> _declineOrder(String orderId) async {
     try {
       // Find the document with the given orderId
       final querySnapshot = await FirebaseFirestore.instance
@@ -251,7 +251,7 @@ class NotificationService {
       // Update each document found (assuming orderId is unique)
       for (final doc in querySnapshot.docs) {
         await doc.reference.update({
-          'status.rejected': {
+          'status.cancelled': {
             'timestamp': FieldValue.serverTimestamp(),
             'message': 'Order rejected by store owner',
           },
@@ -292,17 +292,31 @@ class NotificationService {
       ReceivedAction receivedAction) async {
     // Your code goes here
     debugPrint('Notification action received: ${receivedAction.title}');
-    if (receivedAction.buttonKeyPressed == 'accept') {
+    if (receivedAction.channelKey == 'store_new_order_channel') {
       final orderId = receivedAction.payload?['orderId'];
       if (orderId != null) {
-        await _acceptOrder(orderId);
-      }
-    } else if (receivedAction.buttonKeyPressed == 'reject') {
-      final orderId = receivedAction.payload?['orderId'];
-      if (orderId != null) {
-        await _rejectOrder(orderId);
+        if (receivedAction.buttonKeyPressed == 'accept') {
+          await _acceptOrder(orderId);
+          await AwesomeNotifications().createNotification(
+            content: NotificationContent(
+              id: receivedAction.id! + 1,
+              channelKey: 'store_order_channel',
+              title: 'Order Accepted',
+              body: 'You have accepted order #$orderId',
+            ),
+          );
+        } else if (receivedAction.buttonKeyPressed == 'decline') {
+          await _declineOrder(orderId);
+          await AwesomeNotifications().createNotification(
+            content: NotificationContent(
+              id: receivedAction.id! + 1,
+              channelKey: 'store_order_channel',
+              title: 'Order Declined',
+              body: 'You have declined order #$orderId',
+            ),
+          );
+        }
       }
     }
-    // You can navigate to a specific screen based on the notification action here
   }
 }
