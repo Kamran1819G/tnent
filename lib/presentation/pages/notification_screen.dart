@@ -184,7 +184,7 @@ class _NotificationScreenState extends State<NotificationScreen>
                       }),
                     ),
                   ),
-                  SizedBox(height: 50.h),
+                  SizedBox(height: 10.h),
                 ],
               ),
             ),
