@@ -70,7 +70,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   @override
   void initState() {
     super.initState();
-    _getUserLocation(_locationController);
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 5));
     _storeFeaturesPageController = PageController()
@@ -142,11 +141,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     }
   }
 
-  Future<void> _validateStoreDomain(String domain) async
-  {
+  Future<void> _validateStoreDomain(String domain) async {
     final storeRef = FirebaseFirestore.instance.collection('Stores');
     final querySnapshot =
-        await storeRef.where('storeDomain', isEqualTo: domain).get();
+    await storeRef.where('storeDomain', isEqualTo: domain).get();
+
     setState(() {
       _isStoreDomainUnique = querySnapshot.docs.isEmpty;
     });
@@ -214,7 +213,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
 
     // Get the address from the coordinates
     List<Placemark> placemarks =
-        await placemarkFromCoordinates(position.latitude, position.longitude);
+    await placemarkFromCoordinates(position.latitude, position.longitude);
 
     if (placemarks.isNotEmpty) {
       Placemark place = placemarks[0];
@@ -369,9 +368,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     );
 
                                     sessionIdReceived =
-                                        await otpController.sendOtp(
-                                            _phoneController.text.trim(),
-                                            context);
+                                    await otpController.sendOtp(
+                                        _phoneController.text.trim(),
+                                        context);
 
                                     if (!context.mounted) return;
                                     Navigator.of(context).pop();
@@ -513,25 +512,25 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             child: GestureDetector(
                               onTap: isButtonEnabled
                                   ? () async {
-                                      bool isVerified =
-                                          await otpController.verifyOtp(
-                                        sessionIdReceived!,
-                                        _otpController.text,
-                                        context,
-                                      );
+                                bool isVerified =
+                                await otpController.verifyOtp(
+                                  sessionIdReceived!,
+                                  _otpController.text,
+                                  context,
+                                );
 
-                                      if (isVerified) {
-                                        _pageController
-                                            .jumpToPage(_currentPageIndex + 1);
-                                      } else {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                              content: Text(
-                                                  'Invalid OTP. Please try again.')),
-                                        );
-                                      }
-                                    }
+                                if (isVerified) {
+                                  _pageController
+                                      .jumpToPage(_currentPageIndex + 1);
+                                } else {
+                                  ScaffoldMessenger.of(context)
+                                      .showSnackBar(
+                                    const SnackBar(
+                                        content: Text(
+                                            'Invalid OTP. Please try again.')),
+                                  );
+                                }
+                              }
                                   : null,
                               child: CircleAvatar(
                                 backgroundColor: isButtonEnabled
@@ -682,7 +681,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                     MaterialPageRoute(
                                         builder: (context) => const WebViewScreen(
                                             url:
-                                                'https://tnent-updated.vercel.app/legals',
+                                            'https://tnent-updated.vercel.app/legals',
                                             title: 'Terms and Conditions')));
                               },
                               child: Text(
@@ -924,9 +923,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       child: GestureDetector(
                         onTap: _isStoreDomainUnique
                             ? () {
-                                _pageController
-                                    .jumpToPage(_currentPageIndex + 1);
-                              }
+                          _pageController
+                              .jumpToPage(_currentPageIndex + 1);
+                        }
                             : null,
                         child: Container(
                           height: 95.h,
@@ -1025,10 +1024,10 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                                       ),
                                       child: isSelected
                                           ? Center(
-                                              child: Icon(Icons.check,
-                                                  size: 16.sp,
-                                                  color: Colors.white),
-                                            )
+                                        child: Icon(Icons.check,
+                                            size: 16.sp,
+                                            color: Colors.white),
+                                      )
                                           : null,
                                     ),
                                     SizedBox(width: 12.w),
@@ -1376,7 +1375,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  Theme.of(context).primaryColor,
                                   radius: 15.w,
                                   child: Icon(
                                     Icons.check,
@@ -1401,7 +1400,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  Theme.of(context).primaryColor,
                                   radius: 15.w,
                                   child: Icon(
                                     Icons.check,
@@ -1426,7 +1425,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  Theme.of(context).primaryColor,
                                   radius: 15.w,
                                   child: Icon(
                                     Icons.check,
@@ -1451,7 +1450,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  Theme.of(context).primaryColor,
                                   radius: 15.w,
                                   child: Icon(
                                     Icons.check,
@@ -1476,7 +1475,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  Theme.of(context).primaryColor,
                                   radius: 15.w,
                                   child: Icon(
                                     Icons.check,
@@ -1501,7 +1500,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               children: [
                                 CircleAvatar(
                                   backgroundColor:
-                                      Theme.of(context).primaryColor,
+                                  Theme.of(context).primaryColor,
                                   radius: 15.w,
                                   child: Icon(
                                     Icons.check,
@@ -1717,43 +1716,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     );
   }
 
-  Future<void> _getUserLocation(TextEditingController locationController) async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Check if location services are enabled
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return;
-    }
-
-    // Check for location permissions
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return;
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return;
-    }
-
-    // Get the current position
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-
-    // Get the address from the coordinates
-    List<Placemark> placemarks =
-    await placemarkFromCoordinates(position.latitude, position.longitude);
-
-    if (placemarks.isNotEmpty) {
-      Placemark place = placemarks[0];
-      locationController.text = '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
-    }
-  }
-
   Widget _buildStoreFeatures() {
     return Stack(
       children: [
@@ -1839,7 +1801,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
           children: [
             Container(
               padding:
-                  EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 12.0.h),
+              EdgeInsets.symmetric(horizontal: 16.0.w, vertical: 12.0.h),
               decoration: BoxDecoration(
                 color: hexToColor('#272822'),
                 borderRadius: BorderRadius.circular(50.r),

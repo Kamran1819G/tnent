@@ -25,6 +25,7 @@ class _CartScreenState extends State<CartScreen> {
     _fetchCartItems();
   }
 
+
   Future<void> _fetchCartItems() async {
     String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     FirebaseFirestore.instance
@@ -97,16 +98,18 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   void _updateSelectionState() {
-    _allItemsSelected = _cartItems.isNotEmpty &&
-        _cartItems.every((item) => item['isSelected'] == true);
-    _calculateTotalAmount();
+    setState(() {
+      _allItemsSelected = _cartItems.isNotEmpty &&
+          _cartItems.every((item) => item['isSelected'] == true);
+      _calculateTotalAmount();
+    });
   }
 
   void _calculateTotalAmount() {
     _totalAmount = _cartItems.where((item) => item['isSelected'] == true).fold(
         0,
-        (sum, item) =>
-            sum + (item['variationDetails'].price * item['quantity']));
+            (sum, item) =>
+        sum + (item['variationDetails'].price * item['quantity']));
   }
 
   void _toggleAllItemsSelection(bool? value) {
@@ -120,8 +123,7 @@ class _CartScreenState extends State<CartScreen> {
     _updateFirestore();
   }
 
-  void _updateItemSelection(
-      String productId, String variation, bool isSelected) {
+  void _updateItemSelection(String productId, String variation, bool isSelected) {
     setState(() {
       int index = _cartItems.indexWhere((item) =>
           item['productId'] == productId && item['variation'] == variation);
@@ -162,11 +164,8 @@ class _CartScreenState extends State<CartScreen> {
       int index = _cartItems.indexWhere((item) =>
           item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
-        if (newQuantity > 0) {
-          _cartItems[index]['quantity'] = newQuantity;
-        } else {
-          _cartItems.removeAt(index);
-        }
+        // Ensure the quantity never goes below 1
+        _cartItems[index]['quantity'] = newQuantity.clamp(1, double.infinity).toInt();
         _updateSelectionState();
       }
     });
@@ -414,7 +413,7 @@ class CartItemTile extends StatelessWidget {
                     icon: Icon(Icons.remove, size: 20.sp),
                     onPressed: () {
                       int newQuantity = item['quantity'] - 1;
-                      if (newQuantity >= 0) {
+                      if (newQuantity >= 1) {
                         onUpdateQuantity(
                             item['productId'], item['variation'], newQuantity);
                       }

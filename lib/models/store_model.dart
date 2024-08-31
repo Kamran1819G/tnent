@@ -55,7 +55,7 @@ class StoreModel {
       upiId: data['upiId'] ?? '',
       location: data['location'] ?? '',
       category: data['category'] ?? '',
-      isActive: data['isActive'] ?? false,
+      isActive: data['isActive'] ?? true,
       createdAt: data['createdAt'] ?? Timestamp.now(),
       storeEngagement: List<String>.from(data['followerIds'] ?? []).length,
       greenFlags: data['greenFlags'] ?? 0,

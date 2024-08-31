@@ -139,26 +139,24 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   Future<void> _fetchFeaturedStores() async {
     try {
-      // Fetch the featured-store document from the Featured Stores collection
       final featuredStoreDoc = await FirebaseFirestore.instance
           .collection('Featured Stores')
           .doc('featured-stores')
           .get();
 
-      // Extract the store IDs from the array field
-      final List<String> storeId =
-          List<String>.from(featuredStoreDoc['stores'] ?? []);
+      final List<String> storeIds =
+      List<String>.from(featuredStoreDoc['stores'] ?? []);
 
-      // Fetch the actual store documents using the store IDs
-      if (storeId.isNotEmpty) {
+      if (storeIds.isNotEmpty) {
         final storesSnapshot = await FirebaseFirestore.instance
             .collection('Stores')
-            .where(FieldPath.documentId, whereIn: storeId)
+            .where(FieldPath.documentId, whereIn: storeIds)
             .get();
 
         setState(() {
           featuredStores = storesSnapshot.docs
               .map((doc) => StoreModel.fromFirestore(doc))
+              .where((store) => store.isActive) // Filter active stores
               .toList();
         });
       } else {
@@ -173,17 +171,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   Future<void> _fetchFeaturedProducts() async {
     try {
-      // Fetch the featured-products document from the Featured Products collection
       final featuredProductDoc = await FirebaseFirestore.instance
           .collection('Featured Products')
           .doc('featured-products')
           .get();
 
-      // Extract the product IDs from the array field
       final List<String> productIds =
-          List<String>.from(featuredProductDoc['products'] ?? []);
+      List<String>.from(featuredProductDoc['products'] ?? []);
 
-      // Fetch the actual product documents using the product IDs
       if (productIds.isNotEmpty) {
         List<ProductModel> products = [];
 
@@ -194,7 +189,17 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               .get();
 
           if (productDoc.exists) {
-            products.add(ProductModel.fromFirestore(productDoc));
+            final product = ProductModel.fromFirestore(productDoc);
+
+            // Check if the store is active
+            final storeDoc = await FirebaseFirestore.instance
+                .collection('Stores')
+                .doc(product.storeId)
+                .get();
+
+            if (storeDoc.exists && storeDoc.data()?['isActive'] == true) {
+              products.add(product);
+            }
           }
         }
 
@@ -1039,20 +1044,38 @@ class CategoryProductsScreen extends StatelessWidget {
 
                   final products = snapshot.data!.docs;
 
-                  return GridView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    gridDelegate:
+                  return FutureBuilder<List<ProductModel>>(
+                    future: _filterActiveStoreProducts(products),
+                    builder: (context, activeProductsSnapshot) {
+                      if (activeProductsSnapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      if (activeProductsSnapshot.hasError) {
+                        return Center(child: Text('Error: ${activeProductsSnapshot.error}'));
+                      }
+
+                      final activeProducts = activeProductsSnapshot.data ?? [];
+
+                      if (activeProducts.isEmpty) {
+                        return const Center(
+                            child: Text('No active products found in this category'));
+                      }
+
+                      return GridView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                      childAspectRatio: 0.8,
-                    ),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final product =
-                          ProductModel.fromFirestore(products[index]);
-                      return WishlistProductTile(product: product);
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                          childAspectRatio: 0.8,
+                        ),
+                        itemCount: activeProducts.length,
+                        itemBuilder: (context, index) {
+                          return WishlistProductTile(product: activeProducts[index]);
+                        },
+                      );
                     },
                   );
                 },
@@ -1062,6 +1085,24 @@ class CategoryProductsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<List<ProductModel>> _filterActiveStoreProducts(List<QueryDocumentSnapshot> products) async {
+    List<ProductModel> activeProducts = [];
+
+    for (var doc in products) {
+      final product = ProductModel.fromFirestore(doc);
+      final storeDoc = await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(product.storeId)
+          .get();
+
+      if (storeDoc.exists && storeDoc.data()?['isActive'] == true) {
+        activeProducts.add(product);
+      }
+    }
+
+    return activeProducts;
   }
 }
 

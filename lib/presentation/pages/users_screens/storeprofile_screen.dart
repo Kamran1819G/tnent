@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -36,7 +38,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
   late int greenFlags;
   late int redFlags;
   UserModel? currentUser;
-
+  bool isStoreActive = true; // New variable to track store active status
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -81,7 +83,27 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
       curve: Curves.easeInOut,
     );
     listenToFlagChanges();
+    checkStoreActiveStatus(); // New method to check store active status
   }
+
+  // New method to check store active status
+  Future<void> checkStoreActiveStatus() async {
+    try {
+      DocumentSnapshot storeDoc = await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(widget.store.storeId)
+          .get();
+
+      setState(() {
+        isStoreActive = storeDoc.get('isActive') ?? true;
+      });
+    } catch (e) {
+      print('Error checking store active status: $e');
+    }
+  }
+
+  // New method to show store offline popup
+
 
   Future<void> _fetchStoreCommunityPosts() async {
     try {
@@ -363,7 +385,9 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
+      body: Stack (
+        children: [
+          SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -894,6 +918,31 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
           ),
         ),
       ),
+         if (!isStoreActive)
+           BackdropFilter(
+           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(
+              color: Colors.black.withOpacity(0.5),
+            child: Center(
+    child: Container(
+    padding: EdgeInsets.all(20.w),
+    decoration: BoxDecoration(
+    color: Colors.white,
+    borderRadius: BorderRadius.circular(10.r),
+    ),
+    child: Text(
+    'This store is currently offline.',
+    style: TextStyle(
+    fontSize: 18.sp,
+    fontWeight: FontWeight.bold,
+    ),
+    ),
+    ),
+    ),
+    ),
+    ),
+    ],
+    ),
     );
   }
 

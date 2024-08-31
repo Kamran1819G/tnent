@@ -16,7 +16,7 @@ class NotificationScreen extends StatefulWidget {
 class _NotificationScreenState extends State<NotificationScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool isStoreOwner = true;
+  bool isStoreOwner = false;
   int _selectedIndex = 0;
   Map<String, List<QueryDocumentSnapshot>> groupedGeneralNotifications = {};
   Map<String, List<QueryDocumentSnapshot>> groupedStoreNotifications = {};
@@ -24,8 +24,40 @@ class _NotificationScreenState extends State<NotificationScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: isStoreOwner ? 2 : 1, vsync: this);
-    _loadNotifications();
+    _tabController= TabController(length: 1, vsync: this);
+    _checkIfStoreOwner();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _checkIfStoreOwner() async {
+    final userId = FirebaseAuth.instance.currentUser?.uid;
+    if (userId != null) {
+      try {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(userId)
+            .get();
+        final bool userIsStoreOwner = userDoc.data()?['isStoreOwner'] ?? false;
+
+        setState(() {
+          isStoreOwner = userIsStoreOwner;
+          if (isStoreOwner) {
+            _tabController.dispose();
+            _tabController = TabController(length: 2, vsync: this);
+          }
+        });
+        _loadNotifications();
+      } catch (e) {
+        print('Error checking store owner status: $e');
+      }
+    } else {
+      print('No user is currently signed in');
+    }
   }
 
   Future<void> _loadNotifications() async {
@@ -42,9 +74,12 @@ class _NotificationScreenState extends State<NotificationScreen>
       groupedGeneralNotifications = _groupNotifications(snapshots.docs
           .where((doc) => doc.data()['data']['type'] != 'store')
           .toList());
-      groupedStoreNotifications = _groupNotifications(snapshots.docs
-          .where((doc) => doc.data()['data']['type'] == 'store')
-          .toList());
+
+      if (isStoreOwner) {
+        groupedStoreNotifications = _groupNotifications(snapshots.docs
+            .where((doc) => doc.data()['data']['type'] == 'store')
+            .toList());
+      }
 
       setState(() {});
     }
@@ -151,7 +186,7 @@ class _NotificationScreenState extends State<NotificationScreen>
                   Container(
                     padding: EdgeInsets.only(left: 12.w),
                     child: Wrap(
-                      children: List.generate(2, (index) {
+                      children: List.generate(isStoreOwner ? 2 : 1, (index) {
                         return Container(
                           margin: EdgeInsets.symmetric(horizontal: 6.w),
                           padding: EdgeInsets.symmetric(horizontal: 4.w),
