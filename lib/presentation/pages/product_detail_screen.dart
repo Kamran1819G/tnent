@@ -852,7 +852,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             .showSnackBar(
                                           const SnackBar(
                                               content: Text(
-                                                  'Product is out of stock or store is inactive')),
+                                                  'Product is out of stock')),
                                         );
                                       }
                                     },
