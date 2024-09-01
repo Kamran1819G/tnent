@@ -237,7 +237,6 @@ class _NotificationScreenState extends State<NotificationScreen>
               )
                   : _buildNotificationList(groupedGeneralNotifications,
                       isGeneralTab: true),
-
             )
           ],
         ),

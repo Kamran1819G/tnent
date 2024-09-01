@@ -79,6 +79,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
               _storeFeaturesPageController.page?.round() ?? 0;
         });
       });
+    _pageController.addListener(_onPageChange);
   }
 
   @override
@@ -89,6 +90,15 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     _phoneController.dispose();
     _otpController.dispose();
     super.dispose();
+  }
+
+  void _onPageChange() {
+    setState(() {
+      _currentPageIndex = _pageController.page?.round() ?? 0;
+    });
+    if (_currentPageIndex == 3) { // Assuming the location page is the 4th page (index 3)
+      _showLocationFetchDialog();
+    }
   }
 
   Future<void> _registerStore() async {
@@ -184,6 +194,50 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     }
   }
 
+
+  void _showLocationFetchDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Fetch Location'),
+          content: Text('Would you like to fetch your current location?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _fetchLocation();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _fetchLocation() async {
+    showSnackBar(
+      context,
+      'Fetching your current location...',
+      bgColor: Colors.red,
+      duration: const Duration(seconds: 30),
+    );
+
+    String location = await getCurrentLocation();
+    setState(() {
+      _locationController.text = location;
+    });
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  }
+
   Future<String> getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -222,6 +276,46 @@ class _StoreRegistrationState extends State<StoreRegistration> {
       return 'No address available.';
     }
   }
+
+
+ /* Future<String> getCurrentLocation() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+
+    // Check if location services are enabled
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return 'Location services are disabled.';
+    }
+
+    // Check for location permissions
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return 'Location permissions are denied.';
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      return 'Location permissions are permanently denied.';
+    }
+
+    // Get the current position
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+
+    // Get the address from the coordinates
+    List<Placemark> placemarks =
+    await placemarkFromCoordinates(position.latitude, position.longitude);
+
+    if (placemarks.isNotEmpty) {
+      Placemark place = placemarks[0];
+      return '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
+    } else {
+      return 'No address available.';
+    }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -1216,6 +1310,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     ),
                   ],
                 ),
+
+
                 // Page 9: Store Location
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1274,22 +1370,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           ),
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.my_location),
-                            onPressed: () async {
-                              showSnackBar(
-                                context,
-                                'Fetching your current location...',
-                                bgColor: Colors.red,
-                                duration: const Duration(seconds: 30),
-                              );
-
-                              String location = await getCurrentLocation();
-                              setState(() {
-                                _locationController.text = location;
-                              });
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context)
-                                  .hideCurrentSnackBar();
-                            },
+                            onPressed: _showLocationFetchDialog,
                           ),
                           suffixIconColor: Theme.of(context).primaryColor,
                           prefixIconColor: Theme.of(context).primaryColor,
@@ -1331,6 +1412,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     ),
                   ],
                 ),
+
+
                 // Page 10: Store Description
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
