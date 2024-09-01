@@ -97,14 +97,28 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
       setState(() {
         isStoreActive = storeDoc.get('isActive') ?? true;
       });
+
+      if (!isStoreActive) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Store Closed'),
+            content: Text('This store is currently offline.'),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      }
     } catch (e) {
       print('Error checking store active status: $e');
     }
   }
 
   // New method to show store offline popup
-
-
   Future<void> _fetchStoreCommunityPosts() async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -918,29 +932,6 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
           ),
         ),
       ),
-         if (!isStoreActive)
-           BackdropFilter(
-           filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-              child: Container(
-              color: Colors.black.withOpacity(0.5),
-            child: Center(
-    child: Container(
-    padding: EdgeInsets.all(20.w),
-    decoration: BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(10.r),
-    ),
-    child: Text(
-    'This store is currently offline.',
-    style: TextStyle(
-    fontSize: 18.sp,
-    fontWeight: FontWeight.bold,
-    ),
-    ),
-    ),
-    ),
-    ),
-    ),
     ],
     ),
     );
