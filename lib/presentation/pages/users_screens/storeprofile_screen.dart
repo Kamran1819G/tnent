@@ -334,8 +334,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
         });
 
         setState(() {
-          isConnected = true;
-          storeEngagement++;
+          isConnected = !isConnected;
+          storeEngagement+= isConnected ? 1 :-1;
         });
         sendStoreFollowNotification();
       } else {
@@ -349,8 +349,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
         });
 
         setState(() {
-          isConnected = false;
-          storeEngagement--;
+          isConnected = !isConnected;
+          storeEngagement+= isConnected ? 1 :-1;
         });
       }
     });
