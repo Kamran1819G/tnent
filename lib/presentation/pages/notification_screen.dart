@@ -224,17 +224,20 @@ class _NotificationScreenState extends State<NotificationScreen>
               ),
             ),
             Expanded(
-              child: TabBarView(
+              child: isStoreOwner
+              ? TabBarView(
                 controller: _tabController,
                 physics: NeverScrollableScrollPhysics(),
                 children: [
                   _buildNotificationList(groupedGeneralNotifications,
                       isGeneralTab: true),
-                  if (isStoreOwner)
                     _buildNotificationList(groupedStoreNotifications,
                         isGeneralTab: false),
                 ],
-              ),
+              )
+                  : _buildNotificationList(groupedGeneralNotifications,
+                      isGeneralTab: true),
+
             )
           ],
         ),

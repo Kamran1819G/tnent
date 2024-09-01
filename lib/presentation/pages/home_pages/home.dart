@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/core/helpers/snackbar_utils.dart';
@@ -118,13 +119,36 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   Stream<bool> _getNewNotificationsStream() {
-    return FirebaseFirestore.instance
-        .collection('notifications')
-        .where('userId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-        .where('isRead', isEqualTo: false)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.isNotEmpty);
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return Stream.value(false);
+
+    return Stream.periodic(const Duration(seconds: 30), (_) => null)
+        .asyncMap((_) => _checkForNewNotifications(user.uid))
+        .distinct();
   }
+
+  Future<bool> _checkForNewNotifications(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastCheckTime = prefs.getInt('lastNotificationCheck') ?? 0;
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .where('createdAt', isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(lastCheckTime))
+        .limit(1)
+        .get();
+
+    final hasNewNotifications = snapshot.docs.isNotEmpty;
+
+    if (hasNewNotifications) {
+      // Update the last check time
+      await prefs.setInt('lastNotificationCheck', DateTime.now().millisecondsSinceEpoch);
+    }
+
+    return hasNewNotifications;
+  }
+
 
   String getGreeting() {
     final hour = DateTime.now().hour;
@@ -361,22 +385,22 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 ),
               ),
               SizedBox(width: 22.w),
-              StreamBuilder(stream: _getNewNotificationsStream(),
+              StreamBuilder<bool>(
+                stream: _getNewNotificationsStream(),
                   builder:(context, snapshot) {
                     bool hasNewNotifications = snapshot.data ?? false;
                     return GestureDetector(
-                      onTap: () {
+                      onTap: () async {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => const NotificationScreen()
                             )
                         );
+                        // After returning from NotificationScreen, update the last check time
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setInt('lastNotificationCheck', DateTime.now().millisecondsSinceEpoch);
                       },
-                      /* setState(() {
-                      isNewNotification = false;
-                    });
-                  },*/
                       child: Image.asset(
                         hasNewNotifications
                             ? 'assets/icons/new_notification_box.png'
