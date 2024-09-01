@@ -41,17 +41,20 @@ class _CartScreenState extends State<CartScreen> {
         List<Map<String, dynamic>> updatedCartItems = [];
         for (var item in cartData) {
           try {
-            ProductModel product = await _fetchProductDetails(item['productId']);
-            if (product != null) {
+            Map<String, dynamic> productDetails =
+                await _fetchProductDetails(item['productId']);
+            if (productDetails.isNotEmpty) {
               updatedCartItems.add({
                 ...item,
-                'product': product,
-                'variationDetails': product.variations[item['variation']],
-                'isSelected': item['isSelected'] ?? false,
+                ...productDetails,
+                'variationDetails': productDetails['variations']
+                    [item['variation']],
+                'isSelected': item['isSelected'] ?? false, // Preserve selection state
               });
             }
           } catch (e) {
             print('Error fetching product ${item['productId']}: $e');
+            // Optionally, you can add a placeholder or error item here
           }
         }
 
@@ -63,21 +66,36 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
-  Future<ProductModel> _fetchProductDetails(String productId) async {
+  Future<Map<String, dynamic>> _fetchProductDetails(String productId) async {
     try {
       DocumentSnapshot productDoc = await FirebaseFirestore.instance
           .collection('products')
           .doc(productId)
-          .get();
+          .get(GetOptions(source: Source.cache));
 
       if (!productDoc.exists) {
-        throw Exception('Product not found');
+        productDoc = await FirebaseFirestore.instance
+            .collection('products')
+            .doc(productId)
+            .get(GetOptions(source: Source.server));
       }
 
-      return ProductModel.fromFirestore(productDoc);
+      if (!productDoc.exists) {
+        print('Product document not found for ID: $productId');
+        return {};
+      }
+
+      ProductModel product = ProductModel.fromFirestore(productDoc);
+      return {
+        'productName': product.name,
+        'storeId': product.storeId,
+        'productImage':
+            product.imageUrls.isNotEmpty ? product.imageUrls[0] : '',
+        'variations': product.variations,
+      };
     } catch (e) {
       print('Error fetching product details for ID $productId: $e');
-      throw e;
+      return {};
     }
   }
 
@@ -118,14 +136,6 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
-  void _navigateToProductDetail(ProductModel product) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProductDetailScreen(product: product),
-      ),
-    );
-  }
 
   void _updateFirestore() {
     String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -323,8 +333,6 @@ class _CartScreenState extends State<CartScreen> {
                     onRemove: _removeFromCart,
                     onUpdateQuantity: _updateQuantity,
                     onUpdateSelection: _updateItemSelection,
-                    onProductTap:
-                      _navigateToProductDetail,
                   );
                 },
               ),
@@ -359,7 +367,6 @@ class CartItemTile extends StatelessWidget {
   final Function(String, String) onRemove;
   final Function(String, String, int) onUpdateQuantity;
   final Function(String, String, bool) onUpdateSelection;
-  final Function(ProductModel) onProductTap;
 
   const CartItemTile({
     Key? key,
@@ -367,7 +374,6 @@ class CartItemTile extends StatelessWidget {
     required this.onRemove,
     required this.onUpdateQuantity,
     required this.onUpdateSelection,
-    required this.onProductTap,
   }) : super(key: key);
 
   @override
@@ -380,7 +386,40 @@ class CartItemTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           GestureDetector(
-         onTap: () => onProductTap(item['product']),
+          onTap: () {
+      // Create a ProductVariant instance
+      ProductVariant variant = ProductVariant(
+      discount: item['variationDetails'].discount ?? 0.0,
+      mrp: item['variationDetails'].mrp ?? 0.0,
+      price: item['variationDetails'].price,
+      stockQuantity: item['variationDetails'].stockQuantity ?? 0,
+      sku: item['variationDetails'].sku,
+    );
+
+    // Create a ProductModel instance
+    ProductModel product = ProductModel(
+      productId: item['productId'],
+      storeId: item['storeId'],
+      name: item['productName'],
+      description: item['description'] ?? '',
+      productCategory: item['productCategory'] ?? '',
+      storeCategory: item['storeCategory'] ?? '',
+      imageUrls: [item['productImage']],
+      isAvailable: item['isAvailable'] ?? true,
+      createdAt: item['createdAt'] ?? Timestamp.now(),
+      greenFlags: item['greenFlags'] ?? 0,
+      redFlags: item['redFlags'] ?? 0,
+      variations: {item['variation']: variant},
+    );
+
+    // Navigate to the ProductDetailScreen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductDetailScreen(product: product),
+      ),
+    );
+  },
           child : Container(
             height: 285.h,
             width: 255.w,
@@ -388,7 +427,7 @@ class CartItemTile extends StatelessWidget {
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: CachedNetworkImage(
-              imageUrl: item['product'].imageUrls.isNotEmpty ? item['product'].imageUrls[0] : '',
+              imageUrl: item['productImage'] ?? '',
               fit: BoxFit.cover,
               placeholder: (context, url) =>
                   Center(child: CircularProgressIndicator()),
@@ -406,7 +445,7 @@ class CartItemTile extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                item['product'].name,
+                item['productName'],
                 style: TextStyle(
                   color: hexToColor('#343434'),
                   fontSize: 26.sp,
