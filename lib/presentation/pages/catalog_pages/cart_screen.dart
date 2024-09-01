@@ -7,6 +7,8 @@ import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/presentation/pages/catalog_pages/checkout_screen.dart';
 
+import '../product_detail_screen.dart';
+
 class CartScreen extends StatefulWidget {
   const CartScreen({Key? key}) : super(key: key);
 
@@ -39,20 +41,17 @@ class _CartScreenState extends State<CartScreen> {
         List<Map<String, dynamic>> updatedCartItems = [];
         for (var item in cartData) {
           try {
-            Map<String, dynamic> productDetails =
-                await _fetchProductDetails(item['productId']);
-            if (productDetails.isNotEmpty) {
+            ProductModel product = await _fetchProductDetails(item['productId']);
+            if (product != null) {
               updatedCartItems.add({
                 ...item,
-                ...productDetails,
-                'variationDetails': productDetails['variations']
-                    [item['variation']],
-                'isSelected': item['isSelected'] ?? false, // Preserve selection state
+                'product': product,
+                'variationDetails': product.variations[item['variation']],
+                'isSelected': item['isSelected'] ?? false,
               });
             }
           } catch (e) {
             print('Error fetching product ${item['productId']}: $e');
-            // Optionally, you can add a placeholder or error item here
           }
         }
 
@@ -64,36 +63,21 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
-  Future<Map<String, dynamic>> _fetchProductDetails(String productId) async {
+  Future<ProductModel> _fetchProductDetails(String productId) async {
     try {
       DocumentSnapshot productDoc = await FirebaseFirestore.instance
           .collection('products')
           .doc(productId)
-          .get(GetOptions(source: Source.cache));
+          .get();
 
       if (!productDoc.exists) {
-        productDoc = await FirebaseFirestore.instance
-            .collection('products')
-            .doc(productId)
-            .get(GetOptions(source: Source.server));
+        throw Exception('Product not found');
       }
 
-      if (!productDoc.exists) {
-        print('Product document not found for ID: $productId');
-        return {};
-      }
-
-      ProductModel product = ProductModel.fromFirestore(productDoc);
-      return {
-        'productName': product.name,
-        'storeId': product.storeId,
-        'productImage':
-            product.imageUrls.isNotEmpty ? product.imageUrls[0] : '',
-        'variations': product.variations,
-      };
+      return ProductModel.fromFirestore(productDoc);
     } catch (e) {
       print('Error fetching product details for ID $productId: $e');
-      return {};
+      throw e;
     }
   }
 
@@ -134,6 +118,15 @@ class _CartScreenState extends State<CartScreen> {
     });
   }
 
+  void _navigateToProductDetail(ProductModel product) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductDetailScreen(product: product),
+      ),
+    );
+  }
+
   void _updateFirestore() {
     String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     List<Map<String, dynamic>> cartData = _cartItems.reversed
@@ -152,12 +145,35 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   void _removeFromCart(String productId, String variation) {
-    setState(() {
-      _cartItems.removeWhere((item) =>
-          item['productId'] == productId && item['variation'] == variation);
-      _updateSelectionState();
-    });
-    _updateFirestore();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Remove Product'),
+          content: Text('Are you sure you want to remove this product from your cart?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                setState(() {
+                  _cartItems.removeWhere((item) =>
+                  item['productId'] == productId && item['variation'] == variation);
+                  _updateSelectionState();
+                });
+                _updateFirestore();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _updateQuantity(String productId, String variation, int newQuantity) {
@@ -307,6 +323,8 @@ class _CartScreenState extends State<CartScreen> {
                     onRemove: _removeFromCart,
                     onUpdateQuantity: _updateQuantity,
                     onUpdateSelection: _updateItemSelection,
+                    onProductTap:
+                      _navigateToProductDetail,
                   );
                 },
               ),
@@ -341,6 +359,7 @@ class CartItemTile extends StatelessWidget {
   final Function(String, String) onRemove;
   final Function(String, String, int) onUpdateQuantity;
   final Function(String, String, bool) onUpdateSelection;
+  final Function(ProductModel) onProductTap;
 
   const CartItemTile({
     Key? key,
@@ -348,6 +367,7 @@ class CartItemTile extends StatelessWidget {
     required this.onRemove,
     required this.onUpdateQuantity,
     required this.onUpdateSelection,
+    required this.onProductTap,
   }) : super(key: key);
 
   @override
@@ -359,14 +379,16 @@ class CartItemTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Container(
+          GestureDetector(
+         onTap: () => onProductTap(item['product']),
+          child : Container(
             height: 285.h,
             width: 255.w,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: CachedNetworkImage(
-              imageUrl: item['productImage'] ?? '',
+              imageUrl: item['product'].imageUrls.isNotEmpty ? item['product'].imageUrls[0] : '',
               fit: BoxFit.cover,
               placeholder: (context, url) =>
                   Center(child: CircularProgressIndicator()),
@@ -376,6 +398,7 @@ class CartItemTile extends StatelessWidget {
                   color: Colors.grey),
             ),
           ),
+          ),
           SizedBox(width: 16.w),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -383,7 +406,7 @@ class CartItemTile extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                item['productName'],
+                item['product'].name,
                 style: TextStyle(
                   color: hexToColor('#343434'),
                   fontSize: 26.sp,
