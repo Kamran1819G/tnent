@@ -416,23 +416,21 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               GestureDetector(
                 onTap: () {
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const MyProfileScreen()));
+                    context,
+                    MaterialPageRoute(builder: (context) => const MyProfileScreen()),
+                  );
                 },
-                child: widget.currentUser.photoURL != null
-                    ? CircleAvatar(
-                        radius: 30.0,
-                        backgroundImage:
-                            NetworkImage(widget.currentUser.photoURL ?? ''),
-                      )
-                    : CircleAvatar(
-                        radius: 30.0,
-                        backgroundColor: Theme.of(context).primaryColor,
-                        child: const Icon(Icons.person,
-                            color: Colors.white, size: 30.0),
-                      ),
-              ),
+                child: CircleAvatar(
+                  radius: 30.0,
+                  backgroundImage: widget.currentUser.photoURL != null
+                      ? CachedNetworkImageProvider(widget.currentUser.photoURL ?? ' ')
+                      : null,
+                  backgroundColor: Theme.of(context).primaryColor,
+                  child: widget.currentUser.photoURL == null
+                      ? const Icon(Icons.person, color: Colors.white, size: 30.0)
+                      : null,
+                ),
+              )
             ],
           ),
         ),
