@@ -47,7 +47,7 @@ class _CartScreenState extends State<CartScreen> {
                 ...productDetails,
                 'variationDetails': productDetails['variations']
                     [item['variation']],
-                'isSelected': false,
+                'isSelected': item['isSelected'] ?? false, // Preserve selection state
               });
             }
           } catch (e) {
@@ -126,7 +126,7 @@ class _CartScreenState extends State<CartScreen> {
   void _updateItemSelection(String productId, String variation, bool isSelected) {
     setState(() {
       int index = _cartItems.indexWhere((item) =>
-          item['productId'] == productId && item['variation'] == variation);
+      item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
         _cartItems[index]['isSelected'] = isSelected;
         _updateSelectionState();
@@ -141,6 +141,7 @@ class _CartScreenState extends State<CartScreen> {
               'productId': item['productId'],
               'quantity': item['quantity'],
               'variation': item['variation'],
+              'isSelected': item['isSelected'], // Include selection state
             })
         .toList();
 
@@ -162,11 +163,10 @@ class _CartScreenState extends State<CartScreen> {
   void _updateQuantity(String productId, String variation, int newQuantity) {
     setState(() {
       int index = _cartItems.indexWhere((item) =>
-          item['productId'] == productId && item['variation'] == variation);
+      item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
-        // Ensure the quantity never goes below 1
         _cartItems[index]['quantity'] = newQuantity.clamp(1, double.infinity).toInt();
-        _updateSelectionState();
+        _updateSelectionState(); // This will recalculate the total amount
       }
     });
     _updateFirestore();
