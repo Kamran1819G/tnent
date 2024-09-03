@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:tnent/presentation/pages/catalog_pages/detail_screen.dart';
 
 class NotificationService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -240,7 +242,7 @@ class NotificationService {
     }
   }
 
-  static Future<void> _rejectOrder(String orderId) async {
+  static Future<void> _declineOrder(String orderId) async {
     try {
       // Find the document with the given orderId
       final querySnapshot = await FirebaseFirestore.instance
@@ -251,7 +253,7 @@ class NotificationService {
       // Update each document found (assuming orderId is unique)
       for (final doc in querySnapshot.docs) {
         await doc.reference.update({
-          'status.rejected': {
+          'status.cancelled': {
             'timestamp': FieldValue.serverTimestamp(),
             'message': 'Order rejected by store owner',
           },
@@ -259,6 +261,22 @@ class NotificationService {
       }
     } catch (e) {
       debugPrint('Error accepting order: $e');
+    }
+  }
+
+  static Future<void> _fetchOrderAndNavigate(String orderId) async {
+    try {
+      final orderDoc = await FirebaseFirestore.instance
+          .collection('Orders')
+          .where('orderId', isEqualTo: orderId)
+          .get();
+
+      if (orderDoc.docs.isNotEmpty) {
+        final orderData = orderDoc.docs.first.data();
+        Get.to(() => DetailScreen(order: orderData));
+      }
+    } catch (e) {
+      print("Failed to fetch order");
     }
   }
 
@@ -292,17 +310,39 @@ class NotificationService {
       ReceivedAction receivedAction) async {
     // Your code goes here
     debugPrint('Notification action received: ${receivedAction.title}');
-    if (receivedAction.buttonKeyPressed == 'accept') {
+    if (receivedAction.channelKey == 'store_new_order_channel') {
       final orderId = receivedAction.payload?['orderId'];
       if (orderId != null) {
-        await _acceptOrder(orderId);
-      }
-    } else if (receivedAction.buttonKeyPressed == 'reject') {
-      final orderId = receivedAction.payload?['orderId'];
-      if (orderId != null) {
-        await _rejectOrder(orderId);
+        if (receivedAction.buttonKeyPressed == 'accept') {
+          await _acceptOrder(orderId);
+          await AwesomeNotifications().createNotification(
+            content: NotificationContent(
+              id: receivedAction.id! + 1,
+              channelKey: 'store_order_channel',
+              title: 'Order Accepted',
+              body: 'You have accepted order #$orderId',
+            ),
+          );
+        } else if (receivedAction.buttonKeyPressed == 'decline') {
+          await _declineOrder(orderId);
+          await AwesomeNotifications().createNotification(
+            content: NotificationContent(
+              id: receivedAction.id! + 1,
+              channelKey: 'store_order_channel',
+              title: 'Order Declined',
+              body: 'You have declined order #$orderId',
+            ),
+          );
+        }
       }
     }
-    // You can navigate to a specific screen based on the notification action here
+
+    if (receivedAction.channelKey == 'user_order_channel') {
+      final orderId = receivedAction.payload?['orderId'];
+
+      if (orderId != null) {
+        _fetchOrderAndNavigate(orderId);
+      }
+    }
   }
 }

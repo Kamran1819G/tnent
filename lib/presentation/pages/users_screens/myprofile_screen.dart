@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -28,11 +27,13 @@ class MyProfileScreen extends StatefulWidget {
 
 class _MyProfileScreenState extends State<MyProfileScreen> {
   late Future<UserModel> _userFuture;
+  late Future<String?> _featuredFestivalImageFuture;
 
   @override
   void initState() {
     super.initState();
     _userFuture = fetchUserData();
+    _featuredFestivalImageFuture = fetchFeaturedFestivalImage();
   }
 
   Future<UserModel> fetchUserData() async {
@@ -42,6 +43,15 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
         .doc(currentUser.uid)
         .get();
     return UserModel.fromFirestore(doc);
+  }
+
+  Future<String?> fetchFeaturedFestivalImage() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('FeaturedFestivals')
+        .doc('featuredfestival')
+        .get();
+    final images = doc.data()?['images'] as List<dynamic>?;
+    return images?.isNotEmpty == true ? images!.first as String : null;
   }
 
   @override
@@ -102,46 +112,29 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 10),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const AddProfileImageScreen(),
-                                      ),
-                                    ).then((_) => setState(() {
-                                          _userFuture = fetchUserData();
-                                        }));
-                                  },
-                                  child: Stack(
-                                    children: [
-                                      CircleAvatar(
+                                child:  FutureBuilder<String?>(
+                                  future: _featuredFestivalImageFuture,
+                                    builder: (context, imageSnapshot) {
+                                          if (imageSnapshot.connectionState == ConnectionState.waiting) {
+                                            return CircularProgressIndicator();
+                                      } else if (imageSnapshot.hasError || !imageSnapshot.hasData) {
+                                      return CircleAvatar(
                                         radius: 57.w,
                                         backgroundColor:
                                             Theme.of(context).primaryColor,
-                                        backgroundImage: user.photoURL != null
-                                            ? NetworkImage(user.photoURL!)
-                                            : null,
-                                        child: user.photoURL == null
-                                            ? Icon(
+                                        child : Icon(
                                                 Icons.person,
                                                 color: Colors.white,
                                                 size: 40.sp,
                                               )
-                                            : null,
-                                      ),
-                                      const Positioned(
-                                        bottom: 8,
-                                        right: 0,
-                                        child: Icon(
-                                          Icons.edit,
-                                          color: Colors.white,
-                                          size: 24.0,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                      );
+                                      } else {
+                                            return CircleAvatar(
+                                              radius: 57.w,
+                                                backgroundImage: NetworkImage(imageSnapshot.data!),
+                                      );
+                                          }
+            },
                                 ),
                               ),
                               SizedBox(width: 10.w),

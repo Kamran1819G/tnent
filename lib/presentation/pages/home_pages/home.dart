@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/core/helpers/snackbar_utils.dart';
@@ -118,13 +119,36 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   Stream<bool> _getNewNotificationsStream() {
-    return FirebaseFirestore.instance
-        .collection('notifications')
-        .where('userId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
-        .where('isRead', isEqualTo: false)
-        .snapshots()
-        .map((snapshot) => snapshot.docs.isNotEmpty);
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return Stream.value(false);
+
+    return Stream.periodic(const Duration(seconds: 30), (_) => null)
+        .asyncMap((_) => _checkForNewNotifications(user.uid))
+        .distinct();
   }
+
+  Future<bool> _checkForNewNotifications(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final lastCheckTime = prefs.getInt('lastNotificationCheck') ?? 0;
+
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('notifications')
+        .where('createdAt', isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(lastCheckTime))
+        .limit(1)
+        .get();
+
+    final hasNewNotifications = snapshot.docs.isNotEmpty;
+
+    if (hasNewNotifications) {
+      // Update the last check time
+      await prefs.setInt('lastNotificationCheck', DateTime.now().millisecondsSinceEpoch);
+    }
+
+    return hasNewNotifications;
+  }
+
 
   String getGreeting() {
     final hour = DateTime.now().hour;
@@ -139,26 +163,24 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   Future<void> _fetchFeaturedStores() async {
     try {
-      // Fetch the featured-store document from the Featured Stores collection
       final featuredStoreDoc = await FirebaseFirestore.instance
           .collection('Featured Stores')
           .doc('featured-stores')
           .get();
 
-      // Extract the store IDs from the array field
-      final List<String> storeId =
-          List<String>.from(featuredStoreDoc['stores'] ?? []);
+      final List<String> storeIds =
+      List<String>.from(featuredStoreDoc['stores'] ?? []);
 
-      // Fetch the actual store documents using the store IDs
-      if (storeId.isNotEmpty) {
+      if (storeIds.isNotEmpty) {
         final storesSnapshot = await FirebaseFirestore.instance
             .collection('Stores')
-            .where(FieldPath.documentId, whereIn: storeId)
+            .where(FieldPath.documentId, whereIn: storeIds)
             .get();
 
         setState(() {
           featuredStores = storesSnapshot.docs
               .map((doc) => StoreModel.fromFirestore(doc))
+              .where((store) => store.isActive) // Filter active stores
               .toList();
         });
       } else {
@@ -173,17 +195,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   Future<void> _fetchFeaturedProducts() async {
     try {
-      // Fetch the featured-products document from the Featured Products collection
       final featuredProductDoc = await FirebaseFirestore.instance
           .collection('Featured Products')
           .doc('featured-products')
           .get();
 
-      // Extract the product IDs from the array field
       final List<String> productIds =
-          List<String>.from(featuredProductDoc['products'] ?? []);
+      List<String>.from(featuredProductDoc['products'] ?? []);
 
-      // Fetch the actual product documents using the product IDs
       if (productIds.isNotEmpty) {
         List<ProductModel> products = [];
 
@@ -194,7 +213,17 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               .get();
 
           if (productDoc.exists) {
-            products.add(ProductModel.fromFirestore(productDoc));
+            final product = ProductModel.fromFirestore(productDoc);
+
+            // Check if the store is active
+            final storeDoc = await FirebaseFirestore.instance
+                .collection('Stores')
+                .doc(product.storeId)
+                .get();
+
+            if (storeDoc.exists && storeDoc.data()?['isActive'] == true) {
+              products.add(product);
+            }
           }
         }
 
@@ -356,22 +385,22 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 ),
               ),
               SizedBox(width: 22.w),
-              StreamBuilder(stream: _getNewNotificationsStream(),
+              StreamBuilder<bool>(
+                stream: _getNewNotificationsStream(),
                   builder:(context, snapshot) {
                     bool hasNewNotifications = snapshot.data ?? false;
                     return GestureDetector(
-                      onTap: () {
+                      onTap: () async {
                         Navigator.push(
                             context,
                             MaterialPageRoute(
                                 builder: (context) => const NotificationScreen()
                             )
                         );
+                        // After returning from NotificationScreen, update the last check time
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setInt('lastNotificationCheck', DateTime.now().millisecondsSinceEpoch);
                       },
-                      /* setState(() {
-                      isNewNotification = false;
-                    });
-                  },*/
                       child: Image.asset(
                         hasNewNotifications
                             ? 'assets/icons/new_notification_box.png'
@@ -387,23 +416,21 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               GestureDetector(
                 onTap: () {
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const MyProfileScreen()));
+                    context,
+                    MaterialPageRoute(builder: (context) => const MyProfileScreen()),
+                  );
                 },
-                child: widget.currentUser.photoURL != null
-                    ? CircleAvatar(
-                        radius: 30.0,
-                        backgroundImage:
-                            NetworkImage(widget.currentUser.photoURL ?? ''),
-                      )
-                    : CircleAvatar(
-                        radius: 30.0,
-                        backgroundColor: Theme.of(context).primaryColor,
-                        child: const Icon(Icons.person,
-                            color: Colors.white, size: 30.0),
-                      ),
-              ),
+                child: CircleAvatar(
+                  radius: 30.0,
+                  backgroundImage: widget.currentUser.photoURL != null
+                      ? CachedNetworkImageProvider(widget.currentUser.photoURL ?? ' ')
+                      : null,
+                  backgroundColor: Theme.of(context).primaryColor,
+                  child: widget.currentUser.photoURL == null
+                      ? const Icon(Icons.person, color: Colors.white, size: 30.0)
+                      : null,
+                ),
+              )
             ],
           ),
         ),
@@ -1039,20 +1066,38 @@ class CategoryProductsScreen extends StatelessWidget {
 
                   final products = snapshot.data!.docs;
 
-                  return GridView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    gridDelegate:
+                  return FutureBuilder<List<ProductModel>>(
+                    future: _filterActiveStoreProducts(products),
+                    builder: (context, activeProductsSnapshot) {
+                      if (activeProductsSnapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      if (activeProductsSnapshot.hasError) {
+                        return Center(child: Text('Error: ${activeProductsSnapshot.error}'));
+                      }
+
+                      final activeProducts = activeProductsSnapshot.data ?? [];
+
+                      if (activeProducts.isEmpty) {
+                        return const Center(
+                            child: Text('No active products found in this category'));
+                      }
+
+                      return GridView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                        gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                      childAspectRatio: 0.8,
-                    ),
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final product =
-                          ProductModel.fromFirestore(products[index]);
-                      return WishlistProductTile(product: product);
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 8,
+                          mainAxisSpacing: 8,
+                          childAspectRatio: 0.8,
+                        ),
+                        itemCount: activeProducts.length,
+                        itemBuilder: (context, index) {
+                          return WishlistProductTile(product: activeProducts[index]);
+                        },
+                      );
                     },
                   );
                 },
@@ -1062,6 +1107,24 @@ class CategoryProductsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<List<ProductModel>> _filterActiveStoreProducts(List<QueryDocumentSnapshot> products) async {
+    List<ProductModel> activeProducts = [];
+
+    for (var doc in products) {
+      final product = ProductModel.fromFirestore(doc);
+      final storeDoc = await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(product.storeId)
+          .get();
+
+      if (storeDoc.exists && storeDoc.data()?['isActive'] == true) {
+        activeProducts.add(product);
+      }
+    }
+
+    return activeProducts;
   }
 }
 

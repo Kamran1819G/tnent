@@ -7,6 +7,8 @@ import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/presentation/pages/catalog_pages/checkout_screen.dart';
 
+import '../product_detail_screen.dart';
+
 class CartScreen extends StatefulWidget {
   const CartScreen({Key? key}) : super(key: key);
 
@@ -24,6 +26,7 @@ class _CartScreenState extends State<CartScreen> {
     super.initState();
     _fetchCartItems();
   }
+
 
   Future<void> _fetchCartItems() async {
     String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -46,7 +49,7 @@ class _CartScreenState extends State<CartScreen> {
                 ...productDetails,
                 'variationDetails': productDetails['variations']
                     [item['variation']],
-                'isSelected': false,
+                'isSelected': item['isSelected'] ?? false, // Preserve selection state
               });
             }
           } catch (e) {
@@ -97,16 +100,18 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   void _updateSelectionState() {
-    _allItemsSelected = _cartItems.isNotEmpty &&
-        _cartItems.every((item) => item['isSelected'] == true);
-    _calculateTotalAmount();
+    setState(() {
+      _allItemsSelected = _cartItems.isNotEmpty &&
+          _cartItems.every((item) => item['isSelected'] == true);
+      _calculateTotalAmount();
+    });
   }
 
   void _calculateTotalAmount() {
     _totalAmount = _cartItems.where((item) => item['isSelected'] == true).fold(
         0,
-        (sum, item) =>
-            sum + (item['variationDetails'].price * item['quantity']));
+            (sum, item) =>
+        sum + (item['variationDetails'].price * item['quantity']));
   }
 
   void _toggleAllItemsSelection(bool? value) {
@@ -120,17 +125,17 @@ class _CartScreenState extends State<CartScreen> {
     _updateFirestore();
   }
 
-  void _updateItemSelection(
-      String productId, String variation, bool isSelected) {
+  void _updateItemSelection(String productId, String variation, bool isSelected) {
     setState(() {
       int index = _cartItems.indexWhere((item) =>
-          item['productId'] == productId && item['variation'] == variation);
+      item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
         _cartItems[index]['isSelected'] = isSelected;
         _updateSelectionState();
       }
     });
   }
+
 
   void _updateFirestore() {
     String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -139,6 +144,7 @@ class _CartScreenState extends State<CartScreen> {
               'productId': item['productId'],
               'quantity': item['quantity'],
               'variation': item['variation'],
+              'isSelected': item['isSelected'], // Include selection state
             })
         .toList();
 
@@ -149,25 +155,44 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   void _removeFromCart(String productId, String variation) {
-    setState(() {
-      _cartItems.removeWhere((item) =>
-          item['productId'] == productId && item['variation'] == variation);
-      _updateSelectionState();
-    });
-    _updateFirestore();
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Remove Product'),
+          content: Text('Are you sure you want to remove this product from your cart?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+                setState(() {
+                  _cartItems.removeWhere((item) =>
+                  item['productId'] == productId && item['variation'] == variation);
+                  _updateSelectionState();
+                });
+                _updateFirestore();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void _updateQuantity(String productId, String variation, int newQuantity) {
     setState(() {
       int index = _cartItems.indexWhere((item) =>
-          item['productId'] == productId && item['variation'] == variation);
+      item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
-        if (newQuantity > 0) {
-          _cartItems[index]['quantity'] = newQuantity;
-        } else {
-          _cartItems.removeAt(index);
-        }
-        _updateSelectionState();
+        _cartItems[index]['quantity'] = newQuantity.clamp(1, double.infinity).toInt();
+        _updateSelectionState(); // This will recalculate the total amount
       }
     });
     _updateFirestore();
@@ -360,7 +385,42 @@ class CartItemTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Container(
+          GestureDetector(
+          onTap: () {
+      // Create a ProductVariant instance
+      ProductVariant variant = ProductVariant(
+      discount: item['variationDetails'].discount ?? 0.0,
+      mrp: item['variationDetails'].mrp ?? 0.0,
+      price: item['variationDetails'].price,
+      stockQuantity: item['variationDetails'].stockQuantity ?? 0,
+      sku: item['variationDetails'].sku,
+    );
+
+    // Create a ProductModel instance
+    ProductModel product = ProductModel(
+      productId: item['productId'],
+      storeId: item['storeId'],
+      name: item['productName'],
+      description: item['description'] ?? '',
+      productCategory: item['productCategory'] ?? '',
+      storeCategory: item['storeCategory'] ?? '',
+      imageUrls: [item['productImage']],
+      isAvailable: item['isAvailable'] ?? true,
+      createdAt: item['createdAt'] ?? Timestamp.now(),
+      greenFlags: item['greenFlags'] ?? 0,
+      redFlags: item['redFlags'] ?? 0,
+      variations: {item['variation']: variant},
+    );
+
+    // Navigate to the ProductDetailScreen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductDetailScreen(product: product),
+      ),
+    );
+  },
+          child : Container(
             height: 285.h,
             width: 255.w,
             decoration: BoxDecoration(
@@ -376,6 +436,7 @@ class CartItemTile extends StatelessWidget {
                   size: 50.sp,
                   color: Colors.grey),
             ),
+          ),
           ),
           SizedBox(width: 16.w),
           Column(
@@ -414,7 +475,7 @@ class CartItemTile extends StatelessWidget {
                     icon: Icon(Icons.remove, size: 20.sp),
                     onPressed: () {
                       int newQuantity = item['quantity'] - 1;
-                      if (newQuantity >= 0) {
+                      if (newQuantity >= 1) {
                         onUpdateQuantity(
                             item['productId'], item['variation'], newQuantity);
                       }

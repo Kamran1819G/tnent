@@ -15,9 +15,14 @@ class RelatedProductsService {
           .where(FieldPath.documentId, isNotEqualTo: currentProduct.productId)
           .get();
 
-      relatedProducts = querySnapshot.docs
-          .map((doc) => ProductModel.fromFirestore(doc))
-          .toList();
+      for (var doc in querySnapshot.docs) {
+        // Check if the store is active
+        DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(doc['storeId']).get();
+        if (storeDoc.exists && storeDoc['isActive'] == true) {
+          relatedProducts.add(ProductModel.fromFirestore(doc));
+        }
+      }
+
 
       // If we don't have 10 products yet, fetch more based on the store category
       if (relatedProducts.length < 10) {
@@ -27,13 +32,18 @@ class RelatedProductsService {
             .where(FieldPath.documentId, isNotEqualTo: currentProduct.productId)
             .get();
 
-        relatedProducts.addAll(
-            additionalQuery.docs
-                .map((doc) => ProductModel.fromFirestore(doc))
-                .where((product) => !relatedProducts.contains(product))
-                .toList()
-        );
+        for (var doc in additionalQuery.docs) {
+          // Check if the store is active
+          DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(doc['storeId']).get();
+          if (storeDoc.exists && storeDoc['isActive'] == true) {
+            ProductModel product = ProductModel.fromFirestore(doc);
+            if (!relatedProducts.contains(product)) {
+              relatedProducts.add(product);
+            }
+          }
+        }
       }
+
 
       return relatedProducts;
     } catch (e) {
@@ -57,26 +67,39 @@ class RelatedProductsService {
           .collection('products')
           .orderBy(FieldPath.documentId)
           .startAfter([countSnapshot.docs[randomStart].id])
-          .limit(count)
+          .limit(count * 2)  // Fetch more to account for inactive stores
           .get();
 
-      List<ProductModel> randomProducts = snapshot.docs
-          .map((doc) => ProductModel.fromFirestore(doc))
-          .toList();
+      List<ProductModel> randomProducts = [];
+
+      for (var doc in snapshot.docs) {
+        // Check if the store is active
+        DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(doc['storeId']).get();
+        if (storeDoc.exists && storeDoc['isActive'] == true) {
+          randomProducts.add(ProductModel.fromFirestore(doc));
+          if (randomProducts.length == count) break;
+        }
+      }
 
       // If we didn't get enough products, wrap around to the beginning
       if (randomProducts.length < count) {
         QuerySnapshot additionalSnapshot = await _firestore
             .collection('products')
             .orderBy(FieldPath.documentId)
-            .limit(count - randomProducts.length)
+            .limit(count * 2)  // Fetch more to account for inactive stores
             .get();
 
-        randomProducts.addAll(
-            additionalSnapshot.docs
-                .map((doc) => ProductModel.fromFirestore(doc))
-                .toList()
-        );
+        for (var doc in additionalSnapshot.docs) {
+          // Check if the store is active
+          DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(doc['storeId']).get();
+          if (storeDoc.exists && storeDoc['isActive'] == true) {
+            ProductModel product = ProductModel.fromFirestore(doc);
+            if (!randomProducts.contains(product)) {
+              randomProducts.add(product);
+              if (randomProducts.length == count) break;
+            }
+          }
+        }
       }
 
       return randomProducts;

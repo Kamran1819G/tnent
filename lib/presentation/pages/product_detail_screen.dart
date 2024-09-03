@@ -68,11 +68,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   Future<void> _loadRelatedProducts() async {
     List<ProductModel> fetchedRelatedProducts =
-    await RelatedProductsService.fetchRelatedProducts(widget.product);
+        await RelatedProductsService.fetchRelatedProducts(widget.product);
 
     if (fetchedRelatedProducts.isEmpty) {
       // If no related products, fetch random products
-      fetchedRelatedProducts = await RelatedProductsService.fetchRandomProducts(5); // Fetch 5 random products
+      fetchedRelatedProducts = await RelatedProductsService.fetchRandomProducts(
+          5); // Fetch 5 random products
     }
 
     setState(() {
@@ -96,7 +97,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       return [];
     }
   }
-
 
   Future<void> _loadReviews() async {
     QuerySnapshot reviewsSnapshot = await FirebaseFirestore.instance
@@ -466,52 +466,66 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             width: 620.w,
                             child: widget.product.imageUrls.length == 1
                                 ? Center(
-                              child: Container(
-                                width: 445.w,
-                                height: 490.h,
-                                margin: EdgeInsets.symmetric(horizontal: 12.w),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  child: CachedNetworkImage(
-                                    imageUrl: widget.product.imageUrls[0],
-                                    cacheManager: DefaultCacheManager(),
-                                    placeholder: (context, url) => Shimmer.fromColors(
-                                      baseColor: hexToColor('#E0E0E0'),
-                                      highlightColor: hexToColor('#F5F5F5'),
-                                      child: Container(color: Colors.white),
-                                    ),
-                                    errorWidget: (context, url, error) => Icon(Icons.error),
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            )
-                                : ListView.builder(
-                              controller: imagesController,
-                              scrollDirection: Axis.horizontal,
-                              itemCount: widget.product.imageUrls.length,
-                              itemBuilder: (context, index) {
-                                return Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 12.w),
-                                  width: 445.w,
-                                  height: 490.h,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.r),
-                                    child: CachedNetworkImage(
-                                      imageUrl: widget.product.imageUrls[index],
-                                      cacheManager: DefaultCacheManager(),
-                                      placeholder: (context, url) => Shimmer.fromColors(
-                                        baseColor: hexToColor('#E0E0E0'),
-                                        highlightColor: hexToColor('#F5F5F5'),
-                                        child: Container(color: Colors.white),
+                                    child: Container(
+                                      width: 445.w,
+                                      height: 490.h,
+                                      margin: EdgeInsets.symmetric(
+                                          horizontal: 12.w),
+                                      child: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(8.r),
+                                        child: CachedNetworkImage(
+                                          imageUrl: widget.product.imageUrls[0],
+                                          cacheManager: DefaultCacheManager(),
+                                          placeholder: (context, url) =>
+                                              Shimmer.fromColors(
+                                            baseColor: hexToColor('#E0E0E0'),
+                                            highlightColor:
+                                                hexToColor('#F5F5F5'),
+                                            child:
+                                                Container(color: Colors.white),
+                                          ),
+                                          errorWidget: (context, url, error) =>
+                                              Icon(Icons.error),
+                                          fit: BoxFit.cover,
+                                        ),
                                       ),
-                                      errorWidget: (context, url, error) => Icon(Icons.error),
-                                      fit: BoxFit.cover,
                                     ),
+                                  )
+                                : ListView.builder(
+                                    controller: imagesController,
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: widget.product.imageUrls.length,
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        margin: EdgeInsets.symmetric(
+                                            horizontal: 12.w),
+                                        width: 445.w,
+                                        height: 490.h,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8.r),
+                                          child: CachedNetworkImage(
+                                            imageUrl:
+                                                widget.product.imageUrls[index],
+                                            cacheManager: DefaultCacheManager(),
+                                            placeholder: (context, url) =>
+                                                Shimmer.fromColors(
+                                              baseColor: hexToColor('#E0E0E0'),
+                                              highlightColor:
+                                                  hexToColor('#F5F5F5'),
+                                              child: Container(
+                                                  color: Colors.white),
+                                            ),
+                                            errorWidget:
+                                                (context, url, error) =>
+                                                    Icon(Icons.error),
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
                           ),
                           SizedBox(height: 30.h),
                           Container(
@@ -565,6 +579,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         store.logoUrl,
                                         width: 50.w,
                                         height: 50.h,
+                                        fit: BoxFit.cover,
                                       )),
                                   SizedBox(width: 12.w),
                                   Text(
@@ -927,61 +942,68 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             height: 300.h,
                             child: relatedProducts.isEmpty
                                 ? ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: 5, // Show 3 placeholder items
-                              itemBuilder: (context, index) {
-                                return Shimmer.fromColors(
-                                  baseColor: hexToColor('#E0E0E0'),
-                                  highlightColor: hexToColor('#F5F5F5'),
-                                  child: Container(
-                                    width: 200.w,
-                                    margin: EdgeInsets.only(right: 12.w),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12.r),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          height: 150.h,
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: 5, // Show 3 placeholder items
+                                    itemBuilder: (context, index) {
+                                      return Shimmer.fromColors(
+                                        baseColor: hexToColor('#E0E0E0'),
+                                        highlightColor: hexToColor('#F5F5F5'),
+                                        child: Container(
+                                          width: 200.w,
+                                          margin: EdgeInsets.only(right: 12.w),
                                           decoration: BoxDecoration(
                                             color: Colors.white,
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(12.r),
-                                              topRight: Radius.circular(12.r),
-                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(12.r),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                height: 150.h,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(12.r),
+                                                    topRight:
+                                                        Radius.circular(12.r),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 10.h),
+                                              Container(
+                                                margin: EdgeInsets.symmetric(
+                                                    horizontal: 10.w),
+                                                height: 20.h,
+                                                width: 150.w,
+                                                color: Colors.white,
+                                              ),
+                                              SizedBox(height: 5.h),
+                                              Container(
+                                                margin: EdgeInsets.symmetric(
+                                                    horizontal: 10.w),
+                                                height: 15.h,
+                                                width: 100.w,
+                                                color: Colors.white,
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        SizedBox(height: 10.h),
-                                        Container(
-                                          margin: EdgeInsets.symmetric(horizontal: 10.w),
-                                          height: 20.h,
-                                          width: 150.w,
-                                          color: Colors.white,
-                                        ),
-                                        SizedBox(height: 5.h),
-                                        Container(
-                                          margin: EdgeInsets.symmetric(horizontal: 10.w),
-                                          height: 15.h,
-                                          width: 100.w,
-                                          color: Colors.white,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            )
+                                      );
+                                    },
+                                  )
                                 : ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: relatedProducts.length,
-                              itemBuilder: (context, index) {
-                                return WishlistProductTile(
-                                  product: relatedProducts[index],
-                                );
-                              },
-                            ),
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: relatedProducts.length,
+                                    itemBuilder: (context, index) {
+                                      return WishlistProductTile(
+                                        product: relatedProducts[index],
+                                      );
+                                    },
+                                  ),
                           ),
                         ],
                       ),

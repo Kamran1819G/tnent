@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -36,7 +38,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
   late int greenFlags;
   late int redFlags;
   UserModel? currentUser;
-
+  bool isStoreActive = true; // New variable to track store active status
   late AnimationController _controller;
   late Animation<double> _animation;
 
@@ -81,8 +83,42 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
       curve: Curves.easeInOut,
     );
     listenToFlagChanges();
+    checkStoreActiveStatus(); // New method to check store active status
   }
 
+  // New method to check store active status
+  Future<void> checkStoreActiveStatus() async {
+    try {
+      DocumentSnapshot storeDoc = await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(widget.store.storeId)
+          .get();
+
+      setState(() {
+        isStoreActive = storeDoc.get('isActive') ?? true;
+      });
+
+      if (!isStoreActive) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Store Closed'),
+            content: Text('This store is currently offline.'),
+            actions: [
+              TextButton(
+                child: Text('OK'),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      print('Error checking store active status: $e');
+    }
+  }
+
+  // New method to show store offline popup
   Future<void> _fetchStoreCommunityPosts() async {
     try {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -312,8 +348,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
         });
 
         setState(() {
-          isConnected = true;
-          storeEngagement++;
+          isConnected = !isConnected;
+          storeEngagement+= isConnected ? 1 :-1;
         });
         sendStoreFollowNotification();
       } else {
@@ -327,8 +363,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
         });
 
         setState(() {
-          isConnected = false;
-          storeEngagement--;
+          isConnected = !isConnected;
+          storeEngagement+= isConnected ? 1 :-1;
         });
       }
     });
@@ -363,7 +399,9 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
+      body: Stack (
+        children: [
+          SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -894,6 +932,8 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
           ),
         ),
       ),
+    ],
+    ),
     );
   }
 

@@ -63,8 +63,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     setState(() {
       if (newQuantity > 0) {
         _items[index]['quantity'] = newQuantity;
-      } else {
-        _items.removeAt(index);
       }
       _calculateTotalAmount();
     });
@@ -2089,8 +2087,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
           bigPicture: 'file://$bigPicturePath',
           notificationLayout: NotificationLayout.BigPicture,
           payload: {
-            'orderId': item['orderId'],
-            'productName': item['productName'],
+            'orderId': item['orderId'].toString(),
+            'productName': item['productName'].toString(),
           },
         ),
       );

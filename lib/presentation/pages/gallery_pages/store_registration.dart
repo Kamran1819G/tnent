@@ -107,7 +107,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         phone: _phoneController.text,
         email: _emailController.text,
         logoUrl:
-            "https://firebasestorage.googleapis.com/v0/b/tnent-1e1f2.appspot.com/o/Don't%20Delete%2Fblack_tnent_logo.png?alt=media&token=7880c411-c4dc-4615-b800-f55193f23721",
+            "https://firebasestorage.googleapis.com/v0/b/tnennt-1e1f2.appspot.com/o/Don't%20Delete%2Fblack_tnennt_logo.png?alt=media&token=7880c411-c4dc-4615-b800-f55193f23721",
         storeDomain: '${_storeDomainController.text}.tnent.com',
         upiUsername: _upiUsernameController.text,
         upiId: _upiIdController.text,
@@ -700,7 +700,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          if (_termsAccepted && _isStoreEmailUnique) {
+                          if (_emailController.text.isNotEmpty &&
+                              _termsAccepted &&
+                              _isStoreEmailUnique) {
                             _pageController.jumpToPage(_currentPageIndex + 1);
                           } else {
                             showSnackBar(context,
@@ -725,6 +727,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     ),
                   ],
                 ),
+
                 // Page 5: Store Name
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -790,12 +793,17 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          _pageController.jumpToPage(_currentPageIndex + 1);
-                          setState(() {
-                            _storeDomainController.text = _nameController.text
-                                .toLowerCase()
-                                .replaceAll(' ', '');
-                          });
+                          if (_nameController.text.isNotEmpty) {
+                            _pageController.jumpToPage(_currentPageIndex + 1);
+                            setState(() {
+                              _storeDomainController.text = _nameController.text
+                                  .toLowerCase()
+                                  .replaceAll(' ', '');
+                            });
+                          } else {
+                            showSnackBar(
+                                context, 'Please enter a valid store name');
+                          }
                         },
                         child: Container(
                           height: 95.h,
@@ -921,12 +929,15 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     SizedBox(height: 600.h),
                     Center(
                       child: GestureDetector(
-                        onTap: _isStoreDomainUnique
-                            ? () {
-                                _pageController
-                                    .jumpToPage(_currentPageIndex + 1);
-                              }
-                            : null,
+                        onTap: () {
+                          if (_storeDomainController.text.isNotEmpty &&
+                              _isStoreDomainUnique) {
+                            _pageController.jumpToPage(_currentPageIndex + 1);
+                          } else if (_storeDomainController.text.isEmpty) {
+                            showSnackBar(
+                                context, 'Please enter a valid store domain');
+                          }
+                        },
                         child: Container(
                           height: 95.h,
                           width: 480.w,
@@ -1054,7 +1065,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     ),
                     Center(
                       child: GestureDetector(
-                        onTap: _onContinuePressed,
+                        onTap: selectedCategory != null
+                            ? _onContinuePressed
+                            : null,
                         child: Container(
                           height: 95.h,
                           width: 480.w,
@@ -1196,7 +1209,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          _pageController.jumpToPage(_currentPageIndex + 1);
+                          if (_upiUsernameController.text.isNotEmpty &&
+                              _upiIdController.text.isNotEmpty) {
+                            _pageController.jumpToPage(_currentPageIndex + 1);
+                          } else {
+                            showSnackBar(
+                                context, 'Please enter your UPI details');
+                          }
                         },
                         child: Container(
                           height: 95.h,
@@ -1278,8 +1297,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               showSnackBar(
                                 context,
                                 'Fetching your current location...',
-                                bgColor: Colors.red,
-                                duration: const Duration(seconds: 30),
+                                bgColor: Colors.green,
+                                duration: const Duration(seconds: 5),
                               );
 
                               String location = await getCurrentLocation();
@@ -1311,7 +1330,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          _pageController.jumpToPage(_currentPageIndex + 1);
+                          if (_locationController.text.isNotEmpty) {
+                            _pageController.jumpToPage(_currentPageIndex + 1);
+                          } else {
+                            showSnackBar(
+                                context, 'Please enter your store location');
+                          }
                         },
                         child: Container(
                           height: 95.h,
@@ -1547,33 +1571,203 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           ),
                         ],
                       ),
-                      SizedBox(height: 30.h),
-                      Center(
-                        child: GestureDetector(
-                          onTap: () async {
-                            try {
-                              await _registerStore();
-                              _pageController.jumpToPage(_currentPageIndex + 1);
-                            } catch (e) {
-                              print(e);
-                            }
-                          },
-                          child: Container(
-                            height: 95.h,
-                            width: 595.w,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor,
-                              borderRadius: BorderRadius.circular(22.r),
+                      // SizedBox(height: 30.h),
+                      // Center(
+                      //   child: GestureDetector(
+                      //     onTap: () async {
+                      //       try {
+                      //         await _registerStore();
+                      //         _pageController.jumpToPage(_currentPageIndex + 1);
+                      //       } catch (e) {
+                      //         print(e);
+                      //       }
+                      //     },
+                      //     child: Container(
+                      //       height: 95.h,
+                      //       width: 595.w,
+                      //       alignment: Alignment.center,
+                      //       decoration: BoxDecoration(
+                      //         color: Theme.of(context).primaryColor,
+                      //         borderRadius: BorderRadius.circular(22.r),
+                      //       ),
+                      //       child: Text('Pay ₹2999.00',
+                      //           style: TextStyle(
+                      //               fontSize: 28.sp,
+                      //               color: Colors.white,
+                      //               fontFamily: 'Gotham',
+                      //               fontWeight: FontWeight.w500)),
+                      // ),
+                      SizedBox(height: 100.h),
+                      Container(
+                          margin: EdgeInsets.symmetric(horizontal: 50.w),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    radius: 15.w,
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Lifetime Store Access',
+                                    style: TextStyle(
+                                      color: hexToColor('#636363'),
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20.h),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    radius: 15.w,
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Provided middlemen for item delivery',
+                                    style: TextStyle(
+                                      color: hexToColor('#636363'),
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20.h),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    radius: 15.w,
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Free store domain',
+                                    style: TextStyle(
+                                      color: hexToColor('#636363'),
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20.h),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    radius: 15.w,
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Free marketing & advertisement space',
+                                    style: TextStyle(
+                                      color: hexToColor('#636363'),
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20.sp),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    radius: 15.w,
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Unlimited coupon generator for your store',
+                                    style: TextStyle(
+                                      color: hexToColor('#636363'),
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20.h),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    radius: 15.w,
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Print store analytics in excel, pdf or jpeg',
+                                    style: TextStyle(
+                                      color: hexToColor('#636363'),
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )),
+                      SizedBox(height: 300.h),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Hurry up! Register now and start your digital store',
+                            style: TextStyle(
+                              color: hexToColor('#636363'),
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16.sp,
                             ),
-                            child: Text('Pay ₹2999.00',
-                                style: TextStyle(
-                                    fontSize: 28.sp,
-                                    color: Colors.white,
-                                    fontFamily: 'Gotham',
-                                    fontWeight: FontWeight.w500)),
                           ),
-                        ),
+                        ],
                       ),
                     ],
                   ),

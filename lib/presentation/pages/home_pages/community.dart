@@ -360,18 +360,13 @@ class _CommunityPostState extends State<CommunityPost> {
               onTap: () => _showFullScreenImage(widget.post.images[index]),
               child: Hero(
                 tag: 'postImage${widget.post.postId}$index',
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(8.0),
-                  child: FadeInImage.memoryNetwork(
-                    placeholder: kTransparentImage,
-                    image: widget.post.images[index],
-                    fit: BoxFit.cover,
-                    fadeInDuration: const Duration(milliseconds: 300),
-                    fadeInCurve: Curves.easeIn,
-                    imageErrorBuilder: (context, error, stackTrace) {
-                      return const Center(child: Icon(Icons.error));
-                    },
+                child: CachedNetworkImage(
+                  imageUrl: widget.post.images[index],
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(),
                   ),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
                 ),
               ),
             );
