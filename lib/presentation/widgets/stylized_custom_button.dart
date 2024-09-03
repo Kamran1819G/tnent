@@ -22,7 +22,7 @@ class StylizedCustomButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
+              borderRadius: BorderRadius.circular(40),
               color: Colors.grey[200],
             ),
             child: Row(
@@ -36,7 +36,7 @@ class StylizedCustomButton extends StatelessWidget {
                           icon,
                           scale: 2,
                         )
-                      : const Icon(Icons.settings_outlined,
+                      : const Icon(Icons.more_horiz_outlined,
                           color: Colors.black26, size: 32),
                 ),
                 const SizedBox(

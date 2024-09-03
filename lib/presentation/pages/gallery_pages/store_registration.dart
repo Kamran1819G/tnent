@@ -1332,249 +1332,251 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                   ],
                 ),
                 // Page 10: Store Description
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _buildStoreRegistrationPageHeader(
-                        context, _pageController, _currentPageIndex),
-                    SizedBox(height: 100.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 32.w),
-                      child: Column(
+                SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _buildStoreRegistrationPageHeader(
+                          context, _pageController, _currentPageIndex),
+                      SizedBox(height: 100.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 32.w),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Pay Once & Own Your Store Forever',
+                              style: TextStyle(
+                                color: hexToColor('#2A2A2A'),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 55.sp,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            Text(
+                              'Get instant access to your personalized store and list unlimited items to your digital space ',
+                              style: TextStyle(
+                                color: hexToColor('#636363'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 20.sp,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 100.h),
+                      Container(
+                          margin: EdgeInsets.symmetric(horizontal: 50.w),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    radius: 15.w,
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Lifetime Store Access',
+                                    style: TextStyle(
+                                      color: hexToColor('#636363'),
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20.h),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    radius: 15.w,
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Provided middlemen for item delivery',
+                                    style: TextStyle(
+                                      color: hexToColor('#636363'),
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20.h),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    radius: 15.w,
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Free store domain',
+                                    style: TextStyle(
+                                      color: hexToColor('#636363'),
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20.h),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    radius: 15.w,
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Free marketing & advertisement space',
+                                    style: TextStyle(
+                                      color: hexToColor('#636363'),
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20.sp),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    radius: 15.w,
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Unlimited coupon generator for your store',
+                                    style: TextStyle(
+                                      color: hexToColor('#636363'),
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              SizedBox(height: 20.h),
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                    backgroundColor:
+                                        Theme.of(context).primaryColor,
+                                    radius: 15.w,
+                                    child: Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 16.sp,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Text(
+                                    'Print store analytics in excel, pdf or jpeg',
+                                    style: TextStyle(
+                                      color: hexToColor('#636363'),
+                                      fontFamily: 'Poppins',
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 20.sp,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          )),
+                      SizedBox(height: 300.h),
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            'Pay Once & Own Your Store Forever',
-                            style: TextStyle(
-                              color: hexToColor('#2A2A2A'),
-                              fontWeight: FontWeight.w500,
-                              fontSize: 55.sp,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          Text(
-                            'Get instant access to your personalized store and list unlimited items to your digital space ',
+                            'Hurry up! Register now and start your digital store',
                             style: TextStyle(
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              fontSize: 20.sp,
+                              fontSize: 16.sp,
                             ),
-                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            'Join Our Tnent Community',
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 16.sp,
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                    SizedBox(height: 100.h),
-                    Container(
-                        margin: EdgeInsets.symmetric(horizontal: 50.w),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                  radius: 15.w,
-                                  child: Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 16.sp,
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
-                                Text(
-                                  'Lifetime Store Access',
-                                  style: TextStyle(
-                                    color: hexToColor('#636363'),
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 20.sp,
-                                  ),
-                                ),
-                              ],
+                      SizedBox(height: 30.h),
+                      Center(
+                        child: GestureDetector(
+                          onTap: () async {
+                            try {
+                              await _registerStore();
+                              _pageController.jumpToPage(_currentPageIndex + 1);
+                            } catch (e) {
+                              print(e);
+                            }
+                          },
+                          child: Container(
+                            height: 95.h,
+                            width: 595.w,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).primaryColor,
+                              borderRadius: BorderRadius.circular(22.r),
                             ),
-                            SizedBox(height: 20.h),
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                  radius: 15.w,
-                                  child: Icon(
-                                    Icons.check,
+                            child: Text('Pay ₹2999.00',
+                                style: TextStyle(
+                                    fontSize: 28.sp,
                                     color: Colors.white,
-                                    size: 16.sp,
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
-                                Text(
-                                  'Provided middlemen for item delivery',
-                                  style: TextStyle(
-                                    color: hexToColor('#636363'),
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 20.sp,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20.h),
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                  radius: 15.w,
-                                  child: Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 16.sp,
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
-                                Text(
-                                  'Free store domain',
-                                  style: TextStyle(
-                                    color: hexToColor('#636363'),
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 20.sp,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20.h),
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                  radius: 15.w,
-                                  child: Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 16.sp,
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
-                                Text(
-                                  'Free marketing & advertisement space',
-                                  style: TextStyle(
-                                    color: hexToColor('#636363'),
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 20.sp,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20.sp),
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                  radius: 15.w,
-                                  child: Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 16.sp,
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
-                                Text(
-                                  'Unlimited coupon generator for your store',
-                                  style: TextStyle(
-                                    color: hexToColor('#636363'),
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 20.sp,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 20.h),
-                            Row(
-                              children: [
-                                CircleAvatar(
-                                  backgroundColor:
-                                      Theme.of(context).primaryColor,
-                                  radius: 15.w,
-                                  child: Icon(
-                                    Icons.check,
-                                    color: Colors.white,
-                                    size: 16.sp,
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
-                                Text(
-                                  'Print store analytics in excel, pdf or jpeg',
-                                  style: TextStyle(
-                                    color: hexToColor('#636363'),
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 20.sp,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        )),
-                    SizedBox(height: 300.h),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Hurry up! Register now and start your digital store',
-                          style: TextStyle(
-                            color: hexToColor('#636363'),
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16.sp,
+                                    fontFamily: 'Gotham',
+                                    fontWeight: FontWeight.w500)),
                           ),
-                        ),
-                        Text(
-                          'Join Our Tnent Community',
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 16.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 30.h),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () async {
-                          try {
-                            await _registerStore();
-                            _pageController.jumpToPage(_currentPageIndex + 1);
-                          } catch (e) {
-                            print(e);
-                          }
-                        },
-                        child: Container(
-                          height: 95.h,
-                          width: 595.w,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor,
-                            borderRadius: BorderRadius.circular(22.r),
-                          ),
-                          child: Text('Pay ₹2999.00',
-                              style: TextStyle(
-                                  fontSize: 28.sp,
-                                  color: Colors.white,
-                                  fontFamily: 'Gotham',
-                                  fontWeight: FontWeight.w500)),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 // Page 11:  Congratulation Page
                 Column(

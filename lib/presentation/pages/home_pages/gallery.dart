@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:get/get.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
+import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/core/routes/app_routes.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/presentation/pages/gallery_pages/store_registration.dart';
@@ -37,26 +38,33 @@ class _GalleryState extends State<Gallery> {
   }
 
   Future<void> _checkStoreRegistration() async {
-    final user = FirebaseAuth.instance.currentUser;
-    print(user?.uid);
-    if (user != null) {
-      final storeId = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(user.uid)
-          .get()
-          .then((doc) => doc.get('storeId'));
-      if (storeId.isNotEmpty) {
-        final storeDoc = await FirebaseFirestore.instance
-            .collection('Stores')
-            .doc(storeId)
-            .get();
-        setState(() {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      print(user?.uid);
+
+      if (user != null) {
+        final storeId = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get()
+            .then((doc) => doc.get('storeId'));
+        if (storeId.isNotEmpty) {
+          final storeDoc = await FirebaseFirestore.instance
+              .collection('Stores')
+              .doc(storeId)
+              .get();
           isStoreRegistered = storeDoc.exists;
-          isLoaded = true;
           store = StoreModel.fromFirestore(storeDoc);
           isActive = store.isActive;
-        });
+        }
       }
+    } catch (e) {
+      // if (storeId.isNotEmpty) throws error  when no store is present
+
+      // showSnackBar(context, e.toString());
+    } finally {
+      isLoaded = true;
+      setState(() {});
     }
   }
 

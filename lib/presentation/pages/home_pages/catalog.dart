@@ -46,11 +46,9 @@ class _CatalogState extends State<Catalog> {
       },
     },
     {
-      "title": "Settings",
+      "title": "Coming Soon",
       "icon": "",
-      "function": () {
-        Get.to(() => const MyProfileScreen());
-      },
+      "function": () {},
     },
   ];
   bool isNewNotification = true;
