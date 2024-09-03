@@ -12,7 +12,7 @@ void showSnackBar(
     Icons.warning_amber_rounded,
     color: Colors.white,
   ),
-  Color bgColor = const Color.fromRGBO(9, 68, 79, 1), // dark green
+  Color bgColor = const Color.fromRGBO(49, 49, 49, 0.98), // dark green
   // Color bgColor = const Color.fromRGBO(159, 168, 218, 1), // purple
   Duration duration = const Duration(seconds: 4),
 }) {
@@ -22,10 +22,12 @@ void showSnackBar(
     context: context,
     style: toastificationStyle,
     type: toastificationType,
+    borderSide: const BorderSide(color: Colors.transparent),
     title: Text(
       message!,
+      textAlign: TextAlign.center,
       style: TextStyle(
-        fontSize: 14.sp,
+        fontSize: 16.sp,
         color: Colors.white,
         fontFamily: 'Poppins',
         fontWeight: FontWeight.w500,
@@ -44,6 +46,7 @@ void showSnackBarWithAction(BuildContext context,
     String confirmBtnText = 'Yes',
     String cancelBtnText = 'No',
     Color confirmBtnColor = Colors.black,
+    double buttonTextFontsize = 16,
     Color bgColor = Colors.white,
     QuickAlertType quickAlertType = QuickAlertType.confirm}) {
   QuickAlert.show(
@@ -51,6 +54,10 @@ void showSnackBarWithAction(BuildContext context,
     context: context,
     type: quickAlertType,
     text: text,
+    cancelBtnTextStyle:
+        TextStyle(fontSize: buttonTextFontsize, color: Colors.grey),
+    confirmBtnTextStyle:
+        TextStyle(fontSize: buttonTextFontsize, color: Colors.white),
     confirmBtnText: confirmBtnText,
     cancelBtnText: cancelBtnText,
     confirmBtnColor: confirmBtnColor,

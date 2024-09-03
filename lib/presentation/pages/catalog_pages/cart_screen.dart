@@ -27,7 +27,6 @@ class _CartScreenState extends State<CartScreen> {
     _fetchCartItems();
   }
 
-
   Future<void> _fetchCartItems() async {
     String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     FirebaseFirestore.instance
@@ -49,7 +48,8 @@ class _CartScreenState extends State<CartScreen> {
                 ...productDetails,
                 'variationDetails': productDetails['variations']
                     [item['variation']],
-                'isSelected': item['isSelected'] ?? false, // Preserve selection state
+                'isSelected':
+                    item['isSelected'] ?? false, // Preserve selection state
               });
             }
           } catch (e) {
@@ -71,13 +71,13 @@ class _CartScreenState extends State<CartScreen> {
       DocumentSnapshot productDoc = await FirebaseFirestore.instance
           .collection('products')
           .doc(productId)
-          .get(GetOptions(source: Source.cache));
+          .get(const GetOptions(source: Source.cache));
 
       if (!productDoc.exists) {
         productDoc = await FirebaseFirestore.instance
             .collection('products')
             .doc(productId)
-            .get(GetOptions(source: Source.server));
+            .get(const GetOptions(source: Source.server));
       }
 
       if (!productDoc.exists) {
@@ -110,8 +110,8 @@ class _CartScreenState extends State<CartScreen> {
   void _calculateTotalAmount() {
     _totalAmount = _cartItems.where((item) => item['isSelected'] == true).fold(
         0,
-            (sum, item) =>
-        sum + (item['variationDetails'].price * item['quantity']));
+        (sum, item) =>
+            sum + (item['variationDetails'].price * item['quantity']));
   }
 
   void _toggleAllItemsSelection(bool? value) {
@@ -125,17 +125,17 @@ class _CartScreenState extends State<CartScreen> {
     _updateFirestore();
   }
 
-  void _updateItemSelection(String productId, String variation, bool isSelected) {
+  void _updateItemSelection(
+      String productId, String variation, bool isSelected) {
     setState(() {
       int index = _cartItems.indexWhere((item) =>
-      item['productId'] == productId && item['variation'] == variation);
+          item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
         _cartItems[index]['isSelected'] = isSelected;
         _updateSelectionState();
       }
     });
   }
-
 
   void _updateFirestore() {
     String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -159,22 +159,24 @@ class _CartScreenState extends State<CartScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Remove Product'),
-          content: Text('Are you sure you want to remove this product from your cart?'),
+          title: const Text('Remove Product'),
+          content: const Text(
+              'Are you sure you want to remove this product from your cart?'),
           actions: <Widget>[
             TextButton(
-              child: Text('No'),
+              child: const Text('No'),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
             ),
             TextButton(
-              child: Text('Yes'),
+              child: const Text('Yes'),
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
                 setState(() {
                   _cartItems.removeWhere((item) =>
-                  item['productId'] == productId && item['variation'] == variation);
+                      item['productId'] == productId &&
+                      item['variation'] == variation);
                   _updateSelectionState();
                 });
                 _updateFirestore();
@@ -189,9 +191,10 @@ class _CartScreenState extends State<CartScreen> {
   void _updateQuantity(String productId, String variation, int newQuantity) {
     setState(() {
       int index = _cartItems.indexWhere((item) =>
-      item['productId'] == productId && item['variation'] == variation);
+          item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
-        _cartItems[index]['quantity'] = newQuantity.clamp(1, double.infinity).toInt();
+        _cartItems[index]['quantity'] =
+            newQuantity.clamp(1, double.infinity).toInt();
         _updateSelectionState(); // This will recalculate the total amount
       }
     });
@@ -240,17 +243,18 @@ class _CartScreenState extends State<CartScreen> {
                       ),
                     ],
                   ),
-                  Spacer(),
+                  const Spacer(),
                   IconButton(
                     style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all(
                         Colors.grey[100],
                       ),
                       shape: MaterialStateProperty.all(
-                        CircleBorder(),
+                        const CircleBorder(),
                       ),
                     ),
-                    icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                    icon: const Icon(Icons.arrow_back_ios_new,
+                        color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -386,57 +390,57 @@ class CartItemTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           GestureDetector(
-          onTap: () {
-      // Create a ProductVariant instance
-      ProductVariant variant = ProductVariant(
-      discount: item['variationDetails'].discount ?? 0.0,
-      mrp: item['variationDetails'].mrp ?? 0.0,
-      price: item['variationDetails'].price,
-      stockQuantity: item['variationDetails'].stockQuantity ?? 0,
-      sku: item['variationDetails'].sku,
-    );
+            onTap: () {
+              // Create a ProductVariant instance
+              ProductVariant variant = ProductVariant(
+                discount: item['variationDetails'].discount ?? 0.0,
+                mrp: item['variationDetails'].mrp ?? 0.0,
+                price: item['variationDetails'].price,
+                stockQuantity: item['variationDetails'].stockQuantity ?? 0,
+                sku: item['variationDetails'].sku,
+              );
 
-    // Create a ProductModel instance
-    ProductModel product = ProductModel(
-      productId: item['productId'],
-      storeId: item['storeId'],
-      name: item['productName'],
-      description: item['description'] ?? '',
-      productCategory: item['productCategory'] ?? '',
-      storeCategory: item['storeCategory'] ?? '',
-      imageUrls: [item['productImage']],
-      isAvailable: item['isAvailable'] ?? true,
-      createdAt: item['createdAt'] ?? Timestamp.now(),
-      greenFlags: item['greenFlags'] ?? 0,
-      redFlags: item['redFlags'] ?? 0,
-      variations: {item['variation']: variant},
-    );
+              // Create a ProductModel instance
+              ProductModel product = ProductModel(
+                productId: item['productId'],
+                storeId: item['storeId'],
+                name: item['productName'],
+                description: item['description'] ?? '',
+                productCategory: item['productCategory'] ?? '',
+                storeCategory: item['storeCategory'] ?? '',
+                imageUrls: [item['productImage']],
+                isAvailable: item['isAvailable'] ?? true,
+                createdAt: item['createdAt'] ?? Timestamp.now(),
+                greenFlags: item['greenFlags'] ?? 0,
+                redFlags: item['redFlags'] ?? 0,
+                variations: {item['variation']: variant},
+              );
 
-    // Navigate to the ProductDetailScreen
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ProductDetailScreen(product: product),
-      ),
-    );
-  },
-          child : Container(
-            height: 285.h,
-            width: 255.w,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.r),
+              // Navigate to the ProductDetailScreen
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProductDetailScreen(product: product),
+                ),
+              );
+            },
+            child: Container(
+              height: 285.h,
+              width: 255.w,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: CachedNetworkImage(
+                imageUrl: item['productImage'] ?? '',
+                fit: BoxFit.cover,
+                placeholder: (context, url) =>
+                    const Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) => Icon(
+                    Icons.image_not_supported,
+                    size: 50.sp,
+                    color: Colors.grey),
+              ),
             ),
-            child: CachedNetworkImage(
-              imageUrl: item['productImage'] ?? '',
-              fit: BoxFit.cover,
-              placeholder: (context, url) =>
-                  Center(child: CircularProgressIndicator()),
-              errorWidget: (context, url, error) => Icon(
-                  Icons.image_not_supported,
-                  size: 50.sp,
-                  color: Colors.grey),
-            ),
-          ),
           ),
           SizedBox(width: 16.w),
           Column(
@@ -548,7 +552,7 @@ class CartItemTile extends StatelessWidget {
                     checkColor: Colors.black,
                     activeColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      side: BorderSide(color: Colors.black),
+                      side: const BorderSide(color: Colors.black),
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                     value: item['isSelected'] ?? false,

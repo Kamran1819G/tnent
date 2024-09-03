@@ -457,7 +457,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               },
                               icon: Icon(Icons.ios_share,
                                   color: Colors.white, size: 25.sp)),
-                          SizedBox(width: 16.w),
+                          // SizedBox(width: 12.w),
                           Container(
                             height: 45.h,
                             width: 205.w,
@@ -466,19 +466,23 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                               color: hexToColorWithOpacity('#C0C0C0', 0.2),
                               borderRadius: BorderRadius.circular(20.r),
                             ),
-                            child: Text(
-                              storeLocation,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Poppins',
-                                  fontSize: 17.sp),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 5),
+                              child: Text(
+                                storeLocation,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontFamily: 'Poppins',
+                                    fontSize: 17.sp),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
                             ),
                           ),
                           const Spacer(),
                           Text(
-                            "Accepting Orders: ",
+                            "Accepting Orders:  ",
                             style: TextStyle(
                               color: Colors.white,
                               fontFamily: 'Gotham',
@@ -493,11 +497,10 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                             child: Switch(
                                 value: isActive,
                                 activeColor: hexToColor('#41FA00'),
-                                trackOutlineColor:
-                                    MaterialStateColor.resolveWith(
-                                        (states) => Colors.grey),
+                                trackOutlineColor: WidgetStateColor.resolveWith(
+                                    (states) => Colors.grey),
                                 trackOutlineWidth:
-                                    MaterialStateProperty.resolveWith(
+                                    WidgetStateProperty.resolveWith(
                                         (states) => 1.0),
                                 activeTrackColor: Colors.transparent,
                                 inactiveTrackColor: Colors.transparent,

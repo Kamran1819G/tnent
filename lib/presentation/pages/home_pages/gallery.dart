@@ -195,17 +195,8 @@ class _GalleryState extends State<Gallery> {
                           children: [
                             Row(
                               children: [
-                                Container(
-                                  height: 135
-                                      .h, // Use responsive height if needed (e.g., 135.h)
-                                  width: 135
-                                      .w, // Use responsive width if needed (e.g., 135.w)
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 15.0),
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(18
-                                        .r), // Use responsive radius if needed (e.g., 18.r)
-                                  ),
+                                Padding(
+                                  padding: const EdgeInsets.all(16.0),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(18
                                         .r), // Use responsive radius if needed (e.g., 18.r)

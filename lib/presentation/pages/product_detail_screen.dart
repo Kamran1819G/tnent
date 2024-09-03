@@ -769,12 +769,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                 .instance.currentUser?.uid ??
                                             '';
                                         if (userId.isEmpty) {
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                                content: Text(
-                                                    'Please log in to add items to cart')),
-                                          );
+                                          showSnackBar(context,
+                                              'Please log in to add items to cart');
+
                                           return;
                                         }
 
@@ -819,20 +816,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             if (existingIndex != -1) {
                                               cartList[existingIndex]
                                                   ['quantity'] += 1;
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                    content: Text(
-                                                        'Item already in cart')),
-                                              );
+                                              showSnackBar(context,
+                                                  'Item already in cart');
                                             } else {
                                               cartList.add(cartItem);
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                const SnackBar(
-                                                    content: Text(
-                                                        'Item added to cart')),
-                                              );
+                                              showSnackBar(context,
+                                                  'Item added to cart');
                                             }
 
                                             transaction.update(
@@ -840,12 +829,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           });
                                         } catch (e) {
                                           print('Error updating cart: $e');
-                                          ScaffoldMessenger.of(context)
-                                              .showSnackBar(
-                                            const SnackBar(
-                                                content: Text(
-                                                    'Failed to update cart. Please try again.')),
-                                          );
+                                          showSnackBar(context,
+                                              'Failed to update cart. Please try again.');
                                         }
                                       } else {
                                         ScaffoldMessenger.of(context)

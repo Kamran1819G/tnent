@@ -42,28 +42,28 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   List<Map<String, dynamic>> categories = [
     {
-      'name': 'Clothings',
-      'image': 'assets/categories/clothings.png',
+      'name': 'Restaurant',
+      'image': 'assets/categories/restaurant.png',
     },
     {
-      'name': 'Electronics',
-      'image': 'assets/categories/electronics.png',
+      'name': 'Cafe',
+      'image': 'assets/categories/cafe.png',
+    },
+    {
+      'name': 'Clothings',
+      'image': 'assets/categories/clothing.png',
+    },
+    {
+      'name': 'Bakery',
+      'image': 'assets/categories/bakery.png',
     },
     {
       'name': 'Grocery',
       'image': 'assets/categories/grocery.png',
     },
     {
-      'name': 'Accessories',
-      'image': 'assets/categories/accessories.png',
-    },
-    {
       'name': 'Books',
       'image': 'assets/categories/books.png',
-    },
-    {
-      'name': 'More',
-      'image': 'assets/categories/more.png',
     },
   ];
 
@@ -135,7 +135,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         .collection('users')
         .doc(userId)
         .collection('notifications')
-        .where('createdAt', isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(lastCheckTime))
+        .where('createdAt',
+            isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(lastCheckTime))
         .limit(1)
         .get();
 
@@ -143,12 +144,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
     if (hasNewNotifications) {
       // Update the last check time
-      await prefs.setInt('lastNotificationCheck', DateTime.now().millisecondsSinceEpoch);
+      await prefs.setInt(
+          'lastNotificationCheck', DateTime.now().millisecondsSinceEpoch);
     }
 
     return hasNewNotifications;
   }
-
 
   String getGreeting() {
     final hour = DateTime.now().hour;
@@ -169,7 +170,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           .get();
 
       final List<String> storeIds =
-      List<String>.from(featuredStoreDoc['stores'] ?? []);
+          List<String>.from(featuredStoreDoc['stores'] ?? []);
 
       if (storeIds.isNotEmpty) {
         final storesSnapshot = await FirebaseFirestore.instance
@@ -201,7 +202,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           .get();
 
       final List<String> productIds =
-      List<String>.from(featuredProductDoc['products'] ?? []);
+          List<String>.from(featuredProductDoc['products'] ?? []);
 
       if (productIds.isNotEmpty) {
         List<ProductModel> products = [];
@@ -380,54 +381,59 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
                 child: Icon(
                   Icons.shopping_cart_outlined,
-                  color: hexToColor('#999999'),
+                  color: const Color.fromRGBO(179, 179, 179, 1),
                   size: 35.sp,
                 ),
               ),
-              SizedBox(width: 22.w),
+              SizedBox(width: 28.w),
               StreamBuilder<bool>(
                 stream: _getNewNotificationsStream(),
-                  builder:(context, snapshot) {
-                    bool hasNewNotifications = snapshot.data ?? false;
-                    return GestureDetector(
-                      onTap: () async {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const NotificationScreen()
-                            )
-                        );
-                        // After returning from NotificationScreen, update the last check time
-                        final prefs = await SharedPreferences.getInstance();
-                        await prefs.setInt('lastNotificationCheck', DateTime.now().millisecondsSinceEpoch);
-                      },
-                      child: Image.asset(
-                        hasNewNotifications
-                            ? 'assets/icons/new_notification_box.png'
-                            : 'assets/icons/no_new_notification_box.png',
-                        height: 35.h,
-                        width: 35.w,
-                        fit: BoxFit.cover,
-                      ),
-                    );
-                  },
-    ),
-              SizedBox(width: 22.w),
+                builder: (context, snapshot) {
+                  bool hasNewNotifications = snapshot.data ?? false;
+                  return GestureDetector(
+                    onTap: () async {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  const NotificationScreen()));
+                      // After returning from NotificationScreen, update the last check time
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setInt('lastNotificationCheck',
+                          DateTime.now().millisecondsSinceEpoch);
+                    },
+                    child: Image.asset(
+                      hasNewNotifications
+                          ? 'assets/icons/new_notification_box.png'
+                          : 'assets/icons/no_new_notification_box.png',
+                      height: 35.h,
+                      width: 35.w,
+                      fit: BoxFit.cover,
+                    ),
+                  );
+                },
+              ),
+              SizedBox(width: 28.w),
               GestureDetector(
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const MyProfileScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const MyProfileScreen()),
                   );
                 },
                 child: CircleAvatar(
-                  radius: 30.0,
+                  radius: 25.0,
                   backgroundImage: widget.currentUser.photoURL != null
-                      ? CachedNetworkImageProvider(widget.currentUser.photoURL ?? ' ')
+                      ? CachedNetworkImageProvider(
+                          widget.currentUser.photoURL ?? ' ')
                       : null,
-                  backgroundColor: Theme.of(context).primaryColor,
+                  backgroundColor: Colors.transparent,
                   child: widget.currentUser.photoURL == null
-                      ? const Icon(Icons.person, color: Colors.white, size: 30.0)
+                      ? Image.asset(
+                          'assets/icons/profile_pic.png',
+                          fit: BoxFit.cover,
+                        )
                       : null,
                 ),
               )
@@ -476,17 +482,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       'Search Products & Store',
                       style: TextStyle(
                         color: hexToColor('#6D6D6D'),
-                        fontSize: 24.sp,
+                        fontSize: 21.sp,
                       ),
                     ),
-                    Expanded(
-                      child: Text(
-                        'restaurants, cafes, bakeries, clothings & more...',
-                        style: TextStyle(
-                          color: hexToColor('#989898'),
-                          fontFamily: 'Gotham',
-                          fontSize: 14.sp,
-                        ),
+                    Text(
+                      'restaurants, cafes, bakeries, clothings & more...',
+                      style: TextStyle(
+                        color: hexToColor('#989898'),
+                        fontFamily: 'Gotham',
+                        fontSize: 12.sp,
                       ),
                     ),
                   ],
@@ -547,32 +551,21 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       }).toList(),
                     ),
                   ),
-        const SizedBox(height: 10.0),
         SizedBox(
-          height: 250.h,
           child: CarouselSlider(
             options: CarouselOptions(
-              height: 250.h,
               autoPlay: true,
               viewportFraction: 1.0,
               enlargeCenterPage: true,
             ),
             items: [
-              Image.asset('assets/store_profile_banner.png'),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 16.w),
-                decoration: BoxDecoration(
-                  color: hexToColor('#F5F5F5'),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Center(
-                  child: Text('Second Page Content'),
-                ),
+              Image.asset(
+                'assets/store_profile_updated2.jpg.png',
+                scale: 0.8,
               ),
             ],
           ),
         ),
-        SizedBox(height: 30.h),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -637,7 +630,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             'Featured',
             style: TextStyle(
               color: hexToColor('#343434'),
-              fontSize: 35.sp,
+              fontSize: 30.sp,
             ),
           ),
         ),
@@ -737,7 +730,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 'Featured Stores',
                 style: TextStyle(
                   color: hexToColor('#343434'),
-                  fontSize: 35.sp,
+                  fontSize: 30.sp,
                 ),
               )
             ],
@@ -805,7 +798,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 'Special Products',
                 style: TextStyle(
                   color: hexToColor('#343434'),
-                  fontSize: 35.sp,
+                  fontSize: 30.sp,
                 ),
               ),
               SizedBox(height: 30.h),
@@ -1069,25 +1062,29 @@ class CategoryProductsScreen extends StatelessWidget {
                   return FutureBuilder<List<ProductModel>>(
                     future: _filterActiveStoreProducts(products),
                     builder: (context, activeProductsSnapshot) {
-                      if (activeProductsSnapshot.connectionState == ConnectionState.waiting) {
+                      if (activeProductsSnapshot.connectionState ==
+                          ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
 
                       if (activeProductsSnapshot.hasError) {
-                        return Center(child: Text('Error: ${activeProductsSnapshot.error}'));
+                        return Center(
+                            child:
+                                Text('Error: ${activeProductsSnapshot.error}'));
                       }
 
                       final activeProducts = activeProductsSnapshot.data ?? [];
 
                       if (activeProducts.isEmpty) {
                         return const Center(
-                            child: Text('No active products found in this category'));
+                            child: Text(
+                                'No active products found in this category'));
                       }
 
                       return GridView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 8,
@@ -1095,7 +1092,8 @@ class CategoryProductsScreen extends StatelessWidget {
                         ),
                         itemCount: activeProducts.length,
                         itemBuilder: (context, index) {
-                          return WishlistProductTile(product: activeProducts[index]);
+                          return WishlistProductTile(
+                              product: activeProducts[index]);
                         },
                       );
                     },
@@ -1109,7 +1107,8 @@ class CategoryProductsScreen extends StatelessWidget {
     );
   }
 
-  Future<List<ProductModel>> _filterActiveStoreProducts(List<QueryDocumentSnapshot> products) async {
+  Future<List<ProductModel>> _filterActiveStoreProducts(
+      List<QueryDocumentSnapshot> products) async {
     List<ProductModel> activeProducts = [];
 
     for (var doc in products) {

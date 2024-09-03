@@ -24,16 +24,16 @@ class ContactScreen extends StatelessWidget {
                       fontSize: 42.sp,
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   IconButton(
                     style: ButtonStyle(
                       backgroundColor:
-                          MaterialStateProperty.all(hexToColor('#F5F5F5')),
+                          WidgetStateProperty.all(hexToColor('#F5F5F5')),
                     ),
                     onPressed: () {
                       Get.back();
                     },
-                    icon: Icon(Icons.arrow_back_ios),
+                    icon: const Icon(Icons.arrow_back_ios),
                   ),
                 ],
               ),
@@ -72,7 +72,7 @@ class ContactScreen extends StatelessWidget {
                         labelStyle: TextStyle(
                           fontSize: 24.sp,
                         ),
-                        border: UnderlineInputBorder(
+                        border: const UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.black),
                         ),
                       ),
@@ -84,7 +84,7 @@ class ContactScreen extends StatelessWidget {
                         labelStyle: TextStyle(
                           fontSize: 24.sp,
                         ),
-                        border: UnderlineInputBorder(
+                        border: const UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.black),
                         ),
                       ),
@@ -96,7 +96,7 @@ class ContactScreen extends StatelessWidget {
                         labelStyle: TextStyle(
                           fontSize: 24.sp,
                         ),
-                        border: UnderlineInputBorder(
+                        border: const UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.black),
                         ),
                       ),
@@ -108,7 +108,7 @@ class ContactScreen extends StatelessWidget {
                         labelStyle: TextStyle(
                           fontSize: 24.sp,
                         ),
-                        border: UnderlineInputBorder(
+                        border: const UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.black),
                         ),
                       ),
@@ -220,6 +220,9 @@ class ContactScreen extends StatelessWidget {
                   ],
                 ),
               ),
+            ),
+            const SizedBox(
+              height: 30,
             ),
           ],
         ),

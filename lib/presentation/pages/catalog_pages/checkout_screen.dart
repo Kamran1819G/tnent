@@ -3,13 +3,16 @@ import 'dart:math';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:quickalert/quickalert.dart';
 
 // import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
@@ -214,7 +217,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         ],
                       ),
                       SizedBox(height: 20.h),
-                      Container(
+                      SizedBox(
                         width: 325.w,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -784,7 +787,7 @@ class CheckoutItemTile extends StatelessWidget {
               ),
             ),
             SizedBox(width: 20.w),
-            Container(
+            SizedBox(
               height: 185.h,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -815,7 +818,7 @@ class CheckoutItemTile extends StatelessWidget {
                       ),
                     ),
                   ],
-                  SizedBox(height: 20.h),
+                  const Spacer(),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -928,15 +931,23 @@ class SummaryItemTile extends StatelessWidget {
         padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
         child: Column(
           children: [
-            Row(children: [
-              const Spacer(),
+            Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+              // Text(
+              //   'Order ID: ${item['orderId']}',
+              //   style: TextStyle(
+              //     color: hexToColor('#A9A9A9'),
+              //     fontSize: 17.sp,
+              //     fontFamily: 'Poppins',
+              //     fontWeight: FontWeight.w500,
+              //   ),
+              // ),
               Text(
-                'Order ID: ${item['orderId']}',
+                '  Remove',
                 style: TextStyle(
                   color: hexToColor('#A9A9A9'),
                   fontSize: 17.sp,
                   fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ]),
@@ -955,7 +966,7 @@ class SummaryItemTile extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 20.w),
-                Container(
+                SizedBox(
                   height: 185.h,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -1773,15 +1784,26 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                     SizedBox(height: 20.h),
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(
+                        showSnackBarWithAction(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => TransactionScreen(
-                              storeDetails: widget.storeDetails,
-                              totalAmount: widget.totalAmount,
-                              items: widget.items, // Add this line
-                            ),
-                          ),
+                          text:
+                              'Do you want to continue with Cash on Delivery?',
+                          confirmBtnText: 'Continue 💵',
+                          buttonTextFontsize: 11,
+                          cancelBtnText: 'Cancel',
+                          quickAlertType: QuickAlertType.confirm,
+                          action: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TransactionScreen(
+                                  storeDetails: widget.storeDetails,
+                                  totalAmount: widget.totalAmount,
+                                  items: widget.items, // Add this line
+                                ),
+                              ),
+                            );
+                          },
                         );
                       },
                       child: ListTile(
@@ -1847,8 +1869,10 @@ class TransactionScreen extends StatefulWidget {
 }
 
 class _TransactionScreenState extends State<TransactionScreen> {
-  GlobalKey _globalKey = GlobalKey();
+  late ConfettiController _confettiController;
 
+  GlobalKey _globalKey = GlobalKey();
+  bool isGreeting = false;
   late Map<String, dynamic> _userAddress;
   bool _isLoading = true;
 
@@ -1859,15 +1883,29 @@ class _TransactionScreenState extends State<TransactionScreen> {
   }
 
   void initialize() async {
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 5));
     _userAddress = await _loadUserAddress();
     /*processOrder();*/
     _isLoading = false;
+    makeIsGreetingTrue();
     processOrder(widget.items);
-    setState(() => _isLoading = false);
+
+    setState(() {});
+
     sendOrderNotification();
   }
 
   final user = FirebaseAuth.instance.currentUser!;
+  void makeIsGreetingTrue() {
+    isGreeting = true;
+    _confettiController.play();
+    Future.delayed(const Duration(seconds: 2, milliseconds: 500), () {
+      isGreeting = false;
+      setState(() {});
+    });
+    _startFadeIn();
+  }
 
   Future<Map<String, dynamic>> _loadUserAddress() async {
     final userData = await FirebaseFirestore.instance
@@ -2142,11 +2180,110 @@ class _TransactionScreenState extends State<TransactionScreen> {
     }
   }*/
 
+  double _opacity = 0.0;
+  void _startFadeIn() {
+    // Delay before starting the fade-in
+    Future.delayed(const Duration(milliseconds: 2900), () {
+      setState(() {
+        _opacity = 1.0; // Fade in
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    if (isGreeting) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // _buildStoreRegistrationPageHeader(
+              //     context, _pageController, _currentPageIndex),
+              SizedBox(height: 100.h),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  ConfettiWidget(
+                    confettiController: _confettiController,
+                    blastDirectionality: BlastDirectionality.explosive,
+                    shouldLoop: false,
+                    colors: [Theme.of(context).primaryColor],
+                  ),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(50.r),
+                    child: Image.asset(
+                      'assets/congratulation.png',
+                      width: 425.w,
+                      height: 340.h,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 200.h),
+              SizedBox(
+                width: 430.w,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Congratulations!',
+                      style: TextStyle(
+                        color: hexToColor('#2A2A2A'),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 42.sp,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(height: 20.h),
+                    Text(
+                      'Your Order has been placed',
+                      style: TextStyle(
+                        color: hexToColor('#636363'),
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 28.sp,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 300.h),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Hurray! Now we recommend you to',
+                    style: TextStyle(
+                      color: hexToColor('#636363'),
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 17.sp,
+                    ),
+                  ),
+                  Text(
+                    'Join Our Tnent Community',
+                    style: TextStyle(
+                      color: Theme.of(context).primaryColor,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w500,
+                      fontSize: 17.sp,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       );
     }
     if (_userAddress == null) {
@@ -2157,297 +2294,304 @@ class _TransactionScreenState extends State<TransactionScreen> {
       );
     }
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              height: 100.h,
-              margin: EdgeInsets.only(top: 20.h),
-              padding: EdgeInsets.symmetric(horizontal: 24.w),
-              child: Row(
-                children: [
-                  const Spacer(),
-                  IconButton(
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
-                        Colors.grey[100],
+      body: AnimatedOpacity(
+        opacity: _opacity,
+        duration: const Duration(milliseconds: 2900),
+        child: SafeArea(
+          child: Column(
+            children: [
+              Container(
+                height: 100.h,
+                margin: EdgeInsets.only(top: 20.h),
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                child: Row(
+                  children: [
+                    const Spacer(),
+                    IconButton(
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(
+                          Colors.grey[100],
+                        ),
+                        shape: WidgetStateProperty.all(
+                          const CircleBorder(),
+                        ),
                       ),
-                      shape: MaterialStateProperty.all(
-                        const CircleBorder(),
-                      ),
+                      icon: const Icon(Icons.arrow_back_ios_new,
+                          color: Colors.black),
+                      onPressed: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const HomeScreen()),
+                          (Route<dynamic> route) => false,
+                        );
+                      },
                     ),
-                    icon: const Icon(Icons.arrow_back_ios_new,
-                        color: Colors.black),
-                    onPressed: () {
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const HomeScreen()),
-                        (Route<dynamic> route) => false,
-                      );
-                    },
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            RepaintBoundary(
-              key: _globalKey,
-              child: Stack(
-                children: [
-                  Container(
-                    height: 1150.h,
-                    width: 680.w,
-                    margin: EdgeInsets.symmetric(horizontal: 30.w),
-                    decoration: const BoxDecoration(
-                      image: DecorationImage(
-                        image: AssetImage('assets/transaction_bg.png'),
-                        fit: BoxFit.fill,
+              RepaintBoundary(
+                key: _globalKey,
+                child: Stack(
+                  children: [
+                    Container(
+                      height: 1150.h,
+                      width: 680.w,
+                      margin: EdgeInsets.symmetric(horizontal: 30.w),
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage('assets/transaction_bg.png'),
+                          fit: BoxFit.fill,
+                        ),
                       ),
                     ),
-                  ),
-                  Align(
-                    alignment: const Alignment(0.0, 0.0),
-                    child: Container(
-                      margin: EdgeInsets.all(12.w),
-                      child: CircleAvatar(
-                        radius: 65.w,
-                        backgroundColor: Theme.of(context).primaryColor,
-                        child:
-                            Icon(Icons.check, color: Colors.white, size: 45.sp),
+                    Align(
+                      alignment: const Alignment(0.0, 0.0),
+                      child: Container(
+                        margin: EdgeInsets.all(12.w),
+                        child: CircleAvatar(
+                          radius: 65.w,
+                          backgroundColor: Theme.of(context).primaryColor,
+                          child: Icon(Icons.check,
+                              color: Colors.white, size: 45.sp),
+                        ),
                       ),
                     ),
-                  ),
-                  Align(
-                    alignment: const Alignment(0.0, 0.0),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 40.w),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(height: 175.h),
-                          Text(
-                            'Thank You!',
-                            style: TextStyle(
-                              color: hexToColor('#1E1E1E'),
-                              fontSize: 36.sp,
+                    Align(
+                      alignment: const Alignment(0.0, 0.0),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 40.w),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(height: 175.h),
+                            Text(
+                              'Thank You!',
+                              style: TextStyle(
+                                color: hexToColor('#1E1E1E'),
+                                fontSize: 36.sp,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 8.h),
-                          Text(
-                            'Your transaction is successful',
-                            style: TextStyle(
-                              color: hexToColor('#8E8E8E'),
-                              fontFamily: 'Gotham',
-                              fontSize: 24.sp,
-                              fontWeight: FontWeight.w500,
+                            SizedBox(height: 8.h),
+                            Text(
+                              'Your transaction is successful',
+                              style: TextStyle(
+                                color: hexToColor('#8E8E8E'),
+                                fontFamily: 'Gotham',
+                                fontSize: 24.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 50.h),
-                          Container(
-                            margin: EdgeInsets.symmetric(horizontal: 20.w),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Date:',
-                                      style: TextStyle(
-                                        color: hexToColor('#979797'),
-                                        fontSize: 27.sp,
-                                        fontFamily: 'Gotham',
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    Text(
-                                      DateFormat('dd MMM yyyy')
-                                          .format(DateTime.now()),
-                                      style: TextStyle(
-                                        color: hexToColor('#333333'),
-                                        fontSize: 27.sp,
-                                        fontFamily: 'Gotham',
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 12.h),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Time:',
-                                      style: TextStyle(
-                                        color: hexToColor('#979797'),
-                                        fontSize: 27.sp,
-                                        fontFamily: 'Gotham',
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    Text(
-                                      DateFormat('hh:mm a')
-                                          .format(DateTime.now()),
-                                      style: TextStyle(
-                                        color: hexToColor('#333333'),
-                                        fontSize: 27.sp,
-                                        fontFamily: 'Gotham',
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 12.h),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'To:',
-                                      style: TextStyle(
-                                        color: hexToColor('#979797'),
-                                        fontSize: 27.sp,
-                                        fontFamily: 'Gotham',
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8.0),
-                                    Text(
-                                      _userAddress['name'],
-                                      style: TextStyle(
-                                        color: hexToColor('#333333'),
-                                        fontSize: 27.sp,
-                                        fontFamily: 'Gotham',
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Container(
-                                  height: 2.h,
-                                  margin: EdgeInsets.symmetric(vertical: 30.h),
-                                  decoration: BoxDecoration(
-                                    color: hexToColor('#E0E0E0'),
-                                    borderRadius: BorderRadius.circular(100.r),
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Total',
-                                      style: TextStyle(
-                                        color: hexToColor('#343434'),
-                                        fontSize: 34.sp,
-                                      ),
-                                    ),
-                                    Text(
-                                      '₹ ${widget.totalAmount.toStringAsFixed(2)}',
-                                      style: TextStyle(
-                                        color: hexToColor('#343434'),
-                                        fontSize: 34.sp,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 50.h),
-                                Container(
-                                  height: 125.h,
-                                  width: 505.w,
-                                  decoration: BoxDecoration(
-                                    color: hexToColor('#FFFFFF'),
-                                    borderRadius: BorderRadius.circular(25.r),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                            SizedBox(height: 50.h),
+                            Container(
+                              margin: EdgeInsets.symmetric(horizontal: 20.w),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'Cash on Delivery',
+                                        'Date:',
                                         style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 28.sp,
+                                          color: hexToColor('#979797'),
+                                          fontSize: 27.sp,
+                                          fontFamily: 'Gotham',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      Text(
+                                        DateFormat('dd MMM yyyy')
+                                            .format(DateTime.now()),
+                                        style: TextStyle(
+                                          color: hexToColor('#333333'),
+                                          fontSize: 27.sp,
                                           fontFamily: 'Gotham',
                                           fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                SizedBox(height: 225.h),
-                                Row(
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: widget.items
-                                          .map(
-                                            (item) => Padding(
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 8.h),
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    'Order ID:',
-                                                    style: TextStyle(
-                                                      color:
-                                                          hexToColor('#2D332F'),
-                                                      fontSize: 24.sp,
+                                  SizedBox(height: 12.h),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Time:',
+                                        style: TextStyle(
+                                          color: hexToColor('#979797'),
+                                          fontSize: 27.sp,
+                                          fontFamily: 'Gotham',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      Text(
+                                        DateFormat('hh:mm a')
+                                            .format(DateTime.now()),
+                                        style: TextStyle(
+                                          color: hexToColor('#333333'),
+                                          fontSize: 27.sp,
+                                          fontFamily: 'Gotham',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 12.h),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'To:',
+                                        style: TextStyle(
+                                          color: hexToColor('#979797'),
+                                          fontSize: 27.sp,
+                                          fontFamily: 'Gotham',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8.0),
+                                      Text(
+                                        _userAddress['name'],
+                                        style: TextStyle(
+                                          color: hexToColor('#333333'),
+                                          fontSize: 27.sp,
+                                          fontFamily: 'Gotham',
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Container(
+                                    height: 2.h,
+                                    margin:
+                                        EdgeInsets.symmetric(vertical: 30.h),
+                                    decoration: BoxDecoration(
+                                      color: hexToColor('#E0E0E0'),
+                                      borderRadius:
+                                          BorderRadius.circular(100.r),
+                                    ),
+                                  ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Total',
+                                        style: TextStyle(
+                                          color: hexToColor('#343434'),
+                                          fontSize: 34.sp,
+                                        ),
+                                      ),
+                                      Text(
+                                        '₹ ${widget.totalAmount.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          color: hexToColor('#343434'),
+                                          fontSize: 34.sp,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 50.h),
+                                  Container(
+                                    height: 125.h,
+                                    width: 505.w,
+                                    decoration: BoxDecoration(
+                                      color: hexToColor('#FFFFFF'),
+                                      borderRadius: BorderRadius.circular(25.r),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Cash on Delivery',
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 28.sp,
+                                            fontFamily: 'Gotham',
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: 225.h),
+                                  Row(
+                                    children: [
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: widget.items
+                                            .map(
+                                              (item) => Padding(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 8.h),
+                                                child: Row(
+                                                  children: [
+                                                    Text(
+                                                      'Order ID:',
+                                                      style: TextStyle(
+                                                        color: hexToColor(
+                                                            '#2D332F'),
+                                                        fontSize: 24.sp,
+                                                      ),
                                                     ),
-                                                  ),
-                                                  SizedBox(width: 8.w),
-                                                  Text(
-                                                    item['orderId'],
-                                                    style: TextStyle(
-                                                      color:
-                                                          hexToColor('#A9A9A9'),
-                                                      fontSize: 24.sp,
-                                                      fontFamily: 'Poppins',
-                                                      fontWeight:
-                                                          FontWeight.w600,
+                                                    SizedBox(width: 8.w),
+                                                    Text(
+                                                      item['orderId'],
+                                                      style: TextStyle(
+                                                        color: hexToColor(
+                                                            '#A9A9A9'),
+                                                        fontSize: 24.sp,
+                                                        fontFamily: 'Poppins',
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
                                                     ),
-                                                  ),
-                                                ],
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                            .toList(),
+                                      ),
+                                      const Spacer(),
+                                      Container(
+                                          height: 95.h,
+                                          width: 200.w,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: hexToColor('#094446')),
+                                            borderRadius:
+                                                BorderRadius.circular(25.r),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'Unpaid'.toUpperCase(),
+                                              style: TextStyle(
+                                                color: hexToColor('#094446'),
+                                                fontSize: 32.sp,
+                                                fontFamily: 'Poppins',
+                                                fontWeight: FontWeight.w600,
                                               ),
                                             ),
-                                          )
-                                          .toList(),
-                                    ),
-                                    const Spacer(),
-                                    Container(
-                                        height: 95.h,
-                                        width: 200.w,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: hexToColor('#094446')),
-                                          borderRadius:
-                                              BorderRadius.circular(25.r),
-                                        ),
-                                        child: Center(
-                                          child: Text(
-                                            'Unpaid'.toUpperCase(),
-                                            style: TextStyle(
-                                              color: hexToColor('#094446'),
-                                              fontSize: 32.sp,
-                                              fontFamily: 'Poppins',
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ))
-                                  ],
-                                )
-                              ],
-                            ),
-                          )
-                        ],
+                                          ))
+                                    ],
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -116,8 +116,8 @@ class CommunityState extends State<Community> {
                           color: hexToColor('#272822'), size: 35.sp),
                       style: ButtonStyle(
                         backgroundColor:
-                            MaterialStateProperty.all(hexToColor('#F5F5F5')),
-                        shape: MaterialStateProperty.all(const CircleBorder()),
+                            WidgetStateProperty.all(hexToColor('#F5F5F5')),
+                        shape: WidgetStateProperty.all(const CircleBorder()),
                       ),
                       onPressed: () {
                         Navigator.push(
@@ -150,10 +150,20 @@ class CommunityState extends State<Community> {
                     final postData =
                         snapshot.data![index].data() as Map<String, dynamic>;
                     final postId = snapshot.data![index].id;
-                    return CommunityPost(
-                        post: CommunityPostModel.fromFirestore(
-                      snapshot.data![index],
-                    ));
+                    bool isLastPost = index == snapshot.data!.length - 1;
+                    return Column(
+                      children: [
+                        CommunityPost(
+                            post: CommunityPostModel.fromFirestore(
+                          snapshot.data![index],
+                        )),
+                        if (isLastPost) ...[
+                          const SizedBox(
+                            height: 120,
+                          )
+                        ],
+                      ],
+                    );
                   },
                 );
               },

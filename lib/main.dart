@@ -100,6 +100,7 @@ class _MyAppState extends State<MyApp> {
           scaffoldBackgroundColor: Colors.white,
           primaryColor: hexToColor('#094446'),
           fontFamily: 'Gotham Black',
+          // dialogBackgroundColor: Colors.white,
         ),
         initialRoute:
             widget.onboarding! ? AppRoutes.AUTH_GATE : AppRoutes.ONBOARDING,
