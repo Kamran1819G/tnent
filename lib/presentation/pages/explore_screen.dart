@@ -176,9 +176,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               color: hexToColor('#FAD524'),
             ),
           ),
-          Spacer(),
-          _buildNotificationIcon(),
-          SizedBox(width: 22.w),
+          const Spacer(),
           _buildBackButton(),
         ],
       ),
@@ -244,7 +242,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         filteredProducts.isNotEmpty || filteredStores.isNotEmpty;
     final String query = _searchController.text;
 
-    if (!hasResults || query.isEmpty) return SizedBox.shrink();
+    if (!hasResults || query.isEmpty) return const SizedBox.shrink();
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 26.w),
@@ -261,7 +259,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          Spacer(),
+          const Spacer(),
           _buildFilterButton(),
         ],
       ),
@@ -270,7 +268,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   Widget _buildResultsList() {
     if (isLoading) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
 
     final bool hasResults =
@@ -320,7 +318,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               ),
             ),
             SliverGrid(
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
@@ -344,7 +342,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => NotificationScreen()),
+          MaterialPageRoute(builder: (context) => const NotificationScreen()),
         );
         setState(() {
           isNewNotification = false;
@@ -365,9 +363,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
     return IconButton(
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all(Colors.grey[100]),
-        shape: MaterialStateProperty.all(CircleBorder()),
+        shape: MaterialStateProperty.all(const CircleBorder()),
       ),
-      icon: Icon(Icons.arrow_back_ios_new, color: Colors.black),
+      icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
       onPressed: () => Navigator.pop(context),
     );
   }
@@ -398,7 +396,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   Widget _buildBottomSheet() {
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(18.r)),
@@ -412,9 +410,9 @@ class _ExploreScreenState extends State<ExploreScreen> {
                 'Sort & Filter',
                 style: TextStyle(fontSize: 24.sp),
               ),
-              Spacer(),
+              const Spacer(),
               IconButton(
-                icon: Icon(Icons.close),
+                icon: const Icon(Icons.close),
                 onPressed: () => Navigator.pop(context),
               ),
             ],

@@ -27,6 +27,8 @@ class _CatalogState extends State<Catalog> {
     {
       "title": "Wishlist",
       "icon": "assets/icons/wishlist.png",
+      "background": "assets/catalog_button_images/wishlist.png",
+      "textColor": Colors.white,
       "function": () {
         Get.to(() => const WishlistScreen());
       },
@@ -34,6 +36,8 @@ class _CatalogState extends State<Catalog> {
     {
       "title": "My Purchases",
       "icon": "assets/icons/my_purchases.png",
+      "background": "assets/catalog_button_images/my_purchases.png",
+      "textColor": Colors.white,
       "function": () {
         Get.to(() => const PurchaseScreen());
       },
@@ -41,6 +45,8 @@ class _CatalogState extends State<Catalog> {
     {
       "title": "Premium",
       "icon": "assets/icons/premium.png",
+      "background": "assets/catalog_button_images/premium.png",
+      "textColor": Colors.black,
       "function": () {
         Get.toNamed(AppRoutes.COMING_SOON);
       },
@@ -48,6 +54,8 @@ class _CatalogState extends State<Catalog> {
     {
       "title": "Coming Soon",
       "icon": "",
+      "background": "assets/catalog_button_images/coming_soon.png",
+      "textColor": Colors.black,
       "function": () {},
     },
   ];
@@ -143,6 +151,8 @@ class _CatalogState extends State<Catalog> {
               icon: content[index]["icon"],
               label: content[index]["title"],
               onPressed: content[index]["function"],
+              backgground: content[index]["background"],
+              textColor: content[index]["textColor"],
             ),
           ),
         ),
@@ -153,6 +163,7 @@ class _CatalogState extends State<Catalog> {
               icon: content[index + 2]["icon"],
               label: content[index + 2]["title"],
               onPressed: content[index + 2]["function"],
+              backgground: content[index + 2]["background"],
             ),
           ),
         ),

@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
+import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/presentation/pages/catalog_pages/checkout_screen.dart';
 
@@ -155,35 +157,17 @@ class _CartScreenState extends State<CartScreen> {
   }
 
   void _removeFromCart(String productId, String variation) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Remove Product'),
-          content: const Text(
-              'Are you sure you want to remove this product from your cart?'),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('No'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-            ),
-            TextButton(
-              child: const Text('Yes'),
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                setState(() {
-                  _cartItems.removeWhere((item) =>
-                      item['productId'] == productId &&
-                      item['variation'] == variation);
-                  _updateSelectionState();
-                });
-                _updateFirestore();
-              },
-            ),
-          ],
-        );
+    showSnackBarWithAction(
+      context,
+      text: 'Do you want to remove this product from your cart?',
+      action: () {
+        Navigator.of(context).pop(); // Close the dialog
+        setState(() {
+          _cartItems.removeWhere((item) =>
+              item['productId'] == productId && item['variation'] == variation);
+          _updateSelectionState();
+        });
+        _updateFirestore();
       },
     );
   }

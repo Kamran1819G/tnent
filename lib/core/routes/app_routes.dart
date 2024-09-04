@@ -7,4 +7,5 @@ class AppRoutes {
   static const String SIGN_UP = '/sign-up';
   static const String COMING_SOON = '/coming-soon';
   static const String CONTACT = '/contact';
+  static const String CHOOSE_SIGNIN_METHOD = '/choose-signin-method';
 }

@@ -217,7 +217,7 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                               ? Icons.favorite
                               : Icons.favorite_border,
                           color: _isInWishlist ? Colors.red : Colors.grey,
-                          size: 20.sp,
+                          size: 32.sp,
                         ),
                       ),
                     ),

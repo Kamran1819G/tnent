@@ -312,13 +312,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 13),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
-          child: AspectRatio(
-            aspectRatio: 235 / 342,
-            child: Container(
-              color: Colors.grey,
-              child: Center(
-                child: Text(text),
-              ),
+          child: Container(
+            width: 350 * (235 / 342),
+            height: 350,
+            color: Colors.grey,
+            child: Center(
+              child: Text(text),
             ),
           ),
         ),
@@ -708,9 +707,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           child: CarouselSlider(
             options: CarouselOptions(
               aspectRatio: 235 / 342,
-              viewportFraction: 1.0,
+              height: 350,
+              viewportFraction: 0.7,
               autoPlay: true,
-              enlargeCenterPage: true,
+              enableInfiniteScroll: false,
+              enlargeCenterPage: false,
             ),
             items: List.generate(
               4,
@@ -725,6 +726,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 18.w),
           child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 'Featured Stores',
@@ -732,7 +734,31 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   color: hexToColor('#343434'),
                   fontSize: 30.sp,
                 ),
-              )
+              ),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const StoresScreen()));
+                },
+                child: Row(
+                  children: [
+                    Text(
+                      'View all ',
+                      style: TextStyle(
+                          color: hexToColor('#343434').withOpacity(0.6),
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w300),
+                    ),
+                    Icon(
+                      Icons.launch_rounded,
+                      color: hexToColor('#343434').withOpacity(0.6),
+                      size: 16,
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
@@ -747,42 +773,44 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   store: store,
                 );
               }).toList(),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const StoresScreen()));
-                },
-                child: Container(
-                  padding: EdgeInsets.all(18.w),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        height: 120.h,
-                        width: 120.w,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF5F5F5),
-                          borderRadius: BorderRadius.circular(23.r),
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.arrow_forward_ios,
-                            color: Color(0xFFB5B5B5),
-                          ),
+              featuredStores.length > 10
+                  ? GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const StoresScreen()));
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(18.w),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              height: 120.h,
+                              width: 120.w,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5F5F5),
+                                borderRadius: BorderRadius.circular(23.r),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Color(0xFFB5B5B5),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              'View All',
+                              style: TextStyle(fontSize: 16.sp),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'View All',
-                        style: TextStyle(fontSize: 16.sp),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              )
+                    )
+                  : Container(),
             ],
           ),
         ),

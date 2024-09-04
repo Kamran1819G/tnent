@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 
 class StylizedCustomButton extends StatelessWidget {
   final String icon;
+  final String backgground;
   final String label;
   final VoidCallback onPressed;
+  final Color textColor;
 
-  const StylizedCustomButton({
-    Key? key,
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-  }) : super(key: key);
+  const StylizedCustomButton(
+      {Key? key,
+      required this.icon,
+      required this.label,
+      required this.onPressed,
+      required this.backgground,
+      this.textColor = Colors.black})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +26,13 @@ class StylizedCustomButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(40),
-              color: Colors.grey[200],
-            ),
+                borderRadius: BorderRadius.circular(40),
+                color: Colors.grey.shade200,
+                image: DecorationImage(
+                  image: AssetImage(backgground),
+                  fit: BoxFit.cover,
+                  repeat: ImageRepeat.repeatX,
+                )),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -36,17 +44,17 @@ class StylizedCustomButton extends StatelessWidget {
                           icon,
                           scale: 2,
                         )
-                      : const Icon(Icons.more_horiz_outlined,
+                      : const Icon(Icons.question_mark_outlined,
                           color: Colors.black26, size: 32),
                 ),
                 const SizedBox(
                     width: 10), // Space between the icon and the label
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: Colors.black,
+                    color: textColor,
                     fontFamily: 'regular',
                   ),
                   textAlign: TextAlign.center,

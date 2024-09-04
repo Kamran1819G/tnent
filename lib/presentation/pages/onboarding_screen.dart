@@ -145,7 +145,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   prefs.setBool('onboarding', true);
 
                   if (!mounted) return;
-                  Get.toNamed(AppRoutes.SIGN_UP);
+                  Get.toNamed(AppRoutes.CHOOSE_SIGNIN_METHOD);
                 } else {
                   _pageController.nextPage(
                     duration: const Duration(milliseconds: 500),

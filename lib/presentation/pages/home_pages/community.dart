@@ -17,6 +17,7 @@ import 'package:tnent/models/store_model.dart';
 import 'package:tnent/presentation/pages/users_screens/storeprofile_screen.dart';
 import 'package:tnent/presentation/widgets/full_screen_image_view.dart';
 import '../../../core/helpers/color_utils.dart';
+import '../../../core/helpers/expandable_text.dart';
 import '../../../core/helpers/snackbar_utils.dart';
 import 'package:transparent_image/transparent_image.dart';
 
@@ -285,7 +286,7 @@ class _CommunityPostState extends State<CommunityPost> {
 
   Widget _buildPostContent(StoreModel store) {
     return Container(
-      padding: EdgeInsets.all(24.w),
+      padding: EdgeInsets.all(24.w).copyWith(top: 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -295,13 +296,13 @@ class _CommunityPostState extends State<CommunityPost> {
           ),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 24.h),
-            child: Text(
-              widget.post.content,
+            child: ExpandableText(
+              content: widget.post.content,
               style: TextStyle(
-                color: hexToColor('#737373'),
-                fontFamily: 'Gotham Black',
-                fontSize: 20.sp,
-              ),
+                  color: hexToColor('#737373'),
+                  fontFamily: 'Poppins',
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w200),
             ),
           ),
           if (widget.post.images.isNotEmpty) _buildImageGallery(),
@@ -328,6 +329,8 @@ class _CommunityPostState extends State<CommunityPost> {
                   store.name,
                   style: TextStyle(fontSize: 30.sp),
                   overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  softWrap: true,
                 ),
               ),
               SizedBox(width: 10.w),
@@ -343,13 +346,16 @@ class _CommunityPostState extends State<CommunityPost> {
         ),
         GestureDetector(
           onTap: () => _showMoreOptions(),
-          child: CircleAvatar(
-            radius: 25.w,
-            backgroundColor: hexToColor('#F5F5F5'),
-            child: Icon(
-              Icons.more_horiz,
-              color: hexToColor('#BEBEBE'),
-              size: 26.sp,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: CircleAvatar(
+              radius: 25.w,
+              backgroundColor: hexToColor('#F5F5F5'),
+              child: Icon(
+                Icons.more_horiz,
+                color: hexToColor('#BEBEBE'),
+                size: 26.sp,
+              ),
             ),
           ),
         ),

@@ -109,6 +109,7 @@ flutter:
     - assets/categories/
     - assets/icons/
     - assets/social_icons/
+    - assets/catalog_button_images/
 
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
