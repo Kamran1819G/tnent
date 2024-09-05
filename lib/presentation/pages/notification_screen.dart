@@ -14,8 +14,8 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
+    with TickerProviderStateMixin {
+  TabController? _tabController;
   bool isStoreOwner = false;
   int _selectedIndex = 0;
   Map<String, List<QueryDocumentSnapshot>> groupedGeneralNotifications = {};
@@ -24,13 +24,12 @@ class _NotificationScreenState extends State<NotificationScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 1, vsync: this);
     _checkIfStoreOwner();
   }
 
   @override
   void dispose() {
-    _tabController.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
@@ -42,14 +41,15 @@ class _NotificationScreenState extends State<NotificationScreen>
             .collection('Users')
             .doc(userId)
             .get();
-        final bool userIsStoreOwner = userDoc.data()?['isStoreOwner'] ?? false;
+        final String? storeId = userDoc.data()?['storeId'] as String?;
 
         setState(() {
-          isStoreOwner = userIsStoreOwner;
-          if (isStoreOwner) {
-            _tabController.dispose();
-            _tabController = TabController(length: 2, vsync: this);
-          }
+          isStoreOwner = storeId != null;
+          _tabController?.dispose();
+          _tabController = TabController(
+            length: isStoreOwner ? 2 : 1,
+            vsync: this,
+          );
         });
         _loadNotifications();
       } catch (e) {
@@ -90,11 +90,11 @@ class _NotificationScreenState extends State<NotificationScreen>
     Map<String, List<QueryDocumentSnapshot>> grouped = {};
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
+    final yesterday = today.subtract(Duration(days: 1));
 
     for (var notification in notifications) {
       final timestamp = (notification.data()
-          as Map<String, dynamic>)['timestamp'] as Timestamp;
+      as Map<String, dynamic>)['timestamp'] as Timestamp;
       final date = timestamp.toDate();
       final notificationDate = DateTime(date.year, date.month, date.day);
 
@@ -183,6 +183,7 @@ class _NotificationScreenState extends State<NotificationScreen>
                       ],
                     ),
                   ),
+                  if(isStoreOwner && _tabController !=null)
                   Container(
                     padding: EdgeInsets.only(left: 12.w),
                     child: Wrap(
@@ -211,7 +212,7 @@ class _NotificationScreenState extends State<NotificationScreen>
                             onSelected: (selected) {
                               setState(() {
                                 _selectedIndex = index;
-                                _tabController.index = index;
+                                _tabController?.index = index;
                               });
                             },
                           ),
@@ -224,25 +225,26 @@ class _NotificationScreenState extends State<NotificationScreen>
               ),
             ),
             Expanded(
-              child: isStoreOwner
-                  ? TabBarView(
+              child: _tabController == null
+                  ? Center(child: CircularProgressIndicator())
+                  :  TabBarView(
                       controller: _tabController,
                       physics: const NeverScrollableScrollPhysics(),
                       children: [
                         _buildNotificationList(groupedGeneralNotifications,
                             isGeneralTab: true),
-                        _buildNotificationList(groupedStoreNotifications,
-                            isGeneralTab: false),
+                          if (isStoreOwner)
+                          _buildNotificationList(groupedStoreNotifications,
+                              isGeneralTab: false),
                       ],
-                    )
-                  : _buildNotificationList(groupedGeneralNotifications,
-                      isGeneralTab: true),
+              )
             )
           ],
         ),
       ),
     );
   }
+
 
   Widget _buildNotificationList(
       Map<String, List<QueryDocumentSnapshot>> groupedNotifications,
