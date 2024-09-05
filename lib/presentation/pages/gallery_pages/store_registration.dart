@@ -1205,7 +1205,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             ),
                           ],
                         )),
-                    SizedBox(height: 500.h),
+                    SizedBox(height: 300.h),
                     Center(
                       child: GestureDetector(
                         onTap: () {

@@ -34,7 +34,7 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                   margin: EdgeInsets.only(top: 30.h),
                   height: 440.h,
                   width: 610.w,
-                  decoration: BoxDecoration(
+                  decoration: const BoxDecoration(
                     image: DecorationImage(
                       image: AssetImage('assets/the_middlemen.png'),
                       fit: BoxFit.fill,
@@ -46,7 +46,7 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    Container(
+                    SizedBox(
                       width: 450.w,
                       child: Text(
                         "The Middlemen Groups!".toUpperCase(),
@@ -57,7 +57,7 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                         maxLines: 2,
                       ),
                     ),
-                    Spacer(),
+                    const Spacer(),
                   ],
                 ),
                 SizedBox(height: 30.h),
@@ -88,7 +88,7 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                     fontSize: 20.sp,
                   ),
                 ),
-                SizedBox(height: 175.h),
+                SizedBox(height: 145.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -96,26 +96,35 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        child: Icon(
-                          Icons.arrow_back_ios_new,
-                          color: Colors.white,
-                          size: 30.sp,
-                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
                           padding: EdgeInsets.all(24.w),
                           shape: CircleBorder(
                               side: BorderSide(color: hexToColor('#2D332F'))),
+                        ),
+                        child: Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white,
+                          size: 30.sp,
                         )),
                     TextButton(
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MiddlemenRegistrationForm(),
+                              builder: (context) =>
+                                  const MiddlemenRegistrationForm(),
                             ),
                           );
                         },
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 80.w, vertical: 24.h),
+                          backgroundColor: hexToColor('#2D332F'),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(50.r),
+                          ),
+                        ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -133,17 +142,10 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                               size: 30.sp,
                             ),
                           ],
-                        ),
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 80.w, vertical: 24.h),
-                          backgroundColor: hexToColor('#2D332F'),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(50.r),
-                          ),
-                        ))
+                        )),
                   ],
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -162,15 +164,16 @@ class MiddlemenRegistrationForm extends StatefulWidget {
 }
 
 class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
-  TextEditingController _nameController = TextEditingController();
-  TextEditingController _dobController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _phoneController = TextEditingController();
-  TextEditingController _addressController = TextEditingController();
-  TextEditingController _idProofController = TextEditingController();
-  TextEditingController _upiIdController = TextEditingController();
-  TextEditingController _emergencyContactController = TextEditingController();
-  TextEditingController _vehicleRegController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _dobController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _idProofController = TextEditingController();
+  final TextEditingController _upiIdController = TextEditingController();
+  final TextEditingController _emergencyContactController =
+      TextEditingController();
+  final TextEditingController _vehicleRegController = TextEditingController();
 
   int _vehicleRadioValue = 0;
   File? _idProofImage;
@@ -221,8 +224,10 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
   }
 
   String _generateRandomPassword() {
-    const String chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    return List.generate(6, (index) => chars[Random().nextInt(chars.length)]).join();
+    const String chars =
+        '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    return List.generate(6, (index) => chars[Random().nextInt(chars.length)])
+        .join();
   }
 
   void _copyToClipboard(String text) {
@@ -274,49 +279,49 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Registration Successful'),
+            title: const Text('Registration Successful'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Your account has been created successfully.'),
-                SizedBox(height: 10),
-                Text('Your Middleman ID is:'),
+                const Text('Your account has been created successfully.'),
+                const SizedBox(height: 5),
+                const Text('Your Middleman ID is:'),
                 Row(
                   children: [
                     Text(
                       docId,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                     IconButton(
-                      icon: Icon(Icons.copy),
+                      icon: const Icon(Icons.copy),
                       onPressed: () => _copyToClipboard(docId),
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
-                Text('Your temporary password is:'),
+                const SizedBox(height: 5),
+                const Text('Your temporary password is:'),
                 Row(
                   children: [
                     Text(
                       randomPassword,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 18),
                     ),
                     IconButton(
-                      icon: Icon(Icons.copy),
+                      icon: const Icon(Icons.copy),
                       onPressed: () => _copyToClipboard(randomPassword),
                     ),
                   ],
                 ),
-                SizedBox(height: 10),
-                Text('Please change your password after logging in.'),
+                const SizedBox(height: 5),
+                const Text('Please change your password after logging in.'),
               ],
             ),
             actions: [
               TextButton(
-                child: Text('OK'),
+                child: const Text('OK'),
                 onPressed: () {
                   Navigator.of(context).pop();
                   Navigator.of(context).pop(); // Return to the previous screen
@@ -332,11 +337,11 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Registration Error'),
+            title: const Text('Registration Error'),
             content: Text('An error occurred during registration: $e'),
             actions: [
               TextButton(
-                child: Text('OK'),
+                child: const Text('OK'),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -363,7 +368,7 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
             children: [
               Container(
                 height: 100,
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Row(
                   children: [
                     Row(
@@ -387,13 +392,13 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                         ),
                       ],
                     ),
-                    Spacer(),
+                    const Spacer(),
                     Container(
-                      margin: EdgeInsets.all(8.0),
+                      margin: const EdgeInsets.all(8.0),
                       child: CircleAvatar(
                         backgroundColor: Colors.grey[100],
                         child: IconButton(
-                          icon: Icon(Icons.arrow_back_ios_new,
+                          icon: const Icon(Icons.arrow_back_ios_new,
                               color: Colors.black),
                           onPressed: () {
                             Navigator.pop(context);
@@ -404,11 +409,11 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                   ],
                 ),
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               Image.asset('assets/black_tnent_logo.png', width: 75),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -416,26 +421,27 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                       'Fill the form below to register as a middlemen!',
                       style: TextStyle(
                         color: hexToColor('#727272'),
-                        fontFamily: 'Gotham',
                         fontWeight: FontWeight.w700,
                         fontSize: 18.0,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 25),
+                    const SizedBox(height: 25),
                     Text(
                       'Full Name',
                       style: TextStyle(
+                        fontFamily: 'Poppins',
                         color: hexToColor('#2D332F'),
                         fontSize: 16.0,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     TextField(
                       controller: _nameController,
                       decoration: InputDecoration(
                         hintText: 'Enter your full name',
                         hintStyle: TextStyle(
+                          fontFamily: 'Poppins',
                           color: hexToColor('#727272'),
                           fontWeight: FontWeight.w500,
                           fontSize: 12.0,
@@ -445,21 +451,23 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     //DOB
                     Text(
                       'Date of Birth',
                       style: TextStyle(
+                        fontFamily: 'Poppins',
                         color: hexToColor('#2D332F'),
                         fontSize: 16.0,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     TextField(
                       controller: _dobController,
                       decoration: InputDecoration(
                         hintText: 'Enter your date of birth',
                         hintStyle: TextStyle(
+                          fontFamily: 'Poppins',
                           color: hexToColor('#727272'),
                           fontWeight: FontWeight.w500,
                           fontSize: 12.0,
@@ -473,20 +481,22 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                         pickDoB();
                       },
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Text(
                       'Email Address',
                       style: TextStyle(
+                        fontFamily: 'Poppins',
                         color: hexToColor('#2D332F'),
                         fontSize: 16.0,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     TextField(
                       controller: _emailController,
                       decoration: InputDecoration(
                         hintText: 'Enter your email address',
                         hintStyle: TextStyle(
+                          fontFamily: 'Poppins',
                           color: hexToColor('#727272'),
                           fontWeight: FontWeight.w500,
                           fontSize: 12.0,
@@ -496,20 +506,22 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Text(
                       'Phone Number',
                       style: TextStyle(
+                        fontFamily: 'Poppins',
                         color: hexToColor('#2D332F'),
                         fontSize: 16.0,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     TextField(
                       controller: _phoneController,
                       decoration: InputDecoration(
                         hintText: 'Enter your phone number',
                         hintStyle: TextStyle(
+                          fontFamily: 'Poppins',
                           color: hexToColor('#727272'),
                           fontWeight: FontWeight.w500,
                           fontSize: 12.0,
@@ -519,20 +531,22 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Text(
                       'Address',
                       style: TextStyle(
+                        fontFamily: 'Poppins',
                         color: hexToColor('#2D332F'),
                         fontSize: 16.0,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     TextField(
                       controller: _addressController,
                       decoration: InputDecoration(
                         hintText: 'Enter your address',
                         hintStyle: TextStyle(
+                          fontFamily: 'Poppins',
                           color: hexToColor('#727272'),
                           fontWeight: FontWeight.w500,
                           fontSize: 12.0,
@@ -546,15 +560,16 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         Text(
                           'ID Proof',
                           style: TextStyle(
+                            fontFamily: 'Poppins',
                             color: hexToColor('#2D332F'),
                             fontSize: 16.0,
                           ),
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 5),
                         Row(
                           children: [
                             Expanded(
@@ -563,6 +578,7 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                                 decoration: InputDecoration(
                                   hintText: 'Aadhar Card, Voter ID, etc.',
                                   hintStyle: TextStyle(
+                                    fontFamily: 'Poppins',
                                     color: hexToColor('#727272'),
                                     fontWeight: FontWeight.w500,
                                     fontSize: 12.0,
@@ -573,21 +589,24 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                                 ),
                               ),
                             ),
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                             ElevatedButton(
                               onPressed: _pickIdProofImage,
-                              child: Icon(Icons.upload_file),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: hexToColor('#2D332F'),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10.0),
                                 ),
                               ),
+                              child: const Icon(
+                                Icons.upload_file,
+                                color: Colors.white,
+                              ),
                             ),
                           ],
                         ),
                         if (_idProofImage != null) ...[
-                          SizedBox(height: 10),
+                          const SizedBox(height: 5),
                           Container(
                             height: 100,
                             width: 100,
@@ -603,16 +622,17 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                       ],
                     ),
 
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     // radio button for do you have vehicle yes or no
                     Text(
                       'Do you have a vehicle?',
                       style: TextStyle(
+                        fontFamily: 'Poppins',
                         color: hexToColor('#2D332F'),
                         fontSize: 16.0,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     Row(
                       children: [
                         Radio(
@@ -627,12 +647,13 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                         Text(
                           'Yes',
                           style: TextStyle(
+                            fontFamily: 'Poppins',
                             color: hexToColor('#727272'),
                             fontWeight: FontWeight.w500,
                             fontSize: 12.0,
                           ),
                         ),
-                        SizedBox(width: 20),
+                        const SizedBox(width: 20),
                         Radio(
                           value: 2,
                           groupValue: _vehicleRadioValue,
@@ -645,6 +666,7 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                         Text(
                           'No',
                           style: TextStyle(
+                            fontFamily: 'Poppins',
                             color: hexToColor('#727272'),
                             fontWeight: FontWeight.w500,
                             fontSize: 12.0,
@@ -653,20 +675,22 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                       ],
                     ),
                     if (_vehicleRadioValue == 1) ...[
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Text(
                         'Vehicle Registration No.',
                         style: TextStyle(
+                          fontFamily: 'Poppins',
                           color: hexToColor('#2D332F'),
                           fontSize: 16.0,
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 5),
                       TextField(
                         controller: _vehicleRegController,
                         decoration: InputDecoration(
                           hintText: 'Enter your vehicle registration number',
                           hintStyle: TextStyle(
+                            fontFamily: 'Poppins',
                             color: hexToColor('#727272'),
                             fontWeight: FontWeight.w500,
                             fontSize: 12.0,
@@ -677,21 +701,23 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                         ),
                       ),
                     ],
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     // UPI ID
                     Text(
                       'UPI ID',
                       style: TextStyle(
+                        fontFamily: 'Poppins',
                         color: hexToColor('#2D332F'),
                         fontSize: 16.0,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     TextField(
                       controller: _upiIdController,
                       decoration: InputDecoration(
                         hintText: 'Enter your UPI ID',
                         hintStyle: TextStyle(
+                          fontFamily: 'Poppins',
                           color: hexToColor('#727272'),
                           fontWeight: FontWeight.w500,
                           fontSize: 12.0,
@@ -701,21 +727,23 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Text(
                       'Emergency Contact No.',
                       style: TextStyle(
+                        fontFamily: 'Poppins',
                         color: hexToColor('#2D332F'),
                         fontSize: 16.0,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 5),
                     TextField(
                       controller: _emergencyContactController,
                       decoration: InputDecoration(
                         hintText: 'Enter your emergency contact number',
                         hintStyle: TextStyle(
                           color: hexToColor('#727272'),
+                          fontFamily: 'Poppins',
                           fontWeight: FontWeight.w500,
                           fontSize: 12.0,
                         ),
@@ -724,20 +752,13 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Center(
                       child: ElevatedButton(
                         onPressed: _saveDataToFirebase,
-                        child: Text(
-                          'Register',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16.0,
-                          ),
-                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: hexToColor('#2D332F'),
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 60.0,
                             vertical: 16.0,
                           ),
@@ -745,9 +766,17 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                             borderRadius: BorderRadius.circular(50.0),
                           ),
                         ),
+                        child: const Text(
+                          'Register',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            color: Colors.white,
+                            fontSize: 16.0,
+                          ),
+                        ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),

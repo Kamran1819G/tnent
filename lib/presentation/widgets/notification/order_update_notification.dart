@@ -44,7 +44,7 @@ class OrderUpdateNotification extends StatelessWidget {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Order not found')),
+          const SnackBar(content: Text('Order not found')),
         );
       }
     } catch (e) {
@@ -96,11 +96,21 @@ class OrderUpdateNotification extends StatelessWidget {
           color: Colors.white,
           border: Border.all(color: hexToColor('#8F8F8F'), width: 1.0),
           borderRadius: BorderRadius.circular(12.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black
+                  .withOpacity(0.1), // Shadow color with some transparency
+              spreadRadius: 4, // Set to 0 for no spread
+              blurRadius: 6, // Blur radius of the shadow
+              offset: const Offset(
+                  0, 3), // Only offset in the Y direction for bottom shadow
+            ),
+          ],
         ),
         child: ListTile(
-          contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
           leading: productImage != null
-              ? Container(
+              ? SizedBox(
                   height: 125.h,
                   width: 112.w,
                   child: ClipRRect(
@@ -125,7 +135,7 @@ class OrderUpdateNotification extends StatelessWidget {
                       color: statusColor,
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Text(
                     "${time}",
                     style: TextStyle(
@@ -188,7 +198,7 @@ class OrderUpdateNotification extends StatelessWidget {
                         fontSize: 17.sp,
                       ),
                     ),
-                    Spacer(),
+                    const Spacer(),
                     Container(
                       padding:
                           EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),

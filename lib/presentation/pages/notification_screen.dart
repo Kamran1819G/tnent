@@ -24,7 +24,7 @@ class _NotificationScreenState extends State<NotificationScreen>
   @override
   void initState() {
     super.initState();
-    _tabController= TabController(length: 1, vsync: this);
+    _tabController = TabController(length: 1, vsync: this);
     _checkIfStoreOwner();
   }
 
@@ -90,7 +90,7 @@ class _NotificationScreenState extends State<NotificationScreen>
     Map<String, List<QueryDocumentSnapshot>> grouped = {};
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(Duration(days: 1));
+    final yesterday = today.subtract(const Duration(days: 1));
 
     for (var notification in notifications) {
       final timestamp = (notification.data()
@@ -164,17 +164,17 @@ class _NotificationScreenState extends State<NotificationScreen>
                             ),
                           ],
                         ),
-                        Spacer(),
+                        const Spacer(),
                         IconButton(
                           style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(
+                            backgroundColor: WidgetStateProperty.all(
                               Colors.grey[100],
                             ),
-                            shape: MaterialStateProperty.all(
-                              CircleBorder(),
+                            shape: WidgetStateProperty.all(
+                              const CircleBorder(),
                             ),
                           ),
-                          icon: Icon(Icons.arrow_back_ios_new,
+                          icon: const Icon(Icons.arrow_back_ios_new,
                               color: Colors.black),
                           onPressed: () {
                             Navigator.pop(context);
@@ -225,16 +225,16 @@ class _NotificationScreenState extends State<NotificationScreen>
             ),
             Expanded(
               child: isStoreOwner
-              ? TabBarView(
-                controller: _tabController,
-                physics: NeverScrollableScrollPhysics(),
-                children: [
-                  _buildNotificationList(groupedGeneralNotifications,
-                      isGeneralTab: true),
-                    _buildNotificationList(groupedStoreNotifications,
-                        isGeneralTab: false),
-                ],
-              )
+                  ? TabBarView(
+                      controller: _tabController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        _buildNotificationList(groupedGeneralNotifications,
+                            isGeneralTab: true),
+                        _buildNotificationList(groupedStoreNotifications,
+                            isGeneralTab: false),
+                      ],
+                    )
                   : _buildNotificationList(groupedGeneralNotifications,
                       isGeneralTab: true),
             )
@@ -285,7 +285,7 @@ class _NotificationScreenState extends State<NotificationScreen>
                 );
               }
             }).toList(),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
           ],
         );
       },
