@@ -122,7 +122,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return Stream.value(false);
 
-    return Stream.periodic(const Duration(seconds: 30), (_) => null)
+    return Stream.periodic(const Duration(seconds: 2), (_) => null)
         .asyncMap((_) => _checkForNewNotifications(user.uid))
         .distinct();
   }
@@ -132,20 +132,17 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     final lastCheckTime = prefs.getInt('lastNotificationCheck') ?? 0;
 
     final snapshot = await FirebaseFirestore.instance
-        .collection('users')
+        .collection('Users')
         .doc(userId)
         .collection('notifications')
-        .where('createdAt',
-            isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(lastCheckTime))
-        .limit(1)
+        .where('createdAt', isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(lastCheckTime))
         .get();
 
     final hasNewNotifications = snapshot.docs.isNotEmpty;
 
     if (hasNewNotifications) {
       // Update the last check time
-      await prefs.setInt(
-          'lastNotificationCheck', DateTime.now().millisecondsSinceEpoch);
+      await prefs.setInt('lastNotificationCheck', DateTime.now().millisecondsSinceEpoch);
     }
 
     return hasNewNotifications;

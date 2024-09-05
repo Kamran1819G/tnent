@@ -6,6 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:pinput/pinput.dart';
 import 'package:tnent/core/routes/app_routes.dart';
 import 'package:tnent/presentation/controllers/otp_controller.dart';
@@ -31,19 +32,13 @@ class _UserRegistrationState extends State<UserRegistration> {
   bool _isPhoneNumberUnique = true;
   bool isButtonEnabled = false;
   late UserModel _userModel;
+  bool _isLocationPermissionGranted = false;
 
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
-  final TextEditingController _addressLine1Controller = TextEditingController();
-  final TextEditingController _addressLine2Controller = TextEditingController();
-  final TextEditingController _cityController = TextEditingController();
-  final TextEditingController _stateController = TextEditingController();
-  final TextEditingController _zipController = TextEditingController();
-  final TextEditingController _addressNameController = TextEditingController();
-  String _addressType = 'Home'; // Default value
 
   final OTPController otpController = OTPController();
   String? sessionIdReceived;
@@ -56,6 +51,7 @@ class _UserRegistrationState extends State<UserRegistration> {
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 5));
     _initializeUserModel();
+    _pageController.addListener(_onPageChange);
   }
 
   void _initializeUserModel() {
@@ -67,28 +63,70 @@ class _UserRegistrationState extends State<UserRegistration> {
     );
   }
 
-  /*Future<void> addUserDetails() async {
-    try {
-      final updatedUser = _userModel.copyWith(
-        phoneNumber: _phoneController.text,
-        firstName: _firstNameController.text,
-        lastName: _lastNameController.text,
-        location: _locationController.text,
-        lastUpdated: Timestamp.now(),
-      );
-
-      await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(updatedUser.uid)
-          .set(updatedUser.toFirestore());
-
-      setState(() {
-        _userModel = updatedUser;
+  void _onPageChange() {
+    if (_pageController.page == 3) {  // Assuming the location page is the 4th page (index 3)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _requestLocationPermission();
       });
-    } catch (e) {
-      showSnackBar(context, 'Error: $e');
     }
-  }*/
+  }
+
+  Future<void> _requestLocationPermission() async {
+    var status = await Permission.location.status;
+    if (status.isDenied) {
+      // Show the permission request popup
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Location Permission'),
+          content: const Text('Tnent needs access to your location to provide better service. Allow Tnent to access your location?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Deny'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                setState(() {
+                  _isLocationPermissionGranted = false;
+                });
+                showSnackBar(context, 'Location permission is required to continue.');
+              },
+            ),
+            TextButton(
+              child: const Text('Allow'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                var result = await Permission.location.request();
+                setState(() {
+                  _isLocationPermissionGranted = result.isGranted;
+                });
+                if (result.isGranted) {
+                  _fetchCurrentLocation();
+                } else {
+                  showSnackBar(context, 'Location permission is required to continue.');
+                }
+              },
+            ),
+          ],
+        ),
+      );
+    } else if (status.isGranted) {
+      setState(() {
+        _isLocationPermissionGranted = true;
+      });
+      _fetchCurrentLocation();
+    }
+  }
+
+  Future<void> _fetchCurrentLocation() async {
+    showSnackBar(context, 'Fetching your current location...');
+    String location = await getCurrentLocation();
+    setState(() {
+      _locationController.text = location;
+    });
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  }
+
   Future<void> addUserDetails() async {
     try {
       // Parse the location string to create the address structure
@@ -752,20 +790,7 @@ class _UserRegistrationState extends State<UserRegistration> {
               prefixIconConstraints: const BoxConstraints(
                 minWidth: 40,
               ),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.my_location),
-                onPressed: () async {
-                  showSnackBar(context, 'Fetching your current location...');
-
-                  String location = await getCurrentLocation();
-                  setState(() {
-                    _locationController.text = location;
-                  });
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                },
-              ),
-              suffixIconColor: Theme.of(context).primaryColor,
-              prefixIconColor: Theme.of(context).primaryColor,
+              suffixIcon: Icon(Icons.my_location, color: Theme.of(context).primaryColor),
               filled: true,
               fillColor: hexToColor('#F5F5F5'),
               border: OutlineInputBorder(

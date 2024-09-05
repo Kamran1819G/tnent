@@ -7,8 +7,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server/gmail.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 
 class TheMiddlemen extends StatefulWidget {
@@ -234,6 +237,22 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
     Clipboard.setData(ClipboardData(text: text));
   }
 
+  Future<void> _sendEmailToUser(String email, String middlemanId, String password) async {
+    try {
+      final smtpServer = gmail('your_email@gmail.com', 'your_password');
+
+      final message = Message()
+        ..from = const Address('your_email@gmail.com', 'Tnent')
+        ..recipients.add(email)
+        ..subject = 'Tnent Middleman Registration'
+        ..text = 'Dear user,\n\nCongratulations on your successful registration as a Middleman with Tnent!\n\nYour Middleman ID is: $middlemanId\nYour temporary password is: $password\n\nPlease log in and change your password at your earliest convenience.\n\nThank you for joining the Tnent Middlemen community.\n\nBest regards,\nTnent Team';
+
+      await send(message, smtpServer);
+      print('Email sent successfully.');
+    } catch (error) {
+      print('Error sending email: $error');
+    }
+  }
   Future<void> _saveDataToFirebase() async {
     try {
       final firestore = FirebaseFirestore.instance;
@@ -255,6 +274,8 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
 
       // Generate random password
       String randomPassword = _generateRandomPassword();
+
+      await _sendEmailToUser(_emailController.text, docId, randomPassword);
 
       await firestore.collection('Middlemens').doc(docId).set({
         'fullName': fullName,

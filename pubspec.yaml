@@ -74,6 +74,9 @@ dependencies:
   firebase_app_check: ^0.3.0+4
   image_cropper: ^8.0.1
   app_links: ^6.2.1
+  flutter_email_sender: ^6.0.3
+  mailer: ^6.1.2
+  smtpd: ^0.2.0
 
 dev_dependencies:
   flutter_launcher_icons: "^0.13.1"

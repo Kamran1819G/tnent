@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -29,9 +30,12 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   int _featuresCurrentPageIndex = 0;
   int _currentPageIndex = 0;
   late ConfettiController _confettiController;
-
+  final TextEditingController _locationController = TextEditingController();
+  final PageController _pageControl = PageController();
   final OTPController otpController = OTPController();
   String? sessionIdReceived;
+
+  bool _locationPageShown = false;
 
   bool _termsAccepted = false;
   bool isButtonEnabled = false;
@@ -64,7 +68,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   final _storeDomainController = TextEditingController();
   final _upiUsernameController = TextEditingController();
   final _upiIdController = TextEditingController();
-  final _locationController = TextEditingController();
   final _otpController = TextEditingController();
 
   @override
@@ -79,16 +82,64 @@ class _StoreRegistrationState extends State<StoreRegistration> {
               _storeFeaturesPageController.page?.round() ?? 0;
         });
       });
+
+    // Add listener to _pageController
+    _pageController.addListener(_onPageChange);
   }
 
   @override
   void dispose() {
     _confettiController.dispose();
     _storeFeaturesPageController.dispose();
+    _pageController.removeListener(_onPageChange);
     _pageController.dispose();
     _phoneController.dispose();
     _otpController.dispose();
     super.dispose();
+  }
+
+  void _onPageChange() {
+    setState(() {
+      _currentPageIndex = _pageController.page?.round() ?? 0;
+    });
+
+    // Check if we're on the "Enter Your Store Location" page
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_isLocationPage() && !_locationPageShown) {
+        _showLocationPermissionDialog();
+        _locationPageShown = true;
+      }
+    });
+  }
+
+  bool _isLocationPage() {
+    // Find the current page widget
+    final currentPage = _pageController.page?.round() ?? 0;
+    final pageWidget = (context as Element).findRenderObject()?.parent as RenderBox?;
+
+    if (pageWidget != null) {
+      // Search for the specific text in the widget tree
+      bool hasLocationText = false;
+      bool hasSearchText = false;
+
+      void searchForText(RenderObject object) {
+        if (object is RenderParagraph) {
+          final text = object.text.toPlainText();
+          if (text.contains('Enter Your Store Location')) {
+            hasLocationText = true;
+          }
+          if (text.contains('Search for area, street name . . .')) {
+            hasSearchText = true;
+          }
+        }
+        object.visitChildren(searchForText);
+      }
+
+      searchForText(pageWidget);
+
+      return hasLocationText && hasSearchText;
+    }
+    return false;
   }
 
   Future<void> _registerStore() async {
@@ -141,6 +192,74 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     }
   }
 
+
+  Future<void> _showLocationPermissionDialog() async {
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Location Permission'),
+          content: Text('Allow permission to fetch current location?'),
+          actions: [
+            TextButton(
+              child: Text('Deny'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                showSnackBar(context, 'Location permission denied');
+              },
+            ),
+            TextButton(
+              child: Text('Allow'),
+              onPressed: () async {
+                Navigator.of(context).pop();
+                await _fetchAndSetLocation();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _fetchAndSetLocation() async {
+    showSnackBar(
+      context,
+      'Fetching your current location...',
+      bgColor: Colors.green,
+      duration: const Duration(seconds: 5),
+    );
+    String location = await getCurrentLocation();
+    setState(() {
+      _locationController.text = location;
+    });
+  }
+
+  Future<String> getCurrentLocation() async
+  {
+    LocationPermission permission;
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        return 'Location permissions are denied.';
+      }
+    }
+
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+
+    List<Placemark> placemarks =
+    await placemarkFromCoordinates(position.latitude, position.longitude);
+
+    if (placemarks.isNotEmpty) {
+      Placemark place = placemarks[0];
+      return '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
+    } else {
+      return 'No address available.';
+    }
+  }
+
+
   Future<void> _validateStoreDomain(String domain) async {
     final storeRef = FirebaseFirestore.instance.collection('Stores');
     final querySnapshot =
@@ -181,45 +300,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
       _pageController.jumpToPage(_currentPageIndex + 1);
     } else {
       showSnackBar(context, 'Please select a category');
-    }
-  }
-
-  Future<String> getCurrentLocation() async {
-    bool serviceEnabled;
-    LocationPermission permission;
-
-    // Check if location services are enabled
-    serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return 'Location services are disabled.';
-    }
-
-    // Check for location permissions
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return 'Location permissions are denied.';
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return 'Location permissions are permanently denied.';
-    }
-
-    // Get the current position
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
-
-    // Get the address from the coordinates
-    List<Placemark> placemarks =
-        await placemarkFromCoordinates(position.latitude, position.longitude);
-
-    if (placemarks.isNotEmpty) {
-      Placemark place = placemarks[0];
-      return '${place.street}, ${place.subLocality}, ${place.locality}, ${place.postalCode}, ${place.country}';
-    } else {
-      return 'No address available.';
     }
   }
 
@@ -1001,7 +1081,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                         itemBuilder: (context, index) {
                           final category = categories[index];
                           final isSelected = selectedCategory == category;
-
                           return Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12.r),
@@ -1291,25 +1370,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           prefixIconConstraints: const BoxConstraints(
                             minWidth: 40,
                           ),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.my_location),
-                            onPressed: () async {
-                              showSnackBar(
-                                context,
-                                'Fetching your current location...',
-                                bgColor: Colors.green,
-                                duration: const Duration(seconds: 5),
-                              );
+                          suffixIcon: Icon(Icons.my_location),
 
-                              String location = await getCurrentLocation();
-                              setState(() {
-                                _locationController.text = location;
-                              });
-                              if (!context.mounted) return;
-                              ScaffoldMessenger.of(context)
-                                  .hideCurrentSnackBar();
-                            },
-                          ),
                           suffixIconColor: Theme.of(context).primaryColor,
                           prefixIconColor: Theme.of(context).primaryColor,
                           filled: true,

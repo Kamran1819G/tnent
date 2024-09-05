@@ -41,7 +41,6 @@ class _GalleryState extends State<Gallery> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       print(user?.uid);
-
       if (user != null) {
         final storeId = await FirebaseFirestore.instance
             .collection('Users')

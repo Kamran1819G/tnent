@@ -42,7 +42,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String _flagImage = 'assets/grey-flag.png';
-
+  bool _isCurrentStoreOwner = false;
   List<ProductModel> relatedProducts = [];
   final TextEditingController _reviewController = TextEditingController();
   List<Map<String, dynamic>> _reviews = [];
@@ -58,6 +58,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _loadReviews();
     _prefetchImages();
     _loadRelatedProducts();
+    _checkIfCurrentStoreOwner();
+  }
+
+  Future<void> _checkIfCurrentStoreOwner() async {
+    User? user = _auth.currentUser;
+    if (user != null) {
+      DocumentSnapshot userDoc = await _firestore.collection('Users').doc(
+          user.uid).get();
+      if (userDoc.exists) {
+        Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+        String? userStoreId = userData['storeId'] as String?;
+        setState(() {
+          _isCurrentStoreOwner =
+              userStoreId != null && userStoreId == widget.product.storeId;
+        });
+      }
+    }
   }
 
   Future<void> _prefetchImages() async {
@@ -68,7 +85,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   Future<void> _loadRelatedProducts() async {
     List<ProductModel> fetchedRelatedProducts =
-        await RelatedProductsService.fetchRelatedProducts(widget.product);
+    await RelatedProductsService.fetchRelatedProducts(widget.product);
 
     if (fetchedRelatedProducts.isEmpty) {
       // If no related products, fetch random products
@@ -119,7 +136,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
       if (userSnapshot.exists) {
         Map<String, dynamic> userData =
-            userSnapshot.data() as Map<String, dynamic>;
+        userSnapshot.data() as Map<String, dynamic>;
         String firstName = userData['firstName'] ?? '';
         String lastName = userData['lastName'] ?? '';
         String photoURL = userData['photoURL'] ?? '';
@@ -212,13 +229,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     User? user = _auth.currentUser;
     if (user != null) {
       DocumentSnapshot userDoc =
-          await _firestore.collection('Users').doc(user.uid).get();
+      await _firestore.collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
         List<dynamic> wishlist =
             (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
         setState(() {
           _isInWishlist = wishlist.any((item) =>
-              item['productId'] == _wishlistItem['productId'] &&
+          item['productId'] == _wishlistItem['productId'] &&
               item['variation'] == _wishlistItem['variation']);
         });
       }
@@ -239,7 +256,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     try {
       DocumentReference userDocRef =
-          _firestore.collection('Users').doc(user.uid);
+      _firestore.collection('Users').doc(user.uid);
 
       if (_isInWishlist) {
         // Add product to wishlist
@@ -304,7 +321,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         .collection('votes')
         .doc(productId);
     DocumentReference productRef =
-        _firestore.collection('products').doc(productId);
+    _firestore.collection('products').doc(productId);
 
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
@@ -321,13 +338,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         }
 
         Map<String, dynamic> productData =
-            productDoc.data() as Map<String, dynamic>;
+        productDoc.data() as Map<String, dynamic>;
         int greenFlags = productData['greenFlags'] ?? 0;
         int redFlags = productData['redFlags'] ?? 0;
 
         if (voteDoc.exists) {
           Map<String, dynamic> previousVote =
-              voteDoc.data() as Map<String, dynamic>;
+          voteDoc.data() as Map<String, dynamic>;
 
           if (previousVote['greenFlag'] && voteType == 'greenFlag') {
             greenFlags--;
@@ -466,66 +483,66 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             width: 620.w,
                             child: widget.product.imageUrls.length == 1
                                 ? Center(
-                                    child: Container(
-                                      width: 445.w,
-                                      height: 490.h,
-                                      margin: EdgeInsets.symmetric(
-                                          horizontal: 12.w),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.r),
-                                        child: CachedNetworkImage(
-                                          imageUrl: widget.product.imageUrls[0],
-                                          cacheManager: DefaultCacheManager(),
-                                          placeholder: (context, url) =>
-                                              Shimmer.fromColors(
+                              child: Container(
+                                width: 445.w,
+                                height: 490.h,
+                                margin: EdgeInsets.symmetric(
+                                    horizontal: 12.w),
+                                child: ClipRRect(
+                                  borderRadius:
+                                  BorderRadius.circular(8.r),
+                                  child: CachedNetworkImage(
+                                    imageUrl: widget.product.imageUrls[0],
+                                    cacheManager: DefaultCacheManager(),
+                                    placeholder: (context, url) =>
+                                        Shimmer.fromColors(
+                                          baseColor: hexToColor('#E0E0E0'),
+                                          highlightColor:
+                                          hexToColor('#F5F5F5'),
+                                          child:
+                                          Container(color: Colors.white),
+                                        ),
+                                    errorWidget: (context, url, error) =>
+                                        Icon(Icons.error),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                            )
+                                : ListView.builder(
+                              controller: imagesController,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: widget.product.imageUrls.length,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  margin: EdgeInsets.symmetric(
+                                      horizontal: 12.w),
+                                  width: 445.w,
+                                  height: 490.h,
+                                  child: ClipRRect(
+                                    borderRadius:
+                                    BorderRadius.circular(8.r),
+                                    child: CachedNetworkImage(
+                                      imageUrl:
+                                      widget.product.imageUrls[index],
+                                      cacheManager: DefaultCacheManager(),
+                                      placeholder: (context, url) =>
+                                          Shimmer.fromColors(
                                             baseColor: hexToColor('#E0E0E0'),
                                             highlightColor:
-                                                hexToColor('#F5F5F5'),
-                                            child:
-                                                Container(color: Colors.white),
+                                            hexToColor('#F5F5F5'),
+                                            child: Container(
+                                                color: Colors.white),
                                           ),
-                                          errorWidget: (context, url, error) =>
-                                              Icon(Icons.error),
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
+                                      errorWidget:
+                                          (context, url, error) =>
+                                          Icon(Icons.error),
+                                      fit: BoxFit.cover,
                                     ),
-                                  )
-                                : ListView.builder(
-                                    controller: imagesController,
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: widget.product.imageUrls.length,
-                                    itemBuilder: (context, index) {
-                                      return Container(
-                                        margin: EdgeInsets.symmetric(
-                                            horizontal: 12.w),
-                                        width: 445.w,
-                                        height: 490.h,
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8.r),
-                                          child: CachedNetworkImage(
-                                            imageUrl:
-                                                widget.product.imageUrls[index],
-                                            cacheManager: DefaultCacheManager(),
-                                            placeholder: (context, url) =>
-                                                Shimmer.fromColors(
-                                              baseColor: hexToColor('#E0E0E0'),
-                                              highlightColor:
-                                                  hexToColor('#F5F5F5'),
-                                              child: Container(
-                                                  color: Colors.white),
-                                            ),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    Icon(Icons.error),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      );
-                                    },
                                   ),
+                                );
+                              },
+                            ),
                           ),
                           SizedBox(height: 30.h),
                           Container(
@@ -552,6 +569,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ],
                       ),
                       SizedBox(height: 30.h),
+
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -571,16 +589,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(6.r),
-                                      ),
-                                      child: Image.network(
-                                        store.logoUrl,
-                                        width: 50.w,
-                                        height: 50.h,
-                                        fit: BoxFit.cover,
-                                      )),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(6.r),
+                                    ),
+                                    child: Image.network(
+                                      store.logoUrl,
+                                      width: 50.w,
+                                      height: 50.h,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
                                   SizedBox(width: 12.w),
                                   Text(
                                     store.name,
@@ -600,67 +618,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             padding: EdgeInsets.only(right: 12.w),
                             child: Row(
                               children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    showModalBottomSheet(
-                                      backgroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(16.r),
-                                          topRight: Radius.circular(16.r),
-                                        ),
-                                      ),
-                                      context: context,
-                                      builder: (context) =>
-                                          _buildMoreBottomSheet(),
-                                    );
-                                  },
-                                  child: CircleAvatar(
-                                    radius: 30.w,
-                                    backgroundColor: hexToColor('#F5F5F5'),
-                                    child: Icon(
-                                      Icons.more_horiz,
-                                      color: hexToColor('#BEBEBE'),
-                                      size: 32.sp,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
-                                GestureDetector(
-                                  onTap: () {
-                                    showModalBottomSheet(
-                                      backgroundColor: Colors.white,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.only(
-                                          topLeft: Radius.circular(16.r),
-                                          topRight: Radius.circular(16.r),
-                                        ),
-                                      ),
-                                      context: context,
-                                      builder: (context) =>
-                                          _buildRatingBottomSheet(),
-                                    );
-                                  },
-                                  child: CircleAvatar(
-                                    radius: 30.w,
-                                    backgroundColor: hexToColor('#F5F5F5'),
-                                    child: Image.asset(
-                                      _flagImage,
-                                      width: 24.w,
-                                      height: 24.h,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
+                                // Share button - available for all users
                                 GestureDetector(
                                   onTap: () async {
-                                    // final String productUrl =
-                                    //     'https://tnent.com/product/${widget.product.productId}';
-
-                                    final String productUrl =
-                                        'https://tnentstore.com/?productId=${widget.product.productId}';
-                                    final String shareMessage =
-                                        'Check out this product from ${store.name}! $productUrl';
+                                    final String productUrl = 'https://tnentstore.com/?productId=${widget
+                                        .product.productId}';
+                                    final String shareMessage = 'Check out this product from ${store
+                                        .name}! $productUrl';
                                     await Share.share(shareMessage);
                                   },
                                   child: CircleAvatar(
@@ -674,22 +638,76 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   ),
                                 ),
                                 SizedBox(width: 12.w),
-                                GestureDetector(
-                                  onTap: _toggleWishlist,
-                                  child: CircleAvatar(
-                                    radius: 30.w,
-                                    backgroundColor: hexToColor('#F5F5F5'),
-                                    child: Icon(
-                                      _isInWishlist
-                                          ? Icons.favorite
-                                          : Icons.favorite_border,
-                                      color: _isInWishlist
-                                          ? Colors.red
-                                          : Colors.grey,
-                                      size: 32.sp,
+                                // Conditional buttons for non-store owners
+                                if (!_isCurrentStoreOwner) ...[
+                                  GestureDetector(
+                                    onTap: () {
+                                      showModalBottomSheet(
+                                        backgroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(16.r),
+                                            topRight: Radius.circular(16.r),
+                                          ),
+                                        ),
+                                        context: context,
+                                        builder: (context) =>
+                                            _buildMoreBottomSheet(),
+                                      );
+                                    },
+                                    child: CircleAvatar(
+                                      radius: 30.w,
+                                      backgroundColor: hexToColor('#F5F5F5'),
+                                      child: Icon(
+                                        Icons.more_horiz,
+                                        color: hexToColor('#BEBEBE'),
+                                        size: 32.sp,
+                                      ),
                                     ),
                                   ),
-                                ),
+                                  SizedBox(width: 12.w),
+                                  GestureDetector(
+                                    onTap: () {
+                                      showModalBottomSheet(
+                                        backgroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(16.r),
+                                            topRight: Radius.circular(16.r),
+                                          ),
+                                        ),
+                                        context: context,
+                                        builder: (context) =>
+                                            _buildRatingBottomSheet(),
+                                      );
+                                    },
+                                    child: CircleAvatar(
+                                      radius: 30.w,
+                                      backgroundColor: hexToColor('#F5F5F5'),
+                                      child: Image.asset(
+                                        _flagImage,
+                                        width: 24.w,
+                                        height: 24.h,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  GestureDetector(
+                                    onTap: _toggleWishlist,
+                                    child: CircleAvatar(
+                                      radius: 30.w,
+                                      backgroundColor: hexToColor('#F5F5F5'),
+                                      child: Icon(
+                                        _isInWishlist ? Icons.favorite : Icons
+                                            .favorite_border,
+                                        color: _isInWishlist
+                                            ? Colors.red
+                                            : Colors.grey,
+                                        size: 32.sp,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
@@ -721,14 +739,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 children: [
                                   Column(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                        CrossAxisAlignment.center,
                                         children: [
                                           Text(
-                                            '₹${_selectedVariant.price.toStringAsFixed(0)}',
+                                            '₹${_selectedVariant.price
+                                                .toStringAsFixed(0)}',
                                             style: TextStyle(
                                               color: hexToColor('#343434'),
                                               fontSize: 50.sp,
@@ -737,7 +756,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           SizedBox(width: 10.w),
                                           if (_selectedVariant.discount > 0)
                                             Text(
-                                              '${_selectedVariant.discount}% Off',
+                                              '${_selectedVariant
+                                                  .discount}% Off',
                                               style: TextStyle(
                                                 color: hexToColor('#FF0000'),
                                                 fontSize: 22.sp,
@@ -746,16 +766,17 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         ],
                                       ),
                                       Text(
-                                        'M.R.P ₹${_selectedVariant.mrp.toStringAsFixed(2)}',
+                                        'M.R.P ₹${_selectedVariant.mrp
+                                            .toStringAsFixed(2)}',
                                         style: TextStyle(
                                           color: hexToColor('#B9B9B9'),
                                           fontSize: 22.sp,
                                           decoration:
-                                              _selectedVariant.discount > 0
-                                                  ? TextDecoration.lineThrough
-                                                  : TextDecoration.none,
+                                          _selectedVariant.discount > 0
+                                              ? TextDecoration.lineThrough
+                                              : TextDecoration.none,
                                           decorationColor:
-                                              hexToColor('#B9B9B9'),
+                                          hexToColor('#B9B9B9'),
                                         ),
                                       ),
                                     ],
@@ -766,7 +787,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       if (_selectedVariant.stockQuantity > 0 &&
                                           store.isActive) {
                                         String userId = FirebaseAuth
-                                                .instance.currentUser?.uid ??
+                                            .instance.currentUser?.uid ??
                                             '';
                                         if (userId.isEmpty) {
                                           showSnackBar(context,
@@ -776,57 +797,59 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         }
 
                                         DocumentReference userRef =
-                                            FirebaseFirestore.instance
-                                                .collection('Users')
-                                                .doc(userId);
+                                        FirebaseFirestore.instance
+                                            .collection('Users')
+                                            .doc(userId);
 
                                         try {
                                           await FirebaseFirestore.instance
                                               .runTransaction(
                                                   (transaction) async {
-                                            DocumentSnapshot snapshot =
+                                                DocumentSnapshot snapshot =
                                                 await transaction.get(userRef);
-                                            if (!snapshot.exists) {
-                                              throw Exception(
-                                                  "User does not exist!");
-                                            }
+                                                if (!snapshot.exists) {
+                                                  throw Exception(
+                                                      "User does not exist!");
+                                                }
 
-                                            Map<String, dynamic> userData =
+                                                Map<String, dynamic> userData =
                                                 snapshot.data()
-                                                    as Map<String, dynamic>;
-                                            List<dynamic> cartList =
-                                                userData['cart'] ?? [];
+                                                as Map<String, dynamic>;
+                                                List<dynamic> cartList =
+                                                    userData['cart'] ?? [];
 
-                                            Map<String, dynamic> cartItem = {
-                                              'productId':
+                                                Map<String,
+                                                    dynamic> cartItem = {
+                                                  'productId':
                                                   widget.product.productId,
-                                              'variation': _selectedVariation,
-                                              'quantity': 1,
-                                              // Default quantity
-                                            };
+                                                  'variation': _selectedVariation,
+                                                  'quantity': 1,
+                                                  // Default quantity
+                                                };
 
-                                            int existingIndex =
+                                                int existingIndex =
                                                 cartList.indexWhere((item) =>
-                                                    item['productId'] ==
-                                                        widget.product
-                                                            .productId &&
+                                                item['productId'] ==
+                                                    widget.product
+                                                        .productId &&
                                                     item['variation'] ==
                                                         _selectedVariation);
 
-                                            if (existingIndex != -1) {
-                                              cartList[existingIndex]
+                                                if (existingIndex != -1) {
+                                                  cartList[existingIndex]
                                                   ['quantity'] += 1;
-                                              showSnackBar(context,
-                                                  'Item already in cart');
-                                            } else {
-                                              cartList.add(cartItem);
-                                              showSnackBar(context,
-                                                  'Item added to cart');
-                                            }
+                                                  showSnackBar(context,
+                                                      'Item already in cart');
+                                                } else {
+                                                  cartList.add(cartItem);
+                                                  showSnackBar(context,
+                                                      'Item added to cart');
+                                                }
 
-                                            transaction.update(
-                                                userRef, {'cart': cartList});
-                                          });
+                                                transaction.update(
+                                                    userRef,
+                                                    {'cart': cartList});
+                                              });
                                         } catch (e) {
                                           print('Error updating cart: $e');
                                           showSnackBar(context,
@@ -845,9 +868,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       height: 95.h,
                                       width: 95.w,
                                       decoration: BoxDecoration(
-                                        color: Theme.of(context).primaryColor,
+                                        color: Theme
+                                            .of(context)
+                                            .primaryColor,
                                         borderRadius:
-                                            BorderRadius.circular(12.r),
+                                        BorderRadius.circular(12.r),
                                       ),
                                       child: Icon(Icons.add_shopping_cart,
                                           color: Colors.white, size: 35.sp),
@@ -927,68 +952,68 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             height: 300.h,
                             child: relatedProducts.isEmpty
                                 ? ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: 5, // Show 3 placeholder items
-                                    itemBuilder: (context, index) {
-                                      return Shimmer.fromColors(
-                                        baseColor: hexToColor('#E0E0E0'),
-                                        highlightColor: hexToColor('#F5F5F5'),
-                                        child: Container(
-                                          width: 200.w,
-                                          margin: EdgeInsets.only(right: 12.w),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: 5, // Show 3 placeholder items
+                              itemBuilder: (context, index) {
+                                return Shimmer.fromColors(
+                                  baseColor: hexToColor('#E0E0E0'),
+                                  highlightColor: hexToColor('#F5F5F5'),
+                                  child: Container(
+                                    width: 200.w,
+                                    margin: EdgeInsets.only(right: 12.w),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius:
+                                      BorderRadius.circular(12.r),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          height: 150.h,
                                           decoration: BoxDecoration(
                                             color: Colors.white,
                                             borderRadius:
-                                                BorderRadius.circular(12.r),
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Container(
-                                                height: 150.h,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.only(
-                                                    topLeft:
-                                                        Radius.circular(12.r),
-                                                    topRight:
-                                                        Radius.circular(12.r),
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(height: 10.h),
-                                              Container(
-                                                margin: EdgeInsets.symmetric(
-                                                    horizontal: 10.w),
-                                                height: 20.h,
-                                                width: 150.w,
-                                                color: Colors.white,
-                                              ),
-                                              SizedBox(height: 5.h),
-                                              Container(
-                                                margin: EdgeInsets.symmetric(
-                                                    horizontal: 10.w),
-                                                height: 15.h,
-                                                width: 100.w,
-                                                color: Colors.white,
-                                              ),
-                                            ],
+                                            BorderRadius.only(
+                                              topLeft:
+                                              Radius.circular(12.r),
+                                              topRight:
+                                              Radius.circular(12.r),
+                                            ),
                                           ),
                                         ),
-                                      );
-                                    },
-                                  )
-                                : ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: relatedProducts.length,
-                                    itemBuilder: (context, index) {
-                                      return WishlistProductTile(
-                                        product: relatedProducts[index],
-                                      );
-                                    },
+                                        SizedBox(height: 10.h),
+                                        Container(
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal: 10.w),
+                                          height: 20.h,
+                                          width: 150.w,
+                                          color: Colors.white,
+                                        ),
+                                        SizedBox(height: 5.h),
+                                        Container(
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal: 10.w),
+                                          height: 15.h,
+                                          width: 100.w,
+                                          color: Colors.white,
+                                        ),
+                                      ],
+                                    ),
                                   ),
+                                );
+                              },
+                            )
+                                : ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: relatedProducts.length,
+                              itemBuilder: (context, index) {
+                                return WishlistProductTile(
+                                  product: relatedProducts[index],
+                                );
+                              },
+                            ),
                           ),
                         ],
                       ),
@@ -1060,7 +1085,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 ),
                                 IconButton(
                                   icon: Icon(Icons.send,
-                                      color: Theme.of(context).primaryColor),
+                                      color: Theme
+                                          .of(context)
+                                          .primaryColor),
                                   onPressed: () {
                                     if (_reviewController.text.isNotEmpty) {
                                       _addReview(_reviewController.text);
@@ -1084,7 +1111,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   bottom: 0,
                   child: Container(
                     padding:
-                        EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
+                    EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
                     color: Colors.white,
                     child: ElevatedButton(
                       onPressed: () {
@@ -1160,14 +1187,16 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             variation,
             style: TextStyle(
               color:
-                  _selectedVariation == variation ? Colors.white : Colors.black,
+              _selectedVariation == variation ? Colors.white : Colors.black,
               fontSize: 18.sp,
             ),
           ),
           backgroundColor: Colors.white,
           selected: _selectedVariation == variation,
           showCheckmark: false,
-          selectedColor: Theme.of(context).primaryColor,
+          selectedColor: Theme
+              .of(context)
+              .primaryColor,
           onSelected: (selected) {
             if (selected) {
               setState(() {
@@ -1285,67 +1314,80 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               SizedBox(width: 12.w),
               Text(
                 '${_product.greenFlags + _product.redFlags}',
-                style: TextStyle(
-                    color: Theme.of(context).primaryColor, fontSize: 23.sp),
+                style: TextStyle(color: Theme
+                    .of(context)
+                    .primaryColor, fontSize: 23.sp),
               ),
             ],
           ),
           SizedBox(height: 50.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Column(
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      await handleVote('redFlag');
-                      setState(() {}); // refresh UI
-                    },
-                    child: CircleAvatar(
-                      radius: 50.w,
-                      backgroundColor: hexToColor('#F5F5F5'),
-                      child: Image.asset(
-                        'assets/red-flag.png',
-                        width: 50.w,
-                        height: 50.h,
+          if (!_isCurrentStoreOwner) ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        await handleVote('redFlag');
+                        setState(() {}); // refresh UI
+                      },
+                      child: CircleAvatar(
+                        radius: 50.w,
+                        backgroundColor: hexToColor('#F5F5F5'),
+                        child: Image.asset(
+                          'assets/red-flag.png',
+                          width: 50.w,
+                          height: 50.h,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 20.h),
-                  Text(
-                    '${_product.redFlags}',
-                    style: TextStyle(
-                        color: hexToColor('#9C9C9C'), fontSize: 24.sp),
-                  ),
-                ],
-              ),
-              SizedBox(width: 30.w),
-              Column(
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      await handleVote('greenFlag');
-                    },
-                    child: CircleAvatar(
-                      radius: 50.w,
-                      backgroundColor: hexToColor('#F5F5F5'),
-                      child: Image.asset(
-                        'assets/green-flag.png',
-                        width: 50.w,
-                        height: 50.h,
+                    SizedBox(height: 20.h),
+                    Text(
+                      '${_product.redFlags}',
+                      style: TextStyle(
+                          color: hexToColor('#9C9C9C'), fontSize: 24.sp),
+                    ),
+                  ],
+                ),
+                SizedBox(width: 30.w),
+                Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        await handleVote('greenFlag');
+                      },
+                      child: CircleAvatar(
+                        radius: 50.w,
+                        backgroundColor: hexToColor('#F5F5F5'),
+                        child: Image.asset(
+                          'assets/green-flag.png',
+                          width: 50.w,
+                          height: 50.h,
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 20.h),
-                  Text(
-                    '${_product.greenFlags}',
-                    style: TextStyle(
-                        color: hexToColor('#9C9C9C'), fontSize: 24.sp),
-                  ),
-                ],
+                    SizedBox(height: 20.h),
+                    Text(
+                      '${_product.greenFlags}',
+                      style: TextStyle(
+                          color: hexToColor('#9C9C9C'), fontSize: 24.sp),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ] else
+            ...[
+              Center(
+                child: Text(
+                  'Rating options are not available for store owners.',
+                  style: TextStyle(
+                      color: hexToColor('#9C9C9C'), fontSize: 20.sp),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ],
-          ),
         ],
       ),
     );

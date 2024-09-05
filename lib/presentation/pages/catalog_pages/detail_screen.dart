@@ -26,8 +26,18 @@ class DetailScreen extends StatefulWidget {
 class _DetailScreenState extends State<DetailScreen> {
   bool get isOrderCancelled => widget.order['status']?['cancelled'] != null;
 
+  bool get canCancelOrder {
+    final status = widget.order['status'];
+    return !isOrderCancelled &&
+        !(status?['accepted']?['message'] == 'Order accepted by middleman');
+  }
+
   void _cancelOrder() async {
-    if (isOrderCancelled) return;
+    if (isOrderCancelled) return; // Do nothing if already cancelled
+    if (!canCancelOrder) {
+      _showCannotCancelDialog();
+      return;
+    }
 
     try {
       await FirebaseFirestore.instance
@@ -59,6 +69,7 @@ class _DetailScreenState extends State<DetailScreen> {
       showSnackBar(context, 'Failed to cancel order: $e');
     }
   }
+
 
   Future<void> _sendCancellationNotification() async {
     final firestore = FirebaseFirestore.instance;
@@ -133,6 +144,27 @@ class _DetailScreenState extends State<DetailScreen> {
       print("Failed to fetch order");
     }
   }
+
+  void _showCannotCancelDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Cannot Cancel Order'),
+          content: Text('This order has already been accepted by the middleman and cannot be cancelled.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -342,6 +374,8 @@ class _DetailScreenState extends State<DetailScreen> {
     );
   }
 
+
+
   Widget _buildAmountDetails() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
@@ -357,11 +391,12 @@ class _DetailScreenState extends State<DetailScreen> {
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             child: Column(
               children: [
-                _buildAmountRow(
-                    'Subtotal', widget.order['priceDetails']['price']),
+
                 _buildAmountRow('MRP', widget.order['priceDetails']['mrp']),
                 _buildAmountRow('Discount',
                     '- ${widget.order['priceDetails']['discount']}'),
+                _buildAmountRow(
+                    'Subtotal', widget.order['priceDetails']['price']),
               ],
             ),
           ),
@@ -521,22 +556,25 @@ class _DetailScreenState extends State<DetailScreen> {
 
   Widget _buildCancelOrderButton() {
     return Center(
-      child: GestureDetector(
-        onTap: isOrderCancelled ? null : _cancelOrder,
-        child: Container(
-          height: 75.h,
-          width: 200.w,
-          margin: EdgeInsets.symmetric(vertical: 15.0),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: hexToColor('#2B2B2B'),
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: Center(
-            child: Text(
-              isOrderCancelled ? 'Order Cancelled' : 'Cancel Order',
-              style: TextStyle(
-                  color: Colors.white, fontFamily: 'Poppins', fontSize: 18.sp),
+      child: Opacity(
+        opacity: isOrderCancelled ? 0.5 : 1.0,
+        child: GestureDetector(
+          onTap: isOrderCancelled ? null : _cancelOrder,
+          child: Container(
+            height: 75.h,
+            width: 200.w,
+            margin: EdgeInsets.symmetric(vertical: 15.0),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: hexToColor('#2B2B2B'),
+              borderRadius: BorderRadius.circular(12.0),
+            ),
+            child: Center(
+              child: Text(
+                isOrderCancelled ? 'Order Cancelled' : 'Cancel Order',
+                style: TextStyle(
+                    color: Colors.white, fontFamily: 'Poppins', fontSize: 18.sp),
+              ),
             ),
           ),
         ),

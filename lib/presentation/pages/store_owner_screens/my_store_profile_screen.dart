@@ -47,14 +47,13 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   late String storeCategory = store.category;
   late String storeLocation = store.location;
   late String storeDomain = store.storeDomain;
-  late bool isActive = store.isActive;
+  late bool isActive;
   late int totalProducts = 0;
   late int totalPosts = 0;
   late int storeEngagement = store.storeEngagement ?? 0;
   late int greenFlags = store.greenFlags;
   late int totalFlags = store.greenFlags + store.redFlags;
   late int redFlags = store.redFlags;
-
   bool hasUpdates = false;
   bool isGreenFlag = true;
   bool isExpanded = false;
@@ -73,12 +72,13 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   void initState() {
     super.initState();
     store = widget.store;
+    isActive =widget.store.isActive;
     _fetchStore();
     _loadProducts();
     _fetchCategories();
     _fetchStoreUpdates();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 30),
       vsync: this,
     );
     _animation = CurvedAnimation(
@@ -153,6 +153,27 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     String url = await taskSnapshot.ref.getDownloadURL();
     return url;
   }
+
+
+  Future<void> _updateStoreStatus(bool value) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('Stores')
+          .doc(widget.store.storeId)
+          .update({'isActive': value});
+
+      setState(() {
+        isActive = value;
+      });
+    } catch (e) {
+      print('Error updating store status: $e');
+      // Revert the switch if the update fails
+      setState(() {
+        isActive = !value;
+      });
+    }
+  }
+
 
   Future<void> _fetchStoreUpdates() async {
     try {
@@ -231,6 +252,10 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
           .collection('Stores')
           .doc(store.storeId)
           .get();
+
+      setState(() {
+        isActive = doc['isActive'] ?? false;
+      });
 
       QuerySnapshot postSnapshot = await FirebaseFirestore.instance
           .collection('communityPosts')
@@ -443,6 +468,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                         ],
                       ),
                     ),
+
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       alignment: const Alignment(0.9, 0.9),
@@ -505,10 +531,9 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                 activeTrackColor: Colors.transparent,
                                 inactiveTrackColor: Colors.transparent,
                                 onChanged: (value) {
-                                  setState(() {
-                                    isActive = value;
-                                  });
-                                }),
+                                  _updateStoreStatus(value);
+                                }
+                                ),
                           )
                         ],
                       ),

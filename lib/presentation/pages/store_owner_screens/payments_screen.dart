@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/helpers/color_utils.dart';
 
@@ -11,7 +14,86 @@ class PaymentsScreen extends StatefulWidget {
 }
 
 class _PaymentsScreenState extends State<PaymentsScreen> {
-  String selectedPeriod = 'January';
+  String selectedPeriod = DateFormat('MMMM').format(DateTime.now());
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  late Stream<QuerySnapshot> _ordersStream;
+  Map<String, double> monthlyEarnings = {};
+  String upiId = '';
+  String? storeId;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchStoreIdAndUpiId();
+    _initializeOrdersStream();
+  }
+
+  Future<void> _fetchStoreIdAndUpiId() async {
+    try {
+      final userDoc = await _firestore.collection('Users').doc(_auth.currentUser!.uid).get();
+      final fetchedStoreId = userDoc.data()?['storeId'];
+
+      if (fetchedStoreId != null) {
+        final storeDoc = await _firestore.collection('Stores').doc(fetchedStoreId).get();
+        setState(() {
+          storeId = fetchedStoreId;
+          upiId = storeDoc.data()?['upiId'] ?? '';
+          isLoading = false;
+        });
+        _initializeOrdersStream();
+      } else {
+        print('No storeId found for this user');
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error fetching store ID and UPI ID: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  void _initializeOrdersStream() {
+    _ordersStream = _firestore
+        .collection('Orders')
+        .where('storeId', isEqualTo: storeId)
+        .snapshots();
+  }
+
+  double calculateMonthlyEarning(List<QueryDocumentSnapshot> orders, String month) {
+    return orders
+        .where((order) {
+      var orderAt = order['orderAt'] as Timestamp;
+      var deliveredStatus = (order['status'] as Map<String, dynamic>)['delivered'];
+      return DateFormat('MMMM').format(orderAt.toDate()) == month && deliveredStatus != null;
+    })
+        .map((order) => order['priceDetails']['price'] as double)
+        .fold(0, (sum, price) => sum + price);
+  }
+
+  Future<void> updateEarningsCollection(Map<String, double> earnings) async {
+    if (storeId == null) return;
+
+    final earningsRef = _firestore.collection('Stores').doc(storeId).collection('earnings');
+
+    final batch = _firestore.batch();
+
+    earnings.forEach((month, amount) {
+      final docRef = earningsRef.doc(month);
+      batch.set(docRef, {
+        'amount': amount,
+        'year': DateTime.now().year,
+        'lastUpdated': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    });
+
+    await batch.commit();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -113,7 +195,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                   ),
                   SizedBox(width: 12.w),
                   Text(
-                    'worldsxtreme2910@oksbi',
+                    upiId.isNotEmpty ? upiId : 'Not available',
                     style: TextStyle(
                       color: hexToColor('#838383'),
                       fontFamily: 'Gotham',
@@ -140,7 +222,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                         ),
                       ),
                       Text(
-                        '₹25k',
+                        '₹${monthlyEarnings[selectedPeriod]?.toStringAsFixed(2) ?? '0.00'}',
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
                           fontSize: 24.sp,
@@ -174,18 +256,8 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                         });
                       },
                       items: <String>[
-                        'January',
-                        'February',
-                        'March',
-                        'April',
-                        'May',
-                        'June',
-                        'July',
-                        'August',
-                        'September',
-                        'October',
-                        'November',
-                        'December',
+                        'January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December',
                       ].map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
                           value: value,
@@ -199,12 +271,46 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
             ),
             SizedBox(height: 30.h),
             Expanded(
-              child: ListView.separated(
-                shrinkWrap: true,
-                itemCount: 10,
-                separatorBuilder: (context, index) => SizedBox(height: 20.h),
-                itemBuilder: (context, index) {
-                  return PaymentInfoTile();
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _ordersStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+
+                  final orders = snapshot.data!.docs;
+
+                  // Calculate monthly earnings
+                  monthlyEarnings.clear();
+                  for (var month in ['January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December']) {
+                    monthlyEarnings[month] = calculateMonthlyEarning(orders, month);
+                  }
+
+
+                  // Update earnings collection in Firebase
+                  updateEarningsCollection(monthlyEarnings);
+
+
+                  // Filter orders for the selected month and delivered status
+                  final filteredOrders = orders.where((order) {
+                    var orderAt = order['orderAt'] as Timestamp;
+                    var deliveredStatus = (order['status'] as Map<String, dynamic>)['delivered'];
+                    return DateFormat('MMMM').format(orderAt.toDate()) == selectedPeriod && deliveredStatus != null;
+                  }).toList();
+
+                  return ListView.separated(
+                    itemCount: filteredOrders.length,
+                    separatorBuilder: (context, index) => SizedBox(height: 20.h),
+                    itemBuilder: (context, index) {
+                      final order = filteredOrders[index];
+                      return PaymentInfoTile(order: order);
+                    },
+                  );
                 },
               ),
             )
@@ -216,10 +322,20 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
 }
 
 class PaymentInfoTile extends StatelessWidget {
-  const PaymentInfoTile({super.key});
+  final QueryDocumentSnapshot order;
+
+  const PaymentInfoTile({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
+    final orderDate = (order['orderAt'] as Timestamp).toDate();
+    final paymentMethod = order['payment']['method'] as String;
+    final amount = order['priceDetails']['price'] as double;
+    final deliveredStatus = (order['status'] as Map<String, dynamic>)['delivered'];
+    final deliveryDate = deliveredStatus != null
+        ? (deliveredStatus['timestamp'] as Timestamp).toDate()
+        : null;
+
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 12.w),
       padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
@@ -245,7 +361,7 @@ class PaymentInfoTile extends StatelessWidget {
                   ),
                   SizedBox(width: 8.0),
                   Text(
-                    '123456',
+                    order['orderId'],
                     style: TextStyle(
                       color: hexToColor('#747474'),
                       fontSize: 14.sp,
@@ -256,7 +372,9 @@ class PaymentInfoTile extends StatelessWidget {
                 ],
               ),
               Text(
-                'May 7, 2023, 15:43 pm',
+                deliveryDate != null
+                    ? DateFormat('MMM d, yyyy, HH:mm a').format(deliveryDate)
+                    : 'Not delivered yet',
                 style: TextStyle(
                   color: hexToColor('#747474'),
                   fontFamily: 'Poppins',
@@ -278,11 +396,11 @@ class PaymentInfoTile extends StatelessWidget {
                       fontSize: 17.sp,
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.w600,
-                    ), //TextStyle
+                    ),
                   ),
                   SizedBox(width: 12.w),
                   Text(
-                    'UPI',
+                    paymentMethod,
                     style: TextStyle(
                       color: Theme.of(context).primaryColor,
                       fontSize: 17.sp,
@@ -293,7 +411,7 @@ class PaymentInfoTile extends StatelessWidget {
                 ],
               ),
               Text(
-                '₹ 2500',
+                '₹ ${amount.toStringAsFixed(2)}',
                 style: TextStyle(
                   color: Theme.of(context).primaryColor,
                   fontSize: 32.sp,
