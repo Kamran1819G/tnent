@@ -63,8 +63,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
     "Restaurants",
   ];
 
+  bool get isRestaurantCafeBakery =>
+      ['Restaurants', 'Cafes', 'Bakeries'].contains(selectedCategory);
+
   bool get isMultiOptionCategory =>
       multiOptionCategories.contains(selectedCategory);
+
+  bool get shouldShowStockQuantity =>
+      !isMultiOptionCategory && !isRestaurantCafeBakery;
 
   void _calculateItemPrice() {
     double discount = double.tryParse(_discountController.text) ?? 0.0;
@@ -225,7 +231,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
       discount: double.tryParse(_discountController.text) ?? 0.0,
       mrp: double.tryParse(_mrpController.text) ?? 0.0,
       price: double.tryParse(_itemPriceController.text) ?? 0.0,
-      stockQuantity: int.tryParse(_stockQuantityController.text) ?? 0,
+      stockQuantity: isRestaurantCafeBakery
+          ? 1000000
+          : int.tryParse(_stockQuantityController.text) ?? 0,
       sku: sku,
     );
 
@@ -760,7 +768,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       ),
                       SizedBox(height: 50.h),
                       // Product Stock Quantity
-                      if (!isMultiOptionCategory) ...[
+                      if (shouldShowStockQuantity) ...[
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 24.w),
                           child: Column(

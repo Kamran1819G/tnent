@@ -16,6 +16,7 @@ import 'package:quickalert/quickalert.dart';
 
 // import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
+import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/presentation/pages/home_screen.dart';
 import '../../../core/helpers/snackbar_utils.dart';
@@ -1989,10 +1990,19 @@ class _TransactionScreenState extends State<TransactionScreen> {
         DocumentReference productRef = FirebaseFirestore.instance
             .collection('products')
             .doc(item['productId']);
-        batch.update(productRef, {
-          'variations.${item['variation']}.stockQuantity':
-              FieldValue.increment(-item['quantity'])
-        });
+
+        ProductModel product =
+            ProductModel.fromFirestore(await productRef.get());
+
+        bool isRestaurantCafeBakery = ['Restaurants', 'Cafes', 'Bakeries']
+            .contains(product.productCategory);
+
+        if (!isRestaurantCafeBakery) {
+          batch.update(productRef, {
+            'variations.${item['variation']}.stockQuantity':
+                FieldValue.increment(-item['quantity'])
+          });
+        }
       }
 
       await batch.commit();
