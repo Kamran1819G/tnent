@@ -349,7 +349,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
 
         setState(() {
           isConnected = !isConnected;
-          storeEngagement+= isConnected ? 1 :-1;
+          storeEngagement += isConnected ? 1 : -1;
         });
         sendStoreFollowNotification();
       } else {
@@ -364,7 +364,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
 
         setState(() {
           isConnected = !isConnected;
-          storeEngagement+= isConnected ? 1 :-1;
+          storeEngagement += isConnected ? 1 : -1;
         });
       }
     });
@@ -399,541 +399,568 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack (
+      body: Stack(
         children: [
           SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 20.0),
-              // Profile Card
-              Container(
-                height: 290.h,
-                width: 618.w,
-                margin: EdgeInsets.symmetric(horizontal: 12.w),
-                decoration: BoxDecoration(
-                  color: hexToColor('#2D332F'),
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                child: Stack(
-                  children: [
-                    Positioned(
-                      right: 16.0,
-                      top: 16.0,
-                      child: CircleAvatar(
-                        backgroundColor: hexToColor('#F5F5F5'),
-                        radius: 20,
-                        child: IconButton(
-                          icon: const Icon(
-                            Icons.arrow_back_ios_new,
-                            color: Colors.black,
-                            size: 18,
-                          ),
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ),
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 20.0),
+                  // Profile Card
+                  Container(
+                    height: 290.h,
+                    width: 618.w,
+                    margin: EdgeInsets.symmetric(horizontal: 12.w),
+                    decoration: BoxDecoration(
+                      color: hexToColor('#2D332F'),
+                      borderRadius: BorderRadius.circular(20.0),
                     ),
-                    Align(
-                      alignment: const Alignment(-0.9, -0.5),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(top: 8),
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 16.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(12.0),
-                              child: CachedNetworkImage(
-                                imageUrl: widget.store.logoUrl,
-                                height: 90,
-                                width: 90,
-                                fit: BoxFit.cover,
-                                placeholder: (context, url) =>
-                                    Shimmer.fromColors(
-                                  baseColor: Colors.grey[300]!,
-                                  highlightColor: Colors.grey[100]!,
-                                  child: Container(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    const Icon(Icons.error),
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          right: 16.0,
+                          top: 16.0,
+                          child: CircleAvatar(
+                            backgroundColor: hexToColor('#F5F5F5'),
+                            radius: 20,
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.arrow_back_ios_new,
+                                color: Colors.black,
+                                size: 18,
                               ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
                             ),
                           ),
-                          Column(
+                        ),
+                        Align(
+                          alignment: const Alignment(-0.9, -0.5),
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Container(
+                                margin: const EdgeInsets.only(top: 8),
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 12.0),
-                                height: 30.h,
+                                    horizontal: 16.0),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12.0),
+                                  child: CachedNetworkImage(
+                                    imageUrl: widget.store.logoUrl,
+                                    height: 90,
+                                    width: 90,
+                                    fit: BoxFit.cover,
+                                    placeholder: (context, url) =>
+                                        Shimmer.fromColors(
+                                      baseColor: Colors.grey[300]!,
+                                      highlightColor: Colors.grey[100]!,
+                                      child: Container(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error),
+                                  ),
+                                ),
+                              ),
+                              Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12.0),
+                                    height: 30.h,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: Colors.transparent,
+                                      border: Border.all(
+                                          color: hexToColor('#DEFF98')),
+                                      borderRadius: BorderRadius.circular(20.0),
+                                    ),
+                                    child: Text(
+                                      widget.store.category,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13.sp,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 12.h),
+                                  SizedBox(
+                                    width: 400.w,
+                                    child: RichText(
+                                      text: TextSpan(children: [
+                                        TextSpan(
+                                          text: widget.store.name,
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontFamily: 'Gotham Black',
+                                            fontSize: 36.sp,
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: '•',
+                                          style: TextStyle(
+                                            fontFamily: 'Gotham Black',
+                                            fontSize: 36.sp,
+                                            color: hexToColor('#42FF00'),
+                                          ),
+                                        ),
+                                      ]),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  SizedBox(height: 16.h),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Image.asset(
+                                        'assets/icons/blue_globe.png',
+                                        height: 16.w,
+                                        width: 16.w,
+                                      ),
+                                      SizedBox(width: 8.w),
+                                      Text(
+                                        '${widget.store.storeDomain}.tnent.com',
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontFamily: 'Poppins',
+                                            fontSize: 16.sp),
+                                      ),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          alignment: const Alignment(0.9, 0.9),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                  onPressed: () async {
+                                    final String shareMessage =
+                                        'Check out ${widget.store.name} on Tnent! https://${widget.store.storeDomain}.tnent.com';
+                                    await Share.share(shareMessage);
+                                  },
+                                  icon: Icon(Icons.ios_share,
+                                      color: Colors.white, size: 25.sp)),
+                              const SizedBox(width: 10.0),
+                              Container(
+                                height: 45.h,
+                                width: 205.w,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  border:
-                                      Border.all(color: hexToColor('#DEFF98')),
+                                  color: hexToColorWithOpacity('#C0C0C0', 0.2),
                                   borderRadius: BorderRadius.circular(20.0),
                                 ),
                                 child: Text(
-                                  widget.store.category,
+                                  widget.store.location,
                                   style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'Poppins',
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 13.sp,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: 12.h),
-                              SizedBox(
-                                width: 400.w,
-                                child: RichText(
-                                  text: TextSpan(children: [
-                                    TextSpan(
-                                      text: widget.store.name,
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'Gotham Black',
-                                        fontSize: 36.sp,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: '•',
-                                      style: TextStyle(
-                                        fontFamily: 'Gotham Black',
-                                        fontSize: 36.sp,
-                                        color: hexToColor('#42FF00'),
-                                      ),
-                                    ),
-                                  ]),
+                                      color: Colors.white,
+                                      fontFamily: 'Poppins',
+                                      fontSize: 17.sp),
                                   overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
                                 ),
                               ),
-                              SizedBox(height: 16.h),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Image.asset(
-                                    'assets/icons/blue_globe.png',
-                                    height: 16.w,
-                                    width: 16.w,
-                                  ),
-                                  SizedBox(width: 8.w),
-                                  Text(
-                                    '${widget.store.storeDomain}.tnent.com',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'Poppins',
-                                        fontSize: 16.sp),
-                                  ),
-                                ],
-                              )
+                              const Spacer(),
                             ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      alignment: const Alignment(0.9, 0.9),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          IconButton(
-                              onPressed: () async {
-                                final String shareMessage =
-                                    'Check out ${widget.store.name} on Tnent! https://${widget.store.storeDomain}.tnent.com';
-                                await Share.share(shareMessage);
-                              },
-                              icon: Icon(Icons.ios_share,
-                                  color: Colors.white, size: 25.sp)),
-                          const SizedBox(width: 10.0),
-                          Container(
-                            height: 45.h,
-                            width: 205.w,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: hexToColorWithOpacity('#C0C0C0', 0.2),
-                              borderRadius: BorderRadius.circular(20.0),
-                            ),
-                            child: Text(
-                              widget.store.location,
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Poppins',
-                                  fontSize: 17.sp),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 1,
-                            ),
-                          ),
-                          const Spacer(),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 30.h),
+                  ),
+                  SizedBox(height: 30.h),
 
-              Container(
-                height: 225.h,
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Container(
-                      height: 180.h,
-                      width: 390.w,
-                      padding: EdgeInsets.all(12.w),
-                      decoration: BoxDecoration(
-                        color: hexToColor('#DDF1EF'),
-                        borderRadius: BorderRadius.circular(22.r),
-                      ),
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
+                  Container(
+                    height: 225.h,
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Container(
+                          height: 180.h,
+                          width: 390.w,
+                          padding: EdgeInsets.all(12.w),
+                          decoration: BoxDecoration(
+                            color: hexToColor('#DDF1EF'),
+                            borderRadius: BorderRadius.circular(22.r),
+                          ),
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                Row(
                                   children: [
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              'Store'.toUpperCase(),
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 21.sp,
+                                              ),
+                                            ),
+                                            Text(
+                                              ' •',
+                                              style: TextStyle(
+                                                fontSize: 21.sp,
+                                                fontFamily: 'Gotham Black',
+                                                color: Colors.red,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                         Text(
-                                          'Store'.toUpperCase(),
+                                          'Engagement'.toUpperCase(),
                                           style: TextStyle(
                                             color: Colors.black,
                                             fontSize: 21.sp,
                                           ),
                                         ),
+                                      ],
+                                    ),
+                                    const Spacer(),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        if (!isExpanded)
+                                          Text(
+                                            ' ${userVote == 'red' ? redFlags : greenFlags} / ${greenFlags + redFlags}',
+                                            style: TextStyle(
+                                              color: hexToColor('#676767'),
+                                              fontFamily: 'Gotham',
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        SizedBox(width: 8.w),
+                                        buildFlagButton(),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    // connect button with left + button and connect text at right
+                                    if (widget.store.ownerId !=
+                                        FirebaseAuth
+                                            .instance.currentUser!.uid) ...[
+                                      GestureDetector(
+                                        onTap: toggleConnection,
+                                        child: AnimatedSwitcher(
+                                          duration:
+                                              const Duration(milliseconds: 300),
+                                          // Adjust the duration as needed
+                                          child: Container(
+                                            key: ValueKey<bool>(isConnected),
+                                            // Key helps AnimatedSwitcher identify the widget
+                                            padding: EdgeInsets.all(12.w),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius:
+                                                  BorderRadius.circular(50.r),
+                                            ),
+                                            child: Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                AnimatedContainer(
+                                                  duration: const Duration(
+                                                      milliseconds: 300),
+                                                  padding:
+                                                      const EdgeInsets.all(4.0),
+                                                  decoration: BoxDecoration(
+                                                    color: isConnected
+                                                        ? hexToColor('#D4EDDA')
+                                                        : hexToColor('#F3F3F3'),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            50.0),
+                                                  ),
+                                                  child: Icon(
+                                                    isConnected
+                                                        ? Icons.check
+                                                        : Icons.add,
+                                                    color:
+                                                        hexToColor('#272822'),
+                                                    size: 18.sp,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 8.w),
+                                                AnimatedSwitcher(
+                                                  duration: const Duration(
+                                                      milliseconds: 300),
+                                                  child: Text(
+                                                    isConnected
+                                                        ? 'Connected'
+                                                            .toUpperCase()
+                                                        : 'Connect'
+                                                            .toUpperCase(),
+                                                    key: ValueKey<bool>(
+                                                        isConnected),
+                                                    style: TextStyle(
+                                                      color:
+                                                          hexToColor("#272822"),
+                                                      fontSize: 16.sp,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                    const Spacer(),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
                                         Text(
-                                          ' •',
+                                          storeEngagement.toString(),
                                           style: TextStyle(
-                                            fontSize: 21.sp,
-                                            fontFamily: 'Gotham Black',
-                                            color: Colors.red,
+                                            color: Colors.black,
+                                            fontSize: 24.sp,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Connections'.toUpperCase(),
+                                          style: TextStyle(
+                                            color: hexToColor('#7D7D7D'),
+                                            fontSize: 12.sp,
                                           ),
                                         ),
                                       ],
                                     ),
-                                    Text(
-                                      'Engagement'.toUpperCase(),
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 21.sp,
-                                      ),
-                                    ),
                                   ],
+                                )
+                              ]),
+                        ),
+                        SizedBox(width: 8.w),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StoreCommunity(
+                                  store: widget.store,
                                 ),
-                                const Spacer(),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    if (!isExpanded)
-                                      Text(
-                                        ' ${userVote == 'red' ? redFlags : greenFlags} / ${greenFlags + redFlags}',
-                                        style: TextStyle(
-                                          color: hexToColor('#676767'),
-                                          fontFamily: 'Gotham',
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    SizedBox(width: 8.w),
-                                    buildFlagButton(),
-                                  ],
-                                ),
-                              ],
+                              ),
+                            );
+                          },
+                          child: Container(
+                            height: 180.h,
+                            width: 180.w,
+                            padding: const EdgeInsets.all(8.0),
+                            decoration: BoxDecoration(
+                              color: hexToColor('#EFEFEF'),
+                              borderRadius: BorderRadius.circular(22.r),
                             ),
-                            Row(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                // connect button with left + button and connect text at right
-                                if (widget.store.ownerId !=
-                                    FirebaseAuth.instance.currentUser!.uid) ...[
-                                  GestureDetector(
-                                    onTap: toggleConnection,
-                                    child: AnimatedSwitcher(
-                                      duration:
-                                          const Duration(milliseconds: 300),
-                                      // Adjust the duration as needed
-                                      child: Container(
-                                        key: ValueKey<bool>(isConnected),
-                                        // Key helps AnimatedSwitcher identify the widget
-                                        padding: EdgeInsets.all(12.w),
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(50.r),
-                                        ),
-                                        child: Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            AnimatedContainer(
-                                              duration: const Duration(
-                                                  milliseconds: 300),
-                                              padding:
-                                                  const EdgeInsets.all(4.0),
-                                              decoration: BoxDecoration(
-                                                color: isConnected
-                                                    ? hexToColor('#D4EDDA')
-                                                    : hexToColor('#F3F3F3'),
-                                                borderRadius:
-                                                    BorderRadius.circular(50.0),
-                                              ),
-                                              child: Icon(
-                                                isConnected
-                                                    ? Icons.check
-                                                    : Icons.add,
-                                                color: hexToColor('#272822'),
-                                                size: 18.sp,
-                                              ),
-                                            ),
-                                            SizedBox(width: 8.w),
-                                            AnimatedSwitcher(
-                                              duration: const Duration(
-                                                  milliseconds: 300),
-                                              child: Text(
-                                                isConnected
-                                                    ? 'Connected'.toUpperCase()
-                                                    : 'Connect'.toUpperCase(),
-                                                key:
-                                                    ValueKey<bool>(isConnected),
-                                                style: TextStyle(
-                                                  color: hexToColor("#272822"),
-                                                  fontSize: 16.sp,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
+                                RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: 'Store'.toUpperCase(),
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: 'Gotham Black',
+                                          fontSize: 21.sp,
                                         ),
                                       ),
-                                    ),
+                                      TextSpan(
+                                        text: ' •',
+                                        style: TextStyle(
+                                          fontSize: 21.sp,
+                                          fontFamily: 'Gotham Black',
+                                          color: Colors.red,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                                const Spacer(),
-                                Column(
+                                ),
+                                Text(
+                                  'Community'.toUpperCase(),
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18.sp,
+                                  ),
+                                ),
+                                Text(
+                                  'Post'.toUpperCase(),
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 18.sp,
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Text(
-                                      storeEngagement.toString(),
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 24.sp,
-                                      ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          totalPosts.toString(),
+                                          style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 24.sp,
+                                          ),
+                                        ),
+                                        Text(
+                                          'Posts'.toUpperCase(),
+                                          style: TextStyle(
+                                            color: hexToColor('#7D7D7D'),
+                                            fontSize: 12.sp,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    Text(
-                                      'Connections'.toUpperCase(),
-                                      style: TextStyle(
-                                        color: hexToColor('#7D7D7D'),
-                                        fontSize: 12.sp,
+                                    // right arrow box
+                                    Container(
+                                      margin: const EdgeInsets.only(left: 10.0),
+                                      padding: const EdgeInsets.all(8.0),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[700],
+                                        borderRadius:
+                                            BorderRadius.circular(50.0),
+                                      ),
+                                      child: const Icon(
+                                        Icons.arrow_forward_ios,
+                                        color: Colors.white,
+                                        size: 16.0,
                                       ),
                                     ),
                                   ],
                                 ),
                               ],
-                            )
-                          ]),
-                    ),
-                    SizedBox(width: 8.w),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => StoreCommunity(
-                              store: widget.store,
                             ),
                           ),
-                        );
-                      },
-                      child: Container(
-                        height: 180.h,
-                        width: 180.w,
-                        padding: const EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: hexToColor('#EFEFEF'),
-                          borderRadius: BorderRadius.circular(22.r),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            RichText(
-                              text: TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: 'Store'.toUpperCase(),
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: 'Gotham Black',
-                                      fontSize: 21.sp,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: ' •',
-                                    style: TextStyle(
-                                      fontSize: 21.sp,
-                                      fontFamily: 'Gotham Black',
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Text(
-                              'Community'.toUpperCase(),
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 18.sp,
-                              ),
-                            ),
-                            Text(
-                              'Post'.toUpperCase(),
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 18.sp,
-                              ),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      totalPosts.toString(),
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontSize: 24.sp,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Posts'.toUpperCase(),
-                                      style: TextStyle(
-                                        color: hexToColor('#7D7D7D'),
-                                        fontSize: 12.sp,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                // right arrow box
-                                Container(
-                                  margin: const EdgeInsets.only(left: 10.0),
-                                  padding: const EdgeInsets.all(8.0),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[700],
-                                    borderRadius: BorderRadius.circular(50.0),
-                                  ),
-                                  child: const Icon(
-                                    Icons.arrow_forward_ios,
-                                    color: Colors.white,
-                                    size: 16.0,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20.0),
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Updates Section
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.only(left: 25.w),
-                        child: Text(
-                          'Updates',
-                          style: TextStyle(
-                            color: hexToColor('#343434'),
-                            fontSize: 24.sp,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10.0),
-                      Container(
-                        height: 220.h,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: [
-                            ...storeUpdates.map((update) {
-                              return UpdateTile(
-                                image: update.imageUrl,
-                                onTap: () => _previewUpdate(update),
-                              );
-                            }).toList(),
-                          ],
-                        ),
-                      ),
-                    ],
                   ),
                   const SizedBox(height: 20.0),
+
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Featured Products Section
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          'Featured Products',
-                          style: TextStyle(
-                            color: hexToColor('#343434'),
-                            fontSize: 18.0,
+                      // Updates Section
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(left: 25.w),
+                            child: Text(
+                              'Updates',
+                              style: TextStyle(
+                                color: hexToColor('#343434'),
+                                fontSize: 24.sp,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 10.0),
+                          Container(
+                            height: 220.h,
+                            child: storeUpdates.isEmpty
+                                ? Center(
+                                    child: Text(
+                                      'No Updates',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  )
+                                : ListView(
+                                    scrollDirection: Axis.horizontal,
+                                    children: storeUpdates.map((update) {
+                                      return UpdateTile(
+                                        image: update.imageUrl,
+                                        onTap: () => _previewUpdate(update),
+                                      );
+                                    }).toList(),
+                                  ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 20.0),
-                      FeatureProductsListView(
-                          featuredProductIds: widget.store.featuredProductIds),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Featured Products Section
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Text(
+                              'Featured Products',
+                              style: TextStyle(
+                                color: hexToColor('#343434'),
+                                fontSize: 18.0,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 20.0),
+                          FeatureProductsListView(
+                              featuredProductIds:
+                                  widget.store.featuredProductIds),
+                        ],
+                      ),
+                      const SizedBox(height: 20.0),
+                      FutureBuilder<List<StoreCategoryModel>>(
+                        future: fetchCategories(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else if (snapshot.hasError) {
+                            return Center(
+                                child: Text('Error: ${snapshot.error}'));
+                          } else {
+                            List<StoreCategoryModel> categories =
+                                snapshot.data!;
+                            return Column(
+                              children: categories
+                                  .map((category) => CategoryProductsListView(
+                                      category: category))
+                                  .toList(),
+                            );
+                          }
+                        },
+                      ),
                     ],
-                  ),
-                  const SizedBox(height: 20.0),
-                  FutureBuilder<List<StoreCategoryModel>>(
-                    future: fetchCategories(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      } else if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      } else {
-                        List<StoreCategoryModel> categories = snapshot.data!;
-                        return Column(
-                          children: categories
-                              .map((category) =>
-                                  CategoryProductsListView(category: category))
-                              .toList(),
-                        );
-                      }
-                    },
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
-    ],
-    ),
     );
   }
 

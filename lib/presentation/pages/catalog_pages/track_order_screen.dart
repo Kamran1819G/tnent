@@ -3,8 +3,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/presentation/pages/product_detail_screen.dart';
 
 class TrackOrderScreen extends StatelessWidget {
   final Map<String, dynamic> order;
@@ -79,58 +82,63 @@ class TrackOrderScreen extends StatelessWidget {
   }
 
   Widget _buildOrderDetails() {
-    return Container(
-      height: 175.h,
-      padding: EdgeInsets.symmetric(horizontal: 18.w),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Container(
-            height: 175.h,
-            width: 165.w,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.r),
-              image: DecorationImage(
-                image: NetworkImage(order['productImage']),
-                fit: BoxFit.fill,
+    return GestureDetector(
+      onTap: () => _fetchProductAndNavigate(order['productId']),
+      child: Container(
+        height: 175.h,
+        padding: EdgeInsets.symmetric(horizontal: 18.w),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Container(
+              height: 175.h,
+              width: 165.w,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.r),
+                image: DecorationImage(
+                  image: NetworkImage(order['productImage']),
+                  fit: BoxFit.fill,
+                ),
               ),
             ),
-          ),
-          SizedBox(width: 12.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                order['productName'],
-                style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
-              ),
-              SizedBox(height: 12.h),
-              Row(
-                children: [
-                  Text(
-                    'Order ID:',
-                    style: TextStyle(
-                        color: hexToColor('#878787'), fontSize: 17.sp),
-                  ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    order['orderId'],
-                    style: TextStyle(
-                        color: hexToColor('#A9A9A9'),
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 17.sp),
-                  ),
-                ],
-              ),
-              SizedBox(height: 60.h),
-              Text(
-                '₹ ${order['priceDetails']['price']}',
-                style: TextStyle(color: hexToColor('#343434'), fontSize: 22.sp),
-              ),
-            ],
-          ),
-        ],
+            SizedBox(width: 12.w),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  order['productName'],
+                  style:
+                      TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
+                ),
+                SizedBox(height: 12.h),
+                Row(
+                  children: [
+                    Text(
+                      'Order ID:',
+                      style: TextStyle(
+                          color: hexToColor('#878787'), fontSize: 17.sp),
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      order['orderId'],
+                      style: TextStyle(
+                          color: hexToColor('#A9A9A9'),
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 17.sp),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 60.h),
+                Text(
+                  '₹ ${order['priceDetails']['price']}',
+                  style:
+                      TextStyle(color: hexToColor('#343434'), fontSize: 22.sp),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -215,6 +223,27 @@ class TrackOrderScreen extends StatelessWidget {
     // Implement your timestamp formatting logic here
     return DateFormat('jm')
         .format((timestamp as Timestamp).toDate()); // Placeholder
+  }
+}
+
+Future<void> _fetchProductAndNavigate(String productId) async {
+  try {
+    final DocumentSnapshot<Map<String, dynamic>> prodcutDoc =
+        await FirebaseFirestore.instance
+            .collection('products')
+            .doc(productId)
+            .get();
+
+    if (!prodcutDoc.exists) {
+      print('Product document not found for ID: $productId');
+      return;
+    }
+
+    final ProductModel product = ProductModel.fromFirestore(prodcutDoc);
+
+    Get.to(() => ProductDetailScreen(product: product));
+  } catch (e) {
+    print("Failed to fetch order");
   }
 }
 

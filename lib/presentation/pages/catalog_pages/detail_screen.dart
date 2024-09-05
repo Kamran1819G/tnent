@@ -4,10 +4,13 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
+import 'package:tnent/models/product_model.dart';
+import 'package:tnent/presentation/pages/product_detail_screen.dart';
 
 import '../../../core/helpers/snackbar_utils.dart';
 
@@ -110,6 +113,27 @@ class _DetailScreenState extends State<DetailScreen> {
     return filePath;
   }
 
+  Future<void> _fetchProductAndNavigate(String productId) async {
+    try {
+      final DocumentSnapshot<Map<String, dynamic>> prodcutDoc =
+          await FirebaseFirestore.instance
+              .collection('products')
+              .doc(productId)
+              .get();
+
+      if (!prodcutDoc.exists) {
+        print('Product document not found for ID: $productId');
+        return;
+      }
+
+      final ProductModel product = ProductModel.fromFirestore(prodcutDoc);
+
+      Get.to(() => ProductDetailScreen(product: product));
+    } catch (e) {
+      print("Failed to fetch order");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -192,55 +216,60 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Widget _buildProductDetails() {
-    return Container(
-      height: 175.h,
-      padding: EdgeInsets.symmetric(horizontal: 18.w),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Container(
-            height: 175.h,
-            width: 165.w,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-              image: DecorationImage(
-                image: NetworkImage(widget.order['productImage']),
-                fit: BoxFit.fill,
+    return GestureDetector(
+      onTap: () => _fetchProductAndNavigate(widget.order['productId']),
+      child: Container(
+        height: 175.h,
+        padding: EdgeInsets.symmetric(horizontal: 18.w),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Container(
+              height: 175.h,
+              width: 165.w,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.0),
+                image: DecorationImage(
+                  image: NetworkImage(widget.order['productImage']),
+                  fit: BoxFit.fill,
+                ),
               ),
             ),
-          ),
-          SizedBox(width: 12.w),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                widget.order['productName'],
-                style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
-              ),
-              SizedBox(height: 12.h),
-              Row(
-                children: [
-                  Text(
-                    'Order ID:',
-                    style: TextStyle(
-                        color: hexToColor('#878787'), fontSize: 17.sp),
-                  ),
-                  SizedBox(width: 8.0),
-                  Text(
-                    widget.order['orderId'],
-                    style: TextStyle(
-                        color: hexToColor('#A9A9A9'), fontSize: 17.sp),
-                  ),
-                ],
-              ),
-              SizedBox(height: 60.h),
-              Text(
-                '₹ ${widget.order['priceDetails']['price']}',
-                style: TextStyle(color: hexToColor('#343434'), fontSize: 22.sp),
-              ),
-            ],
-          ),
-        ],
+            SizedBox(width: 12.w),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.order['productName'],
+                  style:
+                      TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
+                ),
+                SizedBox(height: 12.h),
+                Row(
+                  children: [
+                    Text(
+                      'Order ID:',
+                      style: TextStyle(
+                          color: hexToColor('#878787'), fontSize: 17.sp),
+                    ),
+                    SizedBox(width: 8.0),
+                    Text(
+                      widget.order['orderId'],
+                      style: TextStyle(
+                          color: hexToColor('#A9A9A9'), fontSize: 17.sp),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 60.h),
+                Text(
+                  '₹ ${widget.order['priceDetails']['price']}',
+                  style:
+                      TextStyle(color: hexToColor('#343434'), fontSize: 22.sp),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -448,6 +477,21 @@ class _DetailScreenState extends State<DetailScreen> {
                   '${widget.order['shippingAddress']['city'] ?? ''}, ${widget.order['shippingAddress']['state'] ?? ''} - ${widget.order['shippingAddress']['zip'] ?? ''}',
                   style: _addressTextStyle(),
                 ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.phone,
+                      color: hexToColor('#727272'),
+                      size: 20.sp,
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      '${widget.order['shippingAddress']['phone'] ?? ''}',
+                      style: _addressTextStyle(),
+                    ),
+                  ],
+                )
               ],
             ),
           ),

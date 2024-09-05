@@ -690,7 +690,7 @@ class OrderCard extends StatelessWidget {
               ),
               SizedBox(height: 20.h),
               if (orderStatus == OrderStatus.Ongoing ||
-                  orderStatus == OrderStatus.Delivered)
+                  orderStatus == OrderStatus.Delivered) ...[
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -715,6 +715,31 @@ class OrderCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                SizedBox(height: 12.h),
+                Row(
+                  children: [
+                    Text(
+                      "Customer Phone No.",
+                      style: TextStyle(
+                        color: hexToColor('#727272'),
+                        fontSize: 14.sp,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(width: 8.w),
+                    Text(
+                      '${shippingAddress!['phone'] ?? ''}',
+                      style: TextStyle(
+                        color: hexToColor('#878787'),
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14.sp,
+                      ),
+                    ),
+                  ],
+                )
+              ],
               if (orderStatus == OrderStatus.Cancelled)
                 Row(
                   children: [
@@ -750,9 +775,13 @@ class OrderCard extends StatelessWidget {
     if (shippingAddress == null) {
       return 'Not Available';
     }
+    final addressLine1 = shippingAddress!['addressLine1'] ?? '';
+    final addressLine2 = shippingAddress!['addressLine2'] ?? '';
     final city = shippingAddress!['city'] ?? '';
     final zip = shippingAddress!['zip'] ?? '';
     final state = shippingAddress!['state'] ?? '';
-    return [city, zip, state].where((e) => e.isNotEmpty).join(', ');
+    return [addressLine1, addressLine2, city, zip, state]
+        .where((e) => e.isNotEmpty)
+        .join(', ');
   }
 }
