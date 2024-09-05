@@ -500,6 +500,9 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
     initializeOptionalPriceKeys();
   }
 
+  bool get isRestaurantCafeBakery => ['Restaurants', 'Cafes', 'Bakeries']
+      .contains(widget.productData.productCategory);
+
   void initializeOptionalPriceKeys() {
     for (var option in widget.selectedOptions) {
       optionalPriceKeys[option] = GlobalKey<_OptionalPriceAndQuantityState>();
@@ -561,7 +564,9 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
           discount: double.tryParse(state._discountController.text) ?? 0,
           mrp: double.tryParse(state._mrpController.text) ?? 0,
           price: double.tryParse(state._itemPriceController.text) ?? 0,
-          stockQuantity: int.tryParse(state._quantityController.text) ?? 0,
+          stockQuantity: isRestaurantCafeBakery
+              ? 1000000
+              : int.tryParse(state._quantityController.text) ?? 0,
           sku: '${productId}-${option.replaceAll(' ', '-').toLowerCase()}',
         );
       }
@@ -719,6 +724,7 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
                     return OptionalPriceAndQuantity(
                       key: optionalPriceKeys[option],
                       title: option,
+                      isRestaurantCafeBakery: isRestaurantCafeBakery,
                       onDeletePressed: () {
                         setState(() {
                           if (widget.selectedOptions.length > 1) {
@@ -778,11 +784,13 @@ class _OptionalsPriceScreenState extends State<OptionalsPriceScreen> {
 class OptionalPriceAndQuantity extends StatefulWidget {
   final String title;
   final VoidCallback onDeletePressed;
+  final bool isRestaurantCafeBakery;
 
   OptionalPriceAndQuantity({
     Key? key,
     required this.title,
     required this.onDeletePressed,
+    required this.isRestaurantCafeBakery,
   }) : super(key: key);
 
   @override
@@ -1008,63 +1016,64 @@ class _OptionalPriceAndQuantityState extends State<OptionalPriceAndQuantity> {
                   ],
                 ),
                 SizedBox(height: 30.h),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 300.w,
-                      child: TextFormField(
-                        controller: _quantityController,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w700,
-                          fontSize: 20.sp,
-                        ),
-                        decoration: InputDecoration(
-                          hintText: 'Ex. 100',
-                          hintStyle: TextStyle(
-                            color: hexToColor('#989898'),
+                if (!widget.isRestaurantCafeBakery)
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 300.w,
+                        child: TextFormField(
+                          controller: _quantityController,
+                          style: TextStyle(
+                            color: Colors.black,
                             fontFamily: 'Gotham',
                             fontWeight: FontWeight.w700,
                             fontSize: 20.sp,
                           ),
-                          border: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: hexToColor('#848484'),
+                          decoration: InputDecoration(
+                            hintText: 'Ex. 100',
+                            hintStyle: TextStyle(
+                              color: hexToColor('#989898'),
+                              fontFamily: 'Gotham',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 20.sp,
                             ),
-                            borderRadius: BorderRadius.circular(20.r),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: hexToColor('#848484'),
+                              ),
+                              borderRadius: BorderRadius.circular(20.r),
+                            ),
+                            contentPadding: EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 16,
+                            ),
                           ),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 16,
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter the stock quantity';
-                          }
-                          final int? stockQuantity = int.tryParse(value);
-                          if (stockQuantity == null || stockQuantity < 0) {
-                            return 'Please enter a valid stock quantity';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    SizedBox(width: 20.w),
-                    Expanded(
-                      child: Text(
-                        '(Add Total Product Stock Quantity)',
-                        style: TextStyle(
-                          fontSize: 17.sp,
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                          color: hexToColor('#636363'),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter the stock quantity';
+                            }
+                            final int? stockQuantity = int.tryParse(value);
+                            if (stockQuantity == null || stockQuantity < 0) {
+                              return 'Please enter a valid stock quantity';
+                            }
+                            return null;
+                          },
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                      SizedBox(width: 20.w),
+                      Expanded(
+                        child: Text(
+                          '(Add Total Product Stock Quantity)',
+                          style: TextStyle(
+                            fontSize: 17.sp,
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                            color: hexToColor('#636363'),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),
