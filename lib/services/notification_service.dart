@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:tnent/presentation/pages/accept_reject_order_screen.dart';
 import 'package:tnent/presentation/pages/catalog_pages/detail_screen.dart';
 
 class NotificationService {
@@ -37,7 +38,6 @@ class NotificationService {
             channelDescription: 'New order notifications for store owners',
             playSound: true,
             defaultRingtoneType: DefaultRingtoneType.Ringtone,
-            locked: true,
             enableVibration: true,
             defaultColor: const Color(0xFF9D50DD),
             ledColor: const Color(0xFF9D50DD),
@@ -131,6 +131,8 @@ class NotificationService {
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       _handleMessage(message);
     });
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   }
 
   static Future<void> _storeFcmToken(String token) async {
@@ -187,7 +189,7 @@ class NotificationService {
           channelKey: channelKey, // Change as per your requirement
           title: message.notification?.title,
           body: message.notification?.body,
-          autoDismissible: false,
+          category: NotificationCategory.Service,
           locked: true,
           fullScreenIntent: true,
           wakeUpScreen: true,
@@ -280,6 +282,29 @@ class NotificationService {
     }
   }
 
+  static Future<void> _navigateToAcceptRejectScreen(String orderId) async {
+    try {
+      final orderDoc = await FirebaseFirestore.instance
+          .collection('Orders')
+          .where('orderId', isEqualTo: orderId)
+          .get();
+
+      if (orderDoc.docs.isNotEmpty) {
+        final orderData = orderDoc.docs.first.data();
+        Get.to(() => AcceptRejectOrderScreen(order: orderData));
+      }
+    } catch (e) {
+      print("Failed to fetch order");
+    }
+  }
+
+  @pragma('vm:entry-point')
+  static Future<void> _firebaseMessagingBackgroundHandler(
+      RemoteMessage message) async {
+    await initialize();
+    await _handleMessage(message);
+  }
+
   /// Use this method to detect when a new notification or a schedule is created
   @pragma("vm:entry-point")
   static Future<void> onNotificationCreatedMethod(
@@ -333,6 +358,8 @@ class NotificationService {
               body: 'You have declined order #$orderId',
             ),
           );
+        } else {
+          await _navigateToAcceptRejectScreen(orderId);
         }
       }
     }

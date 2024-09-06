@@ -17,6 +17,14 @@ class PermissionHandlerService {
     return status.isGranted;
   }
 
+  Future<bool> requestIgnoreBatteryOptimizationPermission() async {
+    var status = await Permission.ignoreBatteryOptimizations.status;
+    if (!status.isGranted) {
+      status = await Permission.ignoreBatteryOptimizations.request();
+    }
+    return status.isGranted;
+  }
+
   Future<bool> requestLocationPermission() async {
     var status = await Permission.location.status;
     if (!status.isGranted) {
