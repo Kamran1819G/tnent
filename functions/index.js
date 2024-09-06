@@ -1,6 +1,16 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const {getMessaging} = require("firebase-admin/messaging");
+const nodemailer = require("nodemailer");
+
+// Configure the email transporter
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: functions.config().gmail.email,
+    pass: functions.config().gmail.password,
+  },
+});
 
 admin.initializeApp();
 
@@ -136,4 +146,30 @@ exports.sendOrderNotificationToStoreOwner = functions.firestore
       } catch (error) {
         console.error("Error processing order notification:", error);
       }
+    });
+
+exports.sendWelcomeEmail = functions.firestore
+    .document("Middlemens/{middlemanId}")
+    .onCreate((snap, context) => {
+      const newValue = snap.data();
+      const middlemanId = context.params.middlemanId;
+
+      const mailOptions = {
+        from: functions.config().gmail.email,
+        to: newValue.email,
+        subject: "Welcome to Tnent Middleman Program",
+        html: `
+          <h1>Welcome to Tnent!</h1>
+          <p>Your registration as a middleman has been successful.</p>
+          <p>Here are your login details:</p>
+          <p><strong>Middleman ID:</strong> ${middlemanId}</p>
+          <p><strong>Temporary Password:</strong> ${newValue.password}</p>
+          <p>Thank you for joining us!</p>
+        `,
+      };
+
+      return transporter
+          .sendMail(mailOptions)
+          .then(() => console.log("Welcome email sent to:", newValue.email))
+          .catch((error) => console.error("Error sending welcome email:", error));
     });
