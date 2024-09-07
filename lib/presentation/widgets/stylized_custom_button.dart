@@ -42,10 +42,12 @@ class StylizedCustomButton extends StatelessWidget {
                   child: icon != ""
                       ? Image.asset(
                           icon,
-                          scale: 2,
+                          scale: 3,
                         )
-                      : const Icon(Icons.question_mark_outlined,
-                          color: Colors.black26, size: 32),
+                      : Image.asset(
+                          "assets/catalog_button_images/comin.png",
+                          scale: 3,
+                        ),
                 ),
                 const SizedBox(
                     width: 10), // Space between the icon and the label

@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
+import 'package:tnent/core/helpers/frosted_glass.dart';
 import 'package:tnent/presentation/pages/home_pages/catalog.dart';
 import 'package:tnent/presentation/pages/home_pages/community.dart';
 import 'package:tnent/presentation/pages/home_pages/gallery.dart';
@@ -119,36 +120,59 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBottomNavigationBar() {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20, left: 40, right: 40),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85), // Semi-transparent white
-        borderRadius: BorderRadius.circular(100),
-        // border: Border.all(color: Colors.white.withOpacity(0.7), width: 1.0),
-      ),
-      child: Material(
-        surfaceTintColor: Colors.white,
-        shadowColor: Colors.white,
-        elevation: 25,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(100),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildNavItem(0, 'assets/home.png'),
-                  _buildNavItem(1, 'assets/community.png'),
-                  _buildNavItem(2, 'assets/gallery.png'),
-                  _buildNavItem(3, 'assets/catalog.png'),
-                ],
-              ),
-            ),
-          ),
+    // return Container(
+    //   margin: const EdgeInsets.only(bottom: 20, left: 40, right: 40),
+    //   decoration: BoxDecoration(
+    //     color: Colors.white.withOpacity(0.85), // Semi-transparent white
+    //     borderRadius: BorderRadius.circular(100),
+    //     // border: Border.all(color: Colors.white.withOpacity(0.7), width: 1.0),
+    //   ),
+    //   child: Material(
+    //     surfaceTintColor: Colors.white,
+    //     shadowColor: Colors.white,
+    //     elevation: 25,
+    //     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
+    //     child: ClipRRect(
+    //       borderRadius: BorderRadius.circular(100),
+    //       child: BackdropFilter(
+    //         filter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+    //         child: Padding(
+    //           padding: const EdgeInsets.symmetric(vertical: 12),
+    //           child: Row(
+    //             mainAxisSize: MainAxisSize.max,
+    //             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    //             children: [
+    //               _buildNavItem(0, 'assets/home.png'),
+    //               _buildNavItem(1, 'assets/community.png'),
+    //               _buildNavItem(2, 'assets/gallery.png'),
+    //               _buildNavItem(3, 'assets/catalog.png'),
+    //             ],
+    //           ),
+    //         ),
+    //       ),
+    //     ),
+    //   ),
+    // );
+    // final width = MediaQuery.of(context).size.width;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 40).copyWith(bottom: 20),
+      child: FrostedGlass(
+        width: double.infinity,
+        maxOpacity: 0.4,
+        minOpacity: 0.4,
+        sigmaX: 22,
+        sigmaY: 22,
+        borderRadius: 40,
+        height: 70,
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildNavItem(0, 'assets/home.png'),
+            _buildNavItem(1, 'assets/community.png'),
+            _buildNavItem(2, 'assets/gallery.png'),
+            _buildNavItem(3, 'assets/catalog.png'),
+          ],
         ),
       ),
     );
@@ -166,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
           color: _selectedIndex == index
-              ? Colors.indigo.shade200
+              ? hexToColor('#B7BAFF')
               : Colors.transparent,
           borderRadius: BorderRadius.circular(100),
         ),

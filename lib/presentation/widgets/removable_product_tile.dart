@@ -18,7 +18,7 @@ class RemovableProductTile extends StatelessWidget {
     double? height,
     required this.onRemove,
   })  : width = width ?? 240.w,
-        height = height ?? 340.h;
+        height = height ?? 390.h;
 
   ProductVariant? _getFirstVariation() {
     if (product.variations.isNotEmpty) {
@@ -65,7 +65,7 @@ class RemovableProductTile extends StatelessWidget {
         margin: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8.r),
-          color: hexToColor('#F5F5F5'),
+          // color: hexToColor('#F5F5F5'),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,11 +84,11 @@ class RemovableProductTile extends StatelessWidget {
                             placeholder: (context, url) =>
                                 _buildShimmerSkeleton(),
                             errorWidget: (context, url, error) =>
-                                Icon(Icons.error),
+                                const Icon(Icons.error),
                           )
                         : Container(
                             color: Colors.grey[300],
-                            child: Icon(Icons.image_not_supported,
+                            child: const Icon(Icons.image_not_supported,
                                 size: 40, color: Colors.grey),
                           ),
                   ),
@@ -99,7 +99,7 @@ class RemovableProductTile extends StatelessWidget {
                       onTap: onRemove,
                       child: Container(
                         padding: EdgeInsets.all(6.w),
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),

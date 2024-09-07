@@ -26,7 +26,7 @@ class _CatalogState extends State<Catalog> {
   List<Map<String, dynamic>> content = [
     {
       "title": "Wishlist",
-      "icon": "assets/icons/wishlist.png",
+      "icon": "assets/catalog_button_images/wishl.png",
       "background": "assets/catalog_button_images/wishlist.png",
       "textColor": Colors.white,
       "function": () {
@@ -35,7 +35,7 @@ class _CatalogState extends State<Catalog> {
     },
     {
       "title": "My Purchases",
-      "icon": "assets/icons/my_purchases.png",
+      "icon": "assets/catalog_button_images/my_purc.png",
       "background": "assets/catalog_button_images/my_purchases.png",
       "textColor": Colors.white,
       "function": () {
@@ -44,7 +44,7 @@ class _CatalogState extends State<Catalog> {
     },
     {
       "title": "Premium",
-      "icon": "assets/icons/premium.png",
+      "icon": "assets/catalog_button_images/premi.png",
       "background": "assets/catalog_button_images/premium.png",
       "textColor": Colors.black,
       "function": () {
@@ -170,23 +170,19 @@ class _CatalogState extends State<Catalog> {
         const SizedBox(
           height: 30,
         ),
-        underWidget(),
-        underWidget(),
+        underWidget("assets/categories2/cata1.png"),
+        underWidget("assets/categories2/cata3.png"),
+        underWidget("assets/categories2/cata2.png"),
       ],
     );
   }
 
-  Widget underWidget() => Padding(
+  Widget underWidget(String asset) => Padding(
         padding:
             const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 13),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
-          child: AspectRatio(
-            aspectRatio: 16 / 9,
-            child: Container(
-              color: Colors.grey,
-            ),
-          ),
+          child: AspectRatio(aspectRatio: 16 / 9, child: Image.asset(asset)),
         ),
       );
 }

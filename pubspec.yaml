@@ -110,6 +110,7 @@ flutter:
   assets:
     - assets/
     - assets/categories/
+    - assets/categories2/
     - assets/icons/
     - assets/social_icons/
     - assets/catalog_button_images/

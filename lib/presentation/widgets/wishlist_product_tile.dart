@@ -217,7 +217,7 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                               ? Icons.favorite
                               : Icons.favorite_border,
                           color: _isInWishlist ? Colors.red : Colors.grey,
-                          size: 32.sp,
+                          size: 25.sp,
                         ),
                       ),
                     ),
@@ -226,7 +226,7 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.all(8.0).copyWith(top: 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,

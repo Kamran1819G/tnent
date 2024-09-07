@@ -347,7 +347,7 @@ class _CommunityPostState extends State<CommunityPost> {
         GestureDetector(
           onTap: () => _showMoreOptions(),
           child: Padding(
-            padding: const EdgeInsets.only(left: 10),
+            padding: const EdgeInsets.only(left: 16),
             child: CircleAvatar(
               radius: 25.w,
               backgroundColor: hexToColor('#F5F5F5'),

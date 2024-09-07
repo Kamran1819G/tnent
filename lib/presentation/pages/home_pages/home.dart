@@ -43,27 +43,27 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   List<Map<String, dynamic>> categories = [
     {
       'name': 'Restaurant',
-      'image': 'assets/categories/restaurant.png',
+      'image': 'assets/categories2/restaurant.png',
     },
     {
       'name': 'Cafe',
-      'image': 'assets/categories/cafe.png',
+      'image': 'assets/categories2/cafe.png',
     },
     {
       'name': 'Clothings',
-      'image': 'assets/categories/clothing.png',
+      'image': 'assets/categories2/clothing.png',
     },
     {
       'name': 'Bakery',
-      'image': 'assets/categories/bakery.png',
+      'image': 'assets/categories2/bakery.png',
     },
     {
       'name': 'Grocery',
-      'image': 'assets/categories/grocery.png',
+      'image': 'assets/categories2/grocery.png',
     },
     {
       'name': 'Books',
-      'image': 'assets/categories/books.png',
+      'image': 'assets/categories2/books.png',
     },
   ];
 
@@ -135,14 +135,16 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         .collection('Users')
         .doc(userId)
         .collection('notifications')
-        .where('createdAt', isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(lastCheckTime))
+        .where('createdAt',
+            isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(lastCheckTime))
         .get();
 
     final hasNewNotifications = snapshot.docs.isNotEmpty;
 
     if (hasNewNotifications) {
       // Update the last check time
-      await prefs.setInt('lastNotificationCheck', DateTime.now().millisecondsSinceEpoch);
+      await prefs.setInt(
+          'lastNotificationCheck', DateTime.now().millisecondsSinceEpoch);
     }
 
     return hasNewNotifications;
@@ -310,7 +312,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: Container(
-            width: 350 * (235 / 342),
+            // width: 350 * (235 / 342),
             height: 350,
             color: Colors.grey,
             child: Center(
@@ -324,6 +326,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -398,13 +401,16 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       await prefs.setInt('lastNotificationCheck',
                           DateTime.now().millisecondsSinceEpoch);
                     },
-                    child: Image.asset(
-                      hasNewNotifications
-                          ? 'assets/icons/new_notification_box.png'
-                          : 'assets/icons/no_new_notification_box.png',
-                      height: 35.h,
-                      width: 35.w,
-                      fit: BoxFit.cover,
+                    child: Padding(
+                      padding: const EdgeInsets.all(1.5),
+                      child: Image.asset(
+                        hasNewNotifications
+                            ? 'assets/icons/new_notification_box.png'
+                            : 'assets/icons/no_new_notification_box.png',
+                        height: 35.h,
+                        width: 35.w,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   );
                 },
@@ -555,9 +561,26 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               enlargeCenterPage: true,
             ),
             items: [
-              Image.asset(
-                'assets/store_profile_updated2.jpg.png',
-                scale: 0.8,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Image.asset(
+                  'assets/categories2/vbnm.png',
+                  scale: 0.8,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Image.asset(
+                  'assets/categories2/dfgn.png',
+                  scale: 0.8,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Image.asset(
+                  'assets/categories2/dfghj.png',
+                  scale: 0.8,
+                ),
               ),
             ],
           ),
@@ -704,8 +727,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           child: CarouselSlider(
             options: CarouselOptions(
               aspectRatio: 235 / 342,
-              height: 350,
-              viewportFraction: 0.7,
+              // height: 350,
+              viewportFraction: 1,
               autoPlay: true,
               enableInfiniteScroll: false,
               enlargeCenterPage: false,
@@ -739,21 +762,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       MaterialPageRoute(
                           builder: (context) => const StoresScreen()));
                 },
-                child: Row(
-                  children: [
-                    Text(
-                      'View all ',
-                      style: TextStyle(
-                          color: hexToColor('#343434').withOpacity(0.6),
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w300),
-                    ),
-                    Icon(
-                      Icons.launch_rounded,
+                child: Text(
+                  'View all   ',
+                  style: TextStyle(
                       color: hexToColor('#343434').withOpacity(0.6),
-                      size: 16,
-                    ),
-                  ],
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w300),
                 ),
               ),
             ],

@@ -22,11 +22,15 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   String? errorMessage = '';
   bool passwordVisible = false;
+  bool isLoading = false;
 
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
   Future<void> signInWithEmailAndPassword() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       await Auth().signInWithEmailAndPassword(
           email: emailController.text, password: passwordController.text);
@@ -37,10 +41,17 @@ class _SignInScreenState extends State<SignInScreen> {
         errorMessage = e.message;
       });
       showSnackBar(context, errorMessage);
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
   Future<void> signInWithGoogle() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       await Auth().signInWithGoogle();
       Get.offAllNamed(AppRoutes.AUTH_GATE);
@@ -50,6 +61,10 @@ class _SignInScreenState extends State<SignInScreen> {
       });
 
       showSnackBar(context, errorMessage);
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
@@ -219,18 +234,22 @@ class _SignInScreenState extends State<SignInScreen> {
               SizedBox(height: 10.h),
               Container(
                   padding: EdgeInsets.only(left: 470.w),
-                  child: CircleAvatar(
-                    backgroundColor: Theme.of(context).primaryColor,
-                    radius: 40.w,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_forward),
-                      onPressed: () {
-                        signInWithEmailAndPassword();
-                      },
-                      color: Colors.white,
-                    ),
-                  )),
-              SizedBox(height: 200.h),
+                  child: isLoading
+                      ? const CircularProgressIndicator(
+                          color: Colors.black,
+                        )
+                      : CircleAvatar(
+                          backgroundColor: Theme.of(context).primaryColor,
+                          radius: 40.w,
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_forward),
+                            onPressed: () {
+                              signInWithEmailAndPassword();
+                            },
+                            color: Colors.white,
+                          ),
+                        )),
+              SizedBox(height: 160.h),
               // Create google and apple sign in buttons
               Center(
                 child: Text(
@@ -243,86 +262,91 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 20.h),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        height: 75.h,
-                        margin: const EdgeInsets.only(right: 10),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            signInWithGoogle();
-                          },
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.black,
-                            backgroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12.r),
+              SizedBox(height: 40.h),
+              Padding(
+                padding: const EdgeInsets.only(left: 25, right: 12),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          height: 75.h,
+                          margin: const EdgeInsets.only(right: 10),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              signInWithGoogle();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              elevation: 3,
+                              foregroundColor: Colors.black,
+                              backgroundColor: Colors.white,
+                              shadowColor: Colors.grey.shade300,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(40.r),
+                              ),
                             ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'assets/google.png',
-                                width: 30.w,
-                                height: 30.h,
-                              ),
-                              SizedBox(width: 16.w),
-                              Text(
-                                'Google',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 24.sp,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/google.png',
+                                  width: 30.w,
+                                  height: 30.h,
                                 ),
-                              ),
-                            ],
+                                SizedBox(width: 16.w),
+                                Text(
+                                  'Google',
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 24.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        height: 75.h,
-                        margin: const EdgeInsets.only(left: 10),
-                        child: ElevatedButton(
-                          onPressed: () async {},
-                          style: ElevatedButton.styleFrom(
-                            foregroundColor: Colors.white,
-                            backgroundColor: Colors.blue,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Image.asset(
-                                'assets/facebook.png',
-                                width: 30.w,
-                                height: 30.h,
-                              ),
-                              SizedBox(width: 16.w),
-                              Text(
-                                'Facebook',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 24.sp,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                      // Expanded(
+                      //   child: Container(
+                      //     height: 75.h,
+                      //     margin: const EdgeInsets.only(left: 10),
+                      //     child: ElevatedButton(
+                      //       onPressed: () async {},
+                      //       style: ElevatedButton.styleFrom(
+                      //         foregroundColor: Colors.white,
+                      //         backgroundColor: Colors.blue,
+                      //         shape: RoundedRectangleBorder(
+                      //           borderRadius: BorderRadius.circular(10),
+                      //         ),
+                      //       ),
+                      //       child: Row(
+                      //         mainAxisAlignment: MainAxisAlignment.center,
+                      //         children: [
+                      //           Image.asset(
+                      //             'assets/facebook.png',
+                      //             width: 30.w,
+                      //             height: 30.h,
+                      //           ),
+                      //           SizedBox(width: 16.w),
+                      //           Text(
+                      //             'Facebook',
+                      //             style: TextStyle(
+                      //               color: Colors.white,
+                      //               fontFamily: 'Poppins',
+                      //               fontWeight: FontWeight.w500,
+                      //               fontSize: 24.sp,
+                      //             ),
+                      //           ),
+                      //         ],
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
+                    ],
+                  ),
                 ),
               ),
               SizedBox(height: 30.h),

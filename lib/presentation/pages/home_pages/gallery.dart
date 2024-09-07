@@ -202,6 +202,8 @@ class _GalleryState extends State<Gallery> {
                                     child: CachedNetworkImage(
                                       imageUrl: store.logoUrl,
                                       fit: BoxFit.cover,
+                                      width: 65,
+                                      height: 65,
                                       placeholder: (context, url) =>
                                           Shimmer.fromColors(
                                         baseColor: Colors.grey[300]!,
