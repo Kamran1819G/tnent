@@ -342,20 +342,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    GestureDetector(
-                      onLongPress: () {
-                        // TODO: remove this gesture detector after implementing the notification to Acceptreject page
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (context) {
-                          return AcceptRejectOrderScreen(
-                            items: const [],
-                          );
-                        }));
-                      },
-                      child: Text(getGreeting().toUpperCase(),
-                          style: TextStyle(
-                              color: hexToColor('#727272'), fontSize: 18.sp)),
-                    ),
+                    Text(getGreeting().toUpperCase(),
+                        style: TextStyle(
+                            color: hexToColor('#727272'), fontSize: 18.sp)),
                     SizedBox(height: 12.h),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.5,

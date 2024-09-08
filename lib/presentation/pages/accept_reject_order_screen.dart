@@ -1,113 +1,185 @@
-import 'dart:math';
-
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:tnent/core/helpers/snackbar_utils.dart';
 
 import '../../core/helpers/color_utils.dart';
 import '../../models/store_model.dart';
-import 'catalog_pages/checkout_screen.dart';
+import 'home_screen.dart';
 
 class AcceptRejectOrderScreen extends StatefulWidget {
-  List<Map<String, dynamic>> items;
+  final Map<String, dynamic> item;
 
-  AcceptRejectOrderScreen({super.key, required this.items});
+  const AcceptRejectOrderScreen({Key? key, required this.item})
+      : super(key: key);
 
   @override
-  State<AcceptRejectOrderScreen> createState() => _SummaryScreenState();
+  State<AcceptRejectOrderScreen> createState() =>
+      _AcceptRejectOrderScreenState();
 }
 
-class _SummaryScreenState extends State<AcceptRejectOrderScreen> {
-  late Map<String, StoreModel> _storeDetails = {};
-  double _totalAmount = 0.0;
+class _AcceptRejectOrderScreenState extends State<AcceptRejectOrderScreen> {
+  late StoreModel store;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _calculateTotalAmount();
+    initialize();
   }
 
-  void _calculateTotalAmount() {
-    _totalAmount = widget.items.fold(
-        0,
-        (sum, item) =>
-            sum + (item['variationDetails'].price * item['quantity']));
+  Future<void> initialize() async {
+    await _fetchStore();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future<void> _fetchStore() async {
+    final String storeId = widget.item['storeId'] ?? 'Unknown';
+    final storeDoc = await FirebaseFirestore.instance
+        .collection('Stores')
+        .doc(storeId)
+        .get();
+    store = StoreModel.fromFirestore(storeDoc);
+  }
+
+  Future<void> _handleOrder(BuildContext context, bool accept) async {
+    final String orderId = widget.item['orderId'] ?? 'Unknown';
+    try {
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('Orders')
+          .where('orderId', isEqualTo: orderId)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        throw Exception('Order not found');
+      }
+
+      final doc = querySnapshot.docs.first;
+      final status = accept ? 'accepted' : 'cancelled';
+      final message = accept
+          ? 'Order accepted by store owner'
+          : 'Order rejected by store owner';
+
+      await doc.reference.update({
+        'status.$status': {
+          'timestamp': FieldValue.serverTimestamp(),
+          'message': message,
+        },
+      });
+
+      if (accept) {
+        await AwesomeNotifications().createNotification(
+          content: NotificationContent(
+            id: 10,
+            channelKey: 'store_order_channel',
+            title: 'Order Accepted',
+            body: 'You have accepted order #$orderId',
+          ),
+        );
+      } else {
+        await AwesomeNotifications().createNotification(
+          content: NotificationContent(
+            id: 11,
+            channelKey: 'store_order_channel',
+            title: 'Order Declined',
+            body: 'You have declined order #$orderId',
+          ),
+        );
+      }
+
+      Get.offAll(() => HomeScreen());
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final totalAmount =
+        widget.item['priceDetails']['price'] * widget.item['quantity'];
+
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    _buildStoreSection(),
-                    const SizedBox(height: 20),
-                    _buildProductSection(),
-                    const Row(
-                      children: [
-                        StylizedCustomIllustration(
-                          label: 'Optional: ',
-                          value: 'XS',
-                        ),
-                        StylizedCustomIllustration(
-                          label: 'Quantity: ',
-                          value: 'XS',
-                        )
-                      ],
-                    ),
-                    Card(
-                      margin: EdgeInsets.all(24.w),
-                      color: Colors.white,
-                      surfaceTintColor: Colors.white,
-                      child: Container(
-                        padding: EdgeInsets.all(16.w),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Additional Notes: ',
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w500,
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  _buildHeader(),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          _buildStoreSection(),
+                          const SizedBox(height: 20),
+                          _buildProductSection(),
+                          Row(
+                            children: [
+                              StylizedCustomIllustration(
+                                label: 'Optional: ',
+                                value: widget.item['variation']
+                                    .toString()
+                                    .toUpperCase(),
+                              ),
+                              StylizedCustomIllustration(
+                                label: 'Quantity: ',
+                                value: widget.item['quantity'].toString(),
+                              )
+                            ],
+                          ),
+                          Card(
+                            margin: EdgeInsets.all(24.w),
+                            color: Colors.white,
+                            surfaceTintColor: Colors.white,
+                            child: Container(
+                              padding: EdgeInsets.all(16.w),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Additional Notes: ',
+                                    style: TextStyle(
+                                      fontSize: 16.sp,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const Text(
+                                    'Lorem Ipsum sit amet, consectetur adipis, sed do eiusmod tempor inc, eum fug, eiusmod tempor inc, eum fugiat null, eum fugiat null, eum fugiat null, eum fug, eum fugiat null, eum fugiat null, eum fugiat',
+                                    style: TextStyle(
+                                        fontFamily: 'Poppins', fontSize: 10),
+                                  ),
+                                ],
                               ),
                             ),
-                            const Text(
-                              'Lorem Ipsum sit amet, consectetur adipis, sed do eiusmod tempor inc, eum fug, eiusmod tempor inc, eum fugiat null, eum fugiat null, eum fugiat null, eum fug, eum fugiat null, eum fugiat null, eum fugiat',
-                              style: TextStyle(
-                                  fontFamily: 'Poppins', fontSize: 10),
-                            ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(height: 20),
+                          _buildSummarySection(totalAmount),
+                          const SizedBox(height: 20),
+                          btn(() => _handleOrder(context, true), 'Accept Order',
+                              isBlackBG: true),
+                          const SizedBox(height: 20),
+                          btn(() {
+                            showSnackBarWithAction(
+                              context,
+                              text: "Do you want to reject this order?",
+                              action: () => _handleOrder(context, false),
+                              quickAlertType: QuickAlertType.warning,
+                              confirmBtnColor: Colors.red,
+                            );
+                          }, 'Reject Order'),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 20),
-                    _buildSummarySection(),
-                    const SizedBox(height: 20),
-                    btn(() {}, 'Accept Order', isBlackBG: true),
-                    const SizedBox(height: 20),
-                    btn(() {
-                      showSnackBarWithAction(
-                        context,
-                        text: "Do you want to reject this order?",
-                        action: () {},
-                        quickAlertType: QuickAlertType.warning,
-                        confirmBtnColor: Colors.red,
-                      );
-                    }, 'Reject Order'),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -144,67 +216,59 @@ class _SummaryScreenState extends State<AcceptRejectOrderScreen> {
   }
 
   Widget _buildStoreSection() {
-    return Column(
-      children: _storeDetails.entries.map((entry) {
-        String storeId = entry.key;
-        StoreModel store = entry.value;
-        return Container(
-          padding: EdgeInsets.symmetric(horizontal: 36.w, vertical: 12.h),
-          child: Row(
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 36.w, vertical: 12.h),
+      child: Row(
+        children: [
+          Container(
+            height: 80.h,
+            width: 80.w,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6.r),
+              image: DecorationImage(
+                image: NetworkImage(store.logoUrl),
+                fit: BoxFit.fill,
+              ),
+            ),
+          ),
+          SizedBox(width: 16.w),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                height: 80.h,
-                width: 80.w,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6.r),
-                  image: DecorationImage(
-                    image: NetworkImage(store.logoUrl),
-                    fit: BoxFit.fill,
-                  ),
+              Text(
+                store.name,
+                style: TextStyle(
+                  color: hexToColor('#343434'),
+                  fontSize: 25.sp,
                 ),
               ),
-              SizedBox(width: 16.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    store.name,
-                    style: TextStyle(
-                      color: hexToColor('#343434'),
-                      fontSize: 25.sp,
-                    ),
+              SizedBox(height: 6.h),
+              Row(children: [
+                Image.asset(
+                  'assets/icons/globe.png',
+                  width: 14.w,
+                ),
+                SizedBox(width: 6.h),
+                Text(
+                  '${store.storeDomain}.tnent.com',
+                  style: TextStyle(
+                    color: hexToColor('#A9A9A9'),
+                    fontSize: 14.sp,
                   ),
-                  SizedBox(height: 6.h),
-                  Row(children: [
-                    Image.asset(
-                      'assets/icons/globe.png',
-                      width: 14.w,
-                    ),
-                    SizedBox(width: 6.h),
-                    Text(
-                      '${store.storeDomain}.tnent.com',
-                      style: TextStyle(
-                        color: hexToColor('#A9A9A9'),
-                        fontSize: 14.sp,
-                      ),
-                    ),
-                  ])
-                ],
-              ),
+                ),
+              ])
             ],
           ),
-        );
-      }).toList(),
+        ],
+      ),
     );
   }
 
   Widget _buildProductSection() {
-    return Column(
-      children: widget.items.map((item) => ItemTile(item: item)).toList(),
-    );
+    return ItemTile(item: widget.item);
   }
 
-  Widget _buildSummarySection() {
+  Widget _buildSummarySection(double totalAmount) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Column(
@@ -215,7 +279,7 @@ class _SummaryScreenState extends State<AcceptRejectOrderScreen> {
             style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
           ),
           const SizedBox(height: 20.0),
-          ...widget.items.map((item) => _buildItemSummary(item)),
+          _buildItemSummary(widget.item),
           Container(
             margin: EdgeInsets.symmetric(vertical: 20.h),
             height: 1.h,
@@ -229,7 +293,7 @@ class _SummaryScreenState extends State<AcceptRejectOrderScreen> {
                 style: TextStyle(color: hexToColor('#343434'), fontSize: 30.sp),
               ),
               Text(
-                '₹ ${_totalAmount.toStringAsFixed(2)}',
+                '₹ ${totalAmount.toStringAsFixed(2)}',
                 style: TextStyle(color: hexToColor('#343434'), fontSize: 30.sp),
               ),
             ],
@@ -240,6 +304,10 @@ class _SummaryScreenState extends State<AcceptRejectOrderScreen> {
   }
 
   Widget _buildItemSummary(Map<String, dynamic> item) {
+    final price = item['priceDetails']?['price'] ?? 0.0;
+    final quantity = item['quantity'] ?? 1;
+    final totalPrice = price * quantity;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
@@ -255,7 +323,7 @@ class _SummaryScreenState extends State<AcceptRejectOrderScreen> {
             ),
           ),
           Text(
-            '₹ ${(item['variationDetails'].price * item['quantity']).toStringAsFixed(2)}',
+            '₹ ${totalPrice.toStringAsFixed(2)}',
             style: TextStyle(color: hexToColor('#606060'), fontSize: 18.sp),
           ),
         ],
@@ -357,6 +425,11 @@ class ItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final priceDetails = item['priceDetails'] as Map<String, dynamic>? ?? {};
+    final price = priceDetails['price']?.toString() ?? 'N/A';
+    final mrp = priceDetails['mrp']?.toString() ?? 'N/A';
+    final discount = priceDetails['discount'] ?? 0;
+
     return Card(
       color: Colors.white,
       surfaceTintColor: Colors.white,
@@ -389,7 +462,7 @@ class ItemTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item['productName'],
+                        item['productName'] ?? 'N/A',
                         style: TextStyle(
                             color: hexToColor('#343434'),
                             fontSize: 18.sp,
@@ -405,7 +478,7 @@ class ItemTile extends StatelessWidget {
                             borderRadius: BorderRadius.circular(4.r),
                           ),
                           child: Text(
-                            item['variation'],
+                            item['variation'] ?? 'N/A',
                             style: TextStyle(
                                 color: hexToColor('#222230'),
                                 fontFamily: 'Gotham',
@@ -419,7 +492,7 @@ class ItemTile extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '₹${item['variationDetails'].price}',
+                            '₹$price',
                             style: TextStyle(
                               color: hexToColor('#343434'),
                               fontSize: 34.sp,
@@ -428,21 +501,20 @@ class ItemTile extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                'M.R.P ₹${item['variationDetails'].mrp}',
+                                'M.R.P ₹$mrp',
                                 style: TextStyle(
                                   color: hexToColor('#B9B9B9'),
                                   fontSize: 16.sp,
-                                  decoration:
-                                      item['variationDetails'].discount > 0
-                                          ? TextDecoration.lineThrough
-                                          : TextDecoration.none,
+                                  decoration: discount > 0
+                                      ? TextDecoration.lineThrough
+                                      : TextDecoration.none,
                                   decorationColor: hexToColor('#B9B9B9'),
                                 ),
                               ),
                               SizedBox(width: 8.w),
-                              if (item['variationDetails'].discount > 0)
+                              if (discount > 0)
                                 Text(
-                                  '${item['variationDetails'].discount}% OFF',
+                                  '$discount% OFF',
                                   style: TextStyle(
                                     color: hexToColor('#FF0000'),
                                     fontSize: 16.sp,
