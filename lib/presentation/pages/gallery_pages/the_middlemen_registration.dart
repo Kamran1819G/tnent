@@ -237,7 +237,8 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
     Clipboard.setData(ClipboardData(text: text));
   }
 
-  Future<void> _sendEmailToUser(String email, String middlemanId, String password) async {
+  Future<void> _sendEmailToUser(
+      String email, String middlemanId, String password) async {
     try {
       final smtpServer = gmail('your_email@gmail.com', 'your_password');
 
@@ -245,7 +246,8 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
         ..from = const Address('your_email@gmail.com', 'Tnent')
         ..recipients.add(email)
         ..subject = 'Tnent Middleman Registration'
-        ..text = 'Dear user,\n\nCongratulations on your successful registration as a Middleman with Tnent!\n\nYour Middleman ID is: $middlemanId\nYour temporary password is: $password\n\nPlease log in and change your password at your earliest convenience.\n\nThank you for joining the Tnent Middlemen community.\n\nBest regards,\nTnent Team';
+        ..text =
+            'Dear user,\n\nCongratulations on your successful registration as a Middleman with Tnent!\n\nYour Middleman ID is: $middlemanId\nYour temporary password is: $password\n\nPlease log in and change your password at your earliest convenience.\n\nThank you for joining the Tnent Middlemen community.\n\nBest regards,\nTnent Team';
 
       await send(message, smtpServer);
       print('Email sent successfully.');
@@ -253,6 +255,7 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
       print('Error sending email: $error');
     }
   }
+
   Future<void> _saveDataToFirebase() async {
     try {
       final firestore = FirebaseFirestore.instance;
@@ -443,6 +446,7 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
                       style: TextStyle(
                         color: hexToColor('#727272'),
                         fontWeight: FontWeight.w700,
+                        fontFamily: 'Poppins',
                         fontSize: 18.0,
                       ),
                       textAlign: TextAlign.center,

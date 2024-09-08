@@ -291,7 +291,7 @@ class NotificationService {
 
       if (orderDoc.docs.isNotEmpty) {
         final orderData = orderDoc.docs.first.data();
-        Get.to(() => AcceptRejectOrderScreen(order: orderData));
+        // Get.to(() => AcceptRejectOrderScreen(order: orderData)); // TODO :go to AccpetRejject order
       }
     } catch (e) {
       print("Failed to fetch order");

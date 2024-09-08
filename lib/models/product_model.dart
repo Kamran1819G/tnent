@@ -111,6 +111,36 @@ class ProductModel {
     );
   }
 
+  factory ProductModel.fromMap(Map<String, dynamic> data) {
+    Map<String, ProductVariant> variations = {};
+
+    if (data['variations'] != null && data['variations'] is Map) {
+      (data['variations'] as Map<String, dynamic>)
+          .forEach((variantKey, variantData) {
+        if (variantData is Map<String, dynamic>) {
+          try {
+            variations[variantKey] = ProductVariant.fromMap(variantData);
+          } catch (e) {
+            print('Error parsing variant $variantKey: $e');
+          }
+        }
+      });
+    }
+    return ProductModel(
+      productId: data['productId'] as String? ?? '',
+      storeId: data['storeId'] as String? ?? '',
+      name: data['name'] as String? ?? '',
+      description: data['description'] as String? ?? '',
+      productCategory: data['productCategory'] as String? ?? '',
+      storeCategory: data['storeCategory'] as String? ?? '',
+      imageUrls: (data['imageUrls'] as List<dynamic>?)?.cast<String>() ?? [],
+      isAvailable: data['isAvailable'] as bool? ?? false,
+      createdAt: data['createdAt'] as Timestamp? ?? Timestamp.now(),
+      greenFlags: (data['greenFlags'] as int?) ?? 0,
+      redFlags: (data['redFlags'] as int?) ?? 0,
+      variations: variations,
+    );
+  }
 
   Map<String, dynamic> toFirestore() {
     Map<String, dynamic> variationsMap = variations
@@ -161,8 +191,8 @@ class ProductModel {
     );
   }
 
-  static Future<void> reportProduct(
-      String productId, String storeId, String reason, String reportedBy) async {
+  static Future<void> reportProduct(String productId, String storeId,
+      String reason, String reportedBy) async {
     try {
       final reportedItemsRef = FirebaseFirestore.instance
           .collection('ReportedItems')

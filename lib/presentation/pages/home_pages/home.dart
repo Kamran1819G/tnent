@@ -15,6 +15,7 @@ import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/models/store_update_model.dart';
 import 'package:tnent/models/user_model.dart';
+import 'package:tnent/presentation/pages/accept_reject_order_screen.dart';
 import 'package:tnent/presentation/pages/catalog_pages/cart_screen.dart';
 import 'package:tnent/presentation/pages/explore_screen.dart';
 import 'package:tnent/presentation/pages/notification_screen.dart';
@@ -341,9 +342,20 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(getGreeting().toUpperCase(),
-                        style: TextStyle(
-                            color: hexToColor('#727272'), fontSize: 18.sp)),
+                    GestureDetector(
+                      onLongPress: () {
+                        // TODO: remove this gesture detector after implementing the notification to Acceptreject page
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (context) {
+                          return AcceptRejectOrderScreen(
+                            items: const [],
+                          );
+                        }));
+                      },
+                      child: Text(getGreeting().toUpperCase(),
+                          style: TextStyle(
+                              color: hexToColor('#727272'), fontSize: 18.sp)),
+                    ),
                     SizedBox(height: 12.h),
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.5,
@@ -762,12 +774,14 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       MaterialPageRoute(
                           builder: (context) => const StoresScreen()));
                 },
-                child: Text(
-                  'View all   ',
-                  style: TextStyle(
-                      color: hexToColor('#343434').withOpacity(0.6),
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w300),
+                child: CircleAvatar(
+                  backgroundColor: hexToColor('#094446'),
+                  radius: 13,
+                  child: const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    color: Colors.white,
+                    size: 15,
+                  ),
                 ),
               ),
             ],

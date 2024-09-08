@@ -1,7 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/presentation/pages/product_detail_screen.dart';
 import '../../../core/helpers/color_utils.dart';
@@ -364,18 +368,32 @@ class WishlistItemTile extends StatelessWidget {
     required this.onUpdateSelection,
   }) : super(key: key);
 
+  Future<void> _fetchProductAndNavigate(String productId) async {
+    try {
+      final DocumentSnapshot<Map<String, dynamic>> prodcutDoc =
+          await FirebaseFirestore.instance
+              .collection('products')
+              .doc(productId)
+              .get();
+
+      if (!prodcutDoc.exists) {
+        print('Product document not found for ID: $productId');
+        return;
+      }
+
+      final ProductModel product = ProductModel.fromFirestore(prodcutDoc);
+
+      Get.to(() => ProductDetailScreen(product: product));
+    } catch (e) {
+      print("Failed to fetch order");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ProductDetailScreen(
-                product: ProductModel.fromFirestore(
-                    item as DocumentSnapshot<Object?>?)),
-          ),
-        );
+      onTap: () async {
+        _fetchProductAndNavigate(item['productId']);
       },
       child: Container(
         height: 285.h,

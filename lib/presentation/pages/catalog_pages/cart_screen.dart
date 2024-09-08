@@ -230,10 +230,10 @@ class _CartScreenState extends State<CartScreen> {
                   const Spacer(),
                   IconButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
+                      backgroundColor: WidgetStateProperty.all(
                         Colors.grey[100],
                       ),
-                      shape: MaterialStateProperty.all(
+                      shape: WidgetStateProperty.all(
                         const CircleBorder(),
                       ),
                     ),
@@ -328,8 +328,6 @@ class _CartScreenState extends State<CartScreen> {
             Padding(
               padding: EdgeInsets.all(24.w),
               child: ElevatedButton(
-                child: Text('Buy Selected Items',
-                    style: TextStyle(fontSize: 22.sp)),
                 onPressed: _cartItems.any((item) => item['isSelected'] == true)
                     ? _navigateToCheckout
                     : null,
@@ -341,6 +339,8 @@ class _CartScreenState extends State<CartScreen> {
                   foregroundColor: Colors.white,
                   minimumSize: Size(double.infinity, 75.h),
                 ),
+                child: Text('Buy Selected Items',
+                    style: TextStyle(fontSize: 22.sp)),
               ),
             ),
           ],

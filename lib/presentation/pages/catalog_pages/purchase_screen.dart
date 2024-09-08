@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:tnent/presentation/pages/catalog_pages/track_order_screen.dart';
 import '../../../core/helpers/color_utils.dart';
+import '../../../models/product_model.dart';
+import '../product_detail_screen.dart';
 import 'detail_screen.dart';
 
 class PurchaseScreen extends StatefulWidget {
@@ -166,6 +169,27 @@ class PurchaseItemTile extends StatefulWidget {
 }
 
 class _PurchaseItemTileState extends State<PurchaseItemTile> {
+  Future<void> _fetchProductAndNavigate(String productId) async {
+    try {
+      final DocumentSnapshot<Map<String, dynamic>> prodcutDoc =
+          await FirebaseFirestore.instance
+              .collection('products')
+              .doc(productId)
+              .get();
+
+      if (!prodcutDoc.exists) {
+        print('Product document not found for ID: $productId');
+        return;
+      }
+
+      final ProductModel product = ProductModel.fromFirestore(prodcutDoc);
+
+      Get.to(() => ProductDetailScreen(product: product));
+    } catch (e) {
+      print("Failed to fetch order");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -174,23 +198,26 @@ class _PurchaseItemTileState extends State<PurchaseItemTile> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          Container(
-            height: 285.h,
-            width: 255.w,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.r),
-              image: widget.order['productImage'] != null
-                  ? DecorationImage(
-                      image: NetworkImage(widget.order['productImage']),
-                      fit: BoxFit.cover,
-                    )
+          GestureDetector(
+            onTap: () => _fetchProductAndNavigate(widget.order['productId']),
+            child: Container(
+              height: 285.h,
+              width: 255.w,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.r),
+                image: widget.order['productImage'] != null
+                    ? DecorationImage(
+                        image: NetworkImage(widget.order['productImage']),
+                        fit: BoxFit.cover,
+                      )
+                    : null,
+              ),
+              child: widget.order['productImage'] == null
+                  ? Center(
+                      child: Icon(Icons.image_not_supported,
+                          size: 50.sp, color: Colors.grey))
                   : null,
             ),
-            child: widget.order['productImage'] == null
-                ? Center(
-                    child: Icon(Icons.image_not_supported,
-                        size: 50.sp, color: Colors.grey))
-                : null,
           ),
           SizedBox(width: 16.w),
           Expanded(

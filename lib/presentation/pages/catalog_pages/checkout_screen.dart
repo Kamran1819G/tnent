@@ -106,10 +106,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   const Spacer(),
                   IconButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all(
+                      backgroundColor: WidgetStateProperty.all(
                         Colors.grey[100],
                       ),
-                      shape: MaterialStateProperty.all(
+                      shape: WidgetStateProperty.all(
                         const CircleBorder(),
                       ),
                     ),
@@ -122,205 +122,247 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ],
               ),
             ),
-            if (_userAddress == null)
-              Card(
-                margin: EdgeInsets.all(24.w),
-                color: Colors.white,
-                surfaceTintColor: Colors.white,
-                child: Container(
-                  padding: EdgeInsets.all(24.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'No Address Added',
-                        style: TextStyle(
-                          color: hexToColor('#2D332F'),
-                          fontSize: 28.sp,
-                        ),
-                      ),
-                      SizedBox(height: 24.h),
-                      Center(
-                        child: GestureDetector(
-                          onTap: () async {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChangeAddressScreen(),
-                              ),
-                            );
-                            if (result != null) {
-                              setState(() {
-                                _userAddress = result;
-                              });
-                            }
-                          },
-                          child: Container(
-                            height: 85.h,
-                            width: 545.w,
-                            margin: EdgeInsets.symmetric(vertical: 22.h),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor,
-                              borderRadius: BorderRadius.circular(50.r),
-                            ),
-                            child: Text(
-                              'Add Your Address',
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: 16.sp),
+            ListView(
+              shrinkWrap: true,
+              physics: const BouncingScrollPhysics(),
+              children: [
+                if (_userAddress == null)
+                  Card(
+                    margin: EdgeInsets.all(24.w),
+                    color: Colors.white,
+                    surfaceTintColor: Colors.white,
+                    child: Container(
+                      padding: EdgeInsets.all(24.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'No Address Added',
+                            style: TextStyle(
+                              color: hexToColor('#2D332F'),
+                              fontSize: 28.sp,
                             ),
                           ),
-                        ),
+                          SizedBox(height: 24.h),
+                          Center(
+                            child: GestureDetector(
+                              onTap: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChangeAddressScreen(),
+                                  ),
+                                );
+                                if (result != null) {
+                                  setState(() {
+                                    _userAddress = result;
+                                  });
+                                }
+                              },
+                              child: Container(
+                                height: 85.h,
+                                width: 545.w,
+                                margin: EdgeInsets.symmetric(vertical: 22.h),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).primaryColor,
+                                  borderRadius: BorderRadius.circular(50.r),
+                                ),
+                                child: Text(
+                                  'Add Your Address',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 16.sp),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            if (_userAddress != null)
-              Card(
-                margin: EdgeInsets.all(24.w),
-                color: Colors.white,
-                surfaceTintColor: Colors.white,
-                child: Container(
-                  padding: EdgeInsets.all(24.w),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                if (_userAddress != null)
+                  Card(
+                    margin: EdgeInsets.all(24.w),
+                    color: Colors.white,
+                    surfaceTintColor: Colors.white,
+                    child: Container(
+                      padding: EdgeInsets.all(24.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            _userAddress!['name'],
-                            style: TextStyle(
-                              color: hexToColor('#2D332F'),
-                              fontSize: 32.sp,
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 24.w, vertical: 8.h),
-                            height: 55.h,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                color: Theme.of(context).primaryColor,
-                              ),
-                              borderRadius: BorderRadius.circular(50.r),
-                            ),
-                            child: Text(
-                              _userAddress!['type'],
-                              style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                fontSize: 16.sp,
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                      SizedBox(height: 20.h),
-                      SizedBox(
-                        width: 325.w,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${_userAddress!['addressLine1']},',
-                              style: TextStyle(
-                                color: hexToColor('#727272'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 18.sp,
-                              ),
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              _userAddress!['addressLine2'],
-                              style: TextStyle(
-                                color: hexToColor('#727272'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 18.sp,
-                              ),
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              '${_userAddress!['city']}, ${_userAddress!['state']} ${_userAddress!['zip']}',
-                              style: TextStyle(
-                                color: hexToColor('#727272'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 18.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 20.h),
-                      Row(
-                        children: [
-                          Text(
-                            'Mobile:',
-                            style: TextStyle(
-                              color: hexToColor('#727272'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 18.sp,
-                            ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Text(
-                            _userAddress!['phone'],
-                            style: TextStyle(
-                              color: hexToColor('#2D332F'),
-                              fontSize: 18.sp,
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 35.h),
-                      Center(
-                        child: GestureDetector(
-                          onTap: () async {
-                            final result = await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChangeAddressScreen(
-                                    existingAddress: _userAddress),
-                              ),
-                            );
-                            if (result != null) {
-                              setState(() {
-                                _userAddress = result;
-                              });
-                            }
-                          },
-                          child: Container(
-                            height: 85.h,
-                            width: 545.w,
-                            margin: EdgeInsets.symmetric(vertical: 22.h),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: hexToColor('#E3E3E3')),
-                              borderRadius: BorderRadius.circular(50.r),
-                            ),
-                            child: Center(
-                              child: Text(
-                                'Change Your Address',
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                _userAddress!['name'],
                                 style: TextStyle(
-                                    color: hexToColor('#343434'),
-                                    fontSize: 16.sp),
+                                  color: hexToColor('#2D332F'),
+                                  fontSize: 32.sp,
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 24.w, vertical: 8.h),
+                                height: 55.h,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                  borderRadius: BorderRadius.circular(50.r),
+                                ),
+                                child: Text(
+                                  _userAddress!['type'],
+                                  style: TextStyle(
+                                    color: Theme.of(context).primaryColor,
+                                    fontSize: 16.sp,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                          SizedBox(height: 20.h),
+                          SizedBox(
+                            width: 325.w,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '${_userAddress!['addressLine1']},',
+                                  style: TextStyle(
+                                    color: hexToColor('#727272'),
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 18.sp,
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  _userAddress!['addressLine2'],
+                                  style: TextStyle(
+                                    color: hexToColor('#727272'),
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 18.sp,
+                                  ),
+                                ),
+                                SizedBox(height: 8.h),
+                                Text(
+                                  '${_userAddress!['city']}, ${_userAddress!['state']} ${_userAddress!['zip']}',
+                                  style: TextStyle(
+                                    color: hexToColor('#727272'),
+                                    fontFamily: 'Poppins',
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 18.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 20.h),
+                          Row(
+                            children: [
+                              Text(
+                                'Mobile:',
+                                style: TextStyle(
+                                  color: hexToColor('#727272'),
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 18.sp,
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                _userAddress!['phone'],
+                                style: TextStyle(
+                                  color: hexToColor('#2D332F'),
+                                  fontSize: 18.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 35.h),
+                          Center(
+                            child: GestureDetector(
+                              onTap: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChangeAddressScreen(
+                                        existingAddress: _userAddress),
+                                  ),
+                                );
+                                if (result != null) {
+                                  setState(() {
+                                    _userAddress = result;
+                                  });
+                                }
+                              },
+                              child: Container(
+                                height: 85.h,
+                                width: 545.w,
+                                margin: EdgeInsets.symmetric(vertical: 22.h),
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  border:
+                                      Border.all(color: hexToColor('#E3E3E3')),
+                                  borderRadius: BorderRadius.circular(50.r),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Change Your Address',
+                                    style: TextStyle(
+                                        color: hexToColor('#343434'),
+                                        fontSize: 16.sp),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
+                  ),
+                SizedBox(height: 16.h),
+                Card(
+                  margin: EdgeInsets.all(24.w),
+                  color: Colors.white,
+                  surfaceTintColor: Colors.white,
+                  child: Container(
+                    padding: EdgeInsets.all(16.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Add Your Note: ',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const TextField(
+                          cursorHeight: 17,
+                          style: TextStyle(fontFamily: 'Poppins', fontSize: 10),
+                          decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(0),
+                              border: InputBorder.none,
+                              counterStyle: TextStyle(
+                                  fontFamily: 'Poppins', fontSize: 6)),
+                          maxLines:
+                              null, // Increase the max lines for a larger in
+                          maxLength: 200, cursorColor: Colors.grey,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            SizedBox(height: 24.h),
+              ],
+            ),
+            SizedBox(height: 16.h),
             Expanded(
               child: ListView.builder(
+                physics: const BouncingScrollPhysics(),
                 itemCount: _items.length,
                 itemBuilder: (context, index) {
                   return CheckoutItemTile(
