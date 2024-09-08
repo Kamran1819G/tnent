@@ -32,7 +32,7 @@ class ProductDetailScreen extends StatefulWidget {
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  PageController imagesController = PageController(viewportFraction: 0.6);
+  PageController imagesController = PageController(viewportFraction: 1);
   late ProductModel _product;
   late String _selectedVariation;
   late ProductVariant _selectedVariant;
@@ -477,72 +477,40 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                       ),
                       Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Container(
                             height: 495.h,
-                            width: 620.w,
-                            child: widget.product.imageUrls.length == 1
-                                ? Center(
-                                    child: Container(
-                                      width: 445.w,
-                                      height: 490.h,
-                                      margin: EdgeInsets.symmetric(
-                                          horizontal: 12.w),
-                                      child: ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(8.r),
-                                        child: CachedNetworkImage(
-                                          imageUrl: widget.product.imageUrls[0],
-                                          cacheManager: DefaultCacheManager(),
-                                          placeholder: (context, url) =>
-                                              Shimmer.fromColors(
-                                            baseColor: hexToColor('#E0E0E0'),
-                                            highlightColor:
-                                                hexToColor('#F5F5F5'),
-                                            child:
-                                                Container(color: Colors.white),
-                                          ),
-                                          errorWidget: (context, url, error) =>
-                                              Icon(Icons.error),
-                                          fit: BoxFit.cover,
-                                        ),
+                            width: 1.sw,
+                            child: PageView.builder(
+                              controller: imagesController,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: widget.product.imageUrls.length,
+                              itemBuilder: (context, index) {
+                                return Container(
+                                  height: 490.h,
+                                  width: 1.sw,
+                                  padding:
+                                      EdgeInsets.symmetric(horizontal: 8.w),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8.r),
+                                    child: CachedNetworkImage(
+                                      imageUrl: widget.product.imageUrls[index],
+                                      cacheManager: DefaultCacheManager(),
+                                      placeholder: (context, url) =>
+                                          Shimmer.fromColors(
+                                        baseColor: hexToColor('#E0E0E0'),
+                                        highlightColor: hexToColor('#F5F5F5'),
+                                        child: Container(color: Colors.white),
                                       ),
+                                      errorWidget: (context, url, error) =>
+                                          Icon(Icons.error),
+                                      fit: BoxFit.cover,
                                     ),
-                                  )
-                                : ListView.builder(
-                                    controller: imagesController,
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: widget.product.imageUrls.length,
-                                    itemBuilder: (context, index) {
-                                      return Container(
-                                        margin: EdgeInsets.symmetric(
-                                            horizontal: 12.w),
-                                        width: 445.w,
-                                        height: 490.h,
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8.r),
-                                          child: CachedNetworkImage(
-                                            imageUrl:
-                                                widget.product.imageUrls[index],
-                                            cacheManager: DefaultCacheManager(),
-                                            placeholder: (context, url) =>
-                                                Shimmer.fromColors(
-                                              baseColor: hexToColor('#E0E0E0'),
-                                              highlightColor:
-                                                  hexToColor('#F5F5F5'),
-                                              child: Container(
-                                                  color: Colors.white),
-                                            ),
-                                            errorWidget:
-                                                (context, url, error) =>
-                                                    Icon(Icons.error),
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      );
-                                    },
                                   ),
+                                );
+                              },
+                            ),
                           ),
                           SizedBox(height: 30.h),
                           Container(
@@ -568,6 +536,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                         ],
                       ),
+
                       SizedBox(height: 30.h),
 
                       Row(
@@ -954,8 +923,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                           SizedBox(height: 20.h),
                           Container(
-                            margin: EdgeInsets.only(left: 12.w),
-                            height: 300.h,
+                            height: 340.h,
+                            padding: const EdgeInsets.only(left: 8.0),
                             child: relatedProducts.isEmpty
                                 ? ListView.builder(
                                     scrollDirection: Axis.horizontal,
@@ -1021,10 +990,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                     },
                                   ),
                           ),
+                          SizedBox(height: 20.h),
                         ],
                       ),
                       // Reviews
-
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

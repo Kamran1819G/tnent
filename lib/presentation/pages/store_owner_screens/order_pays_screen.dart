@@ -31,8 +31,10 @@ class _OrderAndPaysScreenState extends State<OrderAndPaysScreen> {
 
   Future<void> _fetchOrders() async {
     final ordersRef = FirebaseFirestore.instance.collection('Orders');
-    final snapshot =
-        await ordersRef.where('storeId', isEqualTo: widget.storeId).get();
+    final snapshot = await ordersRef
+        .where('storeId', isEqualTo: widget.storeId)
+        .orderBy('orderAt', descending: true)
+        .get();
 
     setState(() {
       allOrders = snapshot.docs;
@@ -657,24 +659,39 @@ class OrderCard extends StatelessWidget {
                         textDirection: TextDirection.rtl,
                       ),
                       SizedBox(height: 12.h),
-                      Text(
-                        middleman['name'] ?? 'Yet to assign',
-                        style: TextStyle(
-                          color: hexToColor('#878787'),
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14.sp,
+                      if (middleman['name'] != null &&
+                          middleman['phone'] != null) ...[
+                        Text(
+                          middleman['name'],
+                          style: TextStyle(
+                            color: hexToColor('#878787'),
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14.sp,
+                          ),
                         ),
-                      ),
-                      Text(
-                        middleman['phone'] ?? 'Yet to assign',
-                        style: TextStyle(
-                          color: hexToColor('#878787'),
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                          fontSize: 14.sp,
+                        Text(
+                          middleman['phone'],
+                          style: TextStyle(
+                            color: hexToColor('#878787'),
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14.sp,
+                          ),
                         ),
-                      ),
+                      ],
+                      if (middleman['name'] == null &&
+                          middleman['phone'] == null) ...[
+                        Text(
+                          'Yet to Assign',
+                          style: TextStyle(
+                            color: hexToColor('#878787'),
+                            fontFamily: 'Poppins',
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14.sp,
+                          ),
+                        ),
+                      ],
                       SizedBox(height: 25.h),
                       if (orderStatus == OrderStatus.Ongoing)
                         Text(
