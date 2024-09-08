@@ -491,7 +491,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   height: 490.h,
                                   width: 1.sw,
                                   padding:
-                                      EdgeInsets.symmetric(horizontal: 8.w),
+                                      EdgeInsets.symmetric(horizontal: 12.w),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8.r),
                                     child: CachedNetworkImage(
