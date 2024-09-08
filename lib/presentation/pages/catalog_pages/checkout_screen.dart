@@ -13,11 +13,10 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:quickalert/quickalert.dart';
-
-// import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
+import 'package:tnent/presentation/controllers/checkoutController.dart';
 import 'package:tnent/presentation/pages/home_screen.dart';
 import '../../../core/helpers/snackbar_utils.dart';
 
@@ -31,15 +30,13 @@ class CheckoutScreen extends StatefulWidget {
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
-  late List<Map<String, dynamic>> _items;
-  double _totalAmount = 0.0;
+  final CheckoutController checkoutController = Get.put(CheckoutController());
   Map<String, dynamic>? _userAddress;
 
   @override
   void initState() {
     super.initState();
-    _items = List.from(widget.selectedItems);
-    _calculateTotalAmount();
+    checkoutController.items.value = List.from(widget.selectedItems);
     _loadUserAddress();
   }
 
@@ -56,20 +53,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     });
   }
 
-  void _calculateTotalAmount() {
-    _totalAmount = _items.fold(
-        0,
-        (sum, item) =>
-            sum + (item['variationDetails'].price * item['quantity']));
-  }
-
   void _updateQuantity(int index, int newQuantity) {
-    setState(() {
-      if (newQuantity > 0) {
-        _items[index]['quantity'] = newQuantity;
-      }
-      _calculateTotalAmount();
-    });
+    checkoutController.updateQuantity(index, newQuantity);
   }
 
   @override
@@ -116,6 +101,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     icon: const Icon(Icons.arrow_back_ios_new,
                         color: Colors.black),
                     onPressed: () {
+                      checkoutController.clear();
                       Navigator.pop(context);
                     },
                   ),
@@ -361,16 +347,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             SizedBox(height: 16.h),
             Expanded(
-              child: ListView.builder(
-                physics: const BouncingScrollPhysics(),
-                itemCount: _items.length,
-                itemBuilder: (context, index) {
-                  return CheckoutItemTile(
-                    item: _items[index],
-                    onUpdateQuantity: (newQuantity) =>
-                        _updateQuantity(index, newQuantity),
-                  );
-                },
+              child: Obx(
+                () => ListView.builder(
+                  itemCount: checkoutController.items.length,
+                  itemBuilder: (context, index) {
+                    return CheckoutItemTile(
+                      item: checkoutController.items[index],
+                      onUpdateQuantity: (newQuantity) =>
+                          _updateQuantity(index, newQuantity),
+                      index: index,
+                    );
+                  },
+                ),
               ),
             ),
             Padding(
@@ -382,10 +370,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     'Total Amount:',
                     style: TextStyle(fontSize: 26.sp),
                   ),
-                  Text(
-                    '₹${_totalAmount.toStringAsFixed(2)}',
-                    style: TextStyle(
-                        fontSize: 26.sp, color: Theme.of(context).primaryColor),
+                  Obx(
+                    () => Text(
+                      '₹${checkoutController.totalAmount.toStringAsFixed(2)}',
+                      style: TextStyle(
+                          fontSize: 26.sp,
+                          color: Theme.of(context).primaryColor),
+                    ),
                   ),
                 ],
               ),
@@ -402,7 +393,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => SummaryScreen(items: _items),
+                      builder: (context) => SummaryScreen(),
                     ),
                   );
                 },
@@ -797,156 +788,166 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
 class CheckoutItemTile extends StatelessWidget {
   final Map<String, dynamic> item;
   final Function(int) onUpdateQuantity;
+  final int index;
 
   const CheckoutItemTile({
     Key? key,
     required this.item,
     required this.onUpdateQuantity,
+    required this.index,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: EdgeInsets.all(16.w),
-      color: Colors.white,
-      surfaceTintColor: Colors.white,
-      child: Container(
-        width: 600.w,
-        height: 250.h,
-        alignment: Alignment.center,
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              height: 185.h,
-              width: 165.w,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(6.r),
-                image: DecorationImage(
-                  image: NetworkImage(item['productImage']),
-                  fit: BoxFit.fill,
+    final CheckoutController checkoutController =
+        Get.find<CheckoutController>();
+
+    return Obx(
+      () => Card(
+        margin: EdgeInsets.all(16.w),
+        color: Colors.white,
+        surfaceTintColor: Colors.white,
+        child: Container(
+          width: 600.w,
+          height: 250.h,
+          alignment: Alignment.center,
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                height: 185.h,
+                width: 165.w,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(6.r),
+                  image: DecorationImage(
+                    image: NetworkImage(item['productImage']),
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(width: 20.w),
-            SizedBox(
-              height: 185.h,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item['productName'],
-                    style: TextStyle(
-                        color: hexToColor('#343434'),
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.w400),
-                  ),
-                  if (item['variation'] != 'default') ...[
-                    SizedBox(height: 12.h),
-                    Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: hexToColor('#D0D0D0')),
-                        borderRadius: BorderRadius.circular(4.r),
-                      ),
-                      child: Text(
-                        item['variation'],
-                        style: TextStyle(
-                            color: hexToColor('#222230'),
-                            fontFamily: 'Gotham',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14.sp),
-                      ),
-                    ),
-                  ],
-                  const Spacer(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '₹${item['variationDetails'].price}',
-                        style: TextStyle(
+              SizedBox(width: 20.w),
+              SizedBox(
+                height: 185.h,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item['productName'],
+                      style: TextStyle(
                           color: hexToColor('#343434'),
-                          fontSize: 34.sp,
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w400),
+                    ),
+                    if (item['variation'] != 'default') ...[
+                      SizedBox(height: 12.h),
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 16.w, vertical: 8.h),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: hexToColor('#D0D0D0')),
+                          borderRadius: BorderRadius.circular(4.r),
+                        ),
+                        child: Text(
+                          item['variation'],
+                          style: TextStyle(
+                              color: hexToColor('#222230'),
+                              fontFamily: 'Gotham',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 14.sp),
                         ),
                       ),
-                      Row(
-                        children: [
-                          Text(
-                            'M.R.P ₹${item['variationDetails'].mrp}',
-                            style: TextStyle(
-                              color: hexToColor('#B9B9B9'),
-                              fontSize: 16.sp,
-                              decoration: item['variationDetails'].discount > 0
-                                  ? TextDecoration.lineThrough
-                                  : TextDecoration.none,
-                              decorationColor: hexToColor('#B9B9B9'),
-                            ),
+                    ],
+                    const Spacer(),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '₹${item['variationDetails'].price}',
+                          style: TextStyle(
+                            color: hexToColor('#343434'),
+                            fontSize: 34.sp,
                           ),
-                          SizedBox(width: 12.w),
-                          if (item['variationDetails'].discount > 0)
+                        ),
+                        Row(
+                          children: [
                             Text(
-                              '${item['variationDetails'].discount}% OFF',
+                              'M.R.P ₹${item['variationDetails'].mrp}',
                               style: TextStyle(
-                                color: hexToColor('#FF0000'),
+                                color: hexToColor('#B9B9B9'),
                                 fontSize: 16.sp,
+                                decoration:
+                                    item['variationDetails'].discount > 0
+                                        ? TextDecoration.lineThrough
+                                        : TextDecoration.none,
+                                decorationColor: hexToColor('#B9B9B9'),
                               ),
                             ),
-                        ],
-                      ),
-                    ],
+                            SizedBox(width: 12.w),
+                            if (item['variationDetails'].discount > 0)
+                              Text(
+                                '${item['variationDetails'].discount}% OFF',
+                                style: TextStyle(
+                                  color: hexToColor('#FF0000'),
+                                  fontSize: 16.sp,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const Spacer(),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'Quantity'.toUpperCase(),
+                    style: TextStyle(
+                        color: hexToColor('#222230'),
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400),
+                  ),
+                  SizedBox(height: 6.h),
+                  Container(
+                    height: 45.h,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: hexToColor('#D0D0D0')),
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove),
+                          iconSize: 14.sp,
+                          onPressed: () =>
+                              onUpdateQuantity(item['quantity'] - 1),
+                        ),
+                        Text(
+                          '${checkoutController.items[index]['quantity']}',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontFamily: 'Gotham',
+                            fontWeight: FontWeight.w500,
+                            color: hexToColor('#222230'),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          iconSize: 14.sp,
+                          onPressed: () =>
+                              onUpdateQuantity(item['quantity'] + 1),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
-            ),
-            const Spacer(),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Quantity'.toUpperCase(),
-                  style: TextStyle(
-                      color: hexToColor('#222230'),
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w400),
-                ),
-                SizedBox(height: 6.h),
-                Container(
-                  height: 45.h,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: hexToColor('#D0D0D0')),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove),
-                        iconSize: 14.sp,
-                        onPressed: () => onUpdateQuantity(item['quantity'] - 1),
-                      ),
-                      Text(
-                        '${item['quantity']}',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontFamily: 'Gotham',
-                          fontWeight: FontWeight.w500,
-                          color: hexToColor('#222230'),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        iconSize: 14.sp,
-                        onPressed: () => onUpdateQuantity(item['quantity'] + 1),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -955,10 +956,14 @@ class CheckoutItemTile extends StatelessWidget {
 
 class SummaryItemTile extends StatelessWidget {
   final Map<String, dynamic> item;
+  final Function(Map<String, dynamic>) onRemove;
+  final bool showRemoveButton;
 
   const SummaryItemTile({
     Key? key,
     required this.item,
+    required this.onRemove,
+    required this.showRemoveButton,
   }) : super(key: key);
 
   @override
@@ -975,24 +980,19 @@ class SummaryItemTile extends StatelessWidget {
         child: Column(
           children: [
             Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-              // Text(
-              //   'Order ID: ${item['orderId']}',
-              //   style: TextStyle(
-              //     color: hexToColor('#A9A9A9'),
-              //     fontSize: 17.sp,
-              //     fontFamily: 'Poppins',
-              //     fontWeight: FontWeight.w500,
-              //   ),
-              // ),
-              Text(
-                '  Remove',
-                style: TextStyle(
-                  color: hexToColor('#A9A9A9'),
-                  fontSize: 17.sp,
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w800,
+              if (showRemoveButton)
+                GestureDetector(
+                  onTap: () => onRemove(item),
+                  child: Text(
+                    'Remove',
+                    style: TextStyle(
+                      color: hexToColor('#A9A9A9'),
+                      fontSize: 17.sp,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
                 ),
-              ),
             ]),
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -1091,9 +1091,7 @@ class SummaryItemTile extends StatelessWidget {
 }
 
 class SummaryScreen extends StatefulWidget {
-  List<Map<String, dynamic>> items;
-
-  SummaryScreen({super.key, required this.items});
+  SummaryScreen({super.key});
 
   @override
   State<SummaryScreen> createState() => _SummaryScreenState();
@@ -1101,18 +1099,17 @@ class SummaryScreen extends StatefulWidget {
 
 class _SummaryScreenState extends State<SummaryScreen> {
   late Map<String, StoreModel> _storeDetails = {};
-  double _totalAmount = 0.0;
+  final CheckoutController checkoutController = Get.find<CheckoutController>();
 
   @override
   void initState() {
     super.initState();
     _fetchStoreDetails();
     _generateOrderIds();
-    _calculateTotalAmount();
   }
 
   Future<void> _fetchStoreDetails() async {
-    for (var item in widget.items) {
+    for (var item in checkoutController.items) {
       String storeId = item['storeId'];
       if (!_storeDetails.containsKey(storeId)) {
         DocumentSnapshot doc = await FirebaseFirestore.instance
@@ -1126,7 +1123,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
   }
 
   void _generateOrderIds() {
-    for (var item in widget.items) {
+    for (var item in checkoutController.items) {
       String timestamp =
           DateTime.now().millisecondsSinceEpoch.toString().substring(12);
       String randomComponent =
@@ -1135,11 +1132,8 @@ class _SummaryScreenState extends State<SummaryScreen> {
     }
   }
 
-  void _calculateTotalAmount() {
-    _totalAmount = widget.items.fold(
-        0,
-        (sum, item) =>
-            sum + (item['variationDetails'].price * item['quantity']));
+  void _removeItem(Map<String, dynamic> item) {
+    checkoutController.removeItem(item);
   }
 
   @override
@@ -1272,8 +1266,12 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
   Widget _buildProductSection() {
     return Column(
-      children:
-          widget.items.map((item) => SummaryItemTile(item: item)).toList(),
+      children: checkoutController.items
+          .map((item) => SummaryItemTile(
+              item: item,
+              onRemove: _removeItem,
+              showRemoveButton: checkoutController.items.length > 1))
+          .toList(),
     );
   }
 
@@ -1288,7 +1286,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
             style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
           ),
           const SizedBox(height: 20.0),
-          ...widget.items.map((item) => _buildItemSummary(item)),
+          ...checkoutController.items.map((item) => _buildItemSummary(item)),
           Container(
             margin: EdgeInsets.symmetric(vertical: 20.h),
             height: 1.h,
@@ -1302,7 +1300,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 style: TextStyle(color: hexToColor('#343434'), fontSize: 30.sp),
               ),
               Text(
-                '₹ ${_totalAmount.toStringAsFixed(2)}',
+                '₹ ${checkoutController.totalAmount.toStringAsFixed(2)}',
                 style: TextStyle(color: hexToColor('#343434'), fontSize: 30.sp),
               ),
             ],
@@ -1344,9 +1342,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => PaymentOptionScreen(
-                items: widget.items,
                 storeDetails: _storeDetails,
-                totalAmount: _totalAmount,
               ),
             ),
           );
@@ -1361,7 +1357,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
             borderRadius: BorderRadius.circular(18.r),
           ),
           child: Text(
-            'Pay ₹ ${_totalAmount.toStringAsFixed(2)}',
+            'Pay ₹ ${checkoutController.totalAmount.toStringAsFixed(2)}',
             style: TextStyle(
               color: Colors.white,
               fontSize: 28.sp,
@@ -1376,15 +1372,11 @@ class _SummaryScreenState extends State<SummaryScreen> {
 enum ExpandedTile { none, upi, otherUpi, card }
 
 class PaymentOptionScreen extends StatefulWidget {
-  List<Map<String, dynamic>> items;
   Map<String, StoreModel> storeDetails;
-  double totalAmount;
 
   PaymentOptionScreen({
     super.key,
-    required this.items,
     required this.storeDetails,
-    required this.totalAmount,
   });
 
   @override
@@ -1393,6 +1385,7 @@ class PaymentOptionScreen extends StatefulWidget {
 
 class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
   ExpandedTile expandedTile = ExpandedTile.none;
+  final CheckoutController checkoutController = Get.find<CheckoutController>();
 
   @override
   Widget build(BuildContext context) {
@@ -1808,7 +1801,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                   ),
                                   child: Center(
                                     child: Text(
-                                      'Pay ₹ ${widget.totalAmount.toStringAsFixed(2)}',
+                                      'Pay ₹ ${checkoutController.totalAmount.toStringAsFixed(2)}',
                                       style: TextStyle(
                                         color: Colors.white,
                                         fontFamily: 'Poppins',
@@ -1841,8 +1834,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                               MaterialPageRoute(
                                 builder: (context) => TransactionScreen(
                                   storeDetails: widget.storeDetails,
-                                  totalAmount: widget.totalAmount,
-                                  items: widget.items, // Add this line
                                 ),
                               ),
                             );
@@ -1897,14 +1888,10 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
 
 class TransactionScreen extends StatefulWidget {
   Map<String, StoreModel> storeDetails;
-  double totalAmount;
-  List<Map<String, dynamic>> items;
 
   TransactionScreen({
     super.key,
     required this.storeDetails,
-    required this.totalAmount,
-    required this.items,
   });
 
   @override
@@ -1913,6 +1900,7 @@ class TransactionScreen extends StatefulWidget {
 
 class _TransactionScreenState extends State<TransactionScreen> {
   late ConfettiController _confettiController;
+  final CheckoutController checkoutController = Get.find<CheckoutController>();
 
   GlobalKey _globalKey = GlobalKey();
   bool isGreeting = false;
@@ -1932,11 +1920,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
     /*processOrder();*/
     _isLoading = false;
     makeIsGreetingTrue();
-    processOrder(widget.items);
-
+    processOrder(checkoutController.items);
     setState(() {});
 
     sendOrderNotification();
+    checkoutController.clear();
   }
 
   final user = FirebaseAuth.instance.currentUser!;
@@ -2141,7 +2129,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   Future<void> sendOrderNotification() async {
     final firestore = FirebaseFirestore.instance;
 
-    for (var item in widget.items) {
+    for (var item in checkoutController.items) {
       // Calculate total price
       double totalPrice = item['variationDetails'].price * item['quantity'];
 
@@ -2538,7 +2526,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                         ),
                                       ),
                                       Text(
-                                        '₹ ${widget.totalAmount.toStringAsFixed(2)}',
+                                        '₹ ${checkoutController.totalAmount.toStringAsFixed(2)}',
                                         style: TextStyle(
                                           color: hexToColor('#343434'),
                                           fontSize: 34.sp,
@@ -2576,7 +2564,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                       Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                        children: widget.items
+                                        children: checkoutController.items
                                             .map(
                                               (item) => Padding(
                                                 padding: EdgeInsets.symmetric(

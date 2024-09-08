@@ -200,8 +200,7 @@ class _SummaryScreenState extends State<AcceptRejectOrderScreen> {
 
   Widget _buildProductSection() {
     return Column(
-      children:
-          widget.items.map((item) => SummaryItemTile(item: item)).toList(),
+      children: widget.items.map((item) => ItemTile(item: item)).toList(),
     );
   }
 
@@ -342,6 +341,123 @@ class StylizedCustomIllustration extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class ItemTile extends StatelessWidget {
+  final Map<String, dynamic> item;
+
+  const ItemTile({
+    Key? key,
+    required this.item,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.white,
+      surfaceTintColor: Colors.white,
+      margin: EdgeInsets.all(16.w),
+      child: Container(
+        width: 600.w,
+        height: 250.h,
+        alignment: Alignment.center,
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  height: 185.h,
+                  width: 165.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6.r),
+                    image: DecorationImage(
+                      image: NetworkImage(item['productImage']),
+                      fit: BoxFit.fill,
+                    ),
+                  ),
+                ),
+                SizedBox(width: 20.w),
+                SizedBox(
+                  height: 185.h,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item['productName'],
+                        style: TextStyle(
+                            color: hexToColor('#343434'),
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w400),
+                      ),
+                      if (item['variation'] != 'default') ...[
+                        SizedBox(height: 12.h),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 16.w, vertical: 8.h),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: hexToColor('#D0D0D0')),
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
+                          child: Text(
+                            item['variation'],
+                            style: TextStyle(
+                                color: hexToColor('#222230'),
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 14.sp),
+                          ),
+                        ),
+                      ],
+                      SizedBox(height: 20.h),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '₹${item['variationDetails'].price}',
+                            style: TextStyle(
+                              color: hexToColor('#343434'),
+                              fontSize: 34.sp,
+                            ),
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                'M.R.P ₹${item['variationDetails'].mrp}',
+                                style: TextStyle(
+                                  color: hexToColor('#B9B9B9'),
+                                  fontSize: 16.sp,
+                                  decoration:
+                                      item['variationDetails'].discount > 0
+                                          ? TextDecoration.lineThrough
+                                          : TextDecoration.none,
+                                  decorationColor: hexToColor('#B9B9B9'),
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              if (item['variationDetails'].discount > 0)
+                                Text(
+                                  '${item['variationDetails'].discount}% OFF',
+                                  style: TextStyle(
+                                    color: hexToColor('#FF0000'),
+                                    fontSize: 16.sp,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
