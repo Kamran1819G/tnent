@@ -190,6 +190,7 @@ class NotificationService {
           title: message.notification?.title,
           body: message.notification?.body,
           category: NotificationCategory.Service,
+          autoDismissible: false,
           locked: true,
           fullScreenIntent: true,
           wakeUpScreen: true,
@@ -359,6 +360,9 @@ class NotificationService {
             ),
           );
         } else {
+          // Dismiss the notification
+          await AwesomeNotifications().cancel(receivedAction.id!);
+
           await _navigateToAcceptRejectScreen(orderId);
         }
       }
