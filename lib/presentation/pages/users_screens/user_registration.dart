@@ -155,7 +155,6 @@ class _UserRegistrationState extends State<UserRegistration> {
   }
   Map<String, dynamic> _parseLocationToAddress(String location) {
     List<String> parts = location.split(',');
-
     return {
       'name': '${_firstNameController.text} ${_lastNameController.text}'.trim(),
       'addressLine1': parts.isNotEmpty ? parts[0].trim() : '',

@@ -974,8 +974,13 @@ class CheckoutItemTile extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.remove),
                           iconSize: 14.sp,
-                          onPressed: () =>
-                              onUpdateQuantity(item['quantity'] - 1),
+                          onPressed: () {
+                            int newQuantity = item['quantity'] - 1;
+                            if (newQuantity < 1) {
+                              newQuantity = 1;
+                            }
+                            onUpdateQuantity(newQuantity);
+                          },
                         ),
                         Text(
                           '${checkoutController.items[index]['quantity']}',
