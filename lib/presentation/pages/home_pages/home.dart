@@ -658,7 +658,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         SizedBox(height: 30.h),
 
         Container(
-          height: 340.h,
+          height: 360.h,
           padding: const EdgeInsets.only(left: 8.0),
           child: TabBarView(
             controller: _tabController,
@@ -674,7 +674,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               ),
               ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: 5,
+                itemCount: featuredProducts.length,
                 itemBuilder: (context, index) {
                   return WishlistProductTile(
                     product: featuredProducts[index],
@@ -683,7 +683,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               ),
               ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: 5,
+                itemCount: featuredProducts.length,
                 itemBuilder: (context, index) {
                   return WishlistProductTile(
                     product: featuredProducts[index],
@@ -692,7 +692,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               ),
               ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: 5,
+                itemCount: featuredProducts.length,
                 itemBuilder: (context, index) {
                   return WishlistProductTile(
                     product: featuredProducts[index],
@@ -701,7 +701,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               ),
               ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: 5,
+                itemCount: featuredProducts.length,
                 itemBuilder: (context, index) {
                   return WishlistProductTile(
                     product: featuredProducts[index],
@@ -710,7 +710,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               ),
               ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: 5,
+                itemCount: featuredProducts.length,
                 itemBuilder: (context, index) {
                   return WishlistProductTile(
                     product: featuredProducts[index],
@@ -847,11 +847,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: 12.w),
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 12.w,
-                  mainAxisSpacing: 12.h,
+                  crossAxisSpacing: 12.0,
+                  mainAxisSpacing: 12.0,
                   childAspectRatio: 0.8,
                 ),
                 itemCount: featuredProducts.length,

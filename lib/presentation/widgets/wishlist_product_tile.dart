@@ -19,7 +19,7 @@ class WishlistProductTile extends StatefulWidget {
     double? width,
     double? height,
   })  : width = width ?? 240.w,
-        height = height ?? 340.h,
+        height = height ?? 360.h,
         super(key: key);
 
   @override
@@ -226,7 +226,7 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(8.0).copyWith(top: 0),
+              padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,

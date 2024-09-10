@@ -519,7 +519,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Container(
-                            height: 495.h,
+                            height: 665.h,
                             width: 1.sw,
                             child: PageView.builder(
                               controller: imagesController,
@@ -527,7 +527,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               itemCount: widget.product.imageUrls.length,
                               itemBuilder: (context, index) {
                                 return Container(
-                                  height: 490.h,
+                                  height: 665.h,
                                   width: 1.sw,
                                   padding:
                                       EdgeInsets.symmetric(horizontal: 12.w),
