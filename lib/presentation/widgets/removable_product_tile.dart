@@ -18,7 +18,7 @@ class RemovableProductTile extends StatelessWidget {
     double? height,
     required this.onRemove,
   })  : width = width ?? 240.w,
-        height = height ?? 390.h;
+        height = height ?? 360.h;
 
   ProductVariant? _getFirstVariation() {
     if (product.variations.isNotEmpty) {
