@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:tnent/core/helpers/url_utils.dart';
 import 'package:tnent/models/user_model.dart';
 import 'package:tnent/presentation/pages/catalog_pages/checkout_screen.dart';
 import 'package:tnent/presentation/pages/webview_screen.dart';
@@ -112,29 +113,31 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                               Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 10),
-                                child:  FutureBuilder<String?>(
+                                child: FutureBuilder<String?>(
                                   future: _featuredFestivalImageFuture,
-                                    builder: (context, imageSnapshot) {
-                                          if (imageSnapshot.connectionState == ConnectionState.waiting) {
-                                            return CircularProgressIndicator();
-                                      } else if (imageSnapshot.hasError || !imageSnapshot.hasData) {
+                                  builder: (context, imageSnapshot) {
+                                    if (imageSnapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return CircularProgressIndicator();
+                                    } else if (imageSnapshot.hasError ||
+                                        !imageSnapshot.hasData) {
+                                      return CircleAvatar(
+                                          radius: 57.w,
+                                          backgroundColor:
+                                              Theme.of(context).primaryColor,
+                                          child: Icon(
+                                            Icons.person,
+                                            color: Colors.white,
+                                            size: 40.sp,
+                                          ));
+                                    } else {
                                       return CircleAvatar(
                                         radius: 57.w,
-                                        backgroundColor:
-                                            Theme.of(context).primaryColor,
-                                        child : Icon(
-                                                Icons.person,
-                                                color: Colors.white,
-                                                size: 40.sp,
-                                              )
+                                        backgroundImage:
+                                            NetworkImage(imageSnapshot.data!),
                                       );
-                                      } else {
-                                            return CircleAvatar(
-                                              radius: 57.w,
-                                                backgroundImage: NetworkImage(imageSnapshot.data!),
-                                      );
-                                          }
-            },
+                                    }
+                                  },
                                 ),
                               ),
                               SizedBox(width: 10.w),
@@ -273,7 +276,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                   builder: (context) => const WebViewScreen(
                                     title:
                                         'Legals | Terms of Service, Privacy Policy & more',
-                                    url: 'https://tnennt.com/legals',
+                                    url: UrlUtils.legals,
                                   ),
                                 ),
                               );
@@ -287,7 +290,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                                 MaterialPageRoute(
                                   builder: (context) => const WebViewScreen(
                                     title: 'Request for deleting account',
-                                    url: 'https://tnennt.com/deleteacc',
+                                    url: UrlUtils.deleteAcc,
                                   ),
                                 ),
                               );

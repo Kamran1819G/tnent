@@ -275,7 +275,7 @@ class _CommunityPostState extends State<CommunityPost> {
         }
 
         if (!snapshot.hasData) {
-          return _buildLoadingPlaceholder();
+          return Container(); // ie, if the store is deleted in future, then its post will not be shown and blank container will be there.
         }
 
         final store = snapshot.data!;

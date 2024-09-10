@@ -92,7 +92,7 @@ class _AcceptRejectOrderScreenState extends State<AcceptRejectOrderScreen> {
         );
       }
 
-      Get.offAll(() => HomeScreen());
+      Get.offAll(() => const HomeScreen());
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.toString()}')),
@@ -152,7 +152,7 @@ class _AcceptRejectOrderScreenState extends State<AcceptRejectOrderScreen> {
                                   ),
                                   Text(
                                     widget.item['note'] ?? 'N/A',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                         fontFamily: 'Poppins', fontSize: 10),
                                   ),
                                 ],
