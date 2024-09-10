@@ -26,8 +26,8 @@ class _CartScreenState extends State<CartScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchCartItems();
     _checkUserLocation();
+    _fetchCartItems();
   }
 
   Future<void> _checkUserLocation() async {
@@ -76,7 +76,6 @@ class _CartScreenState extends State<CartScreen> {
       _showNotAvailableSnackBar();
     }
   }
-
 
   Future<void> _fetchCartItems() async {
     String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
@@ -438,6 +437,41 @@ class CartItemTile extends StatelessWidget {
     }
   }
 
+  void _navigateToProductDetail(BuildContext context) {
+    // Create a ProductVariant instance
+    ProductVariant variant = ProductVariant(
+      discount: item['variationDetails'].discount ?? 0.0,
+      mrp: item['variationDetails'].mrp ?? 0.0,
+      price: item['variationDetails'].price,
+      stockQuantity: item['variationDetails'].stockQuantity ?? 0,
+      sku: item['variationDetails'].sku,
+    );
+
+    // Create a ProductModel instance
+    ProductModel product = ProductModel(
+      productId: item['productId'],
+      storeId: item['storeId'],
+      name: item['productName'],
+      description: item['description'] ?? '',
+      productCategory: item['productCategory'] ?? '',
+      storeCategory: item['storeCategory'] ?? '',
+      imageUrls: [item['productImage']],
+      isAvailable: item['isAvailable'] ?? true,
+      createdAt: item['createdAt'] ?? DateTime.now(),
+      greenFlags: item['greenFlags'] ?? 0,
+      redFlags: item['redFlags'] ?? 0,
+      variations: {item['variation']: variant},
+    );
+
+    // Navigate to the ProductDetailScreen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProductDetailScreen(product: product),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -448,40 +482,7 @@ class CartItemTile extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           GestureDetector(
-            onTap: () {
-              // Create a ProductVariant instance
-              ProductVariant variant = ProductVariant(
-                discount: item['variationDetails'].discount ?? 0.0,
-                mrp: item['variationDetails'].mrp ?? 0.0,
-                price: item['variationDetails'].price,
-                stockQuantity: item['variationDetails'].stockQuantity ?? 0,
-                sku: item['variationDetails'].sku,
-              );
-
-              // Create a ProductModel instance
-              ProductModel product = ProductModel(
-                productId: item['productId'],
-                storeId: item['storeId'],
-                name: item['productName'],
-                description: item['description'] ?? '',
-                productCategory: item['productCategory'] ?? '',
-                storeCategory: item['storeCategory'] ?? '',
-                imageUrls: [item['productImage']],
-                isAvailable: item['isAvailable'] ?? true,
-                createdAt: item['createdAt'] ?? DateTime.now(),
-                greenFlags: item['greenFlags'] ?? 0,
-                redFlags: item['redFlags'] ?? 0,
-                variations: {item['variation']: variant},
-              );
-
-              // Navigate to the ProductDetailScreen
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProductDetailScreen(product: product),
-                ),
-              );
-            },
+            onTap: () => _navigateToProductDetail(context),
             child: Container(
               height: 285.h,
               width: 255.w,
