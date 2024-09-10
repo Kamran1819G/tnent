@@ -259,7 +259,6 @@ class _UserRegistrationState extends State<UserRegistration> {
     // Check if location services are enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      return 'Location services are disabled.';
     }
 
     // Check for location permissions
@@ -267,12 +266,10 @@ class _UserRegistrationState extends State<UserRegistration> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        return 'Location permissions are denied.';
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return 'Location permissions are permanently denied.';
     }
 
     // Get the current position
