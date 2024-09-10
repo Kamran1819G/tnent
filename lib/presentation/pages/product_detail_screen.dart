@@ -18,6 +18,7 @@ import 'package:intl/intl.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../../core/helpers/report_helper.dart';
 import '../../core/helpers/snackbar_utils.dart';
+import 'geofencing.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   ProductModel product;
@@ -46,6 +47,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   List<ProductModel> relatedProducts = [];
   final TextEditingController _reviewController = TextEditingController();
   List<Map<String, dynamic>> _reviews = [];
+  bool _isInAllowedArea = false;
 
   @override
   void initState() {
@@ -59,7 +61,40 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _prefetchImages();
     _loadRelatedProducts();
     _checkIfCurrentStoreOwner();
+    _checkUserLocation();
   }
+
+  Future<void> _checkUserLocation() async {
+    bool isAllowed = await GeofencingService.isUserInAllowedArea();
+    setState(() {
+      _isInAllowedArea = isAllowed;
+    });
+    if (!isAllowed) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showNotAvailableSnackBar();
+      });
+    }
+  }
+
+  void _showNotAvailableSnackBar() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'service not available in your location',
+          style: TextStyle(color: Colors.white, fontSize: 16.sp),
+        ),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).size.height - 100,
+          right: 20,
+          left: 20,
+        ),
+      ),
+    );
+  }
+
 
   Future<void> _checkIfCurrentStoreOwner() async {
     User? user = _auth.currentUser;
@@ -751,15 +786,31 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   const Spacer(),
                                   GestureDetector(
                                     onTap: () async {
+                                      if(!_isInAllowedArea)
+                                        {
+                                          _showNotAvailableSnackBar();
+                                        return;
+                                        }
+
+                                      if (_selectedVariant.stockQuantity <= 0 || !store.isActive) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          const SnackBar(
+                                              content: Text(
+                                                  'Product is out of stock or store is inactive')),
+                                        );
+                                        return;
+                                      }
+
                                       if (_selectedVariant.stockQuantity > 0 &&
                                           store.isActive) {
                                         String userId = FirebaseAuth
                                                 .instance.currentUser?.uid ??
                                             '';
                                         if (userId.isEmpty) {
-                                          showSnackBar(context,
-                                              'Please log in to add items to cart');
-
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            const SnackBar(content: Text('Please log in to add items to cart'))
+                                          );
                                           return;
                                         }
 
@@ -820,13 +871,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           showSnackBar(context,
                                               'Failed to update cart. Please try again.');
                                         }
-                                      } else {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                              content: Text(
-                                                  'Product is out of stock or store is inactive')),
-                                        );
                                       }
                                     },
                                     child: Container(
@@ -849,8 +893,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         borderRadius:
                                             BorderRadius.circular(12.r),
                                       ),
-                                      child: Icon(Icons.add_shopping_cart,
-                                          color: Colors.black, size: 35.sp),
+                                      child: Icon(
+                                          Icons.add_shopping_cart,
+                                          color: Colors.black,
+                                          size: 35.sp
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1087,7 +1134,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
                     color: Colors.white,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: (_isInAllowedArea &&
+                          _selectedVariant.stockQuantity > 0 &&
+                          store.isActive)
+                          ? () {
                         Map<String, dynamic> item = {
                           'productId': widget.product.productId,
                           'productImage': widget.product.imageUrls.first,
@@ -1098,8 +1148,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           'variationDetails': _selectedVariant
                         };
 
-                        if (_selectedVariant.stockQuantity > 0 &&
-                            store.isActive) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -1107,7 +1155,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   CheckoutScreen(selectedItems: [item]),
                             ),
                           );
-                        } else {
+                        }
+                        : ()
+                      {
+                          if(!_isInAllowedArea) {
+                            _showNotAvailableSnackBar();
+                          }
+                          else if (_selectedVariant.stockQuantity <= 0 ||!store.isActive) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                                 content: Text(
@@ -1168,7 +1222,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           selected: _selectedVariation == variation,
           showCheckmark: false,
           selectedColor: Theme.of(context).primaryColor,
-          onSelected: (selected) {
+          onSelected: _isInAllowedArea
+            ? (selected) {
             if (selected) {
               setState(() {
                 _selectedVariation = variation;
@@ -1180,7 +1235,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 _checkWishlistStatus(); // Check wishlist status when variation changes
               });
             }
-          },
+          }
+          : null,
         );
       }).toList(),
     );
