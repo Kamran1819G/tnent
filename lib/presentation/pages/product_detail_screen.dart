@@ -18,7 +18,6 @@ import 'package:intl/intl.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../../core/helpers/report_helper.dart';
 import '../../core/helpers/snackbar_utils.dart';
-import 'geofencing.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   ProductModel product;
@@ -47,7 +46,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   List<ProductModel> relatedProducts = [];
   final TextEditingController _reviewController = TextEditingController();
   List<Map<String, dynamic>> _reviews = [];
-  bool _isInAllowedArea = false;
 
   @override
   void initState() {
@@ -61,46 +59,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     _prefetchImages();
     _loadRelatedProducts();
     _checkIfCurrentStoreOwner();
-    _checkUserLocation();
   }
-
-  Future<void> _checkUserLocation() async {
-    bool isAllowed = await GeofencingService.isUserInAllowedArea();
-    setState(() {
-      _isInAllowedArea = isAllowed;
-    });
-    if (!isAllowed) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showNotAvailableSnackBar();
-      });
-    }
-  }
-
-  void _showNotAvailableSnackBar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'service not available in your location',
-          style: TextStyle(color: Colors.white, fontSize: 16.sp),
-        ),
-        backgroundColor: Colors.red,
-        duration: Duration(seconds: 3),
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).size.height - 100,
-          right: 20,
-          left: 20,
-        ),
-      ),
-    );
-  }
-
 
   Future<void> _checkIfCurrentStoreOwner() async {
     User? user = _auth.currentUser;
     if (user != null) {
       DocumentSnapshot userDoc =
-          await _firestore.collection('Users').doc(user.uid).get();
+      await _firestore.collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
         Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
         String? userStoreId = userData['storeId'] as String?;
@@ -120,7 +85,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   Future<void> _loadRelatedProducts() async {
     List<ProductModel> fetchedRelatedProducts =
-        await RelatedProductsService.fetchRelatedProducts(widget.product);
+    await RelatedProductsService.fetchRelatedProducts(widget.product);
 
     if (fetchedRelatedProducts.isEmpty) {
       // If no related products, fetch random products
@@ -171,7 +136,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
       if (userSnapshot.exists) {
         Map<String, dynamic> userData =
-            userSnapshot.data() as Map<String, dynamic>;
+        userSnapshot.data() as Map<String, dynamic>;
         String firstName = userData['firstName'] ?? '';
         String lastName = userData['lastName'] ?? '';
         String photoURL = userData['photoURL'] ?? '';
@@ -264,13 +229,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     User? user = _auth.currentUser;
     if (user != null) {
       DocumentSnapshot userDoc =
-          await _firestore.collection('Users').doc(user.uid).get();
+      await _firestore.collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
         List<dynamic> wishlist =
             (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
         setState(() {
           _isInWishlist = wishlist.any((item) =>
-              item['productId'] == _wishlistItem['productId'] &&
+          item['productId'] == _wishlistItem['productId'] &&
               item['variation'] == _wishlistItem['variation']);
         });
       }
@@ -278,13 +243,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Future<void> _toggleWishlist() async {
-    if (!_isInAllowedArea) {
-      _showNotAvailableSnackBar();
-      return;
-    }
-
     User? user = _auth.currentUser;
     if (user == null) {
+      // Handle the case when the user is not logged in
       print('User is not logged in');
       return;
     }
@@ -360,7 +321,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         .collection('votes')
         .doc(productId);
     DocumentReference productRef =
-        _firestore.collection('products').doc(productId);
+    _firestore.collection('products').doc(productId);
 
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
@@ -377,13 +338,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         }
 
         Map<String, dynamic> productData =
-            productDoc.data() as Map<String, dynamic>;
+        productDoc.data() as Map<String, dynamic>;
         int greenFlags = productData['greenFlags'] ?? 0;
         int redFlags = productData['redFlags'] ?? 0;
 
         if (voteDoc.exists) {
           Map<String, dynamic> previousVote =
-              voteDoc.data() as Map<String, dynamic>;
+          voteDoc.data() as Map<String, dynamic>;
 
           if (previousVote['greenFlag'] && voteType == 'greenFlag') {
             greenFlags--;
@@ -530,7 +491,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   height: 490.h,
                                   width: 1.sw,
                                   padding:
-                                      EdgeInsets.symmetric(horizontal: 12.w),
+                                  EdgeInsets.symmetric(horizontal: 12.w),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8.r),
                                     child: CachedNetworkImage(
@@ -538,10 +499,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       cacheManager: DefaultCacheManager(),
                                       placeholder: (context, url) =>
                                           Shimmer.fromColors(
-                                        baseColor: hexToColor('#E0E0E0'),
-                                        highlightColor: hexToColor('#F5F5F5'),
-                                        child: Container(color: Colors.white),
-                                      ),
+                                            baseColor: hexToColor('#E0E0E0'),
+                                            highlightColor: hexToColor('#F5F5F5'),
+                                            child: Container(color: Colors.white),
+                                          ),
                                       errorWidget: (context, url, error) =>
                                           Icon(Icons.error),
                                       fit: BoxFit.cover,
@@ -748,11 +709,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 children: [
                                   Column(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                        CrossAxisAlignment.center,
                                         children: [
                                           Text(
                                             '₹${_selectedVariant.price.toStringAsFixed(0)}',
@@ -778,11 +739,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           color: hexToColor('#B9B9B9'),
                                           fontSize: 22.sp,
                                           decoration:
-                                              _selectedVariant.discount > 0
-                                                  ? TextDecoration.lineThrough
-                                                  : TextDecoration.none,
+                                          _selectedVariant.discount > 0
+                                              ? TextDecoration.lineThrough
+                                              : TextDecoration.none,
                                           decorationColor:
-                                              hexToColor('#B9B9B9'),
+                                          hexToColor('#B9B9B9'),
                                         ),
                                       ),
                                     ],
@@ -790,91 +751,82 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   const Spacer(),
                                   GestureDetector(
                                     onTap: () async {
-                                      if(!_isInAllowedArea)
-                                        {
-                                          _showNotAvailableSnackBar();
-                                        return;
+                                      if (_selectedVariant.stockQuantity > 0 &&
+                                          store.isActive) {
+                                        String userId = FirebaseAuth
+                                            .instance.currentUser?.uid ??
+                                            '';
+                                        if (userId.isEmpty) {
+                                          showSnackBar(context,
+                                              'Please log in to add items to cart');
+
+                                          return;
                                         }
 
-                                      if (_selectedVariant.stockQuantity <= 0 || !store.isActive) {
+                                        DocumentReference userRef =
+                                        FirebaseFirestore.instance
+                                            .collection('Users')
+                                            .doc(userId);
+
+                                        try {
+                                          await FirebaseFirestore.instance
+                                              .runTransaction(
+                                                  (transaction) async {
+                                                DocumentSnapshot snapshot =
+                                                await transaction.get(userRef);
+                                                if (!snapshot.exists) {
+                                                  throw Exception(
+                                                      "User does not exist!");
+                                                }
+
+                                                Map<String, dynamic> userData =
+                                                snapshot.data()
+                                                as Map<String, dynamic>;
+                                                List<dynamic> cartList =
+                                                    userData['cart'] ?? [];
+
+                                                Map<String, dynamic> cartItem = {
+                                                  'productId':
+                                                  widget.product.productId,
+                                                  'variation': _selectedVariation,
+                                                  'quantity': 1,
+                                                  // Default quantity
+                                                };
+
+                                                int existingIndex =
+                                                cartList.indexWhere((item) =>
+                                                item['productId'] ==
+                                                    widget.product
+                                                        .productId &&
+                                                    item['variation'] ==
+                                                        _selectedVariation);
+
+                                                if (existingIndex != -1) {
+                                                  cartList[existingIndex]
+                                                  ['quantity'] += 1;
+                                                  showSnackBar(context,
+                                                      'Item already in cart');
+                                                } else {
+                                                  cartList.add(cartItem);
+                                                  showSnackBar(context,
+                                                      'Item added to cart');
+                                                }
+
+                                                transaction.update(
+                                                    userRef, {'cart': cartList});
+                                              });
+                                        } catch (e) {
+                                          print('Error updating cart: $e');
+                                          showSnackBar(context,
+                                              'Failed to update cart. Please try again.');
+                                        }
+                                      } else {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           const SnackBar(
                                               content: Text(
                                                   'Product is out of stock or store is inactive')),
                                         );
-                                        return;
-                                      }
-
-                                      if (_selectedVariant.stockQuantity > 0 &&
-                                          store.isActive) {
-                                        String userId = FirebaseAuth
-                                                .instance.currentUser?.uid ??
-                                            '';
-                                        if (userId.isEmpty) {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            const SnackBar(content: Text('Please log in to add items to cart'))
-                                          );
-                                          return;
-                                        }
-
-                                        DocumentReference userRef =
-                                            FirebaseFirestore.instance
-                                                .collection('Users')
-                                                .doc(userId);
-
-                                        try {
-                                          await FirebaseFirestore.instance
-                                              .runTransaction(
-                                                  (transaction) async {
-                                            DocumentSnapshot snapshot =
-                                                await transaction.get(userRef);
-                                            if (!snapshot.exists) {
-                                              throw Exception(
-                                                  "User does not exist!");
-                                            }
-
-                                            Map<String, dynamic> userData =
-                                                snapshot.data()
-                                                    as Map<String, dynamic>;
-                                            List<dynamic> cartList =
-                                                userData['cart'] ?? [];
-
-                                            Map<String, dynamic> cartItem = {
-                                              'productId':
-                                                  widget.product.productId,
-                                              'variation': _selectedVariation,
-                                              'quantity': 1,
-                                              // Default quantity
-                                            };
-
-                                            int existingIndex =
-                                                cartList.indexWhere((item) =>
-                                                    item['productId'] ==
-                                                        widget.product
-                                                            .productId &&
-                                                    item['variation'] ==
-                                                        _selectedVariation);
-
-                                            if (existingIndex != -1) {
-                                              cartList[existingIndex]
-                                                  ['quantity'] += 1;
-                                              showSnackBar(context,
-                                                  'Item already in cart');
-                                            } else {
-                                              cartList.add(cartItem);
-                                              showSnackBar(context,
-                                                  'Item added to cart');
-                                            }
-
-                                            transaction.update(
-                                                userRef, {'cart': cartList});
-                                          });
-                                        } catch (e) {
-                                          print('Error updating cart: $e');
-                                          showSnackBar(context,
-                                              'Failed to update cart. Please try again.');
-                                        }
                                       }
                                     },
                                     child: Container(
@@ -887,21 +839,18 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             color: Colors.black.withOpacity(
                                                 0.1), // Shadow color with some transparency
                                             spreadRadius:
-                                                4, // Set to 0 for no spread
+                                            4, // Set to 0 for no spread
                                             blurRadius:
-                                                6, // Blur radius of the shadow
+                                            6, // Blur radius of the shadow
                                             offset: const Offset(0,
                                                 3), // Only offset in the Y direction for bottom shadow
                                           ),
                                         ],
                                         borderRadius:
-                                            BorderRadius.circular(12.r),
+                                        BorderRadius.circular(12.r),
                                       ),
-                                      child: Icon(
-                                          Icons.add_shopping_cart,
-                                          color: Colors.black,
-                                          size: 35.sp
-                                      ),
+                                      child: Icon(Icons.add_shopping_cart,
+                                          color: Colors.black, size: 35.sp),
                                     ),
                                   ),
                                 ],
@@ -978,68 +927,68 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             padding: const EdgeInsets.only(left: 8.0),
                             child: relatedProducts.isEmpty
                                 ? ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: 5, // Show 3 placeholder items
-                                    itemBuilder: (context, index) {
-                                      return Shimmer.fromColors(
-                                        baseColor: hexToColor('#E0E0E0'),
-                                        highlightColor: hexToColor('#F5F5F5'),
-                                        child: Container(
-                                          width: 200.w,
-                                          margin: EdgeInsets.only(right: 12.w),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: 5, // Show 3 placeholder items
+                              itemBuilder: (context, index) {
+                                return Shimmer.fromColors(
+                                  baseColor: hexToColor('#E0E0E0'),
+                                  highlightColor: hexToColor('#F5F5F5'),
+                                  child: Container(
+                                    width: 200.w,
+                                    margin: EdgeInsets.only(right: 12.w),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius:
+                                      BorderRadius.circular(12.r),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          height: 150.h,
                                           decoration: BoxDecoration(
                                             color: Colors.white,
                                             borderRadius:
-                                                BorderRadius.circular(12.r),
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Container(
-                                                height: 150.h,
-                                                decoration: BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.only(
-                                                    topLeft:
-                                                        Radius.circular(12.r),
-                                                    topRight:
-                                                        Radius.circular(12.r),
-                                                  ),
-                                                ),
-                                              ),
-                                              SizedBox(height: 10.h),
-                                              Container(
-                                                margin: EdgeInsets.symmetric(
-                                                    horizontal: 10.w),
-                                                height: 20.h,
-                                                width: 150.w,
-                                                color: Colors.white,
-                                              ),
-                                              SizedBox(height: 5.h),
-                                              Container(
-                                                margin: EdgeInsets.symmetric(
-                                                    horizontal: 10.w),
-                                                height: 15.h,
-                                                width: 100.w,
-                                                color: Colors.white,
-                                              ),
-                                            ],
+                                            BorderRadius.only(
+                                              topLeft:
+                                              Radius.circular(12.r),
+                                              topRight:
+                                              Radius.circular(12.r),
+                                            ),
                                           ),
                                         ),
-                                      );
-                                    },
-                                  )
-                                : ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: relatedProducts.length,
-                                    itemBuilder: (context, index) {
-                                      return WishlistProductTile(
-                                        product: relatedProducts[index],
-                                      );
-                                    },
+                                        SizedBox(height: 10.h),
+                                        Container(
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal: 10.w),
+                                          height: 20.h,
+                                          width: 150.w,
+                                          color: Colors.white,
+                                        ),
+                                        SizedBox(height: 5.h),
+                                        Container(
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal: 10.w),
+                                          height: 15.h,
+                                          width: 100.w,
+                                          color: Colors.white,
+                                        ),
+                                      ],
+                                    ),
                                   ),
+                                );
+                              },
+                            )
+                                : ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: relatedProducts.length,
+                              itemBuilder: (context, index) {
+                                return WishlistProductTile(
+                                  product: relatedProducts[index],
+                                );
+                              },
+                            ),
                           ),
                           SizedBox(height: 20.h),
                         ],
@@ -1135,13 +1084,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   bottom: 0,
                   child: Container(
                     padding:
-                        EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
+                    EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
                     color: Colors.white,
                     child: ElevatedButton(
-                      onPressed: (_isInAllowedArea &&
-                          _selectedVariant.stockQuantity > 0 &&
-                          store.isActive)
-                          ? () {
+                      onPressed: () {
                         Map<String, dynamic> item = {
                           'productId': widget.product.productId,
                           'productImage': widget.product.imageUrls.first,
@@ -1152,6 +1098,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           'variationDetails': _selectedVariant
                         };
 
+                        if (_selectedVariant.stockQuantity > 0 &&
+                            store.isActive) {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -1159,13 +1107,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   CheckoutScreen(selectedItems: [item]),
                             ),
                           );
-                        }
-                        : ()
-                      {
-                          if(!_isInAllowedArea) {
-                            _showNotAvailableSnackBar();
-                          }
-                          else if (_selectedVariant.stockQuantity <= 0 ||!store.isActive) {
+                        } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
                                 content: Text(
@@ -1218,7 +1160,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             variation,
             style: TextStyle(
               color:
-                  _selectedVariation == variation ? Colors.white : Colors.black,
+              _selectedVariation == variation ? Colors.white : Colors.black,
               fontSize: 18.sp,
             ),
           ),
@@ -1226,8 +1168,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           selected: _selectedVariation == variation,
           showCheckmark: false,
           selectedColor: Theme.of(context).primaryColor,
-          onSelected: _isInAllowedArea
-            ? (selected) {
+          onSelected: (selected) {
             if (selected) {
               setState(() {
                 _selectedVariation = variation;
@@ -1239,8 +1180,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 _checkWishlistStatus(); // Check wishlist status when variation changes
               });
             }
-          }
-          : null,
+          },
         );
       }).toList(),
     );

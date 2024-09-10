@@ -19,6 +19,7 @@ import 'package:tnent/models/store_model.dart';
 import 'package:tnent/presentation/controllers/checkoutController.dart';
 import 'package:tnent/presentation/pages/home_screen.dart';
 import '../../../core/helpers/snackbar_utils.dart';
+import '../geofencing.dart';
 
 class CheckoutScreen extends StatefulWidget {
   List<Map<String, dynamic>> selectedItems;
@@ -41,6 +42,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _loadUserAddress();
     _noteController.addListener(_onNoteChanged);
   }
+  void _showLocationNotification() {
+    AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: 10,
+        channelKey: 'basic_channel',
+        title: 'Location Out of Range',
+        body: 'We are not currently delivering to your location.',
+        notificationLayout: NotificationLayout.BigText,
+      ),
+    );
+  }
+
 
   Future<void> _loadUserAddress() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -392,19 +405,47 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             Center(
               child: GestureDetector(
-                onTap: () {
+                onTap: () async {
                   if (_userAddress == null) {
-                    showSnackBar(
-                        context, 'Please add your address to continue');
-
+                    showSnackBar(context, 'Please add your address to continue');
                     return;
                   }
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SummaryScreen(),
-                    ),
+
+                  // Show loading indicator
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      return const Center(child: CircularProgressIndicator());
+                    },
                   );
+
+                  try {
+                    bool isInAllowedArea = await GeofencingService.isUserInAllowedArea();
+
+                    // Hide loading indicator
+                    Navigator.of(context).pop();
+
+                    if (!isInAllowedArea) {
+                      _showLocationNotification();
+                      showSnackBar(context, 'We are not currently delivering to your location.');
+                      return;
+                    }
+
+                    // If the location is allowed, proceed to the summary screen
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SummaryScreen(),
+                      ),
+                    );
+                  } catch (e) {
+                    // Hide loading indicator
+                    Navigator.of(context).pop();
+
+                    print('Error checking location: $e');
+                    showSnackBar(context, 'Unable to verify your location. Please try again.');
+                  }
                 },
                 child: Container(
                   height: 95.h,
@@ -418,9 +459,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     child: Text(
                       'Continue',
                       style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Gotham',
-                          fontSize: 25.sp),
+                        color: Colors.white,
+                        fontFamily: 'Gotham',
+                        fontSize: 25.sp,
+                      ),
                     ),
                   ),
                 ),

@@ -3,11 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:quickalert/quickalert.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/presentation/pages/catalog_pages/checkout_screen.dart';
-import '../geofencing.dart';
+
 import '../product_detail_screen.dart';
 
 class CartScreen extends StatefulWidget {
@@ -21,60 +22,11 @@ class _CartScreenState extends State<CartScreen> {
   bool _allItemsSelected = false;
   List<Map<String, dynamic>> _cartItems = [];
   double _totalAmount = 0.0;
-  bool _isInAllowedArea =true;
 
   @override
   void initState() {
     super.initState();
     _fetchCartItems();
-    _checkUserLocation();
-  }
-
-  Future<void> _checkUserLocation() async {
-    bool isAllowed = await GeofencingService.isUserInAllowedArea();
-    setState(() {
-      _isInAllowedArea = isAllowed;
-    });
-    if (!isAllowed) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _showNotAvailableSnackBar();
-      });
-    }
-  }
-
-  void _showNotAvailableSnackBar() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Service not available in your location',
-          style: TextStyle(color: Colors.white, fontSize: 16.sp),
-        ),
-        backgroundColor: Colors.red,
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).size.height - 100,
-          right: 20,
-          left: 20,
-        ),
-      ),
-    );
-  }
-
-  // Update this method
-  void _navigateToCheckout() {
-    if (_isInAllowedArea) {
-      List<Map<String, dynamic>> selectedItems =
-      _cartItems.where((item) => item['isSelected'] == true).toList();
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CheckoutScreen(selectedItems: selectedItems),
-        ),
-      );
-    } else {
-      _showNotAvailableSnackBar();
-    }
   }
 
   Future<void> _fetchCartItems() async {
@@ -91,15 +43,15 @@ class _CartScreenState extends State<CartScreen> {
         for (var item in cartData) {
           try {
             Map<String, dynamic> productDetails =
-                await _fetchProductDetails(item['productId']);
+            await _fetchProductDetails(item['productId']);
             if (productDetails.isNotEmpty) {
               updatedCartItems.add({
                 ...item,
                 ...productDetails,
                 'variationDetails': productDetails['variations']
-                    [item['variation']],
+                [item['variation']],
                 'isSelected':
-                    item['isSelected'] ?? false, // Preserve selection state
+                item['isSelected'] ?? false, // Preserve selection state
               });
             }
           } catch (e) {
@@ -140,7 +92,7 @@ class _CartScreenState extends State<CartScreen> {
         'productName': product.name,
         'storeId': product.storeId,
         'productImage':
-            product.imageUrls.isNotEmpty ? product.imageUrls[0] : '',
+        product.imageUrls.isNotEmpty ? product.imageUrls[0] : '',
         'variations': product.variations,
       };
     } catch (e) {
@@ -160,8 +112,8 @@ class _CartScreenState extends State<CartScreen> {
   void _calculateTotalAmount() {
     _totalAmount = _cartItems.where((item) => item['isSelected'] == true).fold(
         0,
-        (sum, item) =>
-            sum + (item['variationDetails'].price * item['quantity']));
+            (sum, item) =>
+        sum + (item['variationDetails'].price * item['quantity']));
   }
 
   void _toggleAllItemsSelection(bool? value) {
@@ -179,7 +131,7 @@ class _CartScreenState extends State<CartScreen> {
       String productId, String variation, bool isSelected) {
     setState(() {
       int index = _cartItems.indexWhere((item) =>
-          item['productId'] == productId && item['variation'] == variation);
+      item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
         _cartItems[index]['isSelected'] = isSelected;
         _updateSelectionState();
@@ -191,11 +143,11 @@ class _CartScreenState extends State<CartScreen> {
     String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
     List<Map<String, dynamic>> cartData = _cartItems.reversed
         .map((item) => {
-              'productId': item['productId'],
-              'quantity': item['quantity'],
-              'variation': item['variation'],
-              'isSelected': item['isSelected'], // Include selection state
-            })
+      'productId': item['productId'],
+      'quantity': item['quantity'],
+      'variation': item['variation'],
+      'isSelected': item['isSelected'], // Include selection state
+    })
         .toList();
 
     FirebaseFirestore.instance
@@ -212,7 +164,7 @@ class _CartScreenState extends State<CartScreen> {
         Navigator.of(context).pop(); // Close the dialog
         setState(() {
           _cartItems.removeWhere((item) =>
-              item['productId'] == productId && item['variation'] == variation);
+          item['productId'] == productId && item['variation'] == variation);
           _updateSelectionState();
         });
         _updateFirestore();
@@ -223,7 +175,7 @@ class _CartScreenState extends State<CartScreen> {
   void _updateQuantity(String productId, String variation, int newQuantity) {
     setState(() {
       int index = _cartItems.indexWhere((item) =>
-          item['productId'] == productId && item['variation'] == variation);
+      item['productId'] == productId && item['variation'] == variation);
       if (index != -1) {
         _cartItems[index]['quantity'] =
             newQuantity.clamp(1, double.infinity).toInt();
@@ -233,6 +185,16 @@ class _CartScreenState extends State<CartScreen> {
     _updateFirestore();
   }
 
+  void _navigateToCheckout() {
+    List<Map<String, dynamic>> selectedItems =
+    _cartItems.where((item) => item['isSelected'] == true).toList();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CheckoutScreen(selectedItems: selectedItems),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -359,7 +321,6 @@ class _CartScreenState extends State<CartScreen> {
                     onRemove: _removeFromCart,
                     onUpdateQuantity: _updateQuantity,
                     onUpdateSelection: _updateItemSelection,
-                    isInAllowedArea: _isInAllowedArea,
                   );
                 },
               ),
@@ -394,7 +355,6 @@ class CartItemTile extends StatelessWidget {
   final Function(String, String) onRemove;
   final Function(String, String, int) onUpdateQuantity;
   final Function(String, String, bool) onUpdateSelection;
-  final bool isInAllowedArea;
 
   const CartItemTile({
     Key? key,
@@ -402,40 +362,7 @@ class CartItemTile extends StatelessWidget {
     required this.onRemove,
     required this.onUpdateQuantity,
     required this.onUpdateSelection,
-    required this.isInAllowedArea,
   }) : super(key: key);
-
-  void _showNotAvailableSnackBar(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Service not available in your location',
-          style: TextStyle(color: Colors.white, fontSize: 16.sp),
-        ),
-        backgroundColor: Colors.red,
-        duration: Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.only(
-          bottom: MediaQuery.of(context).size.height - 100,
-          right: 20,
-          left: 20,
-        ),
-      ),
-    );
-  }
-
-  void _handleBuyNow(BuildContext context) {
-    if (isInAllowedArea) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CheckoutScreen(selectedItems: [item]),
-        ),
-      );
-    } else {
-      _showNotAvailableSnackBar(context);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -467,7 +394,7 @@ class CartItemTile extends StatelessWidget {
                 storeCategory: item['storeCategory'] ?? '',
                 imageUrls: [item['productImage']],
                 isAvailable: item['isAvailable'] ?? true,
-                createdAt: item['createdAt'] ?? DateTime.now(),
+                createdAt: item['createdAt'] ?? Timestamp.now(),
                 greenFlags: item['greenFlags'] ?? 0,
                 redFlags: item['redFlags'] ?? 0,
                 variations: {item['variation']: variant},
@@ -578,7 +505,15 @@ class CartItemTile extends StatelessWidget {
                   ),
                   SizedBox(width: 8.w),
                   GestureDetector(
-                    onTap: () => _handleBuyNow(context),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              CheckoutScreen(selectedItems: [item]),
+                        ),
+                      );
+                    },
                     child: Container(
                       height: 50.h,
                       width: 105.w,
