@@ -31,6 +31,7 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final CheckoutController checkoutController = Get.put(CheckoutController());
+  final TextEditingController _noteController = TextEditingController();
   Map<String, dynamic>? _userAddress;
 
   @override
@@ -38,6 +39,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     super.initState();
     checkoutController.items.value = List.from(widget.selectedItems);
     _loadUserAddress();
+    _noteController.addListener(_onNoteChanged);
   }
 
   Future<void> _loadUserAddress() async {
@@ -55,6 +57,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   void _updateQuantity(int index, int newQuantity) {
     checkoutController.updateQuantity(index, newQuantity);
+  }
+
+  void _onNoteChanged() {
+    checkoutController.updateNote(_noteController.text);
   }
 
   @override
@@ -327,17 +333,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const TextField(
+                        TextField(
+                          controller: _noteController,
                           cursorHeight: 17,
-                          style: TextStyle(fontFamily: 'Poppins', fontSize: 10),
-                          decoration: InputDecoration(
+                          style: const TextStyle(
+                              fontFamily: 'Poppins', fontSize: 10),
+                          decoration: const InputDecoration(
                               contentPadding: EdgeInsets.all(0),
                               border: InputBorder.none,
                               counterStyle: TextStyle(
                                   fontFamily: 'Poppins', fontSize: 6)),
                           maxLines:
                               null, // Increase the max lines for a larger in
-                          maxLength: 200, cursorColor: Colors.grey,
+                          maxLength: 200,
+                          cursorColor: Colors.grey,
                         ),
                       ],
                     ),
@@ -1974,6 +1983,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           'productName': item['productName'],
           'productImage': item['productImage'],
           'variation': item['variation'],
+          'note': checkoutController.note.value,
           'priceDetails': {
             'price': item['variationDetails'].price,
             'mrp': item['variationDetails'].mrp,

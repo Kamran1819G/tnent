@@ -150,8 +150,8 @@ class _AcceptRejectOrderScreenState extends State<AcceptRejectOrderScreen> {
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
-                                  const Text(
-                                    'Lorem Ipsum sit amet, consectetur adipis, sed do eiusmod tempor inc, eum fug, eiusmod tempor inc, eum fugiat null, eum fugiat null, eum fugiat null, eum fug, eum fugiat null, eum fugiat null, eum fugiat',
+                                  Text(
+                                    widget.item['note'] ?? 'N/A',
                                     style: TextStyle(
                                         fontFamily: 'Poppins', fontSize: 10),
                                   ),
