@@ -278,9 +278,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   Future<void> _toggleWishlist() async {
+    if (!_isInAllowedArea) {
+      _showNotAvailableSnackBar();
+      return;
+    }
+
     User? user = _auth.currentUser;
     if (user == null) {
-      // Handle the case when the user is not logged in
       print('User is not logged in');
       return;
     }
@@ -291,7 +295,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     try {
       DocumentReference userDocRef =
-          _firestore.collection('Users').doc(user.uid);
+      _firestore.collection('Users').doc(user.uid);
 
       if (_isInWishlist) {
         // Add product to wishlist
