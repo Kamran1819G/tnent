@@ -1,8 +1,27 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GeofencingService {
-  static const List<String> allowedPincodes = ['788710', '788711', '788712'];
+  static Future<List<String>> getAllowedPincodes() async {
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Geofencing')
+          .doc('allowed_pincodes')
+          .get();
+
+      if (snapshot.exists && snapshot.data() != null) {
+        final data = snapshot.data() as Map<String, dynamic>;
+        if (data.containsKey('pincodes') && data['pincodes'] is List) {
+          return List<String>.from(data['pincodes']);
+        }
+      }
+      return [];
+    } catch (e) {
+      print('Error fetching allowed pincodes: $e');
+      return [];
+    }
+  }
 
   static Future<bool> isUserInAllowedArea() async {
     try {
@@ -38,6 +57,7 @@ class GeofencingService {
 
       if (placemarks.isNotEmpty) {
         String? postalCode = placemarks[0].postalCode;
+        List<String> allowedPincodes = await getAllowedPincodes();
         return allowedPincodes.contains(postalCode);
       }
 
