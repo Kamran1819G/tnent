@@ -942,7 +942,7 @@ class StoreTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(23.r),
                 child: Image.network(
                   store.logoUrl,
-                  fit: BoxFit.fill,
+                  fit: BoxFit.cover,
                   height: 120.h,
                   width: 120.w,
                 )),

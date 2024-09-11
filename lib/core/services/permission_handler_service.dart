@@ -41,12 +41,30 @@ class PermissionHandlerService {
     return status.isGranted;
   }
 
+  Future<bool> requestExternalStoragePermission() async {
+    var status = await Permission.manageExternalStorage.status;
+    if (!status.isGranted) {
+      status = await Permission.manageExternalStorage.request();
+    }
+    return status.isGranted;
+  }
+
+  Future<bool> requestMediaAccessPermission() async {
+    var status = await Permission.accessMediaLocation.status;
+    if (!status.isGranted) {
+      status = await Permission.accessMediaLocation.request();
+    }
+    return status.isGranted;
+  }
+
   Future<bool> requestMultiplePermissions() async {
     Map<Permission, PermissionStatus> statuses = await [
       Permission.location,
       Permission.notification,
       Permission.camera,
       Permission.storage,
+      Permission.accessMediaLocation,
+      Permission.manageExternalStorage
     ].request();
 
     bool allGranted = true;

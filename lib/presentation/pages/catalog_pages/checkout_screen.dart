@@ -5,8 +5,8 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -17,6 +17,7 @@ import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/presentation/controllers/checkoutController.dart';
+import 'package:tnent/presentation/pages/catalog_pages/purchase_screen.dart';
 import 'package:tnent/presentation/pages/home_screen.dart';
 import '../../../core/helpers/snackbar_utils.dart';
 
@@ -297,7 +298,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   border:
-                                  Border.all(color: hexToColor('#E3E3E3')),
+                                      Border.all(color: hexToColor('#E3E3E3')),
                                   borderRadius: BorderRadius.circular(50.r),
                                 ),
                                 child: Center(
@@ -344,7 +345,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               counterStyle: TextStyle(
                                   fontFamily: 'Poppins', fontSize: 6)),
                           maxLines:
-                          null, // Increase the max lines for a larger in
+                              null, // Increase the max lines for a larger in
                           maxLength: 200,
                           cursorColor: Colors.grey,
                         ),
@@ -357,7 +358,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             SizedBox(height: 16.h),
             Expanded(
               child: Obx(
-                    () => ListView.builder(
+                () => ListView.builder(
                   itemCount: checkoutController.items.length,
                   itemBuilder: (context, index) {
                     return CheckoutItemTile(
@@ -380,7 +381,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     style: TextStyle(fontSize: 26.sp),
                   ),
                   Obx(
-                        () => Text(
+                    () => Text(
                       '₹${checkoutController.totalAmount.toStringAsFixed(2)}',
                       style: TextStyle(
                           fontSize: 26.sp,
@@ -453,7 +454,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
   late TextEditingController _cityController;
   late TextEditingController _stateController;
 
-  final List<String> pincodes = ['788710','788711','788712'];
+  final List<String> pincodes = ['788710', '788711', '788712'];
   @override
   void initState() {
     super.initState();
@@ -473,8 +474,8 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
 
     // Ensure the initial pincode is one of the valid options
     String initialPincode = widget.existingAddress?['zip'] ?? 'XXXXXX';
-    selectedPincode = pincodes.contains(initialPincode) ? initialPincode : pincodes[0];
-
+    selectedPincode =
+        pincodes.contains(initialPincode) ? initialPincode : pincodes[0];
   }
 
   Future<void> _saveAddress() async {
@@ -501,8 +502,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
           'address': addressData,
         });
         Navigator.pop(context, addressData);
-      } catch (e)
-      {
+      } catch (e) {
         showSnackBar(context, 'Failed to save address: $e');
       }
     }
@@ -644,11 +644,13 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                             labelText: 'Pincode',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: hexToColor('#2A2A2A')),
+                              borderSide:
+                                  BorderSide(color: hexToColor('#2A2A2A')),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: hexToColor('#2A2A2A')),
+                              borderSide:
+                                  BorderSide(color: hexToColor('#2A2A2A')),
                             ),
                           ),
                           items: pincodes.map((String pincode) {
@@ -2140,90 +2142,93 @@ class _TransactionScreenState extends State<TransactionScreen> {
       );
     }
     if (isGreeting) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // _buildStoreRegistrationPageHeader(
-              //     context, _pageController, _currentPageIndex),
-              SizedBox(height: 100.h),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  ConfettiWidget(
-                    confettiController: _confettiController,
-                    blastDirectionality: BlastDirectionality.explosive,
-                    shouldLoop: false,
-                    colors: [Theme.of(context).primaryColor],
-                  ),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(50.r),
-                    child: Image.asset(
-                      'assets/congratulation.png',
-                      width: 425.w,
-                      height: 340.h,
+      return PopScope(
+        canPop: false,
+        child: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // _buildStoreRegistrationPageHeader(
+                //     context, _pageController, _currentPageIndex),
+                SizedBox(height: 100.h),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    ConfettiWidget(
+                      confettiController: _confettiController,
+                      blastDirectionality: BlastDirectionality.explosive,
+                      shouldLoop: false,
+                      colors: [Theme.of(context).primaryColor],
                     ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(50.r),
+                      child: Image.asset(
+                        'assets/congratulation.png',
+                        width: 425.w,
+                        height: 340.h,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 200.h),
+                SizedBox(
+                  width: 430.w,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Congratulations!',
+                        style: TextStyle(
+                          color: hexToColor('#2A2A2A'),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 42.sp,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 20.h),
+                      Text(
+                        'Your Order has been placed',
+                        style: TextStyle(
+                          color: hexToColor('#636363'),
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 28.sp,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: 200.h),
-              SizedBox(
-                width: 430.w,
-                child: Column(
+                ),
+                SizedBox(height: 300.h),
+                Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Congratulations!',
-                      style: TextStyle(
-                        color: hexToColor('#2A2A2A'),
-                        fontWeight: FontWeight.w500,
-                        fontSize: 42.sp,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 20.h),
-                    Text(
-                      'Your Order has been placed',
+                      'Hurray! Now we recommend you to',
                       style: TextStyle(
                         color: hexToColor('#636363'),
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w500,
-                        fontSize: 28.sp,
+                        fontSize: 17.sp,
                       ),
-                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      'Join Our Tnent Community',
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 17.sp,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              SizedBox(height: 300.h),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'Hurray! Now we recommend you to',
-                    style: TextStyle(
-                      color: hexToColor('#636363'),
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 17.sp,
-                    ),
-                  ),
-                  Text(
-                    'Join Our Tnent Community',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 17.sp,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );
@@ -2254,6 +2259,17 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
                   child: Row(
                     children: [
+                      GestureDetector(
+                        onTap: () {
+                          Get.to(const PurchaseScreen());
+                        },
+                        child: CircleAvatar(
+                          radius: 40.w,
+                          backgroundColor: Colors.grey[100],
+                          child: Image.asset('assets/icons/track_order.png',
+                              height: 34.h, width: 34.w),
+                        ),
+                      ),
                       const Spacer(),
                       IconButton(
                         style: ButtonStyle(
@@ -2456,6 +2472,13 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                               fontFamily: 'Gotham',
                                               fontWeight: FontWeight.w500,
                                             ),
+                                          ),
+                                          SizedBox(width: 24.w),
+                                          GestureDetector(
+                                            onTap: () {},
+                                            child: Image.asset(
+                                                'assets/icons/download.png',
+                                                height: 25.h),
                                           ),
                                         ],
                                       ),
