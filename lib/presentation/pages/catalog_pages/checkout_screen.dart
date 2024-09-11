@@ -41,6 +41,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _loadUserAddress();
     _noteController.addListener(_onNoteChanged);
   }
+
   void _showLocationNotification() {
     AwesomeNotifications().createNotification(
       content: NotificationContent(
@@ -52,7 +53,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
     );
   }
-
 
   Future<void> _loadUserAddress() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -406,7 +406,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: GestureDetector(
                 onTap: () async {
                   if (_userAddress == null) {
-                    showSnackBar(context, 'Please add your address to continue');
+                    showSnackBar(
+                        context, 'Please add your address to continue');
                     return;
                   }
 
@@ -420,28 +421,32 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   );
 
                   try {
-                    bool isInAllowedArea = await GeofencingService.isUserInAllowedArea();
+                    bool isInAllowedArea =
+                        await GeofencingService.isUserInAllowedArea();
 
                     // Hide loading indicator
                     Navigator.of(context).pop();
 
                     if (!isInAllowedArea) {
                       _showLocationNotification();
-                      showSnackBar(context, 'We are not currently delivering to your location.');
+                      showSnackBar(context,
+                          'We are not currently delivering to your location.');
                       return;
                     }
 
                     // If the location is allowed, proceed to the summary screen
-                    Navigator.push(context,MaterialPageRoute(
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
                         builder: (context) => SummaryScreen(),
                       ),
                     );
-                  }
-                  catch (e) {
+                  } catch (e) {
                     // Hide loading indicator
                     Navigator.of(context).pop();
                     print('Error checking location: $e');
-                    showSnackBar(context, 'Unable to verify your location. Please try again.');
+                    showSnackBar(context,
+                        'Unable to verify your location. Please try again.');
                   }
                 },
                 child: Container(
@@ -1057,7 +1062,7 @@ class SummaryItemTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6.r),
                     image: DecorationImage(
                       image: NetworkImage(item['productImage']),
-                      fit: BoxFit.fill,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
