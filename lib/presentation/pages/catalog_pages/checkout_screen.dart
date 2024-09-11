@@ -5,7 +5,6 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -433,16 +432,14 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     }
 
                     // If the location is allowed, proceed to the summary screen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
+                    Navigator.push(context,MaterialPageRoute(
                         builder: (context) => SummaryScreen(),
                       ),
                     );
-                  } catch (e) {
+                  }
+                  catch (e) {
                     // Hide loading indicator
                     Navigator.of(context).pop();
-
                     print('Error checking location: $e');
                     showSnackBar(context, 'Unable to verify your location. Please try again.');
                   }
