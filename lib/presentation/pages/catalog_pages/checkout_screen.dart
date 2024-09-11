@@ -5,6 +5,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -18,7 +19,6 @@ import 'package:tnent/models/store_model.dart';
 import 'package:tnent/presentation/controllers/checkoutController.dart';
 import 'package:tnent/presentation/pages/home_screen.dart';
 import '../../../core/helpers/snackbar_utils.dart';
-import '../geofencing.dart';
 
 class CheckoutScreen extends StatefulWidget {
   List<Map<String, dynamic>> selectedItems;
@@ -40,18 +40,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     checkoutController.items.value = List.from(widget.selectedItems);
     _loadUserAddress();
     _noteController.addListener(_onNoteChanged);
-  }
-
-  void _showLocationNotification() {
-    AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id: 10,
-        channelKey: 'basic_channel',
-        title: 'Location Out of Range',
-        body: 'We are not currently delivering to your location.',
-        notificationLayout: NotificationLayout.BigText,
-      ),
-    );
   }
 
   Future<void> _loadUserAddress() async {
@@ -309,7 +297,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   border:
-                                      Border.all(color: hexToColor('#E3E3E3')),
+                                  Border.all(color: hexToColor('#E3E3E3')),
                                   borderRadius: BorderRadius.circular(50.r),
                                 ),
                                 child: Center(
@@ -356,7 +344,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               counterStyle: TextStyle(
                                   fontFamily: 'Poppins', fontSize: 6)),
                           maxLines:
-                              null, // Increase the max lines for a larger in
+                          null, // Increase the max lines for a larger in
                           maxLength: 200,
                           cursorColor: Colors.grey,
                         ),
@@ -369,7 +357,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             SizedBox(height: 16.h),
             Expanded(
               child: Obx(
-                () => ListView.builder(
+                    () => ListView.builder(
                   itemCount: checkoutController.items.length,
                   itemBuilder: (context, index) {
                     return CheckoutItemTile(
@@ -392,7 +380,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     style: TextStyle(fontSize: 26.sp),
                   ),
                   Obx(
-                    () => Text(
+                        () => Text(
                       '₹${checkoutController.totalAmount.toStringAsFixed(2)}',
                       style: TextStyle(
                           fontSize: 26.sp,
@@ -404,50 +392,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             Center(
               child: GestureDetector(
-                onTap: () async {
+                onTap: () {
                   if (_userAddress == null) {
                     showSnackBar(
                         context, 'Please add your address to continue');
                     return;
                   }
-
-                  // Show loading indicator
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (BuildContext context) {
-                      return const Center(child: CircularProgressIndicator());
-                    },
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SummaryScreen(),
+                    ),
                   );
-
-                  try {
-                    bool isInAllowedArea =
-                        await GeofencingService.isUserInAllowedArea();
-
-                    // Hide loading indicator
-                    Navigator.of(context).pop();
-
-                    if (!isInAllowedArea) {
-                      _showLocationNotification();
-                      showSnackBar(context,
-                          'We are not currently delivering to your location.');
-                      return;
-                    }
-
-                    // If the location is allowed, proceed to the summary screen
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SummaryScreen(),
-                      ),
-                    );
-                  } catch (e) {
-                    // Hide loading indicator
-                    Navigator.of(context).pop();
-                    print('Error checking location: $e');
-                    showSnackBar(context,
-                        'Unable to verify your location. Please try again.');
-                  }
                 },
                 child: Container(
                   height: 95.h,
@@ -461,10 +417,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     child: Text(
                       'Continue',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Gotham',
-                        fontSize: 25.sp,
-                      ),
+                          color: Colors.white,
+                          fontFamily: 'Gotham',
+                          fontSize: 25.sp),
                     ),
                   ),
                 ),
@@ -489,15 +444,16 @@ class ChangeAddressScreen extends StatefulWidget {
 class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
   final _formKey = GlobalKey<FormState>();
   String addressType = 'Home';
+  String? selectedPincode;
 
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
   late TextEditingController _addressLine1Controller;
   late TextEditingController _addressLine2Controller;
-  late TextEditingController _zipController;
   late TextEditingController _cityController;
   late TextEditingController _stateController;
 
+  final List<String> pincodes = ['788710','788711','788712'];
   @override
   void initState() {
     super.initState();
@@ -509,13 +465,16 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
         text: widget.existingAddress?['addressLine1'] ?? '');
     _addressLine2Controller = TextEditingController(
         text: widget.existingAddress?['addressLine2'] ?? '');
-    _zipController =
-        TextEditingController(text: widget.existingAddress?['zip'] ?? '');
     _cityController =
         TextEditingController(text: widget.existingAddress?['city'] ?? '');
     _stateController =
         TextEditingController(text: widget.existingAddress?['state'] ?? '');
     addressType = widget.existingAddress?['type'] ?? 'Home';
+
+    // Ensure the initial pincode is one of the valid options
+    String initialPincode = widget.existingAddress?['zip'] ?? 'XXXXXX';
+    selectedPincode = pincodes.contains(initialPincode) ? initialPincode : pincodes[0];
+
   }
 
   Future<void> _saveAddress() async {
@@ -528,7 +487,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
         'phone': _phoneController.text,
         'addressLine1': _addressLine1Controller.text,
         'addressLine2': _addressLine2Controller.text,
-        'zip': _zipController.text,
+        'zip': selectedPincode,
         'city': _cityController.text,
         'state': _stateController.text,
         'type': addressType,
@@ -542,9 +501,8 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
           'address': addressData,
         });
         Navigator.pop(context, addressData);
-      } catch (e) {
-        // Handle error (show a snackbar, for example)
-
+      } catch (e)
+      {
         showSnackBar(context, 'Failed to save address: $e');
       }
     }
@@ -680,16 +638,33 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                       Container(
                         margin: EdgeInsets.symmetric(horizontal: 22.w),
                         width: 340.w,
-                        child: _buildTextFormField(
-                          controller: _zipController,
-                          labelText: 'Pincode',
-                          keyboardType: TextInputType.number,
+                        child: DropdownButtonFormField<String>(
+                          value: selectedPincode,
+                          decoration: InputDecoration(
+                            labelText: 'Pincode',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: hexToColor('#2A2A2A')),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: BorderSide(color: hexToColor('#2A2A2A')),
+                            ),
+                          ),
+                          items: pincodes.map((String pincode) {
+                            return DropdownMenuItem<String>(
+                              value: pincode,
+                              child: Text(pincode),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedPincode = newValue;
+                            });
+                          },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Pincode is required';
-                            }
-                            if (!RegExp(r'^[0-9]{6}$').hasMatch(value)) {
-                              return 'Enter a valid pincode';
+                              return 'Please select a pincode';
                             }
                             return null;
                           },
