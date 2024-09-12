@@ -1944,6 +1944,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
   bool isGreeting = false;
   late Map<String, dynamic> _userAddress;
   bool _isLoading = true;
+  bool _isRemovingProduct = false;
+  String _productIdToRemove = '';
 
   @override
   void initState() {
@@ -1955,13 +1957,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 5));
     _userAddress = await _loadUserAddress();
-    /*processOrder();*/
     _isLoading = false;
     makeIsGreetingTrue();
     processOrder(checkoutController.items);
     setState(() {});
-
     sendOrderNotification();
+    _startProductRemoval();
   }
 
   final user = FirebaseAuth.instance.currentUser!;
@@ -2059,6 +2060,43 @@ class _TransactionScreenState extends State<TransactionScreen> {
       await batch.commit();
     } catch (e) {
       // Handle error
+    }
+  }
+
+  void _startProductRemoval() {
+    if (checkoutController.items.isNotEmpty) {
+      setState(() {
+        _isRemovingProduct = true;
+        _productIdToRemove = checkoutController.items.first['productId'];
+      });
+
+      // Simulate a delay before removing the product
+      Future.delayed(const Duration(seconds: 2), () {
+        _removeProductFromCart(_productIdToRemove);
+      });
+    }
+  }
+
+  void _removeProductFromCart(String productId) async {
+    try {
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+      DocumentReference userRef = FirebaseFirestore.instance.collection('Users').doc(userId);
+      DocumentSnapshot userDoc = await userRef.get();
+      List<dynamic> currentCart = userDoc.get('cart') ?? [];
+      currentCart.removeWhere((item) => item['productId'] == productId);
+      await userRef.update({'cart': currentCart});
+      setState(() {
+        checkoutController.items.removeWhere((item) => item['productId'] == productId);
+        _isRemovingProduct = false;
+      });
+      if (checkoutController.items.isNotEmpty) {
+        _startProductRemoval();
+      }
+    } catch (e) {
+      print('Error removing product from cart: $e');
+      setState(() {
+        _isRemovingProduct = false;
+      });
     }
   }
 
@@ -2178,6 +2216,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
       );
+    }
+    if (_isRemovingProduct) {
     }
     if (isGreeting) {
       return PopScope(

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,12 +9,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
-import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/models/store_update_model.dart';
 import 'package:tnent/models/user_model.dart';
-import 'package:tnent/presentation/pages/accept_reject_order_screen.dart';
 import 'package:tnent/presentation/pages/catalog_pages/cart_screen.dart';
 import 'package:tnent/presentation/pages/explore_screen.dart';
 import 'package:tnent/presentation/pages/notification_screen.dart';
@@ -40,6 +37,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   late TabController _tabController;
   int _selectedIndex = 0;
   bool isNewNotification = true;
+  String? featuredFestivalImage;
 
   List<Map<String, dynamic>> categories = [
     {
@@ -78,7 +76,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     _fetchFeaturedStores();
     _fetchFeaturedProducts();
     _fetchUpdates();
-
+    _fetchFeaturedFestivalImage();
     setState(() {
       firstName = widget.currentUser.firstName;
       lastName = widget.currentUser.lastName;
@@ -117,6 +115,22 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       default:
         return '';
     }
+  }
+
+  Future<void> _fetchFeaturedFestivalImage() async {
+    final image = await fetchFeaturedFestivalImage();
+    setState(() {
+      featuredFestivalImage = image;
+    });
+  }
+
+  Future<String?> fetchFeaturedFestivalImage() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('Avatar')
+        .doc('avatar')
+        .get();
+    final image = doc.data()?['image'] as String?;
+    return image;
   }
 
   Stream<bool> _getNewNotificationsStream() {
@@ -296,7 +310,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   Map<String, List<StoreUpdateModel>> groupedUpdates = {};
-
   void sortInGroupedupdates() {
     for (var update in updates) {
       if (groupedUpdates.containsKey(update.storeName)) {
@@ -427,12 +440,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
                 child: CircleAvatar(
                   radius: 25.0,
-                  backgroundImage: widget.currentUser.photoURL != null
+                  backgroundImage: featuredFestivalImage!= null
                       ? CachedNetworkImageProvider(
-                          widget.currentUser.photoURL ?? ' ')
+                          featuredFestivalImage!)
                       : null,
                   backgroundColor: Colors.transparent,
-                  child: widget.currentUser.photoURL == null
+                  child: featuredFestivalImage == null
                       ? Image.asset(
                           'assets/icons/profile_pic.png',
                           fit: BoxFit.cover,
@@ -554,38 +567,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       }).toList(),
                     ),
                   ),
-        SizedBox(
-          child: CarouselSlider(
-            options: CarouselOptions(
-              autoPlay: true,
-              viewportFraction: 1.0,
-              enlargeCenterPage: true,
-            ),
-            items: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Image.asset(
-                  'assets/categories2/vbnm.png',
-                  scale: 0.8,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Image.asset(
-                  'assets/categories2/dfgn.png',
-                  scale: 0.8,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Image.asset(
-                  'assets/categories2/dfghj.png',
-                  scale: 0.8,
-                ),
-              ),
-            ],
-          ),
-        ),
+        const FirestoreCarouselSlider(),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -1242,6 +1224,57 @@ class UpdateTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+class FirestoreCarouselSlider extends StatelessWidget {
+  const FirestoreCarouselSlider({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('Banners')
+          .doc('banner-1')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const Center(child: Text('No banner data available'));
+        }
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final List<String> images = List<String>.from(data['images'] ?? []);
+        if (images.isEmpty) {
+          return const Center(child: Text('No images available'));
+        }
+        return SizedBox(
+          child: CarouselSlider(
+            options: CarouselOptions(
+              autoPlay: true,
+              viewportFraction: 1.0,
+              enlargeCenterPage: true,
+            ),
+            items: images.map((imageUrl) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
     );
   }
 }
