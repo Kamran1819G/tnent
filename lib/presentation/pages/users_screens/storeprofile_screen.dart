@@ -187,6 +187,7 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
         'name': '${currentUser!.firstName} ${currentUser!.lastName}',
       },
       'timestamp': FieldValue.serverTimestamp(),
+      'IsUnRead': true,
     });
   }
 
