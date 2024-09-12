@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,6 +13,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:screenshot/screenshot.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/models/product_model.dart';
@@ -1936,6 +1938,7 @@ class TransactionScreen extends StatefulWidget {
 class _TransactionScreenState extends State<TransactionScreen> {
   late ConfettiController _confettiController;
   final CheckoutController checkoutController = Get.find<CheckoutController>();
+  ScreenshotController screenshotController = ScreenshotController();
 
   GlobalKey _globalKey = GlobalKey();
   bool isGreeting = false;
@@ -2134,6 +2137,41 @@ class _TransactionScreenState extends State<TransactionScreen> {
     });
   }
 
+  Future<void> _captureAndSaveImage() async {
+    try {
+      // Capture the screenshot
+      final Uint8List? imageBytes = await screenshotController.capture();
+
+      if (imageBytes != null) {
+        // Get the external storage directory (Pictures folder)
+        final directory =
+            Directory('/storage/emulated/0/Pictures'); // Or use DCIM folder
+
+        if (!(await directory.exists())) {
+          await directory.create(
+              recursive: true); // Create folder if it doesn't exist
+        }
+
+        // Create a unique filename with timestamp
+        final String fileName =
+            'transaction_receipt_${DateTime.now().millisecondsSinceEpoch}.png';
+
+        // Create the file path
+        final String filePath = '${directory.path}/$fileName';
+
+        // Write the file
+        final File file = File(filePath);
+        await file.writeAsBytes(imageBytes);
+
+        // Show a success message to the user
+        showSnackBar(context, 'Receipt saved to: $filePath');
+      }
+    } catch (e) {
+      print('Error saving image: $e');
+      showSnackBar(context, 'Failed to save receipt');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -2287,8 +2325,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     ],
                   ),
                 ),
-                RepaintBoundary(
-                  key: _globalKey,
+                Screenshot(
+                  controller: screenshotController,
                   child: Stack(
                     children: [
                       Container(
@@ -2475,7 +2513,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                           ),
                                           SizedBox(width: 24.w),
                                           GestureDetector(
-                                            onTap: () {},
+                                            onTap: _captureAndSaveImage,
                                             child: Image.asset(
                                                 'assets/icons/download.png',
                                                 height: 25.h),
