@@ -137,32 +137,32 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return Stream.value(false);
 
-    return Stream.periodic(const Duration(seconds: 2), (_) => null)
-        .asyncMap((_) => _checkForNewNotifications(user.uid))
-        .distinct();
+    return FirebaseFirestore.instance
+        .collection('Users')
+        .doc(user.uid)
+        .collection('notifications')
+        .where('IsUnRead', isEqualTo: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.isNotEmpty);
   }
 
-  Future<bool> _checkForNewNotifications(String userId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final lastCheckTime = prefs.getInt('lastNotificationCheck') ?? 0;
+  Future<void> _markAllNotificationsAsRead() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final batch = FirebaseFirestore.instance.batch();
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .collection('notifications')
+          .where('IsUnRead', isEqualTo: true)
+          .get();
 
-    final snapshot = await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(userId)
-        .collection('notifications')
-        .where('createdAt',
-            isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(lastCheckTime))
-        .get();
+      for (var doc in snapshot.docs) {
+        batch.update(doc.reference, {'IsUnRead': false});
+      }
 
-    final hasNewNotifications = snapshot.docs.isNotEmpty;
-
-    if (hasNewNotifications) {
-      // Update the last check time
-      await prefs.setInt(
-          'lastNotificationCheck', DateTime.now().millisecondsSinceEpoch);
+      await batch.commit();
     }
-
-    return hasNewNotifications;
   }
 
   String getGreeting() {
@@ -411,9 +411,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                               builder: (context) =>
                                   const NotificationScreen()));
                       // After returning from NotificationScreen, update the last check time
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.setInt('lastNotificationCheck',
-                          DateTime.now().millisecondsSinceEpoch);
+                      await _markAllNotificationsAsRead();
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(1.5),
@@ -791,7 +789,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ],
           ),
         ),
+
         SizedBox(height: 50.h),
+
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Column(

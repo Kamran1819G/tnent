@@ -2124,6 +2124,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           'orderId': item['orderId'],
         },
         'timestamp': FieldValue.serverTimestamp(),
+        'IsUnRead': true,
       });
 
       // Show local notification
