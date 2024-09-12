@@ -1,3 +1,5 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -92,55 +94,6 @@ class _CatalogState extends State<Catalog> {
                   ),
                 ],
               ),
-              // const Spacer(),
-              /*Row(
-                children: [
-                  GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => NotificationScreen()));
-                        setState(() {
-                          isNewNotification = false;
-                        });
-                      },
-                      child: isNewNotification
-                          ? Image.asset(
-                              'assets/icons/new_notification_box.png',
-                              height: 35.h,
-                              width: 35.w,
-                              fit: BoxFit.cover,
-                            )
-                          : Image.asset(
-                              'assets/icons/no_new_notification_box.png',
-                              height: 35.h,
-                              width: 35.w,
-                              fit: BoxFit.cover,
-                            )),
-                  SizedBox(width: 22.w),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MyProfileScreen()));
-                    },
-                    child: widget.currentUser.photoURL != null
-                        ? CircleAvatar(
-                            radius: 30.0,
-                            backgroundImage:
-                                NetworkImage(widget.currentUser.photoURL ?? ''),
-                          )
-                        : CircleAvatar(
-                            radius: 30.0,
-                            backgroundColor: Theme.of(context).primaryColor,
-                            child: Icon(Icons.person,
-                                color: Colors.white, size: 30.0),
-                          ),
-                  ),
-                ],
-              )*/
             ],
           ),
         ),
@@ -170,9 +123,7 @@ class _CatalogState extends State<Catalog> {
         const SizedBox(
           height: 30,
         ),
-        underWidget("assets/categories2/cata1.png"),
-        underWidget("assets/categories2/cata3.png"),
-        underWidget("assets/categories2/cata2.png"),
+       const FirestoreUnderWidget(),
       ],
     );
   }
@@ -185,4 +136,58 @@ class _CatalogState extends State<Catalog> {
           child: AspectRatio(aspectRatio: 16 / 9, child: Image.asset(asset)),
         ),
       );
+}
+class FirestoreUnderWidget extends StatelessWidget {
+  const FirestoreUnderWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('Banners')
+          .doc('banner-catalog')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const Center(child: Text('No banner data available'));
+        }
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final List<String> images = List<String>.from(data['images'] ?? []);
+        if (images.isEmpty) {
+          return const Center(child: Text('No images available'));
+        }
+        return Column(
+          children: images.map((imageUrl) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 13),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey[300],
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      color: Colors.grey[300],
+                      child: const Center(child: Icon(Icons.error)),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
 }

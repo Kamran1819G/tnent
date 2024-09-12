@@ -328,7 +328,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           child: Container(
             // width: 350 * (235 / 342),
             height: 350,
-            color: Colors.grey,
+            color: Colors.red,
             child: Center(
               child: Text(text),
             ),
@@ -704,27 +704,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         ),
 
         SizedBox(height: 30.h),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: CarouselSlider(
-            options: CarouselOptions(
-              aspectRatio: 235 / 342,
-              // height: 350,
-              viewportFraction: 1,
-              autoPlay: true,
-              enableInfiniteScroll: false,
-              enlargeCenterPage: false,
-            ),
-            items: List.generate(
-              4,
-              (index) => underWidget(index.toString()),
-            ),
-          ),
-        ),
-
+        const FirestoreUnderWidget(),
         SizedBox(height: 50.h),
-
         // Feature Store Section
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 18.w),
@@ -810,9 +791,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ],
           ),
         ),
-
         SizedBox(height: 50.h),
-
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w),
           child: Column(
@@ -1273,6 +1252,67 @@ class FirestoreCarouselSlider extends StatelessWidget {
               );
             }).toList(),
           ),
+        );
+      },
+    );
+  }
+}
+
+class FirestoreUnderWidget extends StatelessWidget {
+  const FirestoreUnderWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('Banners')
+          .doc('banner-2')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const Center(child: Text('No banner data available'));
+        }
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final List<String> images = List<String>.from(data['images'] ?? []);
+        if (images.isEmpty) {
+          return const Center(child: Text('No images available'));
+        }
+        return CarouselSlider(
+          options: CarouselOptions(
+            aspectRatio: 235 / 342,
+            viewportFraction: 1,
+            autoPlay: true,
+            enableInfiniteScroll: false,
+            enlargeCenterPage: false,
+          ),
+          items: images.map((imageUrl) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 13),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    height: 350,
+                    color: Colors.grey[300],
+                    child: const Center(child: CircularProgressIndicator()),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    height: 350,
+                    color: Colors.red,
+                    child: const Center(child: Icon(Icons.error)),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
         );
       },
     );
