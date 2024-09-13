@@ -133,6 +133,10 @@ class NotificationService {
     });
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+     RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    if (initialMessage != null) {
+      _handleMessage(initialMessage);
+    }
   }
 
   static Future<void> _storeFcmToken(String token) async {

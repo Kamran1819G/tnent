@@ -1167,7 +1167,7 @@ class SummaryScreen extends StatefulWidget {
 class _SummaryScreenState extends State<SummaryScreen> {
   late Map<String, StoreModel> _storeDetails = {};
   final CheckoutController checkoutController = Get.find<CheckoutController>();
-  late RazorpayService _razorpayService;
+
 
 
   @override
@@ -1175,14 +1175,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
     super.initState();
     _fetchStoreDetails();
     _generateOrderIds();
-    _razorpayService = RazorpayService();
-  }
 
-  @override
-  void dispose() {
-    // Dispose RazorpayService
-    _razorpayService.dispose();
-    super.dispose();
   }
 
   Future<void> _fetchStoreDetails() async {
@@ -1415,15 +1408,14 @@ class _SummaryScreenState extends State<SummaryScreen> {
     return Center(
       child: GestureDetector(
         onTap: () async {
-         _razorpayService.openCheckout(checkoutController.totalAmount, context);
-          /* Navigator.push(
+        Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => PaymentOptionScreen(
                 storeDetails: _storeDetails,
               ),
             ),
-          );*/
+          );
         },
         child: Container(
           height: 95.h,
@@ -1447,7 +1439,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
   }
 }
 
-enum ExpandedTile { none, upi, otherUpi, card }
 
 class PaymentOptionScreen extends StatefulWidget {
   Map<String, StoreModel> storeDetails;
@@ -1462,8 +1453,21 @@ class PaymentOptionScreen extends StatefulWidget {
 }
 
 class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
-  ExpandedTile expandedTile = ExpandedTile.none;
   final CheckoutController checkoutController = Get.find<CheckoutController>();
+  late RazorpayService _razorpayService;
+
+  @override
+  void initState() {
+    super.initState();
+    _razorpayService = RazorpayService();
+  }
+
+  @override
+  void dispose() {
+    // Dispose RazorpayService
+    _razorpayService.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1532,368 +1536,45 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                       ),
                     ),
                     SizedBox(height: 30.h),
-                    ExpansionTile(
-                      key: const Key('upi'),
-                      initiallyExpanded: expandedTile == ExpandedTile.upi,
-                      onExpansionChanged: (expanded) {
-                        setState(() {
-                          expandedTile =
-                              expanded ? ExpandedTile.upi : ExpandedTile.none;
-                        });
+                    GestureDetector(
+                      onTap: () {
+                        // Navigate to Razorpay
+                         _razorpayService.openCheckout(checkoutController.totalAmount, context);
                       },
-                      collapsedShape: RoundedRectangleBorder(
-                        side: BorderSide(color: hexToColor('#E0E0E0')),
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(color: hexToColor('#E0E0E0')),
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      leading: Icon(
-                        Icons.phone_android,
-                        size: 25.sp,
-                      ),
-                      title: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'UPI',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'Gotham',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 22.sp,
-                            ),
-                          ),
-                          Text(
-                            'Pay by an UPI app',
-                            style: TextStyle(
-                              color: hexToColor('#6F6F6F'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16.sp,
-                            ),
-                          )
-                        ],
-                      ),
-                      children: [
-                        ListTile(
-                          leading: Container(
-                            width: 60.w,
-                            height: 35.h,
-                            padding: EdgeInsets.all(6.w),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: hexToColor('#E0E0E0')),
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            child: Image.asset(
-                              'assets/Google_Pay_Logo.png',
-                              fit: BoxFit.fill,
-                            ),
-                          ),
-                          title: Text(
-                            'Google Pay',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontFamily: 'Poppins',
-                              fontSize: 16.sp,
-                            ),
-                          ),
-                          onTap: () {},
+                      child: ListTile(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(color: hexToColor('#E0E0E0')),
+                          borderRadius: BorderRadius.circular(12.r),
                         ),
-                        ListTile(
-                          leading: Container(
-                            width: 60.w,
-                            height: 35.h,
-                            padding: EdgeInsets.all(6.w),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: hexToColor('#E0E0E0')),
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            child: Image.asset(
-                              'assets/Apple_Pay_Logo.png',
-                              fit: BoxFit.fill,
-                            ),
-                          ),
-                          title: Text(
-                            'Apple Pay',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontFamily: 'Poppins',
-                              fontSize: 16.sp,
-                            ),
-                          ),
-                          onTap: () {},
+                        leading: Icon(
+                          Icons.payment,
+                          size: 25.sp,
                         ),
-                        ExpansionTile(
-                          key: const Key('other_upi'),
-                          initiallyExpanded:
-                              expandedTile == ExpandedTile.otherUpi,
-                          onExpansionChanged: (expanded) {
-                            setState(() {
-                              expandedTile = expanded
-                                  ? ExpandedTile.otherUpi
-                                  : ExpandedTile.upi;
-                            });
-                          },
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                          leading: Container(
-                            width: 60.w,
-                            height: 35.h,
-                            padding: EdgeInsets.all(6.w),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: hexToColor('#E0E0E0')),
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                            child: Image.asset(
-                              'assets/BHIM_Logo.png',
-                              fit: BoxFit.fill,
-                            ),
-                          ),
-                          title: Text(
-                            'Other UPI ID',
-                            style: TextStyle(
-                              color: hexToColor('#343434'),
-                              fontFamily: 'Poppins',
-                              fontSize: 16.sp,
-                            ),
-                          ),
-                          trailing: Text('ADD',
-                              style: TextStyle(
-                                color: hexToColor('#4B8284'),
-                                fontFamily: 'Poppins',
-                                fontSize: 16.sp,
-                              )),
+                        title: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Container(
-                              margin: EdgeInsets.symmetric(
-                                  horizontal: 35.w, vertical: 15.h),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      SizedBox(
-                                        width: 415.w,
-                                        height: 55.h,
-                                        child: TextField(
-                                          style: TextStyle(
-                                            color: hexToColor('#2A2A2A'),
-                                            fontFamily: 'Gotham',
-                                            fontSize: 14,
-                                          ),
-                                          decoration: InputDecoration(
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(8.r),
-                                              borderSide: BorderSide(
-                                                color: hexToColor('#E0E0E0'),
-                                                width: 1.0,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(width: 8.w),
-                                      CircleAvatar(
-                                        radius: 22.w,
-                                        backgroundColor:
-                                            Theme.of(context).primaryColor,
-                                        child: Icon(
-                                          Icons.check,
-                                          color: Colors.white,
-                                          size: 20.sp,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 8.h),
-                                  Text(
-                                    'Your UPI ID will be encrypted and in 100% safe with us',
-                                    style: TextStyle(
-                                      color: hexToColor('#6F6F6F'),
-                                      fontFamily: 'Poppins',
-                                      fontSize: 15.sp,
-                                    ),
-                                  ),
-                                ],
+                            Text(
+                              'Online Payment',
+                              style: TextStyle(
+                                color: Colors.black,
+                                fontFamily: 'Gotham',
+                                fontWeight: FontWeight.w800,
+                                fontSize: 22.sp,
                               ),
                             ),
+                            Text(
+                              'Pay securely online',
+                              style: TextStyle(
+                                color: hexToColor('#6F6F6F'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 16.sp,
+                              ),
+                            )
                           ],
                         ),
-                      ],
-                    ),
-                    SizedBox(height: 20.h),
-                    ExpansionTile(
-                      key: const Key('card'),
-                      initiallyExpanded: expandedTile == ExpandedTile.card,
-                      onExpansionChanged: (expanded) {
-                        setState(() {
-                          expandedTile =
-                              expanded ? ExpandedTile.card : ExpandedTile.none;
-                        });
-                      },
-                      collapsedShape: RoundedRectangleBorder(
-                        side: BorderSide(color: hexToColor('#E0E0E0')),
-                        borderRadius: BorderRadius.circular(12.r),
+
                       ),
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(color: hexToColor('#E0E0E0')),
-                        borderRadius: BorderRadius.circular(12.r),
-                      ),
-                      leading: Icon(
-                        Icons.credit_card,
-                        size: 25.sp,
-                      ),
-                      title: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Credit/Debit Card',
-                            style: TextStyle(
-                              color: Colors.black,
-                              fontFamily: 'Gotham',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 22.sp,
-                            ),
-                          ),
-                          Text(
-                            'Visa, Mastercard, Rupay & more',
-                            style: TextStyle(
-                              color: hexToColor('#6F6F6F'),
-                              fontFamily: 'Poppins',
-                              fontWeight: FontWeight.w500,
-                              fontSize: 16.sp,
-                            ),
-                          )
-                        ],
-                      ),
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.symmetric(
-                              horizontal: 16.0, vertical: 15.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                width: 415.w,
-                                height: 55.h,
-                                child: TextField(
-                                  style: TextStyle(
-                                    color: hexToColor('#2A2A2A'),
-                                    fontFamily: 'Gotham',
-                                    fontSize: 18.sp,
-                                  ),
-                                  decoration: InputDecoration(
-                                    hintText: 'Card Number',
-                                    hintStyle: TextStyle(
-                                      color: hexToColor('#6F6F6F'),
-                                      fontFamily: 'Poppins',
-                                      fontSize: 15.sp,
-                                    ),
-                                    border: OutlineInputBorder(
-                                      gapPadding: 0,
-                                      borderRadius: BorderRadius.circular(8.r),
-                                      borderSide: BorderSide(
-                                        color: hexToColor('#E0E0E0'),
-                                        width: 1.0,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              SizedBox(height: 10.h),
-                              Row(
-                                children: [
-                                  SizedBox(
-                                    width: 200.w,
-                                    height: 55.h,
-                                    child: TextField(
-                                      style: TextStyle(
-                                        color: hexToColor('#2A2A2A'),
-                                        fontFamily: 'Gotham',
-                                        fontSize: 18.sp,
-                                      ),
-                                      decoration: InputDecoration(
-                                        hintText: 'Expiry(MM/YY)',
-                                        hintStyle: TextStyle(
-                                          color: hexToColor('#6F6F6F'),
-                                          fontFamily: 'Poppins',
-                                          fontSize: 15.sp,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          gapPadding: 0.0,
-                                          borderRadius:
-                                              BorderRadius.circular(8.r),
-                                          borderSide: BorderSide(
-                                            color: hexToColor('#E0E0E0'),
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8.0),
-                                  SizedBox(
-                                    width: 200.w,
-                                    height: 55.h,
-                                    child: TextField(
-                                      style: TextStyle(
-                                        color: hexToColor('#2A2A2A'),
-                                        fontFamily: 'Gotham',
-                                        fontSize: 18.sp,
-                                      ),
-                                      decoration: InputDecoration(
-                                        hintText: 'CVV',
-                                        hintStyle: TextStyle(
-                                          color: hexToColor('#6F6F6F'),
-                                          fontFamily: 'Poppins',
-                                          fontSize: 15.sp,
-                                        ),
-                                        border: OutlineInputBorder(
-                                          gapPadding: 0.0,
-                                          borderRadius:
-                                              BorderRadius.circular(8.r),
-                                          borderSide: BorderSide(
-                                            color: hexToColor('#E0E0E0'),
-                                            width: 1.0,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Center(
-                                child: Container(
-                                  height: 65.h,
-                                  width: 500.w,
-                                  margin: EdgeInsets.symmetric(vertical: 18.h),
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).primaryColor,
-                                    borderRadius: BorderRadius.circular(18.r),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Pay ₹ ${checkoutController.totalAmount.toStringAsFixed(2)}',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'Poppins',
-                                        fontWeight: FontWeight.w400,
-                                        fontSize: 24.sp,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
                     ),
                     SizedBox(height: 20.h),
                     GestureDetector(
@@ -1901,7 +1582,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                         showSnackBarWithAction(
                           context,
                           text:
-                              'Do you want to continue with Cash on Delivery?',
+                          'Do you want to continue with Cash on Delivery?',
                           confirmBtnText: 'Continue 💵',
                           buttonTextFontsize: 11,
                           cancelBtnText: 'Cancel',
@@ -2098,7 +1779,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
           });
         }
       }
-
       await batch.commit();
     } catch (e) {
       // Handle error
@@ -2141,7 +1821,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
       });
     }
   }
-
   Future<void> sendOrderNotification() async {
     final firestore = FirebaseFirestore.instance;
 
