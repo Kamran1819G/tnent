@@ -7,15 +7,15 @@ import '../../core/helpers/color_utils.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class UpdateScreen extends StatefulWidget {
-  final Widget storeImage;
   final String storeName;
+  final Widget storeImage;
   final int initialUpdateIndex;
   final List<StoreUpdateModel> updates;
 
   const UpdateScreen({
     Key? key,
-    required this.storeImage,
     required this.storeName,
+    required this.storeImage,
     required this.initialUpdateIndex,
     required this.updates,
   }) : super(key: key);
