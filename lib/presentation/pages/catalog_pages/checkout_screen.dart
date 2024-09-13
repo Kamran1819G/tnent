@@ -66,6 +66,36 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     checkoutController.updateNote(_noteController.text);
   }
 
+  void _validateAndContinue() {
+    if (_userAddress == null) {
+      showSnackBar(context, 'Please add your address to continue');
+      return;
+    }
+
+    // Check if any required field in the address is empty
+    List<String> emptyFields = [];
+    if (_userAddress!['name']?.isEmpty ?? true) emptyFields.add('Name');
+    if (_userAddress!['phone']?.isEmpty ?? true) emptyFields.add('Phone');
+    if (_userAddress!['addressLine1']?.isEmpty ?? true) emptyFields.add('Address Line 1');
+    if (_userAddress!['zip']?.isEmpty ?? true) emptyFields.add('Pincode');
+    if (_userAddress!['city']?.isEmpty ?? true) emptyFields.add('City');
+    if (_userAddress!['state']?.isEmpty ?? true) emptyFields.add('State');
+
+    if (emptyFields.isNotEmpty) {
+      showSnackBar(context, 'Please fill in the following fields: ${emptyFields.join(", ")}');
+      return;
+    }
+
+    // If all validations pass, navigate to the summary screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SummaryScreen(),
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -395,19 +425,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             Center(
               child: GestureDetector(
-                onTap: () {
-                  if (_userAddress == null) {
-                    showSnackBar(
-                        context, 'Please add your address to continue');
-                    return;
-                  }
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SummaryScreen(),
-                    ),
-                  );
-                },
+                onTap: _validateAndContinue,
                 child: Container(
                   height: 95.h,
                   width: 470.w,
@@ -474,10 +492,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
         TextEditingController(text: widget.existingAddress?['state'] ?? '');
     addressType = widget.existingAddress?['type'] ?? 'Home';
 
-    // Ensure the initial pincode is one of the valid options
-    String initialPincode = widget.existingAddress?['zip'] ?? 'XXXXXX';
-    selectedPincode =
-        pincodes.contains(initialPincode) ? initialPincode : pincodes[0];
+    selectedPincode =null;
   }
 
   Future<void> _saveAddress() async {
@@ -495,6 +510,14 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
         'state': _stateController.text,
         'type': addressType,
       };
+
+      // Check if any field is empty
+      if (addressData.values.any((value) => value == null || value.isEmpty)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please fill all required fields')),
+        );
+        return;
+      }
 
       try {
         await FirebaseFirestore.instance
@@ -655,12 +678,18 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                                   BorderSide(color: hexToColor('#2A2A2A')),
                             ),
                           ),
-                          items: pincodes.map((String pincode) {
-                            return DropdownMenuItem<String>(
-                              value: pincode,
-                              child: Text(pincode),
-                            );
-                          }).toList(),
+                          items: [
+                            DropdownMenuItem<String>(
+                              value: null,
+                              child: Text( 'select pincode'),
+                            ),
+                            ...pincodes.map(( String pincode) {
+                              return DropdownMenuItem<String>(
+                                value: pincode,
+                                child: Text(pincode),
+                              );
+                            }).toList(),
+                          ],
                           onChanged: (String? newValue) {
                             setState(() {
                               selectedPincode = newValue;
@@ -2034,6 +2063,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
             'method': 'Cash on Delivery',
             'status': 'Pending',
           },
+          'isOrderNew': true,
         };
 
         batch.set(orderRef, orderData);
