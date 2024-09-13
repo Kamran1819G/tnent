@@ -22,6 +22,7 @@ import 'package:tnent/presentation/controllers/checkoutController.dart';
 import 'package:tnent/presentation/pages/catalog_pages/purchase_screen.dart';
 import 'package:tnent/presentation/pages/home_screen.dart';
 import '../../../core/helpers/snackbar_utils.dart';
+import '../../../services/razorpay_service.dar.dart';
 
 class CheckoutScreen extends StatefulWidget {
   List<Map<String, dynamic>> selectedItems;
@@ -1166,12 +1167,22 @@ class SummaryScreen extends StatefulWidget {
 class _SummaryScreenState extends State<SummaryScreen> {
   late Map<String, StoreModel> _storeDetails = {};
   final CheckoutController checkoutController = Get.find<CheckoutController>();
+  late RazorpayService _razorpayService;
+
 
   @override
   void initState() {
     super.initState();
     _fetchStoreDetails();
     _generateOrderIds();
+    _razorpayService = RazorpayService();
+  }
+
+  @override
+  void dispose() {
+    // Dispose RazorpayService
+    _razorpayService.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchStoreDetails() async {
@@ -1403,15 +1414,16 @@ class _SummaryScreenState extends State<SummaryScreen> {
   Widget _buildPayButton() {
     return Center(
       child: GestureDetector(
-        onTap: () {
-          Navigator.push(
+        onTap: () async {
+         _razorpayService.openCheckout(checkoutController.totalAmount, context);
+          /* Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => PaymentOptionScreen(
                 storeDetails: _storeDetails,
               ),
             ),
-          );
+          );*/
         },
         child: Container(
           height: 95.h,
