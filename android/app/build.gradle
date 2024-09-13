@@ -84,10 +84,6 @@ android {
 
             // Ensure that your release build is signed with the correct key
             signingConfig signingConfigs.release
-
-            // Additional options for improved security
-            v3SigningEnabled true
-            v4SigningEnabled true
         }
 
         debug {
