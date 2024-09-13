@@ -129,15 +129,11 @@ class _UserRegistrationState extends State<UserRegistration> {
 
   Future<void> addUserDetails() async {
     try {
-      // Parse the location string to create the address structure
-      Map<String, dynamic> newAddress = _parseLocationToAddress(_locationController.text);
-
       final updatedUser = _userModel.copyWith(
         phoneNumber: _phoneController.text,
         firstName: _firstNameController.text,
         lastName: _lastNameController.text,
         location: _locationController.text,
-        address: newAddress,
         lastUpdated: Timestamp.now(),
       );
 
@@ -152,19 +148,6 @@ class _UserRegistrationState extends State<UserRegistration> {
     } catch (e) {
       showSnackBar(context, 'Error: $e');
     }
-  }
-  Map<String, dynamic> _parseLocationToAddress(String location) {
-    List<String> parts = location.split(',');
-    return {
-      'name': '${_firstNameController.text} ${_lastNameController.text}'.trim(),
-      'addressLine1': parts.isNotEmpty ? parts[0].trim() : '',
-      'addressLine2': parts.length > 1 ? parts[1].trim() : '',
-      'city': parts.length > 2 ? parts[2].trim() : '',
-      'state': parts.length > 3 ? parts[4].trim() : '', // Corrected here
-      'zip': parts.length > 4 ? parts[3].trim() : '', // Corrected here
-      'phone': _phoneController.text,
-      'type': 'Home', // Default type
-    };
   }
 
   bool _validateFields() {

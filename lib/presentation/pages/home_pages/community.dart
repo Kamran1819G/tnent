@@ -192,19 +192,59 @@ class _CommunityPostState extends State<CommunityPost> {
   bool _isLiked = false;
   int _likeCount = 0;
 
+
   @override
   void initState() {
     super.initState();
-    _storeFuture = _getStoreData();
+    _storeFuture = _getStoreData(forceRefresh: false);
     _likeCount = widget.post.likes;
     _checkIfLiked();
   }
 
-  Future<StoreModel> _getStoreData() async {
-    DocumentSnapshot storeDoc =
-        await _firestore.collection('Stores').doc(widget.post.storeId).get();
-    return StoreModel.fromFirestore(storeDoc);
+  @override
+  void didUpdateWidget(CommunityPost oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.post.storeId != widget.post.storeId) {
+      _refreshStoreData();
+    }
   }
+
+  Future<StoreModel> _getStoreData({bool forceRefresh = false}) async {
+    try {
+      DocumentSnapshot storeDoc;
+      if (forceRefresh) {
+        storeDoc = await _firestore
+            .collection('Stores')
+            .doc(widget.post.storeId)
+            .get(const GetOptions(source: Source.server));
+      } else {
+        // Try cache first, then server if needed
+        storeDoc = await _firestore
+            .collection('Stores')
+            .doc(widget.post.storeId)
+            .get(const GetOptions(source: Source.cache));
+
+        if (!storeDoc.exists || storeDoc.metadata.isFromCache) {
+          storeDoc = await _firestore
+              .collection('Stores')
+              .doc(widget.post.storeId)
+              .get(const GetOptions(source: Source.server));
+        }
+      }
+
+      return StoreModel.fromFirestore(storeDoc);
+    } catch (e) {
+      print('Error fetching store data: $e');
+      rethrow;
+    }
+  }
+
+  void _refreshStoreData() {
+    setState(() {
+      _storeFuture = _getStoreData(forceRefresh: true);
+    });
+  }
+
 
   Future<void> _checkIfLiked() async {
     final user = _auth.currentUser;
@@ -270,17 +310,28 @@ class _CommunityPostState extends State<CommunityPost> {
     return FutureBuilder<StoreModel>(
       future: _storeFuture,
       builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return _buildLoadingPlaceholder();
         }
 
+        if (snapshot.hasError) {
+          return _buildErrorWidget();
+        }
+
         if (!snapshot.hasData) {
-          return Container(); // ie, if the store is deleted in future, then its post will not be shown and blank container will be there.
+          return Container(); // Return an empty container if no data
         }
 
         final store = snapshot.data!;
         return _buildPostContent(store);
       },
+    );
+  }
+
+  Widget _buildErrorWidget() {
+    return Container(
+      padding: EdgeInsets.all(16),
+      child: Text('Error loading store data. Please try again later.'),
     );
   }
 

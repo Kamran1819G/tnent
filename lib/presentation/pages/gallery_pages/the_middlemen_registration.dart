@@ -82,7 +82,7 @@ class _TheMiddlemenState extends State<TheMiddlemen> {
                 ),
                 SizedBox(height: 30.h),
                 Text(
-                  "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                  "Join our platform as a middleman and become a vital part of our delivery network. Enjoy flexible hours, earn competitive rewards, and help bridge the gap between customers and their orders. Be the connection they rely on!",
                   style: TextStyle(
                     color: hexToColor('#727272'),
                     fontFamily: 'Poppins',

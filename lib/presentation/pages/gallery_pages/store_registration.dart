@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:pinput/pinput.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:tnent/core/helpers/url_utils.dart';
 import 'package:tnent/core/routes/app_routes.dart';
 import 'package:tnent/presentation/controllers/otp_controller.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
@@ -115,7 +116,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   bool _isLocationPage() {
     // Find the current page widget
     final currentPage = _pageController.page?.round() ?? 0;
-    final pageWidget = (context as Element).findRenderObject()?.parent as RenderBox?;
+    final pageWidget =
+        (context as Element).findRenderObject()?.parent as RenderBox?;
 
     if (pageWidget != null) {
       // Search for the specific text in the widget tree
@@ -159,7 +161,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         email: _emailController.text,
         logoUrl:
             "https://firebasestorage.googleapis.com/v0/b/tnennt-1e1f2.appspot.com/o/store_logos%2FFrame%20624956.jpg?alt=media&token=4e269627-50e6-465b-9a51-9d1622162413",
-        storeDomain: '${_storeDomainController.text}.tnent.com',
+        storeDomain: _storeDomainController.text,
         upiUsername: _upiUsernameController.text,
         upiId: _upiIdController.text,
         location: _locationController.text,
@@ -191,7 +193,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
       showSnackBar(context, 'Error registering store: $e');
     }
   }
-
 
   Future<void> _showLocationPermissionDialog() async {
     await showDialog(
@@ -234,8 +235,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     });
   }
 
-  Future<String> getCurrentLocation() async
-  {
+  Future<String> getCurrentLocation() async {
     LocationPermission permission;
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -249,7 +249,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         desiredAccuracy: LocationAccuracy.high);
 
     List<Placemark> placemarks =
-    await placemarkFromCoordinates(position.latitude, position.longitude);
+        await placemarkFromCoordinates(position.latitude, position.longitude);
 
     if (placemarks.isNotEmpty) {
       Placemark place = placemarks[0];
@@ -258,7 +258,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
       return 'No address available.';
     }
   }
-
 
   Future<void> _validateStoreDomain(String domain) async {
     final storeRef = FirebaseFirestore.instance.collection('Stores');
@@ -756,13 +755,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             SizedBox(width: 6.w),
                             GestureDetector(
                               onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => const WebViewScreen(
-                                            url:
-                                                'https://tnent-updated.vercel.app/legals',
-                                            title: 'Terms and Conditions')));
+                                Get.to(() => const WebViewScreen(
+                                      title:
+                                          'Legals | Terms of Service, Privacy Policy & more',
+                                      url: UrlUtils.legals,
+                                    ));
                               },
                               child: Text(
                                 'Terms and Conditions',
@@ -1371,7 +1368,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             minWidth: 40,
                           ),
                           suffixIcon: Icon(Icons.my_location),
-
                           suffixIconColor: Theme.of(context).primaryColor,
                           prefixIconColor: Theme.of(context).primaryColor,
                           filled: true,
@@ -1611,7 +1607,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               ),
                             ],
                           )),
-                      SizedBox(height: 100.h),
+                      SizedBox(height: 300.h),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -1635,7 +1631,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           ),
                         ],
                       ),
-                      // SizedBox(height: 30.h),
+                      SizedBox(height: 30.h),
                       Center(
                         child: GestureDetector(
                           onTap: () async {

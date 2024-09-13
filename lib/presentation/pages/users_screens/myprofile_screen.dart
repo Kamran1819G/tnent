@@ -48,13 +48,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
 
   Future<String?> fetchFeaturedFestivalImage() async {
     final doc = await FirebaseFirestore.instance
-        .collection('FeaturedFestivals')
-        .doc('featuredfestival')
+        .collection('Avatar')
+        .doc('avatar')
         .get();
-    final images = doc.data()?['images'] as List<dynamic>?;
-    return images?.isNotEmpty == true ? images!.first as String : null;
+    final image = doc.data()?['image'] as String?;
+    return image;
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

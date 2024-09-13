@@ -1,24 +1,27 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:confetti/confetti.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:screenshot/screenshot.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/presentation/controllers/checkoutController.dart';
+import 'package:tnent/presentation/pages/catalog_pages/purchase_screen.dart';
 import 'package:tnent/presentation/pages/home_screen.dart';
 import '../../../core/helpers/snackbar_utils.dart';
-import '../geofencing.dart';
 
 class CheckoutScreen extends StatefulWidget {
   List<Map<String, dynamic>> selectedItems;
@@ -41,18 +44,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _loadUserAddress();
     _noteController.addListener(_onNoteChanged);
   }
-  void _showLocationNotification() {
-    AwesomeNotifications().createNotification(
-      content: NotificationContent(
-        id: 10,
-        channelKey: 'basic_channel',
-        title: 'Location Out of Range',
-        body: 'We are not currently delivering to your location.',
-        notificationLayout: NotificationLayout.BigText,
-      ),
-    );
-  }
-
 
   Future<void> _loadUserAddress() async {
     final user = FirebaseAuth.instance.currentUser;
@@ -74,6 +65,36 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   void _onNoteChanged() {
     checkoutController.updateNote(_noteController.text);
   }
+
+  void _validateAndContinue() {
+    if (_userAddress == null) {
+      showSnackBar(context, 'Please add your address to continue');
+      return;
+    }
+
+    // Check if any required field in the address is empty
+    List<String> emptyFields = [];
+    if (_userAddress!['name']?.isEmpty ?? true) emptyFields.add('Name');
+    if (_userAddress!['phone']?.isEmpty ?? true) emptyFields.add('Phone');
+    if (_userAddress!['addressLine1']?.isEmpty ?? true) emptyFields.add('Address Line 1');
+    if (_userAddress!['zip']?.isEmpty ?? true) emptyFields.add('Pincode');
+    if (_userAddress!['city']?.isEmpty ?? true) emptyFields.add('City');
+    if (_userAddress!['state']?.isEmpty ?? true) emptyFields.add('State');
+
+    if (emptyFields.isNotEmpty) {
+      showSnackBar(context, 'Please fill in the following fields: ${emptyFields.join(", ")}');
+      return;
+    }
+
+    // If all validations pass, navigate to the summary screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SummaryScreen(),
+      ),
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -404,46 +425,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             ),
             Center(
               child: GestureDetector(
-                onTap: () async {
-                  if (_userAddress == null) {
-                    showSnackBar(context, 'Please add your address to continue');
-                    return;
-                  }
-
-                  // Show loading indicator
-                  showDialog(
-                    context: context,
-                    barrierDismissible: false,
-                    builder: (BuildContext context) {
-                      return const Center(child: CircularProgressIndicator());
-                    },
-                  );
-
-                  try {
-                    bool isInAllowedArea = await GeofencingService.isUserInAllowedArea();
-
-                    // Hide loading indicator
-                    Navigator.of(context).pop();
-
-                    if (!isInAllowedArea) {
-                      _showLocationNotification();
-                      showSnackBar(context, 'We are not currently delivering to your location.');
-                      return;
-                    }
-
-                    // If the location is allowed, proceed to the summary screen
-                    Navigator.push(context,MaterialPageRoute(
-                        builder: (context) => SummaryScreen(),
-                      ),
-                    );
-                  }
-                  catch (e) {
-                    // Hide loading indicator
-                    Navigator.of(context).pop();
-                    print('Error checking location: $e');
-                    showSnackBar(context, 'Unable to verify your location. Please try again.');
-                  }
-                },
+                onTap: _validateAndContinue,
                 child: Container(
                   height: 95.h,
                   width: 470.w,
@@ -456,10 +438,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     child: Text(
                       'Continue',
                       style: TextStyle(
-                        color: Colors.white,
-                        fontFamily: 'Gotham',
-                        fontSize: 25.sp,
-                      ),
+                          color: Colors.white,
+                          fontFamily: 'Gotham',
+                          fontSize: 25.sp),
                     ),
                   ),
                 ),
@@ -484,15 +465,16 @@ class ChangeAddressScreen extends StatefulWidget {
 class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
   final _formKey = GlobalKey<FormState>();
   String addressType = 'Home';
+  String? selectedPincode;
 
   late TextEditingController _nameController;
   late TextEditingController _phoneController;
   late TextEditingController _addressLine1Controller;
   late TextEditingController _addressLine2Controller;
-  late TextEditingController _zipController;
   late TextEditingController _cityController;
   late TextEditingController _stateController;
 
+  final List<String> pincodes = ['788710', '788711', '788712'];
   @override
   void initState() {
     super.initState();
@@ -504,13 +486,13 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
         text: widget.existingAddress?['addressLine1'] ?? '');
     _addressLine2Controller = TextEditingController(
         text: widget.existingAddress?['addressLine2'] ?? '');
-    _zipController =
-        TextEditingController(text: widget.existingAddress?['zip'] ?? '');
     _cityController =
         TextEditingController(text: widget.existingAddress?['city'] ?? '');
     _stateController =
         TextEditingController(text: widget.existingAddress?['state'] ?? '');
     addressType = widget.existingAddress?['type'] ?? 'Home';
+
+    selectedPincode =null;
   }
 
   Future<void> _saveAddress() async {
@@ -523,11 +505,19 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
         'phone': _phoneController.text,
         'addressLine1': _addressLine1Controller.text,
         'addressLine2': _addressLine2Controller.text,
-        'zip': _zipController.text,
+        'zip': selectedPincode,
         'city': _cityController.text,
         'state': _stateController.text,
         'type': addressType,
       };
+
+      // Check if any field is empty
+      if (addressData.values.any((value) => value == null || value.isEmpty)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Please fill all required fields')),
+        );
+        return;
+      }
 
       try {
         await FirebaseFirestore.instance
@@ -538,8 +528,6 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
         });
         Navigator.pop(context, addressData);
       } catch (e) {
-        // Handle error (show a snackbar, for example)
-
         showSnackBar(context, 'Failed to save address: $e');
       }
     }
@@ -675,16 +663,41 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                       Container(
                         margin: EdgeInsets.symmetric(horizontal: 22.w),
                         width: 340.w,
-                        child: _buildTextFormField(
-                          controller: _zipController,
-                          labelText: 'Pincode',
-                          keyboardType: TextInputType.number,
+                        child: DropdownButtonFormField<String>(
+                          value: selectedPincode,
+                          decoration: InputDecoration(
+                            labelText: 'Pincode',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide:
+                                  BorderSide(color: hexToColor('#2A2A2A')),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide:
+                                  BorderSide(color: hexToColor('#2A2A2A')),
+                            ),
+                          ),
+                          items: [
+                            DropdownMenuItem<String>(
+                              value: null,
+                              child: Text( 'select pincode'),
+                            ),
+                            ...pincodes.map(( String pincode) {
+                              return DropdownMenuItem<String>(
+                                value: pincode,
+                                child: Text(pincode),
+                              );
+                            }).toList(),
+                          ],
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedPincode = newValue;
+                            });
+                          },
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Pincode is required';
-                            }
-                            if (!RegExp(r'^[0-9]{6}$').hasMatch(value)) {
-                              return 'Enter a valid pincode';
+                              return 'Please select a pincode';
                             }
                             return null;
                           },
@@ -1057,7 +1070,7 @@ class SummaryItemTile extends StatelessWidget {
                     borderRadius: BorderRadius.circular(6.r),
                     image: DecorationImage(
                       image: NetworkImage(item['productImage']),
-                      fit: BoxFit.fill,
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
@@ -1954,11 +1967,14 @@ class TransactionScreen extends StatefulWidget {
 class _TransactionScreenState extends State<TransactionScreen> {
   late ConfettiController _confettiController;
   final CheckoutController checkoutController = Get.find<CheckoutController>();
+  ScreenshotController screenshotController = ScreenshotController();
 
   GlobalKey _globalKey = GlobalKey();
   bool isGreeting = false;
   late Map<String, dynamic> _userAddress;
   bool _isLoading = true;
+  bool _isRemovingProduct = false;
+  String _productIdToRemove = '';
 
   @override
   void initState() {
@@ -1970,13 +1986,12 @@ class _TransactionScreenState extends State<TransactionScreen> {
     _confettiController =
         ConfettiController(duration: const Duration(seconds: 5));
     _userAddress = await _loadUserAddress();
-    /*processOrder();*/
     _isLoading = false;
     makeIsGreetingTrue();
     processOrder(checkoutController.items);
     setState(() {});
-
     sendOrderNotification();
+    _startProductRemoval();
   }
 
   final user = FirebaseAuth.instance.currentUser!;
@@ -2048,6 +2063,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
             'method': 'Cash on Delivery',
             'status': 'Pending',
           },
+          'isOrderNew': true,
         };
 
         batch.set(orderRef, orderData);
@@ -2077,6 +2093,43 @@ class _TransactionScreenState extends State<TransactionScreen> {
     }
   }
 
+  void _startProductRemoval() {
+    if (checkoutController.items.isNotEmpty) {
+      setState(() {
+        _isRemovingProduct = true;
+        _productIdToRemove = checkoutController.items.first['productId'];
+      });
+
+      // Simulate a delay before removing the product
+      Future.delayed(const Duration(seconds: 2), () {
+        _removeProductFromCart(_productIdToRemove);
+      });
+    }
+  }
+
+  void _removeProductFromCart(String productId) async {
+    try {
+      String userId = FirebaseAuth.instance.currentUser!.uid;
+      DocumentReference userRef = FirebaseFirestore.instance.collection('Users').doc(userId);
+      DocumentSnapshot userDoc = await userRef.get();
+      List<dynamic> currentCart = userDoc.get('cart') ?? [];
+      currentCart.removeWhere((item) => item['productId'] == productId);
+      await userRef.update({'cart': currentCart});
+      setState(() {
+        checkoutController.items.removeWhere((item) => item['productId'] == productId);
+        _isRemovingProduct = false;
+      });
+      if (checkoutController.items.isNotEmpty) {
+        _startProductRemoval();
+      }
+    } catch (e) {
+      print('Error removing product from cart: $e');
+      setState(() {
+        _isRemovingProduct = false;
+      });
+    }
+  }
+
   Future<void> sendOrderNotification() async {
     final firestore = FirebaseFirestore.instance;
 
@@ -2101,6 +2154,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           'orderId': item['orderId'],
         },
         'timestamp': FieldValue.serverTimestamp(),
+        'IsUnRead': true,
       });
 
       // Show local notification
@@ -2152,6 +2206,41 @@ class _TransactionScreenState extends State<TransactionScreen> {
     });
   }
 
+  Future<void> _captureAndSaveImage() async {
+    try {
+      // Capture the screenshot
+      final Uint8List? imageBytes = await screenshotController.capture();
+
+      if (imageBytes != null) {
+        // Get the external storage directory (Pictures folder)
+        final directory =
+            Directory('/storage/emulated/0/Pictures'); // Or use DCIM folder
+
+        if (!(await directory.exists())) {
+          await directory.create(
+              recursive: true); // Create folder if it doesn't exist
+        }
+
+        // Create a unique filename with timestamp
+        final String fileName =
+            'transaction_receipt_${DateTime.now().millisecondsSinceEpoch}.png';
+
+        // Create the file path
+        final String filePath = '${directory.path}/$fileName';
+
+        // Write the file
+        final File file = File(filePath);
+        await file.writeAsBytes(imageBytes);
+
+        // Show a success message to the user
+        showSnackBar(context, 'Receipt saved to: $filePath');
+      }
+    } catch (e) {
+      print('Error saving image: $e');
+      showSnackBar(context, 'Failed to save receipt');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
@@ -2159,91 +2248,96 @@ class _TransactionScreenState extends State<TransactionScreen> {
         body: Center(child: CircularProgressIndicator()),
       );
     }
+    if (_isRemovingProduct) {
+    }
     if (isGreeting) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // _buildStoreRegistrationPageHeader(
-              //     context, _pageController, _currentPageIndex),
-              SizedBox(height: 100.h),
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  ConfettiWidget(
-                    confettiController: _confettiController,
-                    blastDirectionality: BlastDirectionality.explosive,
-                    shouldLoop: false,
-                    colors: [Theme.of(context).primaryColor],
-                  ),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(50.r),
-                    child: Image.asset(
-                      'assets/congratulation.png',
-                      width: 425.w,
-                      height: 340.h,
+      return PopScope(
+        canPop: false,
+        child: Scaffold(
+          body: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // _buildStoreRegistrationPageHeader(
+                //     context, _pageController, _currentPageIndex),
+                SizedBox(height: 100.h),
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    ConfettiWidget(
+                      confettiController: _confettiController,
+                      blastDirectionality: BlastDirectionality.explosive,
+                      shouldLoop: false,
+                      colors: [Theme.of(context).primaryColor],
                     ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(50.r),
+                      child: Image.asset(
+                        'assets/congratulation.png',
+                        width: 425.w,
+                        height: 340.h,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 200.h),
+                SizedBox(
+                  width: 430.w,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Congratulations!',
+                        style: TextStyle(
+                          color: hexToColor('#2A2A2A'),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 42.sp,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 20.h),
+                      Text(
+                        'Your Order has been placed',
+                        style: TextStyle(
+                          color: hexToColor('#636363'),
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                          fontSize: 28.sp,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-              SizedBox(height: 200.h),
-              SizedBox(
-                width: 430.w,
-                child: Column(
+                ),
+                SizedBox(height: 300.h),
+                Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Congratulations!',
-                      style: TextStyle(
-                        color: hexToColor('#2A2A2A'),
-                        fontWeight: FontWeight.w500,
-                        fontSize: 42.sp,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 20.h),
-                    Text(
-                      'Your Order has been placed',
+                      'Hurray! Now we recommend you to',
                       style: TextStyle(
                         color: hexToColor('#636363'),
                         fontFamily: 'Poppins',
                         fontWeight: FontWeight.w500,
-                        fontSize: 28.sp,
+                        fontSize: 17.sp,
                       ),
-                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      'Join Our Tnent Community',
+                      style: TextStyle(
+                        color: Theme.of(context).primaryColor,
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w500,
+                        fontSize: 17.sp,
+                      ),
                     ),
                   ],
                 ),
-              ),
-              SizedBox(height: 300.h),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'Hurray! Now we recommend you to',
-                    style: TextStyle(
-                      color: hexToColor('#636363'),
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 17.sp,
-                    ),
-                  ),
-                  Text(
-                    'Join Our Tnent Community',
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.w500,
-                      fontSize: 17.sp,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );
@@ -2274,6 +2368,17 @@ class _TransactionScreenState extends State<TransactionScreen> {
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
                   child: Row(
                     children: [
+                      GestureDetector(
+                        onTap: () {
+                          Get.to(const PurchaseScreen());
+                        },
+                        child: CircleAvatar(
+                          radius: 40.w,
+                          backgroundColor: Colors.grey[100],
+                          child: Image.asset('assets/icons/track_order.png',
+                              height: 34.h, width: 34.w),
+                        ),
+                      ),
                       const Spacer(),
                       IconButton(
                         style: ButtonStyle(
@@ -2291,8 +2396,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                     ],
                   ),
                 ),
-                RepaintBoundary(
-                  key: _globalKey,
+                Screenshot(
+                  controller: screenshotController,
                   child: Stack(
                     children: [
                       Container(
@@ -2476,6 +2581,13 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                               fontFamily: 'Gotham',
                                               fontWeight: FontWeight.w500,
                                             ),
+                                          ),
+                                          SizedBox(width: 24.w),
+                                          GestureDetector(
+                                            onTap: _captureAndSaveImage,
+                                            child: Image.asset(
+                                                'assets/icons/download.png',
+                                                height: 25.h),
                                           ),
                                         ],
                                       ),

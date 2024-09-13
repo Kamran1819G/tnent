@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,12 +9,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
-import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/models/store_update_model.dart';
 import 'package:tnent/models/user_model.dart';
-import 'package:tnent/presentation/pages/accept_reject_order_screen.dart';
 import 'package:tnent/presentation/pages/catalog_pages/cart_screen.dart';
 import 'package:tnent/presentation/pages/explore_screen.dart';
 import 'package:tnent/presentation/pages/notification_screen.dart';
@@ -40,6 +37,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   late TabController _tabController;
   int _selectedIndex = 0;
   bool isNewNotification = true;
+  String? featuredFestivalImage;
 
   List<Map<String, dynamic>> categories = [
     {
@@ -78,7 +76,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     _fetchFeaturedStores();
     _fetchFeaturedProducts();
     _fetchUpdates();
-
+    _fetchFeaturedFestivalImage();
     setState(() {
       firstName = widget.currentUser.firstName;
       lastName = widget.currentUser.lastName;
@@ -119,36 +117,52 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     }
   }
 
+  Future<void> _fetchFeaturedFestivalImage() async {
+    final image = await fetchFeaturedFestivalImage();
+    setState(() {
+      featuredFestivalImage = image;
+    });
+  }
+
+  Future<String?> fetchFeaturedFestivalImage() async {
+    final doc = await FirebaseFirestore.instance
+        .collection('Avatar')
+        .doc('avatar')
+        .get();
+    final image = doc.data()?['image'] as String?;
+    return image;
+  }
+
   Stream<bool> _getNewNotificationsStream() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return Stream.value(false);
 
-    return Stream.periodic(const Duration(seconds: 2), (_) => null)
-        .asyncMap((_) => _checkForNewNotifications(user.uid))
-        .distinct();
+    return FirebaseFirestore.instance
+        .collection('Users')
+        .doc(user.uid)
+        .collection('notifications')
+        .where('IsUnRead', isEqualTo: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.isNotEmpty);
   }
 
-  Future<bool> _checkForNewNotifications(String userId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final lastCheckTime = prefs.getInt('lastNotificationCheck') ?? 0;
+  Future<void> _markAllNotificationsAsRead() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final batch = FirebaseFirestore.instance.batch();
+      final snapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(user.uid)
+          .collection('notifications')
+          .where('IsUnRead', isEqualTo: true)
+          .get();
 
-    final snapshot = await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(userId)
-        .collection('notifications')
-        .where('createdAt',
-            isGreaterThan: Timestamp.fromMillisecondsSinceEpoch(lastCheckTime))
-        .get();
+      for (var doc in snapshot.docs) {
+        batch.update(doc.reference, {'IsUnRead': false});
+      }
 
-    final hasNewNotifications = snapshot.docs.isNotEmpty;
-
-    if (hasNewNotifications) {
-      // Update the last check time
-      await prefs.setInt(
-          'lastNotificationCheck', DateTime.now().millisecondsSinceEpoch);
+      await batch.commit();
     }
-
-    return hasNewNotifications;
   }
 
   String getGreeting() {
@@ -296,7 +310,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   Map<String, List<StoreUpdateModel>> groupedUpdates = {};
-
   void sortInGroupedupdates() {
     for (var update in updates) {
       if (groupedUpdates.containsKey(update.storeName)) {
@@ -315,7 +328,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           child: Container(
             // width: 350 * (235 / 342),
             height: 350,
-            color: Colors.grey,
+            color: Colors.red,
             child: Center(
               child: Text(text),
             ),
@@ -398,9 +411,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                               builder: (context) =>
                                   const NotificationScreen()));
                       // After returning from NotificationScreen, update the last check time
-                      final prefs = await SharedPreferences.getInstance();
-                      await prefs.setInt('lastNotificationCheck',
-                          DateTime.now().millisecondsSinceEpoch);
+                      await _markAllNotificationsAsRead();
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(1.5),
@@ -427,12 +438,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
                 child: CircleAvatar(
                   radius: 25.0,
-                  backgroundImage: widget.currentUser.photoURL != null
+                  backgroundImage: featuredFestivalImage!= null
                       ? CachedNetworkImageProvider(
-                          widget.currentUser.photoURL ?? ' ')
+                          featuredFestivalImage!)
                       : null,
                   backgroundColor: Colors.transparent,
-                  child: widget.currentUser.photoURL == null
+                  child: featuredFestivalImage == null
                       ? Image.asset(
                           'assets/icons/profile_pic.png',
                           fit: BoxFit.cover,
@@ -554,38 +565,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       }).toList(),
                     ),
                   ),
-        SizedBox(
-          child: CarouselSlider(
-            options: CarouselOptions(
-              autoPlay: true,
-              viewportFraction: 1.0,
-              enlargeCenterPage: true,
-            ),
-            items: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Image.asset(
-                  'assets/categories2/vbnm.png',
-                  scale: 0.8,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Image.asset(
-                  'assets/categories2/dfgn.png',
-                  scale: 0.8,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Image.asset(
-                  'assets/categories2/dfghj.png',
-                  scale: 0.8,
-                ),
-              ),
-            ],
-          ),
-        ),
+        const FirestoreCarouselSlider(),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -722,27 +702,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         ),
 
         SizedBox(height: 30.h),
-
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: CarouselSlider(
-            options: CarouselOptions(
-              aspectRatio: 235 / 342,
-              // height: 350,
-              viewportFraction: 1,
-              autoPlay: true,
-              enableInfiniteScroll: false,
-              enlargeCenterPage: false,
-            ),
-            items: List.generate(
-              4,
-              (index) => underWidget(index.toString()),
-            ),
-          ),
-        ),
-
+        const FirestoreUnderWidget(),
         SizedBox(height: 50.h),
-
         // Feature Store Section
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 18.w),
@@ -942,7 +903,7 @@ class StoreTile extends StatelessWidget {
                 borderRadius: BorderRadius.circular(23.r),
                 child: Image.network(
                   store.logoUrl,
-                  fit: BoxFit.fill,
+                  fit: BoxFit.cover,
                   height: 120.h,
                   width: 120.w,
                 )),
@@ -1242,6 +1203,118 @@ class UpdateTile extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+class FirestoreCarouselSlider extends StatelessWidget {
+  const FirestoreCarouselSlider({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('Banners')
+          .doc('banner-1')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const Center(child: Text('No banner data available'));
+        }
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final List<String> images = List<String>.from(data['images'] ?? []);
+        if (images.isEmpty) {
+          return const Center(child: Text('No images available'));
+        }
+        return SizedBox(
+          child: CarouselSlider(
+            options: CarouselOptions(
+              autoPlay: true,
+              viewportFraction: 1.0,
+              enlargeCenterPage: true,
+            ),
+            items: images.map((imageUrl) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                ),
+              );
+            }).toList(),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class FirestoreUnderWidget extends StatelessWidget {
+  const FirestoreUnderWidget({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('Banners')
+          .doc('banner-2')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const Center(child: Text('No banner data available'));
+        }
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final List<String> images = List<String>.from(data['images'] ?? []);
+        if (images.isEmpty) {
+          return const Center(child: Text('No images available'));
+        }
+        return CarouselSlider(
+          options: CarouselOptions(
+            aspectRatio: 235 / 342,
+            viewportFraction: 1,
+            autoPlay: true,
+            enableInfiniteScroll: false,
+            enlargeCenterPage: false,
+          ),
+          items: images.map((imageUrl) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 13),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    height: 350,
+                    color: Colors.grey[300],
+                    child: const Center(child: CircularProgressIndicator()),
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    height: 350,
+                    color: Colors.red,
+                    child: const Center(child: Icon(Icons.error)),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
     );
   }
 }

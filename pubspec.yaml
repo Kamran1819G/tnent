@@ -77,6 +77,7 @@ dependencies:
   flutter_email_sender: ^6.0.3
   mailer: ^6.1.2
   smtpd: ^0.2.0
+  screenshot: ^3.0.0
 
 dev_dependencies:
   flutter_launcher_icons: "^0.13.1"
