@@ -48,7 +48,8 @@ void showSnackBarWithAction(BuildContext context,
     Color confirmBtnColor = Colors.black,
     double buttonTextFontsize = 16,
     Color bgColor = Colors.white,
-    QuickAlertType quickAlertType = QuickAlertType.confirm}) {
+
+      QuickAlertType quickAlertType = QuickAlertType.confirm}) {
   QuickAlert.show(
     showCancelBtn: true,
     context: context,

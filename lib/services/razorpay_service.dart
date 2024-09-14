@@ -7,10 +7,9 @@ class RazorpayService {
   late Razorpay _razorpay;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  double _amount=0.0;
+  double _amount = 0.0;
   Function(PaymentSuccessResponse)? _onPaymentCompleted;
   Function(PaymentFailureResponse)? _onPaymentFailed;
-
 
   RazorpayService() {
     _razorpay = Razorpay();
@@ -27,9 +26,19 @@ class RazorpayService {
     _onPaymentFailed = callback;
   }
 
-  Future<void> openCheckout(double amount, BuildContext context, String storeId, List<Map<String, dynamic>> items) async {
-    // Fetch store details
+  Future<void> openCheckout(
+      double amount,
+      BuildContext context,
+      String storeId,
+      List<Map<String, dynamic>> items, {
+        required Function(PaymentSuccessResponse) onSuccess,
+        required Function(PaymentFailureResponse) onError,
+      }) async {
     _amount = amount;
+    _onPaymentCompleted = onSuccess;
+    _onPaymentFailed = onError;
+
+    // Fetch store details
     DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(storeId).get();
     String storeName = storeDoc['name'] ?? '';
 
@@ -54,6 +63,7 @@ class RazorpayService {
       _razorpay.open(options);
     } catch (e) {
       debugPrint('Error: ${e.toString()}');
+      onError(PaymentFailureResponse(0, 'Error opening Razorpay checkout', e.toString() as Map?));
     }
   }
 
@@ -87,8 +97,6 @@ class RazorpayService {
             'method': 'Razorpay',
           });
 
-          /*await updatePaymentField(orderData['orderId'], 'Paid');
-
           // Update order status
           await orderDoc.reference.update({
             'payment': {
@@ -96,13 +104,16 @@ class RazorpayService {
               'status': 'Paid',
               'paymentId': response.paymentId,
             },
-          });*/
+          });
+        }
+
+        if (_onPaymentCompleted != null) {
+          _onPaymentCompleted!(response);
         }
       } catch (e) {
         print('Error saving payment details: ${e.toString()}');
       }
     }
-    // Handle successful payment (e.g., show confirmation)
   }
 
   void _handlePaymentError(PaymentFailureResponse response) async {
@@ -135,7 +146,6 @@ class RazorpayService {
             'timestamp': FieldValue.serverTimestamp(),
             'method': 'Razorpay',
           });
-
         }
         if (_onPaymentFailed != null) {
           _onPaymentFailed!(response);
@@ -144,7 +154,6 @@ class RazorpayService {
         print('Error saving failed payment details: ${e.toString()}');
       }
     }
-    // Handle payment failure (e.g., show error message to user)
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {

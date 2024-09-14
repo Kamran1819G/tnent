@@ -22,6 +22,7 @@ import 'package:tnent/models/store_model.dart';
 import 'package:tnent/presentation/controllers/checkoutController.dart';
 import 'package:tnent/presentation/pages/catalog_pages/purchase_screen.dart';
 import 'package:tnent/presentation/pages/home_screen.dart';
+import 'package:toastification/toastification.dart';
 import '../../../core/helpers/snackbar_utils.dart';
 import '../../../services/razorpay_service.dart';
 
@@ -1566,15 +1567,56 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                     onTap: () {
                       if (checkoutController.items.isNotEmpty) {
                         String storeId = checkoutController.items.first['storeId'];
-                        razorpayService.openCheckout(
-                            checkoutController.totalAmount,
-                            context,
-                            storeId,
-                            checkoutController.items
+                        showSnackBarWithAction(
+                          context,
+                          text: 'Do you want to proceed with online payment?',
+                          confirmBtnText: 'Continue',
+                          buttonTextFontsize: 11,
+                          cancelBtnText: 'Cancel',
+                          quickAlertType: QuickAlertType.confirm,
+                          action: () {
+                            // Close the confirmation dialog
+                            Navigator.of(context).pop();
+
+                            // Show circular progress bar
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (BuildContext context) {
+                                return WillPopScope(
+                                  onWillPop: () async => false,
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              },
+                            );
+
+                            // Proceed with payment
+                            razorpayService.openCheckout(
+                              checkoutController.totalAmount,
+                              context,
+                              storeId,
+                              checkoutController.items,
+                              onSuccess: (PaymentSuccessResponse response) {
+                                Navigator.of(context).pop(); // Dismiss the progress indicator
+                                _navigateToTransactionScreen(
+                                    isOnlinePayment: true,
+                                    paymentId: response.paymentId
+                                );
+                              },
+                              onError: (PaymentFailureResponse response) {
+                                Navigator.of(context).pop(); // Dismiss the progress indicator
+                                _onPaymentFailed(response);
+                              },
+                            );
+                          },
                         );
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Your cart is empty')),
+                        showSnackBar(
+                          context,
+                          'Your cart is empty',
+                          toastificationType: ToastificationType.warning,
                         );
                       }
                     },
