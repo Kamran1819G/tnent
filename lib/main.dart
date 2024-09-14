@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,6 +21,11 @@ import 'package:tnent/presentation/controllers/notification_controller.dart';
 import 'firebase_options.dart';
 import 'package:get/get.dart';
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  await NotificationController.firebaseMessagingBackgroundHandler(message);
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await UniversalLinking.init();
@@ -32,9 +38,10 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  
+
   FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
 
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   await NotificationController.initialize();
 
@@ -42,7 +49,6 @@ Future<void> main() async {
   final onboarding = prefs.getBool('onboarding') ?? false;
   runApp(MyApp(onboarding: onboarding));
 }
-
 
 class MyApp extends StatefulWidget {
   final bool? onboarding;

@@ -2,6 +2,7 @@ import 'dart:typed_data';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -131,7 +132,8 @@ class NotificationController {
       _handleMessage(message);
     });
 
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
     RemoteMessage? initialMessage =
         await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
@@ -196,7 +198,7 @@ class NotificationController {
           category: NotificationCategory.Call,
           autoDismissible: false,
           locked: true,
-          fullScreenIntent: true,
+          fullScreenIntent: false,
           wakeUpScreen: true,
           notificationLayout: NotificationLayout.Default,
           payload: {
@@ -304,8 +306,9 @@ class NotificationController {
   }
 
   @pragma('vm:entry-point')
-  static Future<void> _firebaseMessagingBackgroundHandler(
+  static Future<void> firebaseMessagingBackgroundHandler(
       RemoteMessage message) async {
+    await Firebase.initializeApp();
     await initialize();
     await _handleMessage(message);
   }
