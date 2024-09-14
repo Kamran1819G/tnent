@@ -36,15 +36,17 @@ class NotificationController {
             channelName: 'New Orders',
             channelGroupKey: 'store_channel_group',
             channelDescription: 'New order notifications for store owners',
-            playSound: true,
             defaultRingtoneType: DefaultRingtoneType.Ringtone,
             enableVibration: true,
+            enableLights: true,
+            playSound: true,
             defaultColor: const Color(0xFF9D50DD),
             ledColor: const Color(0xFF9D50DD),
             importance: NotificationImportance.Max,
+            criticalAlerts: true,
             channelShowBadge: true,
             onlyAlertOnce: false,
-            criticalAlerts: true,
+            locked: true,
           ),
 
           NotificationChannel(
@@ -118,20 +120,24 @@ class NotificationController {
     );
 
     // Request FCM token on app start
-    await _firebaseMessaging.requestPermission();
+    await _firebaseMessaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      criticalAlert: true,
+    );
     String? token = await _firebaseMessaging.getToken();
     if (token != null) {
       await _storeFcmToken(token);
     }
 
+    // Set up message handlers
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       _handleMessage(message);
     });
-
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       _handleMessage(message);
     });
-
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
     RemoteMessage? initialMessage =
@@ -196,10 +202,10 @@ class NotificationController {
           title: message.notification?.title,
           body: message.notification?.body,
           category: NotificationCategory.Call,
-          autoDismissible: false,
-          locked: true,
-          fullScreenIntent: false,
           wakeUpScreen: true,
+          fullScreenIntent: true,
+          autoDismissible: false,
+          criticalAlert: true,
           notificationLayout: NotificationLayout.Default,
           payload: {
             'orderId': message.data['orderId'],
