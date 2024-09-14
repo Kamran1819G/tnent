@@ -1933,13 +1933,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
   void _navigateToHomeScreen() {
     checkoutController.clear();
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
-      (Route<dynamic> route) => false,
-    );
-
     _startProductRemoval();
+    Get.offAll(() => const HomeScreen());
   }
 
   Future<String> _downloadAndSaveFile(String url, String fileName) async {
