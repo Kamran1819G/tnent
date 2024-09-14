@@ -120,20 +120,24 @@ class NotificationController {
     );
 
     // Request FCM token on app start
-    await _firebaseMessaging.requestPermission();
+    await _firebaseMessaging.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      criticalAlert: true,
+    );
     String? token = await _firebaseMessaging.getToken();
     if (token != null) {
       await _storeFcmToken(token);
     }
 
+    // Set up message handlers
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       _handleMessage(message);
     });
-
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       _handleMessage(message);
     });
-
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
     RemoteMessage? initialMessage =
