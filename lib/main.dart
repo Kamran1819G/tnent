@@ -39,11 +39,11 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  await NotificationController.initialize();
+
   FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  await NotificationController.initialize();
 
   final prefs = await SharedPreferences.getInstance();
   final onboarding = prefs.getBool('onboarding') ?? false;
