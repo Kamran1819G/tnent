@@ -364,10 +364,10 @@ class NotificationController {
             ),
           );
         } else {
+          await _navigateToAcceptRejectScreen(orderId);
+
           // Dismiss the notification
           await AwesomeNotifications().cancel(receivedAction.id!);
-
-          await _navigateToAcceptRejectScreen(orderId);
         }
       }
     }
