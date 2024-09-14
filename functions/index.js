@@ -84,6 +84,16 @@ exports.sendOrderNotificationToStoreOwner = functions.firestore
           const message = {
             token: fcmToken,
             notification: {title, body},
+            android: {
+              notification: {
+                channelId: data.channelKey,
+                priority: "high",
+                // sound: "res_custom_notification",
+                defaultSound: true,
+                defaultVibrateTimings: true,
+                notificationPriority: "PRIORITY_MAX",
+              },
+            },
             data: {...data, orderId},
           };
 

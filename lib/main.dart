@@ -6,20 +6,22 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/core/routes/app_pages.dart';
 import 'package:tnent/core/routes/app_routes.dart';
+import 'package:tnent/dependency_injection.dart';
+import 'package:tnent/presentation/controllers/notification_controller.dart';
 import 'package:tnent/presentation/controllers/permission_controller.dart';
 import 'package:tnent/services/context_utility.dart';
 import 'package:tnent/services/external_linking_services/universal_linking.dart';
-import 'package:tnent/presentation/controllers/notification_controller.dart';
+
 import 'firebase_options.dart';
-import 'package:get/get.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -38,8 +40,12 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  DependencyInjection.init();
 
   await NotificationController.initialize();
+
+// TODO: import the pckgs my import throws error
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
 
   FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
 
