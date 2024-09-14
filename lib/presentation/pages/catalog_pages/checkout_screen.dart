@@ -1176,7 +1176,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
     super.initState();
     _fetchStoreDetails();
     _generateOrderIds();
-
   }
 
   Future<void> _fetchStoreDetails() async {
@@ -1440,7 +1439,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
   }
 }
 
-
 class PaymentOptionScreen extends StatefulWidget {
   Map<String, StoreModel> storeDetails;
 
@@ -1587,7 +1585,17 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                     subtitle: 'Pay at your doorstep',
                     icon: Icons.money,
                     onTap: () {
-                      _navigateToTransactionScreen(isOnlinePayment: false);
+                      showSnackBarWithAction(
+                        context,
+                        text: 'Do you want to continue with Cash on Delivery?',
+                        confirmBtnText: 'Continue 💵',
+                        buttonTextFontsize: 11,
+                        cancelBtnText: 'Cancel',
+                        quickAlertType: QuickAlertType.confirm,
+                        action: () {
+                          _navigateToTransactionScreen(isOnlinePayment: false);
+                        },
+                      );
                     },
                   ),
                 ],
@@ -1810,7 +1818,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
       DocumentReference userRef = FirebaseFirestore.instance.collection('Users').doc(userId);
       DocumentSnapshot userDoc = await userRef.get();
       List<dynamic> currentCart = userDoc.get('cart') ?? [];
-      currentCart.removeWhere((item) => item['productId'] == productId);
+      currentCart.removeWhere((item) => item['productId']
+ == productId);
       await userRef.update({'cart': currentCart});
       setState(() {
         checkoutController.items.removeWhere((item) => item['productId'] == productId);
@@ -1948,6 +1957,19 @@ class _TransactionScreenState extends State<TransactionScreen> {
     if (_isRemovingProduct) {
     }
     if (isGreeting) {
+      return _buildGreetingScreen();
+    }
+    if (_userAddress == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text('Error: User address not found'),
+        ),
+      );
+    }
+    return _buildTransactionScreen();
+  }
+
+   Widget _buildGreetingScreen() {
       return PopScope(
         canPop: false,
         child: Scaffold(
@@ -2039,13 +2061,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
         ),
       );
     }
-    if (_userAddress == null) {
-      return const Scaffold(
-        body: Center(
-          child: Text('Error: User address not found'),
-        ),
-      );
-    }
+
+  Widget _buildTransactionScreen() {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
