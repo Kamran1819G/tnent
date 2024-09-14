@@ -13,6 +13,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:quickalert/quickalert.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
@@ -77,15 +78,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     List<String> emptyFields = [];
     if (_userAddress!['name']?.isEmpty ?? true) emptyFields.add('Name');
     if (_userAddress!['phone']?.isEmpty ?? true) emptyFields.add('Phone');
-    if (_userAddress!['addressLine1']?.isEmpty ?? true)
-      emptyFields.add('Address Line 1');
+    if (_userAddress!['addressLine1']?.isEmpty ?? true) emptyFields.add('Address Line 1');
     if (_userAddress!['zip']?.isEmpty ?? true) emptyFields.add('Pincode');
     if (_userAddress!['city']?.isEmpty ?? true) emptyFields.add('City');
     if (_userAddress!['state']?.isEmpty ?? true) emptyFields.add('State');
 
     if (emptyFields.isNotEmpty) {
-      showSnackBar(context,
-          'Please fill in the following fields: ${emptyFields.join(", ")}');
+      showSnackBar(context, 'Please fill in the following fields: ${emptyFields.join(", ")}');
       return;
     }
 
@@ -97,6 +96,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -332,7 +332,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   border:
-                                      Border.all(color: hexToColor('#E3E3E3')),
+                                  Border.all(color: hexToColor('#E3E3E3')),
                                   borderRadius: BorderRadius.circular(50.r),
                                 ),
                                 child: Center(
@@ -379,7 +379,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               counterStyle: TextStyle(
                                   fontFamily: 'Poppins', fontSize: 6)),
                           maxLines:
-                              null, // Increase the max lines for a larger in
+                          null, // Increase the max lines for a larger in
                           maxLength: 200,
                           cursorColor: Colors.grey,
                         ),
@@ -392,7 +392,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             SizedBox(height: 16.h),
             Expanded(
               child: Obx(
-                () => ListView.builder(
+                    () => ListView.builder(
                   itemCount: checkoutController.items.length,
                   itemBuilder: (context, index) {
                     return CheckoutItemTile(
@@ -415,7 +415,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     style: TextStyle(fontSize: 26.sp),
                   ),
                   Obx(
-                    () => Text(
+                        () => Text(
                       '₹${checkoutController.totalAmount.toStringAsFixed(2)}',
                       style: TextStyle(
                           fontSize: 26.sp,
@@ -494,7 +494,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
         TextEditingController(text: widget.existingAddress?['state'] ?? '');
     addressType = widget.existingAddress?['type'] ?? 'Home';
 
-    selectedPincode = null;
+    selectedPincode =null;
   }
 
   Future<void> _saveAddress() async {
@@ -672,20 +672,20 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide:
-                                  BorderSide(color: hexToColor('#2A2A2A')),
+                              BorderSide(color: hexToColor('#2A2A2A')),
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide:
-                                  BorderSide(color: hexToColor('#2A2A2A')),
+                              BorderSide(color: hexToColor('#2A2A2A')),
                             ),
                           ),
                           items: [
                             DropdownMenuItem<String>(
                               value: null,
-                              child: Text('select pincode'),
+                              child: Text( 'select pincode'),
                             ),
-                            ...pincodes.map((String pincode) {
+                            ...pincodes.map(( String pincode) {
                               return DropdownMenuItem<String>(
                                 value: pincode,
                                 child: Text(pincode),
@@ -863,10 +863,10 @@ class CheckoutItemTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final CheckoutController checkoutController =
-        Get.find<CheckoutController>();
+    Get.find<CheckoutController>();
 
     return Obx(
-      () => Card(
+          () => Card(
         margin: EdgeInsets.all(16.w),
         color: Colors.white,
         surfaceTintColor: Colors.white,
@@ -940,9 +940,9 @@ class CheckoutItemTile extends StatelessWidget {
                                 color: hexToColor('#B9B9B9'),
                                 fontSize: 16.sp,
                                 decoration:
-                                    item['variationDetails'].discount > 0
-                                        ? TextDecoration.lineThrough
-                                        : TextDecoration.none,
+                                item['variationDetails'].discount > 0
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
                                 decorationColor: hexToColor('#B9B9B9'),
                               ),
                             ),
@@ -1127,9 +1127,9 @@ class SummaryItemTile extends StatelessWidget {
                                   color: hexToColor('#B9B9B9'),
                                   fontSize: 16.sp,
                                   decoration:
-                                      item['variationDetails'].discount > 0
-                                          ? TextDecoration.lineThrough
-                                          : TextDecoration.none,
+                                  item['variationDetails'].discount > 0
+                                      ? TextDecoration.lineThrough
+                                      : TextDecoration.none,
                                   decorationColor: hexToColor('#B9B9B9'),
                                 ),
                               ),
@@ -1169,11 +1169,14 @@ class _SummaryScreenState extends State<SummaryScreen> {
   late Map<String, StoreModel> _storeDetails = {};
   final CheckoutController checkoutController = Get.find<CheckoutController>();
 
+
+
   @override
   void initState() {
     super.initState();
     _fetchStoreDetails();
     _generateOrderIds();
+
   }
 
   Future<void> _fetchStoreDetails() async {
@@ -1193,9 +1196,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
   void _generateOrderIds() {
     for (var item in checkoutController.items) {
       String timestamp =
-          DateTime.now().millisecondsSinceEpoch.toString().substring(12);
+      DateTime.now().millisecondsSinceEpoch.toString().substring(12);
       String randomComponent =
-          Random().nextInt(900000).toString().padLeft(3, '0');
+      Random().nextInt(900000).toString().padLeft(3, '0');
       item['orderId'] = 'ORD${timestamp}$randomComponent';
     }
   }
@@ -1336,9 +1339,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
     return Column(
       children: checkoutController.items
           .map((item) => SummaryItemTile(
-              item: item,
-              onRemove: _removeItem,
-              showRemoveButton: checkoutController.items.length > 1))
+          item: item,
+          onRemove: _removeItem,
+          showRemoveButton: checkoutController.items.length > 1))
           .toList(),
     );
   }
@@ -1437,6 +1440,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
   }
 }
 
+
 class PaymentOptionScreen extends StatefulWidget {
   Map<String, StoreModel> storeDetails;
 
@@ -1451,19 +1455,45 @@ class PaymentOptionScreen extends StatefulWidget {
 
 class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
   final CheckoutController checkoutController = Get.find<CheckoutController>();
-  late RazorpayService _razorpayService;
+  late RazorpayService razorpayService;
 
   @override
   void initState() {
     super.initState();
-    _razorpayService = RazorpayService();
+    razorpayService = RazorpayService();
+    razorpayService.setPaymentCompletedCallback(_onPaymentCompleted);
+    razorpayService.setPaymentFailedCallback(_onPaymentFailed);
   }
+
 
   @override
   void dispose() {
     // Dispose RazorpayService
-    _razorpayService.dispose();
+    razorpayService.dispose();
     super.dispose();
+  }
+
+  void _onPaymentCompleted(PaymentSuccessResponse response) {
+    _navigateToTransactionScreen(isOnlinePayment: true, paymentId: response.paymentId);
+  }
+
+  void _onPaymentFailed(PaymentFailureResponse response) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Payment failed: ${response.message}')),
+    );
+  }
+
+  void _navigateToTransactionScreen({required bool isOnlinePayment, String? paymentId}) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TransactionScreen(
+          storeDetails: widget.storeDetails,
+          isOnlinePayment: isOnlinePayment,
+          paymentId: paymentId,
+        ),
+      ),
+    );
   }
 
   @override
@@ -1507,8 +1537,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                         const CircleBorder(),
                       ),
                     ),
-                    icon: const Icon(Icons.arrow_back_ios_new,
-                        color: Colors.black),
+                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
                     onPressed: () {
                       Navigator.pop(context);
                     },
@@ -1518,123 +1547,93 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 50.w),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 100.h),
-                    Text(
-                      'Select Payment Option',
-                      style: TextStyle(
-                        color: Colors.black,
-                        fontFamily: 'Gotham',
-                        fontWeight: FontWeight.w800,
-                        fontSize: 24.sp,
-                      ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 100.h),
+                  Text(
+                    'Select Payment Option',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontFamily: 'Gotham',
+                      fontWeight: FontWeight.w800,
+                      fontSize: 24.sp,
                     ),
-                    SizedBox(height: 30.h),
-                    GestureDetector(
-                      onTap: () {
-                        // Navigate to Razorpay
-                        _razorpayService.openCheckout(
-                            checkoutController.totalAmount, context);
-                      },
-                      child: ListTile(
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(color: hexToColor('#E0E0E0')),
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        leading: Icon(
-                          Icons.payment,
-                          size: 25.sp,
-                        ),
-                        title: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Online Payment',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w800,
-                                fontSize: 22.sp,
-                              ),
-                            ),
-                            Text(
-                              'Pay securely online',
-                              style: TextStyle(
-                                color: hexToColor('#6F6F6F'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16.sp,
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20.h),
-                    GestureDetector(
-                      onTap: () {
-                        showSnackBarWithAction(
-                          context,
-                          text:
-                              'Do you want to continue with Cash on Delivery?',
-                          confirmBtnText: 'Continue 💵',
-                          buttonTextFontsize: 11,
-                          cancelBtnText: 'Cancel',
-                          quickAlertType: QuickAlertType.confirm,
-                          action: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TransactionScreen(
-                                  storeDetails: widget.storeDetails,
-                                ),
-                              ),
-                            );
-                          },
+                  ),
+                  SizedBox(height: 30.h),
+                  _buildPaymentOption(
+                    title: 'Online Payment',
+                    subtitle: 'Pay securely online',
+                    icon: Icons.payment,
+                    onTap: () {
+                      if (checkoutController.items.isNotEmpty) {
+                        String storeId = checkoutController.items.first['storeId'];
+                        razorpayService.openCheckout(
+                            checkoutController.totalAmount,
+                            context,
+                            storeId,
+                            checkoutController.items
                         );
-                      },
-                      child: ListTile(
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(color: hexToColor('#E0E0E0')),
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        leading: Icon(
-                          Icons.money,
-                          size: 25.sp,
-                        ),
-                        title: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Cash on Delivery',
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: 'Gotham',
-                                fontWeight: FontWeight.w800,
-                                fontSize: 22.sp,
-                              ),
-                            ),
-                            Text(
-                              'Pay at your doorstep',
-                              style: TextStyle(
-                                color: hexToColor('#6F6F6F'),
-                                fontFamily: 'Poppins',
-                                fontWeight: FontWeight.w500,
-                                fontSize: 16.sp,
-                              ),
-                            )
-                          ],
-                        ),
-                        trailing: const SizedBox(),
-                      ),
-                    ),
-                  ],
-                ),
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Your cart is empty')),
+                        );
+                      }
+                    },
+                  ),
+                  SizedBox(height: 20.h),
+                  _buildPaymentOption(
+                    title: 'Cash on Delivery',
+                    subtitle: 'Pay at your doorstep',
+                    icon: Icons.money,
+                    onTap: () {
+                      _navigateToTransactionScreen(isOnlinePayment: false);
+                    },
+                  ),
+                ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPaymentOption({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: ListTile(
+        shape: RoundedRectangleBorder(
+          side: BorderSide(color: hexToColor('#E0E0E0')),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        leading: Icon(icon, size: 25.sp),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: Colors.black,
+                fontFamily: 'Gotham',
+                fontWeight: FontWeight.w800,
+                fontSize: 22.sp,
+              ),
+            ),
+            Text(
+              subtitle,
+              style: TextStyle(
+                color: hexToColor('#6F6F6F'),
+                fontFamily: 'Poppins',
+                fontWeight: FontWeight.w500,
+                fontSize: 16.sp,
+              ),
+            )
           ],
         ),
       ),
@@ -1644,11 +1643,16 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
 
 class TransactionScreen extends StatefulWidget {
   Map<String, StoreModel> storeDetails;
+  final bool isOnlinePayment;
+  final String? paymentId;
+
 
   TransactionScreen({
-    super.key,
+    Key? key,
     required this.storeDetails,
-  });
+    required this.isOnlinePayment,
+    this.paymentId,
+  }) : super(key: key);
 
   @override
   State<TransactionScreen> createState() => _TransactionScreenState();
@@ -1665,6 +1669,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   bool _isLoading = true;
   bool _isRemovingProduct = false;
   String _productIdToRemove = '';
+  double _opacity = 0.0;
 
   @override
   void initState() {
@@ -1678,13 +1683,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
     _userAddress = await _loadUserAddress();
     _isLoading = false;
     makeIsGreetingTrue();
-    processOrder(checkoutController.items);
+    await processOrder(checkoutController.items);
     setState(() {});
-    sendOrderNotification();
+    await sendOrderNotification();
     _startProductRemoval();
   }
 
   final user = FirebaseAuth.instance.currentUser!;
+
   void makeIsGreetingTrue() {
     isGreeting = true;
     _confettiController.play();
@@ -1723,7 +1729,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       for (var item in items) {
         String pickupCode = _getRandomString(5);
         DocumentReference orderRef =
-            FirebaseFirestore.instance.collection('Orders').doc();
+        FirebaseFirestore.instance.collection('Orders').doc();
         Map<String, dynamic> orderData = {
           'orderId': item['orderId'],
           'userId': FirebaseAuth.instance.currentUser!.uid,
@@ -1750,8 +1756,9 @@ class _TransactionScreenState extends State<TransactionScreen> {
           'pickupCode': pickupCode,
           'providedMiddleman': {},
           'payment': {
-            'method': 'Cash on Delivery',
-            'status': 'Pending',
+            'method': widget.isOnlinePayment ? 'Online Payment' : 'Cash on Delivery',
+            'status': widget.isOnlinePayment ? 'Paid' : 'Pending',
+            'paymentId': widget.paymentId,
           },
           'isOrderNew': true,
         };
@@ -1764,7 +1771,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
             .doc(item['productId']);
 
         ProductModel product =
-            ProductModel.fromFirestore(await productRef.get());
+        ProductModel.fromFirestore(await productRef.get());
 
         bool isRestaurantCafeBakery = ['Restaurants', 'Cafes', 'Bakeries']
             .contains(product.productCategory);
@@ -1772,12 +1779,13 @@ class _TransactionScreenState extends State<TransactionScreen> {
         if (!isRestaurantCafeBakery) {
           batch.update(productRef, {
             'variations.${item['variation']}.stockQuantity':
-                FieldValue.increment(-item['quantity'])
+            FieldValue.increment(-item['quantity'])
           });
         }
       }
       await batch.commit();
     } catch (e) {
+      print('Error processing order: $e');
       // Handle error
     }
   }
@@ -1799,15 +1807,13 @@ class _TransactionScreenState extends State<TransactionScreen> {
   void _removeProductFromCart(String productId) async {
     try {
       String userId = FirebaseAuth.instance.currentUser!.uid;
-      DocumentReference userRef =
-          FirebaseFirestore.instance.collection('Users').doc(userId);
+      DocumentReference userRef = FirebaseFirestore.instance.collection('Users').doc(userId);
       DocumentSnapshot userDoc = await userRef.get();
       List<dynamic> currentCart = userDoc.get('cart') ?? [];
       currentCart.removeWhere((item) => item['productId'] == productId);
       await userRef.update({'cart': currentCart});
       setState(() {
-        checkoutController.items
-            .removeWhere((item) => item['productId'] == productId);
+        checkoutController.items.removeWhere((item) => item['productId'] == productId);
         _isRemovingProduct = false;
       });
       if (checkoutController.items.isNotEmpty) {
@@ -1820,7 +1826,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
       });
     }
   }
-
   Future<void> sendOrderNotification() async {
     final firestore = FirebaseFirestore.instance;
 
@@ -1843,6 +1848,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
           'productName': item['productName'],
           'price': totalPrice.toString(),
           'orderId': item['orderId'],
+          'paymentMethod': widget.isOnlinePayment ? 'Online Payment' : 'Cash on Delivery',
+          'paymentStatus': widget.isOnlinePayment ? 'Paid' : 'Pending',
         },
         'timestamp': FieldValue.serverTimestamp(),
         'IsUnRead': true,
@@ -1874,7 +1881,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => const HomeScreen()),
-      (Route<dynamic> route) => false,
+          (Route<dynamic> route) => false,
     );
   }
 
@@ -1887,7 +1894,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
     return filePath;
   }
 
-  double _opacity = 0.0;
   void _startFadeIn() {
     // Delay before starting the fade-in
     Future.delayed(const Duration(milliseconds: 2900), () {
@@ -1905,7 +1911,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       if (imageBytes != null) {
         // Get the external storage directory (Pictures folder)
         final directory =
-            Directory('/storage/emulated/0/Pictures'); // Or use DCIM folder
+        Directory('/storage/emulated/0/Pictures'); // Or use DCIM folder
 
         if (!(await directory.exists())) {
           await directory.create(
@@ -1939,7 +1945,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
         body: Center(child: CircularProgressIndicator()),
       );
     }
-    if (_isRemovingProduct) {}
+    if (_isRemovingProduct) {
+    }
     if (isGreeting) {
       return PopScope(
         canPop: false,
@@ -2145,7 +2152,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                   children: [
                                     Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           'Date:',
@@ -2171,7 +2178,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                     SizedBox(height: 12.h),
                                     Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           'Time:',
@@ -2197,7 +2204,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                     SizedBox(height: 12.h),
                                     Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           'To:',
@@ -2223,16 +2230,16 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                     Container(
                                       height: 2.h,
                                       margin:
-                                          EdgeInsets.symmetric(vertical: 30.h),
+                                      EdgeInsets.symmetric(vertical: 30.h),
                                       decoration: BoxDecoration(
                                         color: hexToColor('#E0E0E0'),
                                         borderRadius:
-                                            BorderRadius.circular(100.r),
+                                        BorderRadius.circular(100.r),
                                       ),
                                     ),
                                     Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                       children: [
                                         Text(
                                           'Total',
@@ -2257,11 +2264,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                       decoration: BoxDecoration(
                                         color: hexToColor('#FFFFFF'),
                                         borderRadius:
-                                            BorderRadius.circular(25.r),
+                                        BorderRadius.circular(25.r),
                                       ),
                                       child: Row(
                                         mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                                        MainAxisAlignment.center,
                                         children: [
                                           Text(
                                             'Cash on Delivery',
@@ -2287,38 +2294,38 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                       children: [
                                         Column(
                                           crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                           children: checkoutController.items
                                               .map(
                                                 (item) => Padding(
-                                                  padding: EdgeInsets.symmetric(
-                                                      vertical: 8.h),
-                                                  child: Row(
-                                                    children: [
-                                                      Text(
-                                                        'Order ID:',
-                                                        style: TextStyle(
-                                                          color: hexToColor(
-                                                              '#2D332F'),
-                                                          fontSize: 24.sp,
-                                                        ),
-                                                      ),
-                                                      SizedBox(width: 8.w),
-                                                      Text(
-                                                        item['orderId'],
-                                                        style: TextStyle(
-                                                          color: hexToColor(
-                                                              '#A9A9A9'),
-                                                          fontSize: 24.sp,
-                                                          fontFamily: 'Poppins',
-                                                          fontWeight:
-                                                              FontWeight.w600,
-                                                        ),
-                                                      ),
-                                                    ],
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 8.h),
+                                              child: Row(
+                                                children: [
+                                                  Text(
+                                                    'Order ID:',
+                                                    style: TextStyle(
+                                                      color: hexToColor(
+                                                          '#2D332F'),
+                                                      fontSize: 24.sp,
+                                                    ),
                                                   ),
-                                                ),
-                                              )
+                                                  SizedBox(width: 8.w),
+                                                  Text(
+                                                    item['orderId'],
+                                                    style: TextStyle(
+                                                      color: hexToColor(
+                                                          '#A9A9A9'),
+                                                      fontSize: 24.sp,
+                                                      fontFamily: 'Poppins',
+                                                      fontWeight:
+                                                      FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          )
                                               .toList(),
                                         ),
                                         const Spacer(),
@@ -2329,7 +2336,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                               border: Border.all(
                                                   color: hexToColor('#094446')),
                                               borderRadius:
-                                                  BorderRadius.circular(25.r),
+                                              BorderRadius.circular(25.r),
                                             ),
                                             child: Center(
                                               child: Text(
