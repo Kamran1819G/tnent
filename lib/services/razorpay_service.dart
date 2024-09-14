@@ -1,16 +1,15 @@
-import 'package:flutter/material.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class RazorpayService {
   late Razorpay _razorpay;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  double _amount=0.0;
+  double _amount = 0.0;
   Function(PaymentSuccessResponse)? _onPaymentCompleted;
   Function(PaymentFailureResponse)? _onPaymentFailed;
-
 
   RazorpayService() {
     _razorpay = Razorpay();
@@ -27,15 +26,18 @@ class RazorpayService {
     _onPaymentFailed = callback;
   }
 
-  Future<void> openCheckout(double amount, BuildContext context, String storeId, List<Map<String, dynamic>> items) async {
+  Future<void> openCheckout(double amount, BuildContext context, String storeId,
+      List<Map<String, dynamic>> items) async {
     // Fetch store details
     _amount = amount;
-    DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(storeId).get();
+    DocumentSnapshot storeDoc =
+        await _firestore.collection('Stores').doc(storeId).get();
     String storeName = storeDoc['name'] ?? '';
 
     // Fetch customer details
     User? user = _auth.currentUser;
-    DocumentSnapshot userDoc = await _firestore.collection('Users').doc(user?.uid).get();
+    DocumentSnapshot userDoc =
+        await _firestore.collection('Users').doc(user?.uid).get();
     String userEmail = userDoc['email'] ?? '';
     String userPhone = userDoc['phoneNumber'] ?? '';
 
@@ -73,7 +75,8 @@ class RazorpayService {
 
         if (orderSnapshot.docs.isNotEmpty) {
           DocumentSnapshot orderDoc = orderSnapshot.docs.first;
-          Map<String, dynamic> orderData = orderDoc.data() as Map<String, dynamic>;
+          Map<String, dynamic> orderData =
+              orderDoc.data() as Map<String, dynamic>;
 
           // Save payment details to Firestore
           await _firestore.collection('Payments').add({
@@ -106,7 +109,8 @@ class RazorpayService {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) async {
-    print('Payment error. Code: ${response.code}\nMessage: ${response.message}');
+    print(
+        'Payment error. Code: ${response.code}\nMessage: ${response.message}');
 
     User? user = _auth.currentUser;
     if (user != null) {
@@ -121,21 +125,22 @@ class RazorpayService {
 
         if (orderSnapshot.docs.isNotEmpty) {
           DocumentSnapshot orderDoc = orderSnapshot.docs.first;
-          Map<String, dynamic> orderData = orderDoc.data() as Map<String, dynamic>;
+          Map<String, dynamic> orderData =
+              orderDoc.data() as Map<String, dynamic>;
 
           // Save failed payment details to Firestore
           await _firestore.collection('Payments').add({
             'orderId': orderData['orderId'],
             'userId': user.uid,
             'storeId': orderData['storeId'],
-            'amount': orderData['priceDetails']['price'] * orderData['quantity'],
+            'amount':
+                orderData['priceDetails']['price'] * orderData['quantity'],
             'status': 'Failed',
             'errorCode': response.code,
             'errorMessage': response.message,
             'timestamp': FieldValue.serverTimestamp(),
             'method': 'Razorpay',
           });
-
         }
         if (_onPaymentFailed != null) {
           _onPaymentFailed!(response);

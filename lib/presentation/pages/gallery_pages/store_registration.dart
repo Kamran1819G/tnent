@@ -171,7 +171,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
         greenFlags: 0,
         redFlags: 0,
         featuredProductIds: [],
-        followerIds: [],
+        followerIds: [
+          currentUser.uid
+        ], //  so that story updates is visible to current user also
       );
 
       // Add the store to Firestore
