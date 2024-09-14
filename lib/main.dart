@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -14,6 +15,7 @@ import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/core/routes/app_pages.dart';
 import 'package:tnent/core/routes/app_routes.dart';
+import 'package:tnent/dependency_injection.dart';
 import 'package:tnent/presentation/controllers/notification_controller.dart';
 import 'package:tnent/presentation/controllers/permission_controller.dart';
 import 'package:tnent/services/context_utility.dart';
@@ -38,14 +40,14 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  DependencyInjection.init();
 
   await NotificationController.initialize();
 
-// TODO: import the firebase performance pckge as my import throws error
-// import 'package:firebase_performance/firebase_performance.dart';
-// import 'package:firebase_performance/firebase_performance.dart';
+// TODO: import the pckgs my import throws error
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-  // FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
+  FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
