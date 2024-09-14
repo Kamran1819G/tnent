@@ -133,18 +133,33 @@ class NotificationController {
 
     // Set up message handlers
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _handleMessage(message);
+      _handleForegroundMessage(message);
     });
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      _handleMessage(message);
+      _handleBackgroundMessage(message);
     });
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
     RemoteMessage? initialMessage =
         await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
-      _handleMessage(initialMessage);
+      _handleInitialMessage(initialMessage);
     }
+  }
+
+  static Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    debugPrint('Handling a foreground message: ${message.messageId}');
+    _showNotification(message);
+  }
+
+  static Future<void> _handleBackgroundMessage(RemoteMessage message) async {
+    debugPrint('Handling a background message: ${message.messageId}');
+    _navigateBasedOnMessage(message);
+  }
+
+  static Future<void> _handleInitialMessage(RemoteMessage message) async {
+    debugPrint('Handling initial message: ${message.messageId}');
+    _navigateBasedOnMessage(message);
   }
 
   static Future<void> _storeFcmToken(String token) async {
@@ -187,7 +202,7 @@ class NotificationController {
     return doc.get('fcmToken') as String?;
   }
 
-  static Future<void> _handleMessage(RemoteMessage message) async {
+  static Future<void> _showNotification(RemoteMessage message) async {
     debugPrint('Handling a message: ${message.messageId}');
 
     // Get the channel key from the message data, or use a default
@@ -295,6 +310,17 @@ class NotificationController {
     }
   }
 
+  static void _navigateBasedOnMessage(RemoteMessage message) {
+    final String channelKey = message.data['channelKey'] ?? 'default_channel';
+    final String? orderId = message.data['orderId'];
+
+    if (channelKey == 'store_new_order_channel' && orderId != null) {
+      _navigateToAcceptRejectScreen(orderId);
+    } else if (channelKey == 'user_order_channel' && orderId != null) {
+      _fetchOrderAndNavigate(orderId);
+    }
+  }
+
   static Future<void> _navigateToAcceptRejectScreen(String orderId) async {
     try {
       final orderDoc = await FirebaseFirestore.instance
@@ -316,7 +342,7 @@ class NotificationController {
       RemoteMessage message) async {
     await Firebase.initializeApp();
     await initialize();
-    await _handleMessage(message);
+    await _handleBackgroundMessage(message);
   }
 
   /// Use this method to detect when a new notification or a schedule is created
@@ -374,9 +400,6 @@ class NotificationController {
           );
         } else {
           await _navigateToAcceptRejectScreen(orderId);
-
-          // Dismiss the notification
-          await AwesomeNotifications().cancel(receivedAction.id!);
         }
       }
     }
@@ -388,5 +411,7 @@ class NotificationController {
         _fetchOrderAndNavigate(orderId);
       }
     }
+    // Dismiss the notification
+    await AwesomeNotifications().cancel(receivedAction.id!);
   }
 }
