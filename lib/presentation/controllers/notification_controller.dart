@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,7 +8,7 @@ import 'package:get/get.dart';
 import 'package:tnent/presentation/pages/accept_reject_order_screen.dart';
 import 'package:tnent/presentation/pages/catalog_pages/detail_screen.dart';
 
-class NotificationService {
+class NotificationController {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FirebaseMessaging _firebaseMessaging =
@@ -133,7 +132,8 @@ class NotificationService {
     });
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-     RemoteMessage? initialMessage = await FirebaseMessaging.instance.getInitialMessage();
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
     if (initialMessage != null) {
       _handleMessage(initialMessage);
     }
@@ -193,7 +193,7 @@ class NotificationService {
           channelKey: channelKey, // Change as per your requirement
           title: message.notification?.title,
           body: message.notification?.body,
-          category: NotificationCategory.Service,
+          category: NotificationCategory.Call,
           autoDismissible: false,
           locked: true,
           fullScreenIntent: true,

@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:tnent/core/routes/app_routes.dart';
-import 'package:tnent/services/notification_service.dart';
+import 'package:tnent/presentation/controllers/notification_controller.dart';
 import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/presentation/pages/signup_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -35,7 +35,7 @@ class _SignInScreenState extends State<SignInScreen> {
       await Auth().signInWithEmailAndPassword(
           email: emailController.text, password: passwordController.text);
       Get.offAllNamed(AppRoutes.AUTH_GATE);
-      await NotificationService.onUserLogin();
+      await NotificationController.onUserLogin();
     } on FirebaseAuthException catch (e) {
       setState(() {
         errorMessage = e.message;

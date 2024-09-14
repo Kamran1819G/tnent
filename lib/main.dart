@@ -16,7 +16,7 @@ import 'package:tnent/core/routes/app_routes.dart';
 import 'package:tnent/presentation/controllers/permission_controller.dart';
 import 'package:tnent/services/context_utility.dart';
 import 'package:tnent/services/external_linking_services/universal_linking.dart';
-import 'package:tnent/services/notification_service.dart';
+import 'package:tnent/presentation/controllers/notification_controller.dart';
 import 'firebase_options.dart';
 import 'package:get/get.dart';
 
@@ -32,8 +32,12 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  
   FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
-  await NotificationService.initialize();
+
+
+  await NotificationController.initialize();
+
   final prefs = await SharedPreferences.getInstance();
   final onboarding = prefs.getBool('onboarding') ?? false;
   runApp(MyApp(onboarding: onboarding));
@@ -55,13 +59,13 @@ class _MyAppState extends State<MyApp> {
     checkForUpdates();
 
     AwesomeNotifications().setListeners(
-      onActionReceivedMethod: NotificationService.onActionReceivedMethod,
+      onActionReceivedMethod: NotificationController.onActionReceivedMethod,
       onNotificationCreatedMethod:
-          NotificationService.onNotificationCreatedMethod,
+          NotificationController.onNotificationCreatedMethod,
       onNotificationDisplayedMethod:
-          NotificationService.onNotificationDisplayedMethod,
+          NotificationController.onNotificationDisplayedMethod,
       onDismissActionReceivedMethod:
-          NotificationService.onDismissActionReceivedMethod,
+          NotificationController.onDismissActionReceivedMethod,
     );
 
     super.initState();

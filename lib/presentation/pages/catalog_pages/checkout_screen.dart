@@ -22,7 +22,7 @@ import 'package:tnent/presentation/controllers/checkoutController.dart';
 import 'package:tnent/presentation/pages/catalog_pages/purchase_screen.dart';
 import 'package:tnent/presentation/pages/home_screen.dart';
 import '../../../core/helpers/snackbar_utils.dart';
-import '../../../services/razorpay_service.dar.dart';
+import '../../../services/razorpay_service.dart';
 
 class CheckoutScreen extends StatefulWidget {
   List<Map<String, dynamic>> selectedItems;
@@ -77,13 +77,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     List<String> emptyFields = [];
     if (_userAddress!['name']?.isEmpty ?? true) emptyFields.add('Name');
     if (_userAddress!['phone']?.isEmpty ?? true) emptyFields.add('Phone');
-    if (_userAddress!['addressLine1']?.isEmpty ?? true) emptyFields.add('Address Line 1');
+    if (_userAddress!['addressLine1']?.isEmpty ?? true)
+      emptyFields.add('Address Line 1');
     if (_userAddress!['zip']?.isEmpty ?? true) emptyFields.add('Pincode');
     if (_userAddress!['city']?.isEmpty ?? true) emptyFields.add('City');
     if (_userAddress!['state']?.isEmpty ?? true) emptyFields.add('State');
 
     if (emptyFields.isNotEmpty) {
-      showSnackBar(context, 'Please fill in the following fields: ${emptyFields.join(", ")}');
+      showSnackBar(context,
+          'Please fill in the following fields: ${emptyFields.join(", ")}');
       return;
     }
 
@@ -95,7 +97,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
     );
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -493,7 +494,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
         TextEditingController(text: widget.existingAddress?['state'] ?? '');
     addressType = widget.existingAddress?['type'] ?? 'Home';
 
-    selectedPincode =null;
+    selectedPincode = null;
   }
 
   Future<void> _saveAddress() async {
@@ -682,9 +683,9 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
                           items: [
                             DropdownMenuItem<String>(
                               value: null,
-                              child: Text( 'select pincode'),
+                              child: Text('select pincode'),
                             ),
-                            ...pincodes.map(( String pincode) {
+                            ...pincodes.map((String pincode) {
                               return DropdownMenuItem<String>(
                                 value: pincode,
                                 child: Text(pincode),
@@ -1168,14 +1169,11 @@ class _SummaryScreenState extends State<SummaryScreen> {
   late Map<String, StoreModel> _storeDetails = {};
   final CheckoutController checkoutController = Get.find<CheckoutController>();
 
-
-
   @override
   void initState() {
     super.initState();
     _fetchStoreDetails();
     _generateOrderIds();
-
   }
 
   Future<void> _fetchStoreDetails() async {
@@ -1408,7 +1406,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
     return Center(
       child: GestureDetector(
         onTap: () async {
-        Navigator.push(
+          Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => PaymentOptionScreen(
@@ -1438,7 +1436,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
     );
   }
 }
-
 
 class PaymentOptionScreen extends StatefulWidget {
   Map<String, StoreModel> storeDetails;
@@ -1539,7 +1536,8 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                     GestureDetector(
                       onTap: () {
                         // Navigate to Razorpay
-                         _razorpayService.openCheckout(checkoutController.totalAmount, context);
+                        _razorpayService.openCheckout(
+                            checkoutController.totalAmount, context);
                       },
                       child: ListTile(
                         shape: RoundedRectangleBorder(
@@ -1573,7 +1571,6 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                             )
                           ],
                         ),
-
                       ),
                     ),
                     SizedBox(height: 20.h),
@@ -1582,7 +1579,7 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                         showSnackBarWithAction(
                           context,
                           text:
-                          'Do you want to continue with Cash on Delivery?',
+                              'Do you want to continue with Cash on Delivery?',
                           confirmBtnText: 'Continue 💵',
                           buttonTextFontsize: 11,
                           cancelBtnText: 'Cancel',
@@ -1802,13 +1799,15 @@ class _TransactionScreenState extends State<TransactionScreen> {
   void _removeProductFromCart(String productId) async {
     try {
       String userId = FirebaseAuth.instance.currentUser!.uid;
-      DocumentReference userRef = FirebaseFirestore.instance.collection('Users').doc(userId);
+      DocumentReference userRef =
+          FirebaseFirestore.instance.collection('Users').doc(userId);
       DocumentSnapshot userDoc = await userRef.get();
       List<dynamic> currentCart = userDoc.get('cart') ?? [];
       currentCart.removeWhere((item) => item['productId'] == productId);
       await userRef.update({'cart': currentCart});
       setState(() {
-        checkoutController.items.removeWhere((item) => item['productId'] == productId);
+        checkoutController.items
+            .removeWhere((item) => item['productId'] == productId);
         _isRemovingProduct = false;
       });
       if (checkoutController.items.isNotEmpty) {
@@ -1821,6 +1820,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       });
     }
   }
+
   Future<void> sendOrderNotification() async {
     final firestore = FirebaseFirestore.instance;
 
@@ -1939,8 +1939,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
         body: Center(child: CircularProgressIndicator()),
       );
     }
-    if (_isRemovingProduct) {
-    }
+    if (_isRemovingProduct) {}
     if (isGreeting) {
       return PopScope(
         canPop: false,

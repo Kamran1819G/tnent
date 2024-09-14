@@ -12,7 +12,7 @@ import 'package:tnent/core/helpers/url_utils.dart';
 import 'package:tnent/models/user_model.dart';
 import 'package:tnent/presentation/pages/catalog_pages/checkout_screen.dart';
 import 'package:tnent/presentation/pages/webview_screen.dart';
-import 'package:tnent/services/notification_service.dart';
+import 'package:tnent/presentation/controllers/notification_controller.dart';
 
 import '../../../core/helpers/snackbar_utils.dart';
 import '../../../services/firebase/firebase_auth_service.dart';
@@ -54,6 +54,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     final image = doc.data()?['image'] as String?;
     return image;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -310,7 +311,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                             confirmBtnColor: Colors.red,
                             action: () {
                               Navigator.of(context).pop();
-                              NotificationService.onUserLogout();
+                              NotificationController.onUserLogout();
                               Auth().signOut();
                               Navigator.pushReplacement(
                                 context,
