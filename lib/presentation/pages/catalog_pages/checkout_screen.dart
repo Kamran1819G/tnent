@@ -2116,6 +2116,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           opacity: _opacity,
           duration: const Duration(milliseconds: 2900),
           child: SafeArea(
+            child : SingleChildScrollView(
             child: Column(
               children: [
                 Container(
@@ -2330,7 +2331,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                         MainAxisAlignment.center,
                                         children: [
                                           Text(
-                                            'Cash on Delivery',
+                                            widget.isOnlinePayment ? 'Online Payment' : 'Cash on Delivery',
                                             style: TextStyle(
                                               color: Colors.black,
                                               fontSize: 28.sp,
@@ -2399,7 +2400,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                             ),
                                             child: Center(
                                               child: Text(
-                                                'Unpaid'.toUpperCase(),
+                                                widget.isOnlinePayment ? 'PAID' : 'UNPAID',
                                                 style: TextStyle(
                                                   color: hexToColor('#094446'),
                                                   fontSize: 32.sp,
@@ -2425,6 +2426,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
           ),
         ),
       ),
+      )
     );
   }
 }
