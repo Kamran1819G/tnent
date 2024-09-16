@@ -495,8 +495,7 @@ class _ChangeAddressScreenState extends State<ChangeAddressScreen> {
     _stateController =
         TextEditingController(text: widget.existingAddress?['state'] ?? '');
     addressType = widget.existingAddress?['type'] ?? 'Home';
-
-    selectedPincode = null;
+    selectedPincode = widget.existingAddress?['zip'];
   }
 
   Future<void> _saveAddress() async {

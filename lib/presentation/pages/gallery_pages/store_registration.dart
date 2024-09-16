@@ -16,7 +16,6 @@ import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/presentation/pages/webview_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../../../core/helpers/snackbar_utils.dart';
 
 class StoreRegistration extends StatefulWidget {
@@ -32,12 +31,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   int _currentPageIndex = 0;
   late ConfettiController _confettiController;
   final TextEditingController _locationController = TextEditingController();
-  final PageController _pageControl = PageController();
   final OTPController otpController = OTPController();
   String? sessionIdReceived;
-
+  final TextEditingController _upiUsernameController = TextEditingController();
+  final TextEditingController _upiIdController = TextEditingController();
   bool _locationPageShown = false;
-
   bool _termsAccepted = false;
   bool isButtonEnabled = false;
   bool _isStorePhoneUnique = true;
@@ -62,13 +60,10 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     "Sports"
   ];
   String selectedCategory = '';
-
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _storeDomainController = TextEditingController();
-  final _upiUsernameController = TextEditingController();
-  final _upiIdController = TextEditingController();
   final _otpController = TextEditingController();
 
   @override
@@ -195,6 +190,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
       showSnackBar(context, 'Error registering store: $e');
     }
   }
+
 
   Future<void> _showLocationPermissionDialog() async {
     await showDialog(
@@ -436,7 +432,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             bottom: 0,
                             child: GestureDetector(
                               onTap: () async {
-                                if (_isStorePhoneUnique) {
+                                if (_isStorePhoneUnique && _phoneController.text.trim().isNotEmpty) {
                                   debugPrint('Sending OTP');
                                   try {
                                     showDialog(
@@ -779,13 +775,15 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          if (_emailController.text.isNotEmpty &&
-                              _termsAccepted &&
-                              _isStoreEmailUnique) {
+                          String trimmedEmail = _emailController.text.trim();
+                          if (trimmedEmail.isNotEmpty && _termsAccepted && _isStoreEmailUnique) {
                             _pageController.jumpToPage(_currentPageIndex + 1);
+                          } else if (trimmedEmail.isEmpty) {
+                            showSnackBar(context, 'Please enter a valid email');
+                          } else if (!_termsAccepted) {
+                            showSnackBar(context, 'Please accept the terms and conditions');
                           } else {
-                            showSnackBar(context,
-                                'Please accept the terms and conditions and provide a unique email');
+                            showSnackBar(context, 'This email is already registered');
                           }
                         },
                         child: Container(
@@ -872,10 +870,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          if (_nameController.text.isNotEmpty) {
+                          String trimmedName = _nameController.text.trim();
+                          if (trimmedName.isNotEmpty) {
                             _pageController.jumpToPage(_currentPageIndex + 1);
                             setState(() {
-                              _storeDomainController.text = _nameController.text
+                              _storeDomainController.text = trimmedName
                                   .toLowerCase()
                                   .replaceAll(' ', '');
                             });
@@ -1009,12 +1008,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          if (_storeDomainController.text.isNotEmpty &&
-                              _isStoreDomainUnique) {
+                          String trimmedDomain = _storeDomainController.text.trim();
+                          if (trimmedDomain.isNotEmpty && _isStoreDomainUnique) {
                             _pageController.jumpToPage(_currentPageIndex + 1);
-                          } else if (_storeDomainController.text.isEmpty) {
-                            showSnackBar(
-                                context, 'Please enter a valid store domain');
+                          } else if (trimmedDomain.isEmpty) {
+                            showSnackBar(context, 'Please enter a valid store domain');
+                          } else {
+                            showSnackBar(context, 'This domain is not available');
                           }
                         },
                         child: Container(
@@ -1287,12 +1287,15 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          if (_upiUsernameController.text.isNotEmpty &&
-                              _upiIdController.text.isNotEmpty) {
-                            _pageController.jumpToPage(_currentPageIndex + 1);
+                          String trimmedUsername = _upiUsernameController.text.trim();
+                          String trimmedUpiId = _upiIdController.text.trim();
+                          if (trimmedUsername.isEmpty && trimmedUpiId.isEmpty) {
+                            showSnackBar(context, 'provide both UPI username and UPI ID');
+                          } else if (_upiUsernameController.text.trim().isEmpty ||
+                              _upiIdController.text.trim().isEmpty) {
+                            showSnackBar(context, 'Please enter your UPI details');
                           } else {
-                            showSnackBar(
-                                context, 'Please enter your UPI details');
+                            _pageController.jumpToPage(_currentPageIndex + 1);
                           }
                         },
                         child: Container(
@@ -1390,11 +1393,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          if (_locationController.text.isNotEmpty) {
+                          String trimmedLocation = _locationController.text.trim();
+                          if (trimmedLocation.isNotEmpty) {
                             _pageController.jumpToPage(_currentPageIndex + 1);
                           } else {
-                            showSnackBar(
-                                context, 'Please enter your store location');
+                            showSnackBar(context, 'Please enter your store location');
                           }
                         },
                         child: Container(

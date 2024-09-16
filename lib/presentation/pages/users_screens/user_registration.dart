@@ -182,19 +182,22 @@ class _UserRegistrationState extends State<UserRegistration> {
   bool _validatePhoneNumber(String phone) {
     // Indian phone number regex pattern
     final RegExp phoneRegex = RegExp(r'^[6-9]\d{9}$');
-    return phoneRegex.hasMatch(phone);
+    return phone.isNotEmpty && phoneRegex.hasMatch(phone);
   }
 
   bool _validateOTP() {
     // Assuming OTP is 4 digits
     final RegExp otpRegex = RegExp(r'^\d{4}$');
-    return otpRegex.hasMatch(_otpController.text);
+    return _otpController.text.trim().isNotEmpty && otpRegex.hasMatch(_otpController.text.trim());
   }
 
   bool _validateName(String firstName, String lastName) {
     // Name should contain only letters, spaces, and hyphens, and be between 2 and 50 characters
     final RegExp nameRegex = RegExp(r'^[a-zA-Z\s-]{2,50}$');
-    return nameRegex.hasMatch(firstName) && nameRegex.hasMatch(lastName);
+    return firstName.isNotEmpty &&
+        lastName.isNotEmpty &&
+        nameRegex.hasMatch(firstName) &&
+        nameRegex.hasMatch(lastName);
   }
 
   bool _validateLocation(String location) {
@@ -660,6 +663,9 @@ class _UserRegistrationState extends State<UserRegistration> {
                   ),
                 ),
                 keyboardType: TextInputType.name,
+                onChanged: (value) {
+                  setState(() {});
+                },
               ),
               SizedBox(height: 20.h),
               TextField(
@@ -686,6 +692,9 @@ class _UserRegistrationState extends State<UserRegistration> {
                   ),
                 ),
                 keyboardType: TextInputType.name,
+                onChanged: (value) {
+                  setState(() {});
+                },
               ),
             ],
           ),
@@ -693,15 +702,19 @@ class _UserRegistrationState extends State<UserRegistration> {
         SizedBox(height: 75.h),
         Center(
           child: GestureDetector(
-            onTap: () {
+            onTap: _validateName(_firstNameController.text.trim(), _lastNameController.text.trim())
+                ? () {
               _proceedToNextPage();
-            },
+            }
+                : null,
             child: Container(
               width: 345.w,
               height: 95.h,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+                color: _validateName(_firstNameController.text.trim(), _lastNameController.text.trim())
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey,
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: Text('Continue',
@@ -801,7 +814,9 @@ class _UserRegistrationState extends State<UserRegistration> {
               height: 95.h,
               alignment: Alignment.center,
               decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
+                color: _validateLocation(_locationController.text.trim())
+                    ? Theme.of(context).primaryColor
+                    : Colors.grey,
                 borderRadius: BorderRadius.circular(20.r),
               ),
               child: Text('Continue',
