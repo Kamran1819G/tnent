@@ -49,7 +49,7 @@ class RazorpayService {
     String userPhone = userDoc['phoneNumber'] ?? '';
 
     var options = {
-      'key': 'rzp_test_rnynHtgZUItQAN', // replace with live key
+      'key': 'rzp_live_L3Ffu2rDxMUBRw', // live key
       'amount': (amount * 100).toInt(),
       'name': storeName,
       'description': 'Payment for your order',
