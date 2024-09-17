@@ -1809,8 +1809,10 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 widget.isOnlinePayment ? 'Online Payment' : 'Cash on Delivery',
             'status': widget.isOnlinePayment ? 'Paid' : 'Pending',
             'paymentId': widget.paymentId,
+
           },
           'isOrderNew': true,
+          'isOnlinePayment': widget.isOnlinePayment,
         };
 
         batch.set(orderRef, orderData);
