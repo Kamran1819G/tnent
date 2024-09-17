@@ -341,7 +341,7 @@ class ProductTile extends StatelessWidget {
                   Text(
                     product.name,
                     style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4),

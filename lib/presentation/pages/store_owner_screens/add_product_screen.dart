@@ -78,6 +78,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
     if (mrp > 0) {
       double itemPrice = mrp - (mrp * discount / 100);
+      // Round up to the next higher integer
+      itemPrice = itemPrice.ceil().toDouble();
       _itemPriceController.text = itemPrice.toStringAsFixed(2);
     } else {
       _itemPriceController.text = '';

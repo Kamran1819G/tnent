@@ -46,6 +46,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   List<ProductModel> relatedProducts = [];
   final TextEditingController _reviewController = TextEditingController();
   List<Map<String, dynamic>> _reviews = [];
+  bool _isDescriptionExpanded = false;
 
   @override
   void initState() {
@@ -884,12 +885,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ],
                             ),
                             SizedBox(height: 20.h),
-                            Text(
-                              widget.product.description,
-                              style: TextStyle(
-                                color: hexToColor('#9C9C9C'),
-                                fontSize: 20.sp,
-                              ),
+                            DescriptionWidget(
+                              description: widget.product.description,
+                              isExpanded: _isDescriptionExpanded,
+                              onToggle: () {
+                                setState(() {
+                                  _isDescriptionExpanded = !_isDescriptionExpanded;
+                                });
+                              },
                             ),
                           ],
                         ),
@@ -1358,6 +1361,49 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           ],
         ],
       ),
+    );
+  }
+}
+
+class DescriptionWidget extends StatelessWidget {
+  final String description;
+  final bool isExpanded;
+  final VoidCallback onToggle;
+
+  const DescriptionWidget({
+    Key? key,
+    required this.description,
+    required this.isExpanded,
+    required this.onToggle,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          description,
+          style: TextStyle(
+            color: hexToColor('#9C9C9C'),
+            fontSize: 20.sp,
+          ),
+          maxLines: isExpanded ? null : 3,
+          overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
+        ),
+        SizedBox(height: 10.h),
+        GestureDetector(
+          onTap: onToggle,
+          child: Text(
+            isExpanded ? 'Show Less' : 'Show More',
+            style: TextStyle(
+              color: Theme.of(context).primaryColor,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

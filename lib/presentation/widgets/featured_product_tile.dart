@@ -182,7 +182,7 @@ class _FeaturedProductTileState extends State<FeaturedProductTile> {
                       color: hexToColor('#343434'),
                       fontSize: 12.0,
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 4.0),

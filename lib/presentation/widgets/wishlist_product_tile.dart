@@ -237,7 +237,7 @@ class _WishlistProductTileState extends State<WishlistProductTile> {
                       color: hexToColor('#343434'),
                       fontSize: 18.sp,
                     ),
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   SizedBox(height: 8.h),
