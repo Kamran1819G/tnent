@@ -6,7 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/models/product_model.dart';
@@ -86,7 +85,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       lastName = widget.currentUser.lastName;
     });
     _tabController = TabController(
-      length: 6,
+      length: 10,
       vsync: this,
     );
     _tabController.addListener(() {
