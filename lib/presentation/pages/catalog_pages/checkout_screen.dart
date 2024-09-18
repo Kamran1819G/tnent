@@ -1827,6 +1827,14 @@ class _TransactionScreenState extends State<TransactionScreen> {
     try {
       WriteBatch batch = FirebaseFirestore.instance.batch();
 
+      double subtotal = 0;
+      for (var item in items) {
+        subtotal += item['variationDetails'].price * item['quantity'];
+      }
+
+      double platformFee = PlatformFeeCalculator.calculateFee(subtotal);
+      double deliveryCharge = checkoutController.deliveryCharge;
+
       for (var item in items) {
         String pickupCode = _getRandomString(5);
         DocumentReference orderRef =
@@ -1861,7 +1869,8 @@ class _TransactionScreenState extends State<TransactionScreen> {
                 widget.isOnlinePayment ? 'Online Payment' : 'Cash on Delivery',
             'status': widget.isOnlinePayment ? 'Paid' : 'Pending',
             'paymentId': widget.paymentId,
-
+            'platformFee': platformFee,
+            'deliveryCharge': deliveryCharge,
           },
           'isOrderNew': true,
           'isOnlinePayment': widget.isOnlinePayment,

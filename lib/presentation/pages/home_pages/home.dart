@@ -6,7 +6,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:showcaseview/showcaseview.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
@@ -18,7 +21,9 @@ import 'package:tnent/presentation/pages/notification_screen.dart';
 import 'package:tnent/presentation/pages/stores_screen.dart';
 import 'package:tnent/presentation/pages/users_screens/myprofile_screen.dart';
 import 'package:tnent/presentation/widgets/wishlist_product_tile.dart';
+import '../../controllers/story_updates_controller.dart';
 import '../coming_soon.dart';
+import '../story_updates_screen.dart';
 import '../update_screen.dart';
 import '../users_screens/storeprofile_screen.dart';
 
@@ -41,6 +46,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   List<String> _tabLabels = [];
   List<List<ProductModel>> _featuredProductsByCategory = [];
   bool _isLoading = true;
+
+  StoryUpdatesController storyUpdatesController =
+  Get.put(StoryUpdatesController(), tag: 'story-updates-controller');
 
   List<Map<String, dynamic>> categories = [
     {
@@ -69,7 +77,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     },
   ];
 
-  List<StoreUpdateModel> updates = [];
   List<StoreModel> featuredStores = [];
   List<ProductModel> featuredProducts = [];
 
@@ -78,7 +85,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     super.initState();
     _fetchFeaturedStores();
     _fetchFeaturedProducts();
-    _fetchUpdates();
+
     _loadTabLabelsAndProducts();
     _fetchFeaturedFestivalImage();
     setState(() {
@@ -263,71 +270,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     }
   }
 
-  void _fetchUpdates() async {
-    List<StoreUpdateModel> fetchedUpdates = await _fetchAndPopulateUpdates();
-    setState(() {
-      updates = fetchedUpdates;
-      sortInGroupedupdates();
-    });
-  }
-
-  bool isUpdatesLoading = false;
-
-  Future<List<StoreUpdateModel>> _fetchAndPopulateUpdates() async {
-    final now = DateTime.now();
-    final oneDayAgo = now.subtract(const Duration(hours: 24));
-    final currentUserId = FirebaseAuth.instance.currentUser!.uid;
-
-    QuerySnapshot snapshot = await FirebaseFirestore.instance
-        .collection('storeUpdates')
-        .where('createdAt', isGreaterThanOrEqualTo: oneDayAgo)
-        .get();
-
-    setState(() {
-      isUpdatesLoading = true;
-    });
-
-    List<StoreUpdateModel> updatesLocal = [];
-
-    for (var doc in snapshot.docs) {
-      final createdAt = (doc['createdAt'] as Timestamp).toDate();
-      final expiresAt = (doc['expiresAt'] as Timestamp).toDate();
-      final storeId = doc['storeId'];
-
-      if (now.isBefore(expiresAt) && createdAt.isAfter(oneDayAgo)) {
-        DocumentSnapshot storeDoc = await FirebaseFirestore.instance
-            .collection('Stores')
-            .doc(storeId)
-            .get();
-
-        List<String> followerIds = List<String>.from(storeDoc['followerIds']);
-        if (followerIds.contains(currentUserId)) {
-          final storeUpdateModel = StoreUpdateModel.fromFirestore(doc);
-          // Handling the logic that 2/more updates from same store dont show individually in home page
-
-          updatesLocal.add(storeUpdateModel);
-        }
-      }
-    }
-
-    setState(() {
-      isUpdatesLoading = false;
-    });
-
-    return updatesLocal;
-  }
-
-  Map<String, List<StoreUpdateModel>> groupedUpdates = {};
-  void sortInGroupedupdates() {
-    for (var update in updates) {
-      if (groupedUpdates.containsKey(update.storeName)) {
-        groupedUpdates[update.storeName]!.add(update);
-      } else {
-        groupedUpdates[update.storeName] = [update];
-      }
-    }
-  }
-
   Widget underWidget(String text) => Padding(
     padding:
     const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 13),
@@ -348,6 +290,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    int indexClicked = -1;
     final size = MediaQuery.of(context).size;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -521,7 +464,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ),
           ),
         ),
-        isUpdatesLoading
+
+        Obx(() => storyUpdatesController.isUpdatesLoading.value
             ? Padding(
           padding: const EdgeInsets.only(left: 20),
           child: SingleChildScrollView(
@@ -532,7 +476,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
             ),
           ),
         )
-            : updates.isEmpty
+            : storyUpdatesController.updates.isEmpty
             ? Container()
             : Container(
           height: 110.0,
@@ -540,24 +484,22 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           child: ListView(
             shrinkWrap: true,
             scrollDirection: Axis.horizontal,
-            children: groupedUpdates.entries.map((e) {
+            children: storyUpdatesController.groupedUpdates.entries
+                .map((e) {
               String storeName = e.key;
               List<StoreUpdateModel> individualStoreUpdates = e.value;
-              int indexClicked = 0;
-              for (int i = 0; i < updates.length; i++) {
-                if (updates[i] == individualStoreUpdates[0]) {
-                  indexClicked = i;
-                }
-              }
+
               return UpdateTile(
-                name: storeName,
-                image: individualStoreUpdates[0].logoUrl,
-                index: indexClicked,
-                updates: updates,
+                indexClicked: ++indexClicked,
+                storeName: storeName,
+                storeLogo: individualStoreUpdates[0].logoUrl,
+                individualStoreUpdates: individualStoreUpdates,
+                allGroupedUpdates:
+                storyUpdatesController.groupedUpdates,
               );
             }).toList(),
           ),
-        ),
+        )),
         const FirestoreCarouselSlider(),
         GridView.builder(
           shrinkWrap: true,
@@ -1116,17 +1058,19 @@ class CategoryProductsScreen extends StatelessWidget {
 }
 
 class UpdateTile extends StatelessWidget {
-  final String name;
-  final String image;
-  final int index;
-  final List<StoreUpdateModel> updates;
+  final String storeName;
+  final String storeLogo;
+  final int indexClicked;
+  final List<StoreUpdateModel> individualStoreUpdates;
+  final Map<String, List<StoreUpdateModel>> allGroupedUpdates;
 
   const UpdateTile({
     super.key,
-    required this.name,
-    required this.image,
-    required this.index,
-    required this.updates,
+    required this.storeName,
+    required this.storeLogo,
+    required this.individualStoreUpdates,
+    required this.indexClicked,
+    required this.allGroupedUpdates,
   });
 
   final double size = 30;
@@ -1138,17 +1082,13 @@ class UpdateTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => UpdateScreen(
-              storeName: name,
-              storeImage: CachedNetworkImage(
-                imageUrl: updates[index].logoUrl,
-                placeholder: (context, url) => CircularProgressIndicator(
-                  color: hexToColor('#094446'),
-                ),
-              ),
-              initialUpdateIndex: index,
-              updates: updates,
-            ),
+            builder: (context) => ShowCaseWidget(builder: (context) {
+              return StoryUpdatesScreen(
+                currentStoreIndex: indexClicked, // Set the initial store index
+                allGroupedUpdates:
+                allGroupedUpdates, // Your map of store updates
+              );
+            }),
           ),
         );
       },
@@ -1167,14 +1107,14 @@ class UpdateTile extends StatelessWidget {
                   radius: size + 1.5,
                   backgroundColor: Colors.white,
                   child: CircleAvatar(
-                    backgroundImage: CachedNetworkImageProvider(image),
+                    backgroundImage: CachedNetworkImageProvider(storeLogo),
                     radius: size,
                   ),
                 ),
               ),
               SizedBox(height: 12.h),
               Text(
-                name,
+                storeName,
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontWeight: FontWeight.w600,
@@ -1191,6 +1131,7 @@ class UpdateTile extends StatelessWidget {
     );
   }
 }
+
 class FirestoreCarouselSlider extends StatelessWidget {
   const FirestoreCarouselSlider({Key? key}) : super(key: key);
 
