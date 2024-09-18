@@ -82,6 +82,7 @@ dependencies:
   flutter_dotenv: ^5.1.0
   firebase_performance: ^0.10.0+5
   connectivity_plus: ^2.3.0
+  showcaseview: ^3.0.0
 
 dev_dependencies:
   flutter_launcher_icons: "^0.13.1"
