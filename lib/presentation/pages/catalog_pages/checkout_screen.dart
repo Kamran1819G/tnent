@@ -412,18 +412,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    'Total Amount:',
-                    style: TextStyle(fontSize: 26.sp),
-                  ),
-                  Obx(
-                    () => Text(
-                      '₹${checkoutController.totalAmount.toStringAsFixed(2)}',
-                      style: TextStyle(
-                          fontSize: 26.sp,
-                          color: Theme.of(context).primaryColor),
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -1357,10 +1345,13 @@ class _SummaryScreenState extends State<SummaryScreen> {
       totalMRP += itemMRP;
       subtotal += itemPrice;
       totalDiscount += itemDiscount;
+
     }
 
     double platformFee = PlatformFeeCalculator.calculateFee(subtotal);
-    double total = subtotal + platformFee;
+    double deliveryCharge = checkoutController.deliveryCharge;
+    double total = subtotal + platformFee + deliveryCharge;
+
 
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -1382,6 +1373,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
           _buildSummaryRow('Total MRP', totalMRP),
           _buildSummaryRow('Total Discount', totalDiscount, isDiscount: true),
           _buildSummaryRow('Platform Fee', platformFee),
+          _buildSummaryRow('Delivery Charge', deliveryCharge),
           Container(
             margin: EdgeInsets.symmetric(vertical: 20.h),
             height: 1.h,
@@ -1463,7 +1455,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
     );
   }
 
-
   Widget _buildPayButton() {
     return Center(
       child: GestureDetector(
@@ -1487,7 +1478,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
             borderRadius: BorderRadius.circular(18.r),
           ),
           child: Text(
-            'Pay ₹ ${checkoutController.totalAmount.toStringAsFixed(2)}',
+            'Pay ₹ ${checkoutController.totalAmountWithFee.toStringAsFixed(2)}',
             style: TextStyle(
               color: Colors.white,
               fontSize: 28.sp,
@@ -1499,24 +1490,6 @@ class _SummaryScreenState extends State<SummaryScreen> {
   }
 }
 
-class PlatformFeeCalculator {
-  static double calculateFee(double totalAmount) {
-    double feePercentage;
-
-    if (totalAmount < 500) {
-      feePercentage = 0.07; // 7% for totals below 500
-    } else if (totalAmount >= 500 && totalAmount <= 1000) {
-      feePercentage = 0.10; // 10% for totals between 500 and 1000
-    } else {
-      feePercentage = 0.10; // Default to 10% for totals above 1000
-    }
-
-    double fee = totalAmount * feePercentage;
-
-    // Round up to the next integer
-    return fee.ceil().toDouble();
-  }
-}
 
 class PaymentOptionScreen extends StatefulWidget {
   Map<String, StoreModel> storeDetails;
@@ -1672,10 +1645,9 @@ class _PaymentOptionScreenState extends State<PaymentOptionScreen> {
                                 );
                               },
                             );
-
                             // Proceed with payment
                             razorpayService.openCheckout(
-                              checkoutController.totalAmount,
+                              checkoutController.totalAmountWithFee,
                               context,
                               storeId,
                               checkoutController.items,
@@ -2391,7 +2363,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
                                               ),
                                             ),
                                             Obx(() => Text(
-                                                  '₹ ${checkoutController.totalAmount.toStringAsFixed(2)}',
+                                                  '₹ ${checkoutController.totalAmountWithFee.toStringAsFixed(2)}',
                                                   style: TextStyle(
                                                     color:
                                                         hexToColor('#343434'),
