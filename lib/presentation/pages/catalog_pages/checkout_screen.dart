@@ -1345,6 +1345,23 @@ class _SummaryScreenState extends State<SummaryScreen> {
   }
 
   Widget _buildSummarySection() {
+    double subtotal = 0;
+    double totalMRP = 0;
+    double totalDiscount = 0;
+
+    for (var item in checkoutController.items) {
+      double itemMRP = item['variationDetails'].mrp * item['quantity'];
+      double itemPrice = item['variationDetails'].price * item['quantity'];
+      double itemDiscount = itemMRP - itemPrice;
+
+      totalMRP += itemMRP;
+      subtotal += itemPrice;
+      totalDiscount += itemDiscount;
+    }
+
+    double platformFee = PlatformFeeCalculator.calculateFee(subtotal);
+    double total = subtotal + platformFee;
+
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Column(
@@ -1361,16 +1378,56 @@ class _SummaryScreenState extends State<SummaryScreen> {
             height: 1.h,
             color: hexToColor('#E3E3E3'),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          _buildSummaryRow('Subtotal', subtotal),
+          _buildSummaryRow('Total MRP', totalMRP),
+          _buildSummaryRow('Total Discount', totalDiscount, isDiscount: true),
+          _buildSummaryRow('Platform Fee', platformFee),
+          Container(
+            margin: EdgeInsets.symmetric(vertical: 20.h),
+            height: 1.h,
+            color: hexToColor('#E3E3E3'),
+          ),
+          _buildSummaryRow('Total', total, isBold: true),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildItemSummary(Map<String, dynamic> item) {
+    double itemMRP = item['variationDetails'].mrp * item['quantity'];
+    double itemPrice = item['variationDetails'].price * item['quantity'];
+    double itemDiscount = itemMRP - itemPrice;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              item['productName'],
+              style: TextStyle(
+                color: hexToColor('#B9B9B9'),
+                fontFamily: 'Gotham',
+                fontWeight: FontWeight.w500,
+                fontSize: 18.sp,
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                'Total',
-                style: TextStyle(color: hexToColor('#343434'), fontSize: 30.sp),
+                '₹ ${itemPrice.toStringAsFixed(2)}',
+                style: TextStyle(color: hexToColor('#606060'), fontSize: 18.sp),
               ),
               Text(
-                '₹ ${checkoutController.totalAmount.toStringAsFixed(2)}',
-                style: TextStyle(color: hexToColor('#343434'), fontSize: 30.sp),
+                'MRP: ₹ ${itemMRP.toStringAsFixed(2)}',
+                style: TextStyle(color: hexToColor('#B9B9B9'), fontSize: 14.sp, decoration: TextDecoration.lineThrough),
+              ),
+              Text(
+                'You save: ₹ ${itemDiscount.toStringAsFixed(2)}',
+                style: TextStyle(color: hexToColor('#4CAF50'), fontSize: 14.sp),
               ),
             ],
           ),
@@ -1379,29 +1436,33 @@ class _SummaryScreenState extends State<SummaryScreen> {
     );
   }
 
-  Widget _buildItemSummary(Map<String, dynamic> item) {
+  Widget _buildSummaryRow(String label, double amount, {bool isDiscount = false, bool isBold = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            item['productName'],
+            label,
             style: TextStyle(
-              color: hexToColor('#B9B9B9'),
-              fontFamily: 'Gotham',
-              fontWeight: FontWeight.w500,
-              fontSize: 18.sp,
+              color: hexToColor('#343434'),
+              fontSize: isBold ? 20.sp : 18.sp,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             ),
           ),
           Text(
-            '₹ ${(item['variationDetails'].price * item['quantity']).toStringAsFixed(2)}',
-            style: TextStyle(color: hexToColor('#606060'), fontSize: 18.sp),
+            isDiscount ? '- ₹ ${amount.toStringAsFixed(2)}' : '₹ ${amount.toStringAsFixed(2)}',
+            style: TextStyle(
+              color: isDiscount ? hexToColor('#4CAF50') : hexToColor('#343434'),
+              fontSize: isBold ? 20.sp : 18.sp,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            ),
           ),
         ],
       ),
     );
   }
+
 
   Widget _buildPayButton() {
     return Center(
@@ -1435,6 +1496,25 @@ class _SummaryScreenState extends State<SummaryScreen> {
         ),
       ),
     );
+  }
+}
+
+class PlatformFeeCalculator {
+  static double calculateFee(double totalAmount) {
+    double feePercentage;
+
+    if (totalAmount < 500) {
+      feePercentage = 0.07; // 7% for totals below 500
+    } else if (totalAmount >= 500 && totalAmount <= 1000) {
+      feePercentage = 0.10; // 10% for totals between 500 and 1000
+    } else {
+      feePercentage = 0.10; // Default to 10% for totals above 1000
+    }
+
+    double fee = totalAmount * feePercentage;
+
+    // Round up to the next integer
+    return fee.ceil().toDouble();
   }
 }
 

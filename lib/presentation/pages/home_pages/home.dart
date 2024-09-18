@@ -38,8 +38,9 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   int _selectedIndex = 0;
   bool isNewNotification = true;
   String? featuredFestivalImage;
-  List<String> category = [];
-  List<ProductModel> featuredProducts = [];
+  List<String> _tabLabels = [];
+  List<List<ProductModel>> _featuredProductsByCategory = [];
+  bool _isLoading = true;
 
   List<Map<String, dynamic>> categories = [
     {
@@ -70,13 +71,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
   List<StoreUpdateModel> updates = [];
   List<StoreModel> featuredStores = [];
+  List<ProductModel> featuredProducts = [];
+
   @override
   void initState() {
     super.initState();
-    _fetchCategories();
     _fetchFeaturedStores();
     _fetchFeaturedProducts();
     _fetchUpdates();
+    _loadTabLabelsAndProducts();
     _fetchFeaturedFestivalImage();
     setState(() {
       firstName = widget.currentUser.firstName;
@@ -99,57 +102,36 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<void> _fetchCategories() async {
-    final snapshot = await FirebaseFirestore.instance.collection('Categories').doc('categories').get();
-    if (snapshot.exists) {
+  Future<void> _loadTabLabelsAndProducts() async {
+    _tabLabels = await FeaturedProductsManager.getTabLabels();
+    _tabController = TabController(length: _tabLabels.length, vsync: this);
+    _tabController.addListener(_handleTabSelection);
+
+    for (String label in _tabLabels) {
+      List<ProductModel> products = await FeaturedProductsManager.getFeaturedProducts(label);
+      _featuredProductsByCategory.add(products);
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  void _handleTabSelection() {
+    if (_tabController.indexIsChanging) {
       setState(() {
-        category = List<String>.from(snapshot.data()!['categories']);
-        _tabController = TabController(
-          length: category.length,
-          vsync: this,
-        );
-        _tabController.addListener(() {
-          setState(() {
-            _selectedIndex = _tabController.index;
-          });
-        });
+        _selectedIndex = _tabController.index;
       });
     }
   }
 
-  Future<void> _fetchFeaturedProducts() async
-  {
-    final snapshot = await FirebaseFirestore.instance.collection('Featured Products').doc('featured-products').get();
-    if (snapshot.exists)
-    {
-      final List<String> productIds = List<String>.from(snapshot.data()!['products'] ?? []);
-      List<ProductModel> products = [];
-
-      for (String productId in productIds)
-      {
-        final productDoc = await FirebaseFirestore.instance.collection('products').doc(productId).get();
-        if (productDoc.exists) {
-          final product = ProductModel.fromFirestore(productDoc);
-          final storeDoc = await FirebaseFirestore.instance.collection('Stores').doc(product.storeId).get();
-          if (storeDoc.exists && storeDoc.data()!['isActive'] == true) {
-            products.add(product);
-          }
-        }
-      }
-      setState(() {
-        featuredProducts = products;
-      });
-    }
-  }
-  String _getTabLabel(int index) {
-    return index < category.length ? category[index] : '';
-  }
   Future<void> _fetchFeaturedFestivalImage() async {
     final image = await fetchFeaturedFestivalImage();
     setState(() {
       featuredFestivalImage = image;
     });
   }
+
   Future<String?> fetchFeaturedFestivalImage() async {
     final doc = await FirebaseFirestore.instance
         .collection('Avatar')
@@ -158,9 +140,11 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     final image = doc.data()?['image'] as String?;
     return image;
   }
+
   Stream<bool> _getNewNotificationsStream() {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return Stream.value(false);
+
     return FirebaseFirestore.instance
         .collection('Users')
         .doc(user.uid)
@@ -232,7 +216,52 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     }
   }
 
+  Future<void> _fetchFeaturedProducts() async {
+    try {
+      final featuredProductDoc = await FirebaseFirestore.instance
+          .collection('Featured Products')
+          .doc('featured-products')
+          .get();
 
+      final List<String> productIds =
+      List<String>.from(featuredProductDoc['products'] ?? []);
+
+      if (productIds.isNotEmpty) {
+        List<ProductModel> products = [];
+
+        for (String productId in productIds) {
+          final productDoc = await FirebaseFirestore.instance
+              .collection('products')
+              .doc(productId)
+              .get();
+
+          if (productDoc.exists) {
+            final product = ProductModel.fromFirestore(productDoc);
+
+            // Check if the store is active
+            final storeDoc = await FirebaseFirestore.instance
+                .collection('Stores')
+                .doc(product.storeId)
+                .get();
+
+            if (storeDoc.exists && storeDoc.data()?['isActive'] == true) {
+              products.add(product);
+            }
+          }
+        }
+
+        setState(() {
+          featuredProducts = products;
+        });
+      } else {
+        setState(() {
+          featuredProducts = [];
+        });
+      }
+    } catch (e) {
+      print('Error fetching featured products: $e');
+    }
+  }
 
   void _fetchUpdates() async {
     List<StoreUpdateModel> fetchedUpdates = await _fetchAndPopulateUpdates();
@@ -553,12 +582,12 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         Padding(
           padding: EdgeInsets.only(left: 16.w),
           child: Wrap(
-            children: List.generate(6, (index) {
+            children: List.generate(_tabLabels.length, (index) {
               return Container(
                 margin: EdgeInsets.symmetric(horizontal: 6.w),
                 padding: EdgeInsets.symmetric(horizontal: 4.w),
                 child: ChoiceChip(
-                  label: Text(_getTabLabel(index)),
+                  label: Text(_tabLabels[index]),
                   labelStyle: TextStyle(
                     fontSize: 19.sp,
                     color: _selectedIndex == index
@@ -600,28 +629,26 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         ),
 
         SizedBox(height: 30.h),
+
         Container(
           height: 360.h,
           padding: const EdgeInsets.only(left: 8.0),
           child: TabBarView(
             controller: _tabController,
-            children: category.map((category) {
+            children: _featuredProductsByCategory.map((products) {
               return ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: featuredProducts.length,
+                itemCount: products.length,
                 itemBuilder: (context, index) {
-                  if (featuredProducts[index].productCategory == category) {
-                    return WishlistProductTile(
-                      product: featuredProducts[index],
-                    );
-                  } else {
-                    return Container(); // Return an empty container for products not in this category
-                  }
+                  return WishlistProductTile(
+                    product: products[index],
+                  );
                 },
               );
             }).toList(),
           ),
         ),
+
         SizedBox(height: 30.h),
         const FirestoreUnderWidget(),
         SizedBox(height: 50.h),
@@ -797,6 +824,31 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 }
 
+class FeaturedProductsManager {
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  static Future<List<String>> getTabLabels() async {
+    final doc = await _firestore.collection('Categories').doc('categories').get();
+    return List<String>.from(doc.data()?['labels'] ?? []);
+  }
+
+  static Future<List<ProductModel>> getFeaturedProducts(String category) async {
+    final doc = await _firestore.collection('Categories').doc('categories').get();
+    final productIds = List<String>.from(doc.data()?[category] ?? []);
+
+    List<ProductModel> products = [];
+    for (String productId in productIds) {
+      final productDoc = await _firestore.collection('products').doc(productId).get();
+      if (productDoc.exists) {
+        final product = ProductModel.fromFirestore(productDoc);
+        products.add(product);
+      }
+    }
+    return products;
+  }
+}
+
+
 class StoreTile extends StatelessWidget {
   final StoreModel store;
 
@@ -909,6 +961,9 @@ class CategoryProductsScreen extends StatelessWidget {
         'Electronics',
         'Accessories',
         'Groceries',
+        'Restaurant'
+        'Cafe',
+        'Bakery'
         'Books'
       ]).snapshots();
     } else {
