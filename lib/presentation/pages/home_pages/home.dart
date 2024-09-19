@@ -681,41 +681,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         ),
 
         SizedBox(height: 50.h),
-
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Special Products',
-                style: TextStyle(
-                  color: hexToColor('#343434'),
-                  fontSize: 30.sp,
-                ),
-              ),
-              SizedBox(height: 30.h),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: 16.w),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12.0,
-                  mainAxisSpacing: 12.0,
-                  childAspectRatio: 0.8,
-                ),
-                itemCount: featuredProducts.length,
-                itemBuilder: (context, index) {
-                  return WishlistProductTile(
-                    product: featuredProducts[index],
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-
+        const SpecialProductsSection(),
         SizedBox(height: 200.h),
       ],
     );
@@ -790,6 +756,98 @@ class FeaturedProductsManager {
   }
 }
 
+class SpecialProductsSection extends StatelessWidget {
+  const SpecialProductsSection({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('Headings')
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const SizedBox(); // Return an empty widget if no data
+        }
+
+        final headings = snapshot.data!.docs;
+
+        return ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: headings.length,
+          itemBuilder: (context, index) {
+            final data = headings[index].data() as Map<String, dynamic>;
+            final heading = data['heading'] as String? ?? 'Special Products';
+            final productIds = List<String>.from(data['productIds'] ?? []);
+
+            return Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    heading,
+                    style: TextStyle(
+                      color: hexToColor('#343434'),
+                      fontSize: 30.sp,
+                    ),
+                  ),
+                  SizedBox(height: 30.h),
+                  StreamBuilder<QuerySnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('products')
+                        .where(FieldPath.documentId, whereIn: productIds)
+                        .snapshots(),
+                    builder: (context, productsSnapshot) {
+                      if (productsSnapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+
+                      if (productsSnapshot.hasError) {
+                        return Center(child: Text('Error: ${productsSnapshot.error}'));
+                      }
+
+                      final products = productsSnapshot.data?.docs
+                          .map((doc) => ProductModel.fromFirestore(doc))
+                          .toList() ?? [];
+
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: EdgeInsets.symmetric(horizontal: 16.w),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12.0,
+                          mainAxisSpacing: 12.0,
+                          childAspectRatio: 0.8,
+                        ),
+                        itemCount: products.length,
+                        itemBuilder: (context, index) {
+                          return WishlistProductTile(
+                            product: products[index],
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
 
 class StoreTile extends StatelessWidget {
   final StoreModel store;

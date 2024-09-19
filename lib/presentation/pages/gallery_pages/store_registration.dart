@@ -17,6 +17,7 @@ import 'package:tnent/models/store_model.dart';
 import 'package:tnent/presentation/pages/webview_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/helpers/snackbar_utils.dart';
+import '../../../services/razorpay_subscription.dart';
 
 class StoreRegistration extends StatefulWidget {
   const StoreRegistration({super.key});
@@ -41,6 +42,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
   bool _isStorePhoneUnique = true;
   bool _isStoreEmailUnique = true;
   bool _isStoreDomainUnique = true;
+  bool _isSubscriptionCompleted = false;
+  late RazorpaySubscription _razorpaySubscription;
 
   List<String> categories = [
     "Clothings",
@@ -81,6 +84,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
 
     // Add listener to _pageController
     _pageController.addListener(_onPageChange);
+    _razorpaySubscription = RazorpaySubscription(onPaymentComplete: _onPaymentComplete);
   }
 
   @override
@@ -91,7 +95,17 @@ class _StoreRegistrationState extends State<StoreRegistration> {
     _pageController.dispose();
     _phoneController.dispose();
     _otpController.dispose();
+    _razorpaySubscription.dispose();
     super.dispose();
+  }
+
+  void _onPaymentComplete(bool success) {
+    setState(() {
+      _isSubscriptionCompleted = success;
+    });
+    if (success) {
+      _pageController.jumpToPage(_currentPageIndex + 1);
+    }
   }
 
   void _onPageChange() {
@@ -948,7 +962,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             color: Theme.of(context).primaryColor,
                             fontSize: 24.sp,
                           ),
-                          suffixText: '.tnent.com',
+                          suffixText: '.tnentstore.com',
                           suffixStyle: TextStyle(
                             color: hexToColor('#636363'),
                             fontFamily: 'Gotham',
@@ -1418,6 +1432,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     ),
                   ],
                 ),
+
                 // Page 10: Store Description
                 SingleChildScrollView(
                   child: Column(
@@ -1432,11 +1447,11 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              'Pay Once & Own Your Store Forever',
+                              'Get Access To Your Own Personalized Store',
                               style: TextStyle(
                                 color: hexToColor('#2A2A2A'),
                                 fontWeight: FontWeight.w500,
-                                fontSize: 55.sp,
+                                fontSize: 53.sp,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -1639,14 +1654,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       SizedBox(height: 30.h),
                       Center(
                         child: GestureDetector(
-                          onTap: () async {
-                            try {
-                              await _registerStore();
-                              _pageController.jumpToPage(_currentPageIndex + 1);
-                            } catch (e) {
-                              print(e);
-                            }
-                          },
+                          onTap: _razorpaySubscription.createSubscription,
                           child: Container(
                             height: 95.h,
                             width: 595.w,
@@ -1655,7 +1663,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               color: Theme.of(context).primaryColor,
                               borderRadius: BorderRadius.circular(22.r),
                             ),
-                            child: Text('Pay ₹2999.00',
+                            child: Text('Subscribe for ₹2999/month',
                                 style: TextStyle(
                                     fontSize: 28.sp,
                                     color: Colors.white,
@@ -1668,7 +1676,9 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     ],
                   ),
                 ),
+
                 // Page 11:  Congratulation Page
+                if(_isSubscriptionCompleted)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
