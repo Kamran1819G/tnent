@@ -1627,7 +1627,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               ),
                             ],
                           )),
-                      SizedBox(height: 300.h),
+                      SizedBox(height: 200.h),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -1663,7 +1663,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               color: Theme.of(context).primaryColor,
                               borderRadius: BorderRadius.circular(22.r),
                             ),
-                            child: Text('Subscribe for ₹2999/month',
+                            child: Text('Subscribe for ₹399/month',
                                 style: TextStyle(
                                     fontSize: 28.sp,
                                     color: Colors.white,

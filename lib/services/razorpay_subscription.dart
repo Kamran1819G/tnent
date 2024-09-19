@@ -4,7 +4,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 class RazorpaySubscription {
   late Razorpay _razorpay;
   final Function(bool) onPaymentComplete;
-  final String _subscriptionId = 'sub_OywFncMHXnzWwf'; // Check this ID in your dashboard
+  final String _subscriptionId = 'sub_OywFncMHXnzWwf';
 
   RazorpaySubscription({required this.onPaymentComplete}) {
     _razorpay = Razorpay();
@@ -33,16 +33,13 @@ class RazorpaySubscription {
 
   void createSubscription() {
     var options = {
-      'key': 'rzp_live_L3Ffu2rDxMUBRw', // Ensure this is the correct key for the mode you're using
+      'key':'rzp_live_L3Ffu2rDxMUBRw',
       'subscription_id': _subscriptionId,
       'name': 'Tnent Store Subscription',
       'description': 'Monthly Store Access',
-      'prefill': {
-        'contact': 'your_customer_contact', // Add contact info if available
-        'email': 'your_customer_email' // Add email info if available
-      },
+      'prefill': {'contact': '', 'email': ''},
       'external': {
-        'wallets': ['paytm'] // Add/remove wallets as needed
+        'wallets': ['paytm']
       }
     };
 
