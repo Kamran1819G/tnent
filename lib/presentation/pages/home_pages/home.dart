@@ -500,7 +500,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                       }).toList(),
                     ),
                   )),
-        const FirestoreCarouselSlider(),
+        const BannerCarousel(),
         SizedBox(height: 30.h),
         GridView.builder(
           shrinkWrap: true,
@@ -593,7 +593,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
         ),
 
         SizedBox(height: 30.h),
-        const FirestoreUnderWidget(),
+        const PromotionalBannerCarousel(),
         SizedBox(height: 50.h),
         // Feature Store Section
         Padding(
@@ -976,9 +976,9 @@ class CategoryProductsScreen extends StatelessWidget {
         'Electronics',
         'Accessories',
         'Groceries',
-        'Restaurant'
-            'Cafe',
-        'Bakery'
+        'Restaurants'
+            'Cafes',
+        'Bakeries'
             'Books'
       ]).snapshots();
     } else {
@@ -1196,8 +1196,8 @@ class UpdateTile extends StatelessWidget {
   }
 }
 
-class FirestoreCarouselSlider extends StatelessWidget {
-  const FirestoreCarouselSlider({Key? key}) : super(key: key);
+class BannerCarousel extends StatelessWidget {
+  const BannerCarousel({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -1253,8 +1253,8 @@ class FirestoreCarouselSlider extends StatelessWidget {
   }
 }
 
-class FirestoreUnderWidget extends StatelessWidget {
-  const FirestoreUnderWidget({Key? key}) : super(key: key);
+class PromotionalBannerCarousel extends StatelessWidget {
+  const PromotionalBannerCarousel({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<DocumentSnapshot>(
