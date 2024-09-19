@@ -48,15 +48,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   bool _isLoading = true;
 
   StoryUpdatesController storyUpdatesController =
-  Get.put(StoryUpdatesController(), tag: 'story-updates-controller');
+      Get.put(StoryUpdatesController(), tag: 'story-updates-controller');
 
   List<Map<String, dynamic>> categories = [
     {
-      'name': 'Restaurant',
+      'name': 'Restaurants',
       'image': 'assets/categories2/restaurant.png',
     },
     {
-      'name': 'Cafe',
+      'name': 'Cafes',
       'image': 'assets/categories2/cafe.png',
     },
     {
@@ -64,7 +64,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
       'image': 'assets/categories2/clothing.png',
     },
     {
-      'name': 'Bakery',
+      'name': 'Bakeries',
       'image': 'assets/categories2/bakery.png',
     },
     {
@@ -115,7 +115,8 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
     _tabController.addListener(_handleTabSelection);
 
     for (String label in _tabLabels) {
-      List<ProductModel> products = await FeaturedProductsManager.getFeaturedProducts(label);
+      List<ProductModel> products =
+          await FeaturedProductsManager.getFeaturedProducts(label);
       _featuredProductsByCategory.add(products);
     }
 
@@ -199,7 +200,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           .get();
 
       final List<String> storeIds =
-      List<String>.from(featuredStoreDoc['stores'] ?? []);
+          List<String>.from(featuredStoreDoc['stores'] ?? []);
 
       if (storeIds.isNotEmpty) {
         final storesSnapshot = await FirebaseFirestore.instance
@@ -231,7 +232,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
           .get();
 
       final List<String> productIds =
-      List<String>.from(featuredProductDoc['products'] ?? []);
+          List<String>.from(featuredProductDoc['products'] ?? []);
 
       if (productIds.isNotEmpty) {
         List<ProductModel> products = [];
@@ -271,20 +272,20 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   }
 
   Widget underWidget(String text) => Padding(
-    padding:
-    const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 13),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        // width: 350 * (235 / 342),
-        height: 350,
-        color: Colors.red,
-        child: Center(
-          child: Text(text),
+        padding:
+            const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 13),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            // width: 350 * (235 / 342),
+            height: 350,
+            color: Colors.red,
+            child: Center(
+              child: Text(text),
+            ),
+          ),
         ),
-      ),
-    ),
-  );
+      );
 
   final double size = 30.0;
 
@@ -360,7 +361,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                           context,
                           MaterialPageRoute(
                               builder: (context) =>
-                              const NotificationScreen()));
+                                  const NotificationScreen()));
                       // After returning from NotificationScreen, update the last check time
                       await _markAllNotificationsAsRead();
                     },
@@ -389,16 +390,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
                 },
                 child: CircleAvatar(
                   radius: 25.0,
-                  backgroundImage: featuredFestivalImage!= null
-                      ? CachedNetworkImageProvider(
-                      featuredFestivalImage!)
+                  backgroundImage: featuredFestivalImage != null
+                      ? CachedNetworkImageProvider(featuredFestivalImage!)
                       : null,
                   backgroundColor: Colors.transparent,
                   child: featuredFestivalImage == null
                       ? Image.asset(
-                    'assets/icons/profile_pic.png',
-                    fit: BoxFit.cover,
-                  )
+                          'assets/icons/profile_pic.png',
+                          fit: BoxFit.cover,
+                        )
                       : null,
                 ),
               )
@@ -467,40 +467,41 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
 
         Obx(() => storyUpdatesController.isUpdatesLoading.value
             ? Padding(
-          padding: const EdgeInsets.only(left: 20),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children:
-              List.generate(4, (index) => updatesShimmerEffect()),
-            ),
-          ),
-        )
+                padding: const EdgeInsets.only(left: 20),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children:
+                        List.generate(4, (index) => updatesShimmerEffect()),
+                  ),
+                ),
+              )
             : storyUpdatesController.updates.isEmpty
-            ? Container()
-            : Container(
-          height: 110.0,
-          padding: const EdgeInsets.only(left: 8.0),
-          child: ListView(
-            shrinkWrap: true,
-            scrollDirection: Axis.horizontal,
-            children: storyUpdatesController.groupedUpdates.entries
-                .map((e) {
-              String storeName = e.key;
-              List<StoreUpdateModel> individualStoreUpdates = e.value;
+                ? Container()
+                : Container(
+                    height: 110.0,
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: ListView(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      children: storyUpdatesController.groupedUpdates.entries
+                          .map((e) {
+                        String storeName = e.key;
+                        List<StoreUpdateModel> individualStoreUpdates = e.value;
 
-              return UpdateTile(
-                indexClicked: ++indexClicked,
-                storeName: storeName,
-                storeLogo: individualStoreUpdates[0].logoUrl,
-                individualStoreUpdates: individualStoreUpdates,
-                allGroupedUpdates:
-                storyUpdatesController.groupedUpdates,
-              );
-            }).toList(),
-          ),
-        )),
+                        return UpdateTile(
+                          indexClicked: ++indexClicked,
+                          storeName: storeName,
+                          storeLogo: individualStoreUpdates[0].logoUrl,
+                          individualStoreUpdates: individualStoreUpdates,
+                          allGroupedUpdates:
+                              storyUpdatesController.groupedUpdates,
+                        );
+                      }).toList(),
+                    ),
+                  )),
         const FirestoreCarouselSlider(),
+        SizedBox(height: 30.h),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -640,41 +641,41 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
               }).toList(),
               featuredStores.length > 10
                   ? GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const StoresScreen()));
-                },
-                child: Container(
-                  padding: EdgeInsets.all(18.w),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        height: 120.h,
-                        width: 120.w,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF5F5F5),
-                          borderRadius: BorderRadius.circular(23.r),
-                        ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.arrow_forward_ios,
-                            color: Color(0xFFB5B5B5),
-                          ),
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const StoresScreen()));
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(18.w),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              height: 120.h,
+                              width: 120.w,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF5F5F5),
+                                borderRadius: BorderRadius.circular(23.r),
+                              ),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.arrow_forward_ios,
+                                  color: Color(0xFFB5B5B5),
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            Text(
+                              'View All',
+                              style: TextStyle(fontSize: 16.sp),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(height: 8.h),
-                      Text(
-                        'View All',
-                        style: TextStyle(fontSize: 16.sp),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ),
-                ),
-              )
+                    )
                   : Container(),
             ],
           ),
@@ -736,17 +737,20 @@ class FeaturedProductsManager {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   static Future<List<String>> getTabLabels() async {
-    final doc = await _firestore.collection('Categories').doc('categories').get();
+    final doc =
+        await _firestore.collection('Categories').doc('categories').get();
     return List<String>.from(doc.data()?['labels'] ?? []);
   }
 
   static Future<List<ProductModel>> getFeaturedProducts(String category) async {
-    final doc = await _firestore.collection('Categories').doc('categories').get();
+    final doc =
+        await _firestore.collection('Categories').doc('categories').get();
     final productIds = List<String>.from(doc.data()?[category] ?? []);
 
     List<ProductModel> products = [];
     for (String productId in productIds) {
-      final productDoc = await _firestore.collection('products').doc(productId).get();
+      final productDoc =
+          await _firestore.collection('products').doc(productId).get();
       if (productDoc.exists) {
         final product = ProductModel.fromFirestore(productDoc);
         products.add(product);
@@ -762,9 +766,7 @@ class SpecialProductsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('Headings')
-          .snapshots(),
+      stream: FirebaseFirestore.instance.collection('Headings').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -808,23 +810,27 @@ class SpecialProductsSection extends StatelessWidget {
                         .where(FieldPath.documentId, whereIn: productIds)
                         .snapshots(),
                     builder: (context, productsSnapshot) {
-                      if (productsSnapshot.connectionState == ConnectionState.waiting) {
+                      if (productsSnapshot.connectionState ==
+                          ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
 
                       if (productsSnapshot.hasError) {
-                        return Center(child: Text('Error: ${productsSnapshot.error}'));
+                        return Center(
+                            child: Text('Error: ${productsSnapshot.error}'));
                       }
 
                       final products = productsSnapshot.data?.docs
-                          .map((doc) => ProductModel.fromFirestore(doc))
-                          .toList() ?? [];
+                              .map((doc) => ProductModel.fromFirestore(doc))
+                              .toList() ??
+                          [];
 
                       return GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         padding: EdgeInsets.symmetric(horizontal: 16.w),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 12.0,
                           mainAxisSpacing: 12.0,
@@ -1058,7 +1064,7 @@ class CategoryProductsScreen extends StatelessWidget {
                       if (activeProductsSnapshot.hasError) {
                         return Center(
                             child:
-                            Text('Error: ${activeProductsSnapshot.error}'));
+                                Text('Error: ${activeProductsSnapshot.error}'));
                       }
 
                       final activeProducts = activeProductsSnapshot.data ?? [];
@@ -1072,7 +1078,7 @@ class CategoryProductsScreen extends StatelessWidget {
                       return GridView.builder(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
                         gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 8,
                           mainAxisSpacing: 8,
@@ -1144,7 +1150,7 @@ class UpdateTile extends StatelessWidget {
               return StoryUpdatesScreen(
                 currentStoreIndex: indexClicked, // Set the initial store index
                 allGroupedUpdates:
-                allGroupedUpdates, // Your map of store updates
+                    allGroupedUpdates, // Your map of store updates
               );
             }),
           ),
@@ -1216,15 +1222,20 @@ class FirestoreCarouselSlider extends StatelessWidget {
           return const Center(child: Text('No images available'));
         }
         return SizedBox(
+          height: 250.h,
           child: CarouselSlider(
             options: CarouselOptions(
+              height: 250.h,
               autoPlay: true,
               viewportFraction: 1.0,
               enlargeCenterPage: true,
             ),
             items: images.map((imageUrl) {
-              return Padding(
+              return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
                 child: CachedNetworkImage(
                   imageUrl: imageUrl,
                   fit: BoxFit.cover,
@@ -1268,15 +1279,16 @@ class FirestoreUnderWidget extends StatelessWidget {
         }
         return CarouselSlider(
           options: CarouselOptions(
-            aspectRatio: 235 / 342,
+            aspectRatio: 9 / 16,
             viewportFraction: 1,
             autoPlay: true,
-            enableInfiniteScroll: false,
+            enableInfiniteScroll: true,
             enlargeCenterPage: false,
           ),
           items: images.map((imageUrl) {
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 13),
+              padding:
+                  EdgeInsets.symmetric(horizontal: 16.h).copyWith(bottom: 13),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: CachedNetworkImage(
