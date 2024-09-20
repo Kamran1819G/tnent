@@ -1,16 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:tnent/core/routes/app_routes.dart';
 import 'package:tnent/models/user_model.dart';
 import 'package:tnent/presentation/pages/catalog_pages/purchase_screen.dart';
 import 'package:tnent/presentation/pages/catalog_pages/wishlist_screen.dart';
-import 'package:tnent/presentation/pages/notification_screen.dart';
-import 'package:tnent/presentation/pages/users_screens/myprofile_screen.dart';
 import 'package:tnent/presentation/widgets/stylized_custom_button.dart';
 
 import '../../../core/helpers/color_utils.dart';
@@ -123,7 +119,7 @@ class _CatalogState extends State<Catalog> {
         const SizedBox(
           height: 30,
         ),
-       const FirestoreUnderWidget(),
+        const FirestoreUnderWidget(),
       ],
     );
   }
@@ -137,6 +133,7 @@ class _CatalogState extends State<Catalog> {
         ),
       );
 }
+
 class FirestoreUnderWidget extends StatelessWidget {
   const FirestoreUnderWidget({Key? key}) : super(key: key);
 
@@ -165,7 +162,8 @@ class FirestoreUnderWidget extends StatelessWidget {
         return Column(
           children: images.map((imageUrl) {
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10).copyWith(bottom: 13),
+              padding: const EdgeInsets.symmetric(horizontal: 10)
+                  .copyWith(bottom: 13),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: AspectRatio(

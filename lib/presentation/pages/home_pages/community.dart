@@ -2,11 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,7 +17,6 @@ import 'package:tnent/presentation/widgets/full_screen_image_view.dart';
 import '../../../core/helpers/color_utils.dart';
 import '../../../core/helpers/expandable_text.dart';
 import '../../../core/helpers/snackbar_utils.dart';
-import 'package:transparent_image/transparent_image.dart';
 
 class Community extends StatefulWidget {
   const Community({Key? key}) : super(key: key);
@@ -79,7 +76,8 @@ class CommunityState extends State<Community> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return Container(
+      color: Colors.white,
       height: MediaQuery.of(context).size.height,
       child: Column(
         children: <Widget>[
@@ -192,7 +190,6 @@ class _CommunityPostState extends State<CommunityPost> {
   bool _isLiked = false;
   int _likeCount = 0;
 
-
   @override
   void initState() {
     super.initState();
@@ -244,7 +241,6 @@ class _CommunityPostState extends State<CommunityPost> {
       _storeFuture = _getStoreData(forceRefresh: true);
     });
   }
-
 
   Future<void> _checkIfLiked() async {
     final user = _auth.currentUser;

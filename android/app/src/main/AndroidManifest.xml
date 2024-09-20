@@ -57,8 +57,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="tnent.com"/>
-                <data android:scheme="https" android:host="tnent.com"/>
+                <data android:scheme="http" android:host="tnentstore.com"/>
+                <data android:scheme="https" android:host="tnentstore.com"/>
             </intent-filter>
 
             <!-- Auto Verification for URLs -->
@@ -66,8 +66,8 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="http" android:host="tnent.com"/>
-                <data android:scheme="https" android:host="tnent.com"/>
+                <data android:scheme="http" android:host="tnentstore.com"/>
+                <data android:scheme="https" android:host="tnentstore.com"/>
             </intent-filter>
 
             <!-- Meta-data for themes and Flutter Deep Linking -->

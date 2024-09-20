@@ -1,4 +1,4 @@
-/*
+
 plugins {
     id "com.android.application"
     // START: FlutterFire Configuration
@@ -100,7 +100,9 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
-*/
+
+
+/*
 plugins {
     id "com.android.application"
     // START: FlutterFire Configuration
@@ -176,3 +178,4 @@ flutter {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
 }
+*/

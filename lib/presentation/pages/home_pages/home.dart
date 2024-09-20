@@ -945,13 +945,15 @@ class CategoryTile extends StatelessWidget {
             SizedBox(height: 8.h),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Text(
-                category['name'],
-                style: TextStyle(
-                  color: hexToColor('#343434'),
-                  fontSize: 20.sp,
+              child: Expanded(
+                child: Text(
+                  category['name'],
+                  style: TextStyle(
+                    color: hexToColor('#343434'),
+                    fontSize: 20.sp,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
             ),
           ],
