@@ -8,21 +8,28 @@ class RelatedProductsService {
     List<ProductModel> relatedProducts = [];
 
     try {
+      // Fetch active store IDs in a single query
+      QuerySnapshot activeStoresSnapshot = await _firestore
+          .collection('Stores')
+          .where('isActive', isEqualTo: true)
+          .get();
+
+      Set<String> activeStoreIds = activeStoresSnapshot.docs.map((doc) => doc.id).toSet();
+
       // Query products with the same category, excluding the current product
       QuerySnapshot querySnapshot = await _firestore
           .collection('products')
           .where('productCategory', isEqualTo: currentProduct.productCategory)
           .where(FieldPath.documentId, isNotEqualTo: currentProduct.productId)
+          .limit(20) // Limit to 20 to reduce data transfer
           .get();
 
       for (var doc in querySnapshot.docs) {
-        // Check if the store is active
-        DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(doc['storeId']).get();
-        if (storeDoc.exists && storeDoc['isActive'] == true) {
+        if (activeStoreIds.contains(doc['storeId'])) {
           relatedProducts.add(ProductModel.fromFirestore(doc));
         }
+        if (relatedProducts.length >= 10) break;
       }
-
 
       // If we don't have 10 products yet, fetch more based on the store category
       if (relatedProducts.length < 10) {
@@ -30,20 +37,19 @@ class RelatedProductsService {
             .collection('products')
             .where('storeCategory', isEqualTo: currentProduct.storeCategory)
             .where(FieldPath.documentId, isNotEqualTo: currentProduct.productId)
+            .limit(20) // Limit to 20 to reduce data transfer
             .get();
 
         for (var doc in additionalQuery.docs) {
-          // Check if the store is active
-          DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(doc['storeId']).get();
-          if (storeDoc.exists && storeDoc['isActive'] == true) {
+          if (activeStoreIds.contains(doc['storeId'])) {
             ProductModel product = ProductModel.fromFirestore(doc);
             if (!relatedProducts.contains(product)) {
               relatedProducts.add(product);
+              if (relatedProducts.length >= 10) break;
             }
           }
         }
       }
-
 
       return relatedProducts;
     } catch (e) {
@@ -54,9 +60,18 @@ class RelatedProductsService {
 
   static Future<List<ProductModel>> fetchRandomProducts(int count) async {
     try {
-      // Get total number of products
+      // Fetch active store IDs in a single query
+      QuerySnapshot activeStoresSnapshot = await _firestore
+          .collection('Stores')
+          .where('isActive', isEqualTo: true)
+          .get();
+
+      Set<String> activeStoreIds = activeStoresSnapshot.docs.map((doc) => doc.id).toSet();
+
+      // Get total number of products (consider caching this value)
       QuerySnapshot countSnapshot = await _firestore
           .collection('products')
+          .limit(1)
           .get();
       int totalProducts = countSnapshot.size;
 
@@ -73,9 +88,7 @@ class RelatedProductsService {
       List<ProductModel> randomProducts = [];
 
       for (var doc in snapshot.docs) {
-        // Check if the store is active
-        DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(doc['storeId']).get();
-        if (storeDoc.exists && storeDoc['isActive'] == true) {
+        if (activeStoreIds.contains(doc['storeId'])) {
           randomProducts.add(ProductModel.fromFirestore(doc));
           if (randomProducts.length == count) break;
         }
@@ -90,9 +103,7 @@ class RelatedProductsService {
             .get();
 
         for (var doc in additionalSnapshot.docs) {
-          // Check if the store is active
-          DocumentSnapshot storeDoc = await _firestore.collection('Stores').doc(doc['storeId']).get();
-          if (storeDoc.exists && storeDoc['isActive'] == true) {
+          if (activeStoreIds.contains(doc['storeId'])) {
             ProductModel product = ProductModel.fromFirestore(doc);
             if (!randomProducts.contains(product)) {
               randomProducts.add(product);
@@ -101,7 +112,6 @@ class RelatedProductsService {
           }
         }
       }
-
       return randomProducts;
     } catch (e) {
       print('Error fetching random products: $e');

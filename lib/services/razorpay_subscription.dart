@@ -4,7 +4,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 class RazorpaySubscription {
   late Razorpay _razorpay;
   final Function(bool) onPaymentComplete;
-  final String _subscriptionId = 'sub_OywFncMHXnzWwf';
+  final String _subscriptionId = 'sub_Oyzmtl8PxqDSAu'; // Check this ID in your dashboard
 
   RazorpaySubscription({required this.onPaymentComplete}) {
     _razorpay = Razorpay();
@@ -33,13 +33,16 @@ class RazorpaySubscription {
 
   void createSubscription() {
     var options = {
-      'key':'rzp_live_L3Ffu2rDxMUBRw',
+      'key': 'rzp_test_rnynHtgZUItQAN', // Ensure this is the correct key for the mode you're using
       'subscription_id': _subscriptionId,
       'name': 'Tnent Store Subscription',
       'description': 'Monthly Store Access',
-      'prefill': {'contact': '', 'email': ''},
+      'prefill': {
+        'contact': 'your_customer_contact', // Add contact info if available
+        'email': 'your_customer_email' // Add email info if available
+      },
       'external': {
-        'wallets': ['paytm']
+        'wallets': ['paytm'] // Add/remove wallets as needed
       }
     };
 
@@ -49,4 +52,4 @@ class RazorpaySubscription {
       print("Error opening Razorpay checkout: $e");
     }
   }
-}
+  }

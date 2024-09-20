@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -235,27 +234,102 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
   void _copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text));
   }
+  // Add these functions at the class level
 
-  Future<void> _sendEmailToUser(
-      String email, String middlemanId, String password) async {
+  bool _validateFullName(String value) {
+    if (value.isEmpty) return false;
+    final nameExp = RegExp(r'^[a-zA-Z ]+$');
+    return nameExp.hasMatch(value);
+  }
+
+  bool _validateDateOfBirth(String value) {
+    if (value.isEmpty) return false;
     try {
-      final smtpServer = gmail('your_email@gmail.com', 'your_password');
-
-      final message = Message()
-        ..from = const Address('your_email@gmail.com', 'Tnent')
-        ..recipients.add(email)
-        ..subject = 'Tnent Middleman Registration'
-        ..text =
-            'Dear user,\n\nCongratulations on your successful registration as a Middleman with Tnent!\n\nYour Middleman ID is: $middlemanId\nYour temporary password is: $password\n\nPlease log in and change your password at your earliest convenience.\n\nThank you for joining the Tnent Middlemen community.\n\nBest regards,\nTnent Team';
-
-      await send(message, smtpServer);
-      print('Email sent successfully.');
-    } catch (error) {
-      print('Error sending email: $error');
+      final date = DateTime.parse(value);
+      final now = DateTime.now();
+      final difference = now.difference(date).inDays;
+      return difference >= 6570 && difference <= 36500; // 18 to 100 years old
+    } catch (e) {
+      return false;
     }
   }
 
+  bool _validateEmail(String value) {
+    if (value.isEmpty) return false;
+    final emailExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    return emailExp.hasMatch(value);
+  }
+
+  bool _validatePhoneNumber(String value) {
+    if (value.isEmpty) return false;
+    final phoneExp = RegExp(r'^\+?[0-9]{10,14}$');
+    return phoneExp.hasMatch(value);
+  }
+
+  bool _validateAddress(String value) {
+    return value.isNotEmpty && value.length >= 10;
+  }
+
+  bool _validateIdProof(String value, File? file) {
+    return value.isNotEmpty && file != null;
+  }
+
+  bool _validateVehicleRegistration(String? value, int radioValue) {
+    if (radioValue != 1) return true; // Not required if no vehicle
+    return value != null && value.isNotEmpty && value.length >= 6;
+  }
+
+  bool _validateUpiId(String value) {
+    if (value.isEmpty) return false;
+    final upiExp = RegExp(r'^[\w\.\-]{3,}@[\w\-]{3,}$');
+    return upiExp.hasMatch(value);
+  }
+
+  bool _validateEmergencyContact(String value) {
+    if (value.isEmpty) return false;
+    final phoneExp = RegExp(r'^\+?[0-9]{10,14}$');
+    return phoneExp.hasMatch(value);
+  }
+
   Future<void> _saveDataToFirebase() async {
+    // Validate all fields
+    if (!_validateFullName(_nameController.text)) {
+      _showErrorDialog('Please enter a valid full name.');
+      return;
+    }
+    if (!_validateDateOfBirth(_dobController.text)) {
+      _showErrorDialog('Please enter a valid date of birth (age between 18 and 100).');
+      return;
+    }
+    if (!_validateEmail(_emailController.text)) {
+      _showErrorDialog('Please enter a valid email address.');
+      return;
+    }
+    if (!_validatePhoneNumber(_phoneController.text)) {
+      _showErrorDialog('Please enter a valid phone number.');
+      return;
+    }
+    if (!_validateAddress(_addressController.text)) {
+      _showErrorDialog('Please enter a valid address (at least 10 characters).');
+      return;
+    }
+    if (!_validateIdProof(_idProofController.text, _idProofImage)) {
+      _showErrorDialog('Please upload a valid ID proof.');
+      return;
+    }
+    if (!_validateVehicleRegistration(_vehicleRegController.text, _vehicleRadioValue)) {
+      _showErrorDialog('Please enter a valid vehicle registration number.');
+      return;
+    }
+    if (!_validateUpiId(_upiIdController.text)) {
+      _showErrorDialog('Please enter a valid UPI ID.');
+      return;
+    }
+    if (!_validateEmergencyContact(_emergencyContactController.text)) {
+      _showErrorDialog('Please enter a valid emergency contact number.');
+      return;
+    }
+
     try {
       final firestore = FirebaseFirestore.instance;
 
@@ -264,20 +338,11 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
         idProofImageUrl = await _uploadImageToFirebase(_idProofImage!);
       }
 
-      // Extract the first name
       String fullName = _nameController.text.trim();
       String firstName = fullName.split(' ').first;
-
-      // Generate 3 random digits
       String randomDigits = (1000 + Random().nextInt(900)).toString();
-
-      // Create the document ID
       String docId = '$firstName$randomDigits';
-
-      // Generate random password
       String randomPassword = _generateRandomPassword();
-
-      await _sendEmailToUser(_emailController.text, docId, randomPassword);
 
       await firestore.collection('Middlemens').doc(docId).set({
         'fullName': fullName,
@@ -289,7 +354,7 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
         'idProofImageUrl': idProofImageUrl,
         'hasVehicle': _vehicleRadioValue == 1,
         'vehicleRegistrationNumber':
-            _vehicleRadioValue == 1 ? _vehicleRegController.text : null,
+        _vehicleRadioValue == 1 ? _vehicleRegController.text : null,
         'upiId': _upiIdController.text,
         'emergencyContact': _emergencyContactController.text,
         'registrationDate': FieldValue.serverTimestamp(),
@@ -297,90 +362,75 @@ class _MiddlemenRegistrationFormState extends State<MiddlemenRegistrationForm> {
         'middlemanId': docId,
       });
 
-      // Show success dialog
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Registration Successful'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Your account has been created successfully.'),
-                const SizedBox(height: 5),
-                const Text('Your Middleman ID is:'),
-                Row(
-                  children: [
-                    Text(
-                      docId,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.copy),
-                      onPressed: () => _copyToClipboard(docId),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                const Text('Your temporary password is:'),
-                Row(
-                  children: [
-                    Text(
-                      randomPassword,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 18),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.copy),
-                      onPressed: () => _copyToClipboard(randomPassword),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                const Text('Please change your password after logging in.'),
-              ],
-            ),
-            actions: [
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop(); // Return to the previous screen
-                },
-              ),
-            ],
-          );
-        },
-      );
+      _showSuccessDialog(docId);
     } catch (e) {
-      // Show error dialog
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text('Registration Error'),
-            content: Text('An error occurred during registration: $e'),
-            actions: [
-              TextButton(
-                child: const Text('OK'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              ),
-            ],
-          );
-        },
-      );
+      _showErrorDialog('An error occurred during registration: $e');
     }
   }
-  /*bool _isValidUpiId(String upiId) {
-    // This is a basic regex pattern for UPI ID validation
-    // You may need to adjust it based on specific requirements
-    final RegExp upiRegex = RegExp(r'^[\w\.\-_]{3,}@[\w\-]{3,}$');
-    return upiRegex.hasMatch(upiId);
-  }*/
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Validation Error'),
+          content: Text(message),
+          actions: [
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showSuccessDialog(String docId) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Registration Successful'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Your account has been created successfully.'),
+              const SizedBox(height: 5),
+              const Text('Your Middleman ID is:'),
+              Row(
+                children: [
+                  Text(
+                    docId,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.copy),
+                    onPressed: () => _copyToClipboard(docId),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 5),
+              const Text('A welcome email has been sent to your registered email address with your login details.'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop(); // Return to the previous screen
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

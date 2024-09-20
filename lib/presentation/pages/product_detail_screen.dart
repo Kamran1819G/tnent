@@ -760,15 +760,12 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                         if (userId.isEmpty) {
                                           showSnackBar(context,
                                               'Please log in to add items to cart');
-
                                           return;
                                         }
-
                                         DocumentReference userRef =
                                         FirebaseFirestore.instance
                                             .collection('Users')
                                             .doc(userId);
-
                                         try {
                                           await FirebaseFirestore.instance
                                               .runTransaction(
@@ -779,7 +776,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                   throw Exception(
                                                       "User does not exist!");
                                                 }
-
                                                 Map<String, dynamic> userData =
                                                 snapshot.data()
                                                 as Map<String, dynamic>;
@@ -793,7 +789,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                   'quantity': 1,
                                                   // Default quantity
                                                 };
-
                                                 int existingIndex =
                                                 cartList.indexWhere((item) =>
                                                 item['productId'] ==
@@ -801,7 +796,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                         .productId &&
                                                     item['variation'] ==
                                                         _selectedVariation);
-
                                                 if (existingIndex != -1) {
                                                   cartList[existingIndex]
                                                   ['quantity'] += 1;
@@ -812,7 +806,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                                   showSnackBar(context,
                                                       'Item added to cart');
                                                 }
-
                                                 transaction.update(
                                                     userRef, {'cart': cartList});
                                               });
@@ -996,6 +989,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           SizedBox(height: 20.h),
                         ],
                       ),
+
+
+
                       // Reviews
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
