@@ -66,7 +66,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     User? user = _auth.currentUser;
     if (user != null) {
       DocumentSnapshot userDoc =
-      await _firestore.collection('Users').doc(user.uid).get();
+          await _firestore.collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
         Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
         String? userStoreId = userData['storeId'] as String?;
@@ -86,7 +86,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
   Future<void> _loadRelatedProducts() async {
     List<ProductModel> fetchedRelatedProducts =
-    await RelatedProductsService.fetchRelatedProducts(widget.product);
+        await RelatedProductsService.fetchRelatedProducts(widget.product);
 
     if (fetchedRelatedProducts.isEmpty) {
       // If no related products, fetch random products
@@ -137,7 +137,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
       if (userSnapshot.exists) {
         Map<String, dynamic> userData =
-        userSnapshot.data() as Map<String, dynamic>;
+            userSnapshot.data() as Map<String, dynamic>;
         String firstName = userData['firstName'] ?? '';
         String lastName = userData['lastName'] ?? '';
         String photoURL = userData['photoURL'] ?? '';
@@ -230,13 +230,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     User? user = _auth.currentUser;
     if (user != null) {
       DocumentSnapshot userDoc =
-      await _firestore.collection('Users').doc(user.uid).get();
+          await _firestore.collection('Users').doc(user.uid).get();
       if (userDoc.exists) {
         List<dynamic> wishlist =
             (userDoc.data() as Map<String, dynamic>)['wishlist'] ?? [];
         setState(() {
           _isInWishlist = wishlist.any((item) =>
-          item['productId'] == _wishlistItem['productId'] &&
+              item['productId'] == _wishlistItem['productId'] &&
               item['variation'] == _wishlistItem['variation']);
         });
       }
@@ -257,7 +257,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     try {
       DocumentReference userDocRef =
-      _firestore.collection('Users').doc(user.uid);
+          _firestore.collection('Users').doc(user.uid);
 
       if (_isInWishlist) {
         // Add product to wishlist
@@ -322,7 +322,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         .collection('votes')
         .doc(productId);
     DocumentReference productRef =
-    _firestore.collection('products').doc(productId);
+        _firestore.collection('products').doc(productId);
 
     Navigator.pop(context);
     ScaffoldMessenger.of(context).showSnackBar(
@@ -339,13 +339,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         }
 
         Map<String, dynamic> productData =
-        productDoc.data() as Map<String, dynamic>;
+            productDoc.data() as Map<String, dynamic>;
         int greenFlags = productData['greenFlags'] ?? 0;
         int redFlags = productData['redFlags'] ?? 0;
 
         if (voteDoc.exists) {
           Map<String, dynamic> previousVote =
-          voteDoc.data() as Map<String, dynamic>;
+              voteDoc.data() as Map<String, dynamic>;
 
           if (previousVote['greenFlag'] && voteType == 'greenFlag') {
             greenFlags--;
@@ -492,7 +492,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                   height: 665.h,
                                   width: 1.sw,
                                   padding:
-                                  EdgeInsets.symmetric(horizontal: 12.w),
+                                      EdgeInsets.symmetric(horizontal: 12.w),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(8.r),
                                     child: CachedNetworkImage(
@@ -500,10 +500,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       cacheManager: DefaultCacheManager(),
                                       placeholder: (context, url) =>
                                           Shimmer.fromColors(
-                                            baseColor: hexToColor('#E0E0E0'),
-                                            highlightColor: hexToColor('#F5F5F5'),
-                                            child: Container(color: Colors.white),
-                                          ),
+                                        baseColor: hexToColor('#E0E0E0'),
+                                        highlightColor: hexToColor('#F5F5F5'),
+                                        child: Container(color: Colors.white),
+                                      ),
                                       errorWidget: (context, url, error) =>
                                           Icon(Icons.error),
                                       fit: BoxFit.cover,
@@ -710,11 +710,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                 children: [
                                   Column(
                                     crossAxisAlignment:
-                                    CrossAxisAlignment.start,
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
                                         crossAxisAlignment:
-                                        CrossAxisAlignment.center,
+                                            CrossAxisAlignment.center,
                                         children: [
                                           Text(
                                             '₹${_selectedVariant.price.toStringAsFixed(0)}',
@@ -740,11 +740,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                           color: hexToColor('#B9B9B9'),
                                           fontSize: 22.sp,
                                           decoration:
-                                          _selectedVariant.discount > 0
-                                              ? TextDecoration.lineThrough
-                                              : TextDecoration.none,
+                                              _selectedVariant.discount > 0
+                                                  ? TextDecoration.lineThrough
+                                                  : TextDecoration.none,
                                           decorationColor:
-                                          hexToColor('#B9B9B9'),
+                                              hexToColor('#B9B9B9'),
                                         ),
                                       ),
                                     ],
@@ -755,60 +755,67 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                       if (_selectedVariant.stockQuantity > 0 &&
                                           store.isActive) {
                                         String userId = FirebaseAuth
-                                            .instance.currentUser?.uid ??
+                                                .instance.currentUser?.uid ??
                                             '';
                                         if (userId.isEmpty) {
                                           showSnackBar(context,
                                               'Please log in to add items to cart');
+
                                           return;
                                         }
+
                                         DocumentReference userRef =
-                                        FirebaseFirestore.instance
-                                            .collection('Users')
-                                            .doc(userId);
+                                            FirebaseFirestore.instance
+                                                .collection('Users')
+                                                .doc(userId);
+
                                         try {
                                           await FirebaseFirestore.instance
                                               .runTransaction(
                                                   (transaction) async {
-                                                DocumentSnapshot snapshot =
+                                            DocumentSnapshot snapshot =
                                                 await transaction.get(userRef);
-                                                if (!snapshot.exists) {
-                                                  throw Exception(
-                                                      "User does not exist!");
-                                                }
-                                                Map<String, dynamic> userData =
-                                                snapshot.data()
-                                                as Map<String, dynamic>;
-                                                List<dynamic> cartList =
-                                                    userData['cart'] ?? [];
+                                            if (!snapshot.exists) {
+                                              throw Exception(
+                                                  "User does not exist!");
+                                            }
 
-                                                Map<String, dynamic> cartItem = {
-                                                  'productId':
+                                            Map<String, dynamic> userData =
+                                                snapshot.data()
+                                                    as Map<String, dynamic>;
+                                            List<dynamic> cartList =
+                                                userData['cart'] ?? [];
+
+                                            Map<String, dynamic> cartItem = {
+                                              'productId':
                                                   widget.product.productId,
-                                                  'variation': _selectedVariation,
-                                                  'quantity': 1,
-                                                  // Default quantity
-                                                };
-                                                int existingIndex =
+                                              'variation': _selectedVariation,
+                                              'quantity': 1,
+                                              // Default quantity
+                                            };
+
+                                            int existingIndex =
                                                 cartList.indexWhere((item) =>
-                                                item['productId'] ==
-                                                    widget.product
-                                                        .productId &&
+                                                    item['productId'] ==
+                                                        widget.product
+                                                            .productId &&
                                                     item['variation'] ==
                                                         _selectedVariation);
-                                                if (existingIndex != -1) {
-                                                  cartList[existingIndex]
+
+                                            if (existingIndex != -1) {
+                                              cartList[existingIndex]
                                                   ['quantity'] += 1;
-                                                  showSnackBar(context,
-                                                      'Item already in cart');
-                                                } else {
-                                                  cartList.add(cartItem);
-                                                  showSnackBar(context,
-                                                      'Item added to cart');
-                                                }
-                                                transaction.update(
-                                                    userRef, {'cart': cartList});
-                                              });
+                                              showSnackBar(context,
+                                                  'Item already in cart');
+                                            } else {
+                                              cartList.add(cartItem);
+                                              showSnackBar(context,
+                                                  'Item added to cart');
+                                            }
+
+                                            transaction.update(
+                                                userRef, {'cart': cartList});
+                                          });
                                         } catch (e) {
                                           print('Error updating cart: $e');
                                           showSnackBar(context,
@@ -833,15 +840,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                                             color: Colors.black.withOpacity(
                                                 0.1), // Shadow color with some transparency
                                             spreadRadius:
-                                            4, // Set to 0 for no spread
+                                                4, // Set to 0 for no spread
                                             blurRadius:
-                                            6, // Blur radius of the shadow
+                                                6, // Blur radius of the shadow
                                             offset: const Offset(0,
                                                 3), // Only offset in the Y direction for bottom shadow
                                           ),
                                         ],
                                         borderRadius:
-                                        BorderRadius.circular(12.r),
+                                            BorderRadius.circular(12.r),
                                       ),
                                       child: Icon(Icons.add_shopping_cart,
                                           color: Colors.black, size: 35.sp),
@@ -883,7 +890,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               isExpanded: _isDescriptionExpanded,
                               onToggle: () {
                                 setState(() {
-                                  _isDescriptionExpanded = !_isDescriptionExpanded;
+                                  _isDescriptionExpanded =
+                                      !_isDescriptionExpanded;
                                 });
                               },
                             ),
@@ -923,75 +931,72 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             padding: const EdgeInsets.only(left: 8.0),
                             child: relatedProducts.isEmpty
                                 ? ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: 5, // Show 3 placeholder items
-                              itemBuilder: (context, index) {
-                                return Shimmer.fromColors(
-                                  baseColor: hexToColor('#E0E0E0'),
-                                  highlightColor: hexToColor('#F5F5F5'),
-                                  child: Container(
-                                    width: 200.w,
-                                    margin: EdgeInsets.only(right: 12.w),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius:
-                                      BorderRadius.circular(12.r),
-                                    ),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                      CrossAxisAlignment.start,
-                                      children: [
-                                        Container(
-                                          height: 150.h,
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: 5, // Show 3 placeholder items
+                                    itemBuilder: (context, index) {
+                                      return Shimmer.fromColors(
+                                        baseColor: hexToColor('#E0E0E0'),
+                                        highlightColor: hexToColor('#F5F5F5'),
+                                        child: Container(
+                                          width: 200.w,
+                                          margin: EdgeInsets.only(right: 12.w),
                                           decoration: BoxDecoration(
                                             color: Colors.white,
                                             borderRadius:
-                                            BorderRadius.only(
-                                              topLeft:
-                                              Radius.circular(12.r),
-                                              topRight:
-                                              Radius.circular(12.r),
-                                            ),
+                                                BorderRadius.circular(12.r),
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                height: 150.h,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(12.r),
+                                                    topRight:
+                                                        Radius.circular(12.r),
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(height: 10.h),
+                                              Container(
+                                                margin: EdgeInsets.symmetric(
+                                                    horizontal: 10.w),
+                                                height: 20.h,
+                                                width: 150.w,
+                                                color: Colors.white,
+                                              ),
+                                              SizedBox(height: 5.h),
+                                              Container(
+                                                margin: EdgeInsets.symmetric(
+                                                    horizontal: 10.w),
+                                                height: 15.h,
+                                                width: 100.w,
+                                                color: Colors.white,
+                                              ),
+                                            ],
                                           ),
                                         ),
-                                        SizedBox(height: 10.h),
-                                        Container(
-                                          margin: EdgeInsets.symmetric(
-                                              horizontal: 10.w),
-                                          height: 20.h,
-                                          width: 150.w,
-                                          color: Colors.white,
-                                        ),
-                                        SizedBox(height: 5.h),
-                                        Container(
-                                          margin: EdgeInsets.symmetric(
-                                              horizontal: 10.w),
-                                          height: 15.h,
-                                          width: 100.w,
-                                          color: Colors.white,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
-                            )
+                                      );
+                                    },
+                                  )
                                 : ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: relatedProducts.length,
-                              itemBuilder: (context, index) {
-                                return WishlistProductTile(
-                                  product: relatedProducts[index],
-                                );
-                              },
-                            ),
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: relatedProducts.length,
+                                    itemBuilder: (context, index) {
+                                      return WishlistProductTile(
+                                        product: relatedProducts[index],
+                                      );
+                                    },
+                                  ),
                           ),
                           SizedBox(height: 20.h),
                         ],
                       ),
-
-
-
                       // Reviews
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1083,7 +1088,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   bottom: 0,
                   child: Container(
                     padding:
-                    EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
+                        EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
                     color: Colors.white,
                     child: ElevatedButton(
                       onPressed: () {
@@ -1151,7 +1156,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       runSpacing: 8.0,
       children: widget.product.variations.keys.map((variation) {
         return ChoiceChip(
-          padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 0),
+          padding: EdgeInsets.symmetric(horizontal: 28.w, vertical: 12.h),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.r),
           ),
@@ -1159,8 +1164,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             variation,
             style: TextStyle(
               color:
-              _selectedVariation == variation ? Colors.white : Colors.black,
-              fontSize: 18.sp,
+                  _selectedVariation == variation ? Colors.white : Colors.black,
+              fontSize: 22.sp,
             ),
           ),
           backgroundColor: Colors.white,

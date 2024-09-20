@@ -84,7 +84,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
 
     // Add listener to _pageController
     _pageController.addListener(_onPageChange);
-    _razorpaySubscription = RazorpaySubscription(onPaymentComplete: _onPaymentComplete);
+    _razorpaySubscription =
+        RazorpaySubscription(onPaymentComplete: _onPaymentComplete);
   }
 
   @override
@@ -204,7 +205,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
       showSnackBar(context, 'Error registering store: $e');
     }
   }
-
 
   Future<void> _showLocationPermissionDialog() async {
     await showDialog(
@@ -446,7 +446,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                             bottom: 0,
                             child: GestureDetector(
                               onTap: () async {
-                                if (_isStorePhoneUnique && _phoneController.text.trim().isNotEmpty) {
+                                if (_isStorePhoneUnique &&
+                                    _phoneController.text.trim().isNotEmpty) {
                                   debugPrint('Sending OTP');
                                   try {
                                     showDialog(
@@ -790,14 +791,18 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                       child: GestureDetector(
                         onTap: () {
                           String trimmedEmail = _emailController.text.trim();
-                          if (trimmedEmail.isNotEmpty && _termsAccepted && _isStoreEmailUnique) {
+                          if (trimmedEmail.isNotEmpty &&
+                              _termsAccepted &&
+                              _isStoreEmailUnique) {
                             _pageController.jumpToPage(_currentPageIndex + 1);
                           } else if (trimmedEmail.isEmpty) {
                             showSnackBar(context, 'Please enter a valid email');
                           } else if (!_termsAccepted) {
-                            showSnackBar(context, 'Please accept the terms and conditions');
+                            showSnackBar(context,
+                                'Please accept the terms and conditions');
                           } else {
-                            showSnackBar(context, 'This email is already registered');
+                            showSnackBar(
+                                context, 'This email is already registered');
                           }
                         },
                         child: Container(
@@ -888,9 +893,8 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           if (trimmedName.isNotEmpty) {
                             _pageController.jumpToPage(_currentPageIndex + 1);
                             setState(() {
-                              _storeDomainController.text = trimmedName
-                                  .toLowerCase()
-                                  .replaceAll(' ', '');
+                              _storeDomainController.text =
+                                  trimmedName.toLowerCase().replaceAll(' ', '');
                             });
                           } else {
                             showSnackBar(
@@ -1022,13 +1026,17 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          String trimmedDomain = _storeDomainController.text.trim();
-                          if (trimmedDomain.isNotEmpty && _isStoreDomainUnique) {
+                          String trimmedDomain =
+                              _storeDomainController.text.trim();
+                          if (trimmedDomain.isNotEmpty &&
+                              _isStoreDomainUnique) {
                             _pageController.jumpToPage(_currentPageIndex + 1);
                           } else if (trimmedDomain.isEmpty) {
-                            showSnackBar(context, 'Please enter a valid store domain');
+                            showSnackBar(
+                                context, 'Please enter a valid store domain');
                           } else {
-                            showSnackBar(context, 'This domain is not available');
+                            showSnackBar(
+                                context, 'This domain is not available');
                           }
                         },
                         child: Container(
@@ -1301,13 +1309,18 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          String trimmedUsername = _upiUsernameController.text.trim();
+                          String trimmedUsername =
+                              _upiUsernameController.text.trim();
                           String trimmedUpiId = _upiIdController.text.trim();
                           if (trimmedUsername.isEmpty && trimmedUpiId.isEmpty) {
-                            showSnackBar(context, 'provide both UPI username and UPI ID');
-                          } else if (_upiUsernameController.text.trim().isEmpty ||
+                            showSnackBar(context,
+                                'provide both UPI username and UPI ID');
+                          } else if (_upiUsernameController.text
+                                  .trim()
+                                  .isEmpty ||
                               _upiIdController.text.trim().isEmpty) {
-                            showSnackBar(context, 'Please enter your UPI details');
+                            showSnackBar(
+                                context, 'Please enter your UPI details');
                           } else {
                             _pageController.jumpToPage(_currentPageIndex + 1);
                           }
@@ -1407,11 +1420,13 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                     Center(
                       child: GestureDetector(
                         onTap: () {
-                          String trimmedLocation = _locationController.text.trim();
+                          String trimmedLocation =
+                              _locationController.text.trim();
                           if (trimmedLocation.isNotEmpty) {
                             _pageController.jumpToPage(_currentPageIndex + 1);
                           } else {
-                            showSnackBar(context, 'Please enter your store location');
+                            showSnackBar(
+                                context, 'Please enter your store location');
                           }
                         },
                         child: Container(
@@ -1474,31 +1489,6 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                children: [
-                                  CircleAvatar(
-                                    backgroundColor:
-                                        Theme.of(context).primaryColor,
-                                    radius: 15.w,
-                                    child: Icon(
-                                      Icons.check,
-                                      color: Colors.white,
-                                      size: 16.sp,
-                                    ),
-                                  ),
-                                  SizedBox(width: 12.w),
-                                  Text(
-                                    'Lifetime Store Access',
-                                    style: TextStyle(
-                                      color: hexToColor('#636363'),
-                                      fontFamily: 'Poppins',
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 20.sp,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              SizedBox(height: 20.h),
                               Row(
                                 children: [
                                   CircleAvatar(
@@ -1627,7 +1617,7 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                               ),
                             ],
                           )),
-                      SizedBox(height: 200.h),
+                      SizedBox(height: 300.h),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -1678,87 +1668,87 @@ class _StoreRegistrationState extends State<StoreRegistration> {
                 ),
 
                 // Page 11:  Congratulation Page
-                if(_isSubscriptionCompleted)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _buildStoreRegistrationPageHeader(
-                        context, _pageController, _currentPageIndex),
-                    SizedBox(height: 100.h),
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        ConfettiWidget(
-                          confettiController: _confettiController,
-                          blastDirectionality: BlastDirectionality.explosive,
-                          shouldLoop: false,
-                          colors: [Theme.of(context).primaryColor],
-                        ),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(50.r),
-                          child: Image.asset(
-                            'assets/congratulation.png',
-                            width: 425.w,
-                            height: 340.h,
+                if (_isSubscriptionCompleted)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _buildStoreRegistrationPageHeader(
+                          context, _pageController, _currentPageIndex),
+                      SizedBox(height: 100.h),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          ConfettiWidget(
+                            confettiController: _confettiController,
+                            blastDirectionality: BlastDirectionality.explosive,
+                            shouldLoop: false,
+                            colors: [Theme.of(context).primaryColor],
                           ),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(50.r),
+                            child: Image.asset(
+                              'assets/congratulation.png',
+                              width: 425.w,
+                              height: 340.h,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 200.h),
+                      Container(
+                        width: 430.w,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Congratulations!',
+                              style: TextStyle(
+                                color: hexToColor('#2A2A2A'),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 42.sp,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 20.h),
+                            Text(
+                              'Your Store has been created',
+                              style: TextStyle(
+                                color: hexToColor('#636363'),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 28.sp,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    SizedBox(height: 200.h),
-                    Container(
-                      width: 430.w,
-                      child: Column(
+                      ),
+                      SizedBox(height: 300.h),
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            'Congratulations!',
-                            style: TextStyle(
-                              color: hexToColor('#2A2A2A'),
-                              fontWeight: FontWeight.w500,
-                              fontSize: 42.sp,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          SizedBox(height: 20.h),
-                          Text(
-                            'Your Store has been created',
+                            'Hurray! you are now ready to shop from your local stores',
                             style: TextStyle(
                               color: hexToColor('#636363'),
                               fontFamily: 'Poppins',
                               fontWeight: FontWeight.w500,
-                              fontSize: 28.sp,
+                              fontSize: 17.sp,
                             ),
-                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            'Join Our Tnent Community',
+                            style: TextStyle(
+                              color: Theme.of(context).primaryColor,
+                              fontFamily: 'Poppins',
+                              fontWeight: FontWeight.w500,
+                              fontSize: 17.sp,
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                    SizedBox(height: 300.h),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Hurray! you are now ready to shop from your local stores',
-                          style: TextStyle(
-                            color: hexToColor('#636363'),
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 17.sp,
-                          ),
-                        ),
-                        Text(
-                          'Join Our Tnent Community',
-                          style: TextStyle(
-                            color: Theme.of(context).primaryColor,
-                            fontFamily: 'Poppins',
-                            fontWeight: FontWeight.w500,
-                            fontSize: 17.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
               ],
             ),
           ],

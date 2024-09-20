@@ -64,7 +64,6 @@ class PermissionHandlerService {
       Permission.camera,
       Permission.storage,
       Permission.accessMediaLocation,
-      Permission.manageExternalStorage
     ].request();
 
     bool allGranted = true;
