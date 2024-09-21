@@ -969,7 +969,7 @@ class CategoryProductsScreen extends StatelessWidget {
   const CategoryProductsScreen({Key? key, required this.categoryName})
       : super(key: key);
 
-  Stream<QuerySnapshot> _getProductsStream() {
+  Query<Map<String, dynamic>> _getProductsQuery() {
     if (categoryName.toLowerCase() == 'more') {
       return FirebaseFirestore.instance
           .collection('products')
@@ -978,16 +978,15 @@ class CategoryProductsScreen extends StatelessWidget {
         'Electronics',
         'Accessories',
         'Groceries',
-        'Restaurants'
-            'Cafes',
-        'Bakeries'
-            'Books'
-      ]).snapshots();
+        'Restaurants',
+        'Cafes',
+        'Bakeries',
+        'Books'
+      ]);
     } else {
       return FirebaseFirestore.instance
           .collection('products')
-          .where('productCategory', isEqualTo: categoryName)
-          .snapshots();
+          .where('productCategory', isEqualTo: categoryName);
     }
   }
 
@@ -998,47 +997,11 @@ class CategoryProductsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              height: 100,
-              padding: const EdgeInsets.fromLTRB(16, 0, 8, 0),
-              child: Row(
-                children: [
-                  Text(
-                    categoryName.toUpperCase(),
-                    style: TextStyle(
-                      color: hexToColor('#1E1E1E'),
-                      fontWeight: FontWeight.w400,
-                      fontSize: 24.0,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  Text(
-                    ' •',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w400,
-                      fontSize: 28.0,
-                      color: hexToColor('#FAD524'),
-                    ),
-                  ),
-                  const Spacer(),
-                  Container(
-                    margin: const EdgeInsets.all(8.0),
-                    child: CircleAvatar(
-                      backgroundColor: Colors.grey[100],
-                      child: IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new,
-                            color: Colors.black),
-                        onPressed: () => Navigator.pop(context),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildHeader(context),
             const SizedBox(height: 10),
             Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: _getProductsStream(),
+              child: FutureBuilder<List<ProductModel>>(
+                future: _getActiveStoreProducts(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
@@ -1048,50 +1011,24 @@ class CategoryProductsScreen extends StatelessWidget {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   }
 
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  final activeProducts = snapshot.data ?? [];
+
+                  if (activeProducts.isEmpty) {
                     return const Center(
-                        child: Text('No products found in this category'));
+                        child: Text('No active products found in this category'));
                   }
 
-                  final products = snapshot.data!.docs;
-
-                  return FutureBuilder<List<ProductModel>>(
-                    future: _filterActiveStoreProducts(products),
-                    builder: (context, activeProductsSnapshot) {
-                      if (activeProductsSnapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-
-                      if (activeProductsSnapshot.hasError) {
-                        return Center(
-                            child:
-                                Text('Error: ${activeProductsSnapshot.error}'));
-                      }
-
-                      final activeProducts = activeProductsSnapshot.data ?? [];
-
-                      if (activeProducts.isEmpty) {
-                        return const Center(
-                            child: Text(
-                                'No active products found in this category'));
-                      }
-
-                      return GridView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 8,
-                          mainAxisSpacing: 8,
-                          childAspectRatio: 0.8,
-                        ),
-                        itemCount: activeProducts.length,
-                        itemBuilder: (context, index) {
-                          return WishlistProductTile(
-                              product: activeProducts[index]);
-                        },
-                      );
+                  return GridView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      childAspectRatio: 0.8,
+                    ),
+                    itemCount: activeProducts.length,
+                    itemBuilder: (context, index) {
+                      return WishlistProductTile(product: activeProducts[index]);
                     },
                   );
                 },
@@ -1103,23 +1040,62 @@ class CategoryProductsScreen extends StatelessWidget {
     );
   }
 
-  Future<List<ProductModel>> _filterActiveStoreProducts(
-      List<QueryDocumentSnapshot> products) async {
-    List<ProductModel> activeProducts = [];
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      height: 100,
+      padding: const EdgeInsets.fromLTRB(16, 0, 8, 0),
+      child: Row(
+        children: [
+          Text(
+            categoryName.toUpperCase(),
+            style: TextStyle(
+              color: hexToColor('#1E1E1E'),
+              fontWeight: FontWeight.w400,
+              fontSize: 24.0,
+              letterSpacing: 1.5,
+            ),
+          ),
+          Text(
+            ' •',
+            style: TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 28.0,
+              color: hexToColor('#FAD524'),
+            ),
+          ),
+          const Spacer(),
+          Container(
+            margin: const EdgeInsets.all(8.0),
+            child: CircleAvatar(
+              backgroundColor: Colors.grey[100],
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-    for (var doc in products) {
-      final product = ProductModel.fromFirestore(doc);
-      final storeDoc = await FirebaseFirestore.instance
-          .collection('Stores')
-          .doc(product.storeId)
-          .get();
+  Future<List<ProductModel>> _getActiveStoreProducts() async {
+    final productsQuery = _getProductsQuery();
+    final storesQuery = FirebaseFirestore.instance.collection('Stores').where('isActive', isEqualTo: true);
 
-      if (storeDoc.exists && storeDoc.data()?['isActive'] == true) {
-        activeProducts.add(product);
-      }
-    }
+    final productsFuture = productsQuery.get();
+    final storesFuture = storesQuery.get();
 
-    return activeProducts;
+    final results = await Future.wait([productsFuture, storesFuture]);
+    final productsSnapshot = results[0] as QuerySnapshot<Map<String, dynamic>>;
+    final storesSnapshot = results[1] as QuerySnapshot<Map<String, dynamic>>;
+
+    final activeStoreIds = storesSnapshot.docs.map((doc) => doc.id).toSet();
+
+    return productsSnapshot.docs
+        .map((doc) => ProductModel.fromFirestore(doc))
+        .where((product) => activeStoreIds.contains(product.storeId))
+        .toList();
   }
 }
 
