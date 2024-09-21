@@ -945,15 +945,13 @@ class CategoryTile extends StatelessWidget {
             SizedBox(height: 8.h),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Expanded(
-                child: Text(
-                  category['name'],
-                  style: TextStyle(
-                    color: hexToColor('#343434'),
-                    fontSize: 20.sp,
-                  ),
-                  textAlign: TextAlign.center,
+              child: Text(
+                category['name'],
+                style: TextStyle(
+                  color: hexToColor('#343434'),
+                  fontSize: 20.sp,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
           ],
@@ -1015,12 +1013,14 @@ class CategoryProductsScreen extends StatelessWidget {
 
                   if (activeProducts.isEmpty) {
                     return const Center(
-                        child: Text('No active products found in this category'));
+                        child:
+                            Text('No active products found in this category'));
                   }
 
                   return GridView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       crossAxisSpacing: 8,
                       mainAxisSpacing: 8,
@@ -1028,7 +1028,8 @@ class CategoryProductsScreen extends StatelessWidget {
                     ),
                     itemCount: activeProducts.length,
                     itemBuilder: (context, index) {
-                      return WishlistProductTile(product: activeProducts[index]);
+                      return WishlistProductTile(
+                          product: activeProducts[index]);
                     },
                   );
                 },
@@ -1081,7 +1082,9 @@ class CategoryProductsScreen extends StatelessWidget {
 
   Future<List<ProductModel>> _getActiveStoreProducts() async {
     final productsQuery = _getProductsQuery();
-    final storesQuery = FirebaseFirestore.instance.collection('Stores').where('isActive', isEqualTo: true);
+    final storesQuery = FirebaseFirestore.instance
+        .collection('Stores')
+        .where('isActive', isEqualTo: true);
 
     final productsFuture = productsQuery.get();
     final storesFuture = storesQuery.get();
