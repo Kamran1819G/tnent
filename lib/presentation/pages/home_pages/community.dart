@@ -476,13 +476,13 @@ class _CommunityPostState extends State<CommunityPost> {
           ),
         ),
         const Spacer(),
-        IconButton(
-          icon: Icon(
-            Icons.ios_share_outlined,
-            size: 30.sp,
-          ),
-          onPressed: () => _sharePost(),
-        ),
+        // IconButton(
+        //   icon: Icon(
+        //     Icons.ios_share_outlined,
+        //     size: 30.sp,
+        //   ),
+        //   onPressed: () => _sharePost(),
+        // ),
       ],
     );
   }
@@ -548,36 +548,36 @@ class _CommunityPostState extends State<CommunityPost> {
           ),
 
           // Share
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                onTap: () async {
-                  final String productUrl =
-                      'https://tnentstore.com/?postId=${widget.post.postId}';
-                  final String shareMessage =
-                      'Check out this post on Tnent Store! $productUrl';
-                  await Share.share(shareMessage);
-                },
-                child: CircleAvatar(
-                  backgroundColor: hexToColor('#2B2B2B'),
-                  child: Icon(
-                    Icons.ios_share_outlined,
-                    color: hexToColor('#BEBEBE'),
-                    size: 20,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Share',
-                style: TextStyle(
-                  color: hexToColor('#9B9B9B'),
-                  fontSize: 16.0,
-                ),
-              ),
-            ],
-          ),
+          // Column(
+          //   mainAxisAlignment: MainAxisAlignment.center,
+          //   children: [
+          //     GestureDetector(
+          //       onTap: () async {
+          //         final String productUrl =
+          //             'https://tnentstore.com/?postId=${widget.post.postId}';
+          //         final String shareMessage =
+          //             'Check out this post on Tnent Store! $productUrl';
+          //         await Share.share(shareMessage);
+          //       },
+          //       child: CircleAvatar(
+          //         backgroundColor: hexToColor('#2B2B2B'),
+          //         child: Icon(
+          //           Icons.ios_share_outlined,
+          //           color: hexToColor('#BEBEBE'),
+          //           size: 20,
+          //         ),
+          //       ),
+          //     ),
+          //     const SizedBox(height: 20),
+          //     Text(
+          //       'Share',
+          //       style: TextStyle(
+          //         color: hexToColor('#9B9B9B'),
+          //         fontSize: 16.0,
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );

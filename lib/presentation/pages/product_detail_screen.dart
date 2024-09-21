@@ -589,25 +589,25 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             child: Row(
                               children: [
                                 // Share button - available for all users
-                                GestureDetector(
-                                  onTap: () async {
-                                    final String productUrl =
-                                        'https://tnentstore.com/?productId=${widget.product.productId}';
-                                    final String shareMessage =
-                                        'Check out this product from ${store.name}! $productUrl';
-                                    await Share.share(shareMessage);
-                                  },
-                                  child: CircleAvatar(
-                                    radius: 30.w,
-                                    backgroundColor: hexToColor('#F5F5F5'),
-                                    child: Icon(
-                                      Icons.ios_share_outlined,
-                                      color: hexToColor('#BEBEBE'),
-                                      size: 32.sp,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 12.w),
+                                // GestureDetector(
+                                //   onTap: () async {
+                                //     final String productUrl =
+                                //         'https://tnentstore.com/?productId=${widget.product.productId}';
+                                //     final String shareMessage =
+                                //         'Check out this product from ${store.name}! $productUrl';
+                                //     await Share.share(shareMessage);
+                                //   },
+                                //   child: CircleAvatar(
+                                //     radius: 30.w,
+                                //     backgroundColor: hexToColor('#F5F5F5'),
+                                //     child: Icon(
+                                //       Icons.ios_share_outlined,
+                                //       color: hexToColor('#BEBEBE'),
+                                //       size: 32.sp,
+                                //     ),
+                                //   ),
+                                // ),
+                                // SizedBox(width: 12.w),
                                 // Conditional buttons for non-store owners
                                 if (!_isCurrentStoreOwner) ...[
                                   GestureDetector(
