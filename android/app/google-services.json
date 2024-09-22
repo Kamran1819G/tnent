@@ -74,6 +74,14 @@
           }
         },
         {
+          "client_id": "950564714045-m16mcepntsg3gamfckfdk5tv6tugg4qk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tnent.tnent",
+            "certificate_hash": "65f036811289477eb74959e6d0f546c5b5a17fb2"
+          }
+        },
+        {
           "client_id": "950564714045-62b8mue9piourqms3kdddm5p5t086li0.apps.googleusercontent.com",
           "client_type": 3
         }
