@@ -84,6 +84,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _fetchFeaturedStores();
+    _fetchStoryUpdates();
     _fetchFeaturedProducts();
 
     _loadTabLabelsAndProducts();
@@ -107,6 +108,15 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _fetchStoryUpdates() async {
+    // In case u wanna call this once, just repeat the lines (excluding clearVars();) in the StoryUpdatesController itself in the OnInit() method
+    storyUpdatesController.clearVars();
+    List<StoreUpdateModel> fetchedUpdates =
+        await storyUpdatesController.fetchAndPopulateUpdates();
+    storyUpdatesController.updates.value = fetchedUpdates;
+    storyUpdatesController.sortInGroupedupdates();
   }
 
   Future<void> _loadTabLabelsAndProducts() async {
@@ -1127,13 +1137,10 @@ class UpdateTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ShowCaseWidget(builder: (context) {
-              return StoryUpdatesScreen(
-                currentStoreIndex: indexClicked, // Set the initial store index
-                allGroupedUpdates:
-                    allGroupedUpdates, // Your map of store updates
-              );
-            }),
+            builder: (context) => StoryUpdatesScreen(
+              currentStoreIndex: indexClicked, // Set the initial store index
+              allGroupedUpdates: allGroupedUpdates, // Your map of store updates
+            ),
           ),
         );
       },
