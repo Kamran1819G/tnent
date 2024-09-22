@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:tnent/core/helpers/url_utils.dart';
@@ -241,6 +243,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         )),
               SizedBox(height: 140.h),
+              /*
               Center(
                 child: Text(
                   'Or Sign Up With',
@@ -338,7 +341,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 40.h),
+              */
+              // SizedBox(height: 40.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

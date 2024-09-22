@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
+import '../../core/helpers/snackbar_utils.dart';
+
 class Auth {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -92,28 +94,33 @@ class Auth {
   }
 
   Future<void> signUpWithGoogle() async {
-    final googleSignInAccount = await _googleSignIn.signIn();
-    if (googleSignInAccount == null) {
-      // User cancelled the sign-in process
-      return;
-    }
-    final googleSignInAuthentication = await googleSignInAccount.authentication;
+    try {
+      final googleSignInAccount = await _googleSignIn.signIn();
+      if (googleSignInAccount == null) {
+        // User cancelled the sign-in process
+        return;
+      }
+      final googleSignInAuthentication =
+          await googleSignInAccount.authentication;
 
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleSignInAuthentication.accessToken,
-      idToken: googleSignInAuthentication.idToken,
-    );
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
 
-    final userCredential = await _auth.signInWithCredential(credential);
+      final userCredential = await _auth.signInWithCredential(credential);
 
-    final userDoc = await _firestore
-        .collection('Users')
-        .doc(userCredential.user!.uid)
-        .get();
-    if (!userDoc.exists) {
-      await _firestore.collection('Users').doc(userCredential.user!.uid).set({
-        'email': userCredential.user!.email,
-      });
+      final userDoc = await _firestore
+          .collection('Users')
+          .doc(userCredential.user!.uid)
+          .get();
+      if (!userDoc.exists) {
+        await _firestore.collection('Users').doc(userCredential.user!.uid).set({
+          'email': userCredential.user!.email,
+        });
+      }
+    } catch (e) {
+      throw Exception(e);
     }
   }
 
