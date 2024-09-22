@@ -14,7 +14,7 @@ void showSnackBar(
   ),
   Color bgColor = const Color.fromRGBO(49, 49, 49, 0.98), // dark green
   // Color bgColor = const Color.fromRGBO(159, 168, 218, 1), // purple
-  Duration duration = const Duration(seconds: 4),
+  Duration duration = const Duration(seconds: 2),
 }) {
   if (!context.mounted) return;
 
