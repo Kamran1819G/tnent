@@ -28,7 +28,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
   signUpWithEmailAndPassword() async {
     setState(() {
       isLoading = true;
+      errorMessage = '';
     });
+
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+      setState(() {
+        errorMessage = 'Provide a Valid Email and Password.';
+        isLoading = false;
+      });
+      showSnackBar(context, errorMessage);
+      return;
+    }
+
     try {
       await Auth().signUpWithEmailAndPassword(
         email: emailController.text,

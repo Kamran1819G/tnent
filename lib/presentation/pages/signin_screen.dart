@@ -30,7 +30,18 @@ class _SignInScreenState extends State<SignInScreen> {
   Future<void> signInWithEmailAndPassword() async {
     setState(() {
       isLoading = true;
+      errorMessage = '';
     });
+
+    if (emailController.text.isEmpty || passwordController.text.isEmpty) {
+      setState(() {
+        errorMessage = 'Provide a Valid Email and Password.';
+        isLoading = false;
+      });
+      showSnackBar(context, errorMessage);
+      return;
+    }
+
     try {
       await Auth().signInWithEmailAndPassword(
           email: emailController.text, password: passwordController.text);

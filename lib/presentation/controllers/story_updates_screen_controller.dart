@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../models/store_update_model.dart';
 
+// UNUSED, may be deleted, but for reference of StoryUpdatesScreen, it is kept 
+/*
 class StoryUpdatesScreenController extends GetxController {
   final Map<String, List<StoreUpdateModel>> allGroupedUpdates;
+  final BuildContext context;
 
   // Rx variables to track the current store, update, and progress
   var currentStoreIndex = 0.obs;
@@ -12,7 +16,7 @@ class StoryUpdatesScreenController extends GetxController {
   Timer? _timer; // Timer for updating the progress
 
   // Constructor to accept the grouped updates
-  StoryUpdatesScreenController(this.allGroupedUpdates);
+  StoryUpdatesScreenController(this.allGroupedUpdates, this.context);
 
   @override
   void onInit() {
@@ -52,7 +56,7 @@ class StoryUpdatesScreenController extends GetxController {
       currentUpdateIndex.value = 0; // Reset the update index for new store
     } else {
       // If at the last store and last update, exit the screen
-      Get.back();
+      Navigator.pop(context);
     }
     _resetLoader(); // Reset loader when moving to the next store
   }
@@ -62,7 +66,7 @@ class StoryUpdatesScreenController extends GetxController {
       currentStoreIndex.value--;
       currentUpdateIndex.value = 0; // Reset the update index for previous store
     } else {
-      Get.back();
+      Navigator.pop(context);
     }
     _resetLoader(); // Reset loader when moving to the previous store
   }
@@ -91,3 +95,5 @@ class StoryUpdatesScreenController extends GetxController {
     super.onClose();
   }
 }
+
+*/

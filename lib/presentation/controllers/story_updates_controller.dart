@@ -16,12 +16,19 @@ class StoryUpdatesController extends GetxController {
   @override
   Future<void> onInit() async {
     super.onInit();
-    List<StoreUpdateModel> fetchedUpdates = await _fetchAndPopulateUpdates();
-    updates.value = fetchedUpdates;
-    sortInGroupedupdates();
+
+    // List<StoreUpdateModel> fetchedUpdates = await fetchAndPopulateUpdates();
+    // updates.value = fetchedUpdates;
+    // sortInGroupedupdates();
   }
 
-  Future<List<StoreUpdateModel>> _fetchAndPopulateUpdates() async {
+  void clearVars() {
+    isUpdatesLoading.value = false;
+    updates.clear();
+    groupedUpdates.clear();
+  }
+
+  Future<List<StoreUpdateModel>> fetchAndPopulateUpdates() async {
     isUpdatesLoading.value = true;
 
     try {
