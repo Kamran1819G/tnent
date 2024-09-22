@@ -251,6 +251,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         )),
               SizedBox(height: 160.h),
               // Create google and apple sign in buttons
+              /*
               Center(
                 child: Text(
                   'Or Sign In With',
@@ -349,7 +350,8 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 30.h),
+              */
+              // SizedBox(height: 30.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
