@@ -1819,7 +1819,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
   final String _digits = '0123456789';
   final _rnd = Random();
 
-  String _getRandomNumericCode() => String.fromCharCodes(Iterable.generate(
+  String _getRandomString() => String.fromCharCodes(Iterable.generate(
       5, (_) => _digits.codeUnitAt(_rnd.nextInt(_digits.length))));
 
   Future<void> processOrder(List<Map<String, dynamic>> items) async {
@@ -1835,7 +1835,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
       double deliveryCharge = checkoutController.deliveryCharge;
 
       for (var item in items) {
-        String pickupCode = _getRandomString(5);
+        String pickupCode = _getRandomString();
         DocumentReference orderRef =
             FirebaseFirestore.instance.collection('Orders').doc();
         Map<String, dynamic> orderData = {
