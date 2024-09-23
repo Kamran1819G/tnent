@@ -25,7 +25,7 @@ class OTPController {
       apiKey = data['apiKey'];
 
       final url = Uri.parse(
-          'https://2factor.in/API/V1/$apiKey/SMS/$numericalPhoneNumber/AUTOGEN');
+          'https://2factor.in/API/V1/$apiKey/SMS/$numericalPhoneNumber/AUTOGEN/OTPTEMPLATE');
 
       try {
         final response = await http.get(url);
