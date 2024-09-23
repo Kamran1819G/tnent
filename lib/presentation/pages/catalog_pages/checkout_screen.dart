@@ -1816,12 +1816,11 @@ class _TransactionScreenState extends State<TransactionScreen> {
     return address;
   }
 
-  final String _chars =
-      'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
+  final String _digits = '0123456789';
   final _rnd = Random();
 
-  String _getRandomString(int length) => String.fromCharCodes(Iterable.generate(
-      length, (_) => _chars.codeUnitAt(_rnd.nextInt(_chars.length))));
+  String _getRandomNumericCode() => String.fromCharCodes(Iterable.generate(
+      5, (_) => _digits.codeUnitAt(_rnd.nextInt(_digits.length))));
 
   Future<void> processOrder(List<Map<String, dynamic>> items) async {
     try {
