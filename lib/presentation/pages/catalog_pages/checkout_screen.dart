@@ -1871,7 +1871,6 @@ class _TransactionScreenState extends State<TransactionScreen> {
             'platformFee': platformFee,
             'deliveryCharge': deliveryCharge,
           },
-          'isOrderNew': true,
           'isOnlinePayment': widget.isOnlinePayment,
         };
 
