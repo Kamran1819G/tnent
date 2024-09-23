@@ -24,7 +24,6 @@ class AcceptRejectOrderScreen extends StatefulWidget {
 class _AcceptRejectOrderScreenState extends State<AcceptRejectOrderScreen> {
   late StoreModel store;
   bool isLoading = true;
-  bool isStoreOwnerAccepted = false; // New variable
 
   @override
   void initState() {
@@ -71,11 +70,6 @@ class _AcceptRejectOrderScreenState extends State<AcceptRejectOrderScreen> {
           'timestamp': FieldValue.serverTimestamp(),
           'message': message,
         },
-        'isStoreOwnerAccepted': accept, // Add this line to update the new field
-      });
-
-      setState(() {
-        isStoreOwnerAccepted = accept; // Update the state variable
       });
 
       if (accept) {
