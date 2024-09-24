@@ -129,9 +129,9 @@ class TrackOrderScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                SizedBox(height: 60.h),
+                SizedBox(height: 55.h),
                 Text(
-                  '₹ ${order['priceDetails']['price']}',
+                  '₹ ${order['priceDetails']['price']+order['payment']['deliveryCharge']+ order['payment']['platformFee']}',
                   style:
                       TextStyle(color: hexToColor('#343434'), fontSize: 22.sp),
                 ),

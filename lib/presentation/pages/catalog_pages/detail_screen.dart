@@ -178,15 +178,15 @@ class _DetailScreenState extends State<DetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildProductDetails(),
-                    SizedBox(height: 40.0),
+                    SizedBox(height: 35.0),
                     if (widget.order['providedMiddleman'] != null &&
                         widget.order['providedMiddleman'].isNotEmpty)
                       _buildProvidedMiddleman(),
-                    SizedBox(height: 40.0),
+                    SizedBox(height: 25.0),
                     _buildAmountDetails(),
-                    SizedBox(height: 40.0),
+                    SizedBox(height: 35.0),
                     _buildPaymentDetails(),
-                    SizedBox(height: 40.0),
+                    SizedBox(height: 35.0),
                     _buildDeliveryDetails(),
                     SizedBox(height: 30.0),
                     _buildCancelOrderButton(),
@@ -291,9 +291,9 @@ class _DetailScreenState extends State<DetailScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 60.h),
+                SizedBox(height: 50.h),
                 Text(
-                  '₹ ${widget.order['priceDetails']['price']}',
+                  '₹ ${widget.order['priceDetails']['price'] + widget.order['payment']['deliveryCharge'] + widget.order['payment']['platformFee']}',
                   style:
                       TextStyle(color: hexToColor('#343434'), fontSize: 22.sp),
                 ),
@@ -396,6 +396,9 @@ class _DetailScreenState extends State<DetailScreen> {
                     '- ${widget.order['priceDetails']['discount']}'),
                 _buildAmountRow(
                     'Subtotal', widget.order['priceDetails']['price']),
+                _buildAmountRow('Delivery Charge', widget.order['payment']['deliveryCharge']),
+                _buildAmountRow('Platform Fee', widget.order['payment']['platformFee']),
+
               ],
             ),
           ),
@@ -412,7 +415,7 @@ class _DetailScreenState extends State<DetailScreen> {
                 style: TextStyle(color: hexToColor('#343434'), fontSize: 24.sp),
               ),
               Text(
-                '₹ ${widget.order['priceDetails']['price']}',
+                '₹ ${widget.order['priceDetails']['price'] + widget.order['payment']['deliveryCharge'] + widget.order['payment']['platformFee']}',
                 style: TextStyle(color: hexToColor('#838383'), fontSize: 24.sp),
               ),
             ],
@@ -463,10 +466,10 @@ class _DetailScreenState extends State<DetailScreen> {
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             child: Column(
               children: [
-                _buildDetailRow(
-                    'Payment Mode', widget.order['payment']['method']),
-                _buildDetailRow(
-                    'Payment Status', widget.order['payment']['status']),
+                _buildDetailRow('Payment Mode', widget.order['payment']['method']),
+                _buildDetailRow('Payment Status', widget.order['payment']['status']),
+                _buildDetailRow('Payment ID', widget.order['payment']['paymentId'] ?? 'N/A'),
+
               ],
             ),
           ),

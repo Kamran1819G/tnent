@@ -1945,7 +1945,7 @@ class _TransactionScreenState extends State<TransactionScreen> {
 
     for (var item in checkoutController.items) {
       // Calculate total price
-      double totalPrice = item['variationDetails'].price * item['quantity'];
+      double totalPrice = item['variationDetails'].price * item['quantity'] + checkoutController.deliveryCharge + PlatformFeeCalculator.calculateFee(item['variationDetails'].price * item['quantity']);
 
       // Store the notification in Firestore
       await firestore

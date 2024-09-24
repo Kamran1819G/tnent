@@ -38,6 +38,8 @@ class _PurchaseScreenState extends State<PurchaseScreen> {
     for (var order in orders) {
       total += (order['priceDetails']['price'] as num).toDouble() *
           (order['quantity'] as num).toDouble();
+      total += (order['payment']['deliveryCharge'] as num).toDouble();
+      total += (order['payment']['platformFee'] as num).toDouble();
     }
     setState(() {
       _totalAmount = total;
@@ -250,15 +252,15 @@ class _PurchaseItemTileState extends State<PurchaseItemTile> {
                     fontSize: 18.sp,
                   ),
                 ),
-                SizedBox(height: 50.h),
+                SizedBox(height: 45.h),
                 Text(
-                  '₹${(widget.order['priceDetails']['price'] * widget.order['quantity']).toStringAsFixed(2)}',
+                  '₹${((widget.order['priceDetails']['price'] * widget.order['quantity']) + widget.order['payment']['deliveryCharge'] + widget.order['payment']['platformFee']).toStringAsFixed(2)}',
                   style: TextStyle(
                     color: hexToColor('#343434'),
                     fontSize: 28.sp,
                   ),
                 ),
-                SizedBox(height: 40.h),
+                SizedBox(height: 38.h),
                 Row(
                   children: [
                     GestureDetector(

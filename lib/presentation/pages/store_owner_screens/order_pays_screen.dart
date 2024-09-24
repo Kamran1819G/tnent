@@ -386,6 +386,8 @@ class OrdersScreen extends StatelessWidget {
           data.containsKey('quantity') &&
           data.containsKey('priceDetails') &&
           data['priceDetails'].containsKey('price') &&
+          data['payment'].containsKey('platformFee') &&
+          data['payment'].containsKey('deliveryCharge') &&
           data.containsKey('status');
     }).toList();
 
@@ -404,12 +406,18 @@ class OrdersScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final order =
                       validOrders[index].data() as Map<String, dynamic>;
+                  final double productPrice = order['priceDetails']['price'] as double;
+                  final double platformFee = order['payment']['platformFee'] as double;
+                  final double deliveryCharge = order['payment']['deliveryCharge'] as double;
+                  final double totalPrice = productPrice + platformFee + deliveryCharge;
+
+
                   return OrderCard(
                     productName: order['productName'],
                     productImage: order['productImage'],
                     orderId: order['orderId'],
                     productQuantity: order['quantity'],
-                    productPrice: order['priceDetails']['price'],
+                    productPrice: totalPrice,
                     uniqueCode: order['pickupCode'],
                     orderStatus: _getOrderStatus(order),
                     middleman: order['providedMiddleman'] ?? {},
