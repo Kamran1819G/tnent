@@ -13,13 +13,20 @@ class StoryUpdatesController extends GetxController {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  @override
-  Future<void> onInit() async {
-    super.onInit();
+  // @override
+  // Future<void> onInit() async {
+  //   super.onInit();
+  //   clearVars();
+  //   List<StoreUpdateModel> fetchedUpdates = await fetchAndPopulateUpdates();
+  //   updates.value = fetchedUpdates;
+  //   sortInGroupedupdates();
+  // }
 
-    // List<StoreUpdateModel> fetchedUpdates = await fetchAndPopulateUpdates();
-    // updates.value = fetchedUpdates;
-    // sortInGroupedupdates();
+  Future<void> mainFetching() async {
+    clearVars();
+    List<StoreUpdateModel> fetchedUpdates = await fetchAndPopulateUpdates();
+    updates.value = fetchedUpdates;
+    sortInGroupedupdates();
   }
 
   void clearVars() {

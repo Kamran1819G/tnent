@@ -1,4 +1,4 @@
-/*
+
 plugins {
     id "com.android.application"
     // START: FlutterFire Configuration
@@ -101,8 +101,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'com.google.android.play:integrity:1.4.0'
 }
-*/
 
+
+
+/*
 plugins {
     id "com.android.application"
     // START: FlutterFire Configuration
@@ -179,3 +181,4 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'com.google.android.play:integrity:1.4.0'
 }
+*/

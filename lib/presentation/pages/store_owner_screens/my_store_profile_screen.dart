@@ -72,7 +72,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
   void initState() {
     super.initState();
     store = widget.store;
-    isActive =widget.store.isActive;
+    isActive = widget.store.isActive;
     _fetchStore();
     _loadProducts();
     _fetchCategories();
@@ -154,7 +154,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
     return url;
   }
 
-
   Future<void> _updateStoreStatus(bool value) async {
     try {
       await FirebaseFirestore.instance
@@ -173,7 +172,6 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
       });
     }
   }
-
 
   Future<void> _fetchStoreUpdates() async {
     try {
@@ -468,21 +466,20 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                         ],
                       ),
                     ),
-
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
                       alignment: const Alignment(0.9, 0.9),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          IconButton(
-                              onPressed: () async {
-                                final String shareMessage =
-                                    'Check out ${widget.store.name} on Tnent! https://${widget.store.storeDomain}.tnent.com';
-                                await Share.share(shareMessage);
-                              },
-                              icon: Icon(Icons.ios_share,
-                                  color: Colors.white, size: 25.sp)),
+                          // IconButton(
+                          //     onPressed: () async {
+                          //       final String shareMessage =
+                          //           'Check out ${widget.store.name} on Tnent! https://${widget.store.storeDomain}.tnent.com';
+                          //       await Share.share(shareMessage);
+                          //     },
+                          //     icon: Icon(Icons.ios_share,
+                          //         color: Colors.white, size: 25.sp)),
                           // SizedBox(width: 12.w),
                           Container(
                             height: 45.h,
@@ -532,8 +529,7 @@ class _MyStoreProfileScreenState extends State<MyStoreProfileScreen>
                                 inactiveTrackColor: Colors.transparent,
                                 onChanged: (value) {
                                   _updateStoreStatus(value);
-                                }
-                                ),
+                                }),
                           )
                         ],
                       ),

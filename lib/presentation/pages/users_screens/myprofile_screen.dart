@@ -762,27 +762,30 @@ class _AppVersionScreenState extends State<AppVersionScreen> {
       ),
       body: Center(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'App Name: $_appName',
+              '$_appName',
               style: TextStyle(fontSize: 24.sp),
             ),
             SizedBox(height: 8.h),
             Text(
-              'Package Name: $_packageName',
+              '($_packageName)',
               style: TextStyle(fontSize: 24.sp),
             ),
             SizedBox(height: 8.h),
-            Text(
-              'Version: $_version',
-              style: TextStyle(fontSize: 24.sp),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              'Build Number: $_buildNumber',
-              style: TextStyle(fontSize: 24.sp),
+            GestureDetector(
+              onLongPress: () {
+                showSnackBar(
+                  context,
+                  '$_appName is released under the tenure of Kunal Deb, Co-Founder & CEO of Tnennt Technologies, in collaboration with Metaupspace team & Jit Deb Nath',
+                );
+              },
+              child: Text(
+                'Version: $_version+$_buildNumber',
+                style: TextStyle(fontSize: 24.sp),
+              ),
             ),
           ],
         ),

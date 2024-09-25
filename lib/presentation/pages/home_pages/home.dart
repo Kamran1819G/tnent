@@ -11,6 +11,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:showcaseview/showcaseview.dart';
 import 'package:tnent/core/helpers/color_utils.dart';
+import 'package:tnent/core/helpers/snackbar_utils.dart';
 import 'package:tnent/models/product_model.dart';
 import 'package:tnent/models/store_model.dart';
 import 'package:tnent/models/store_update_model.dart';
@@ -84,7 +85,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _fetchFeaturedStores();
-    _fetchStoryUpdates();
+    storyUpdatesController.mainFetching();
     _fetchFeaturedProducts();
 
     _loadTabLabelsAndProducts();
@@ -108,15 +109,6 @@ class _HomeState extends State<Home> with TickerProviderStateMixin {
   void dispose() {
     _tabController.dispose();
     super.dispose();
-  }
-
-  void _fetchStoryUpdates() async {
-    // In case u wanna call this once, just repeat the lines (excluding clearVars();) in the StoryUpdatesController itself in the OnInit() method
-    storyUpdatesController.clearVars();
-    List<StoreUpdateModel> fetchedUpdates =
-        await storyUpdatesController.fetchAndPopulateUpdates();
-    storyUpdatesController.updates.value = fetchedUpdates;
-    storyUpdatesController.sortInGroupedupdates();
   }
 
   Future<void> _loadTabLabelsAndProducts() async {

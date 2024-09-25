@@ -549,14 +549,14 @@ class _StoreProfileScreenState extends State<StoreProfileScreen>
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              IconButton(
-                                  onPressed: () async {
-                                    final String shareMessage =
-                                        'Check out ${widget.store.name} on Tnent! https://${widget.store.storeDomain}.tnent.com';
-                                    await Share.share(shareMessage);
-                                  },
-                                  icon: Icon(Icons.ios_share,
-                                      color: Colors.white, size: 25.sp)),
+                              // IconButton(
+                              //     onPressed: () async {
+                              //       final String shareMessage =
+                              //           'Check out ${widget.store.name} on Tnent! https://${widget.store.storeDomain}.tnent.com';
+                              //       await Share.share(shareMessage);
+                              //     },
+                              //     icon: Icon(Icons.ios_share,
+                              //         color: Colors.white, size: 25.sp)),
                               const SizedBox(width: 10.0),
                               Container(
                                 height: 45.h,
